@@ -110,5 +110,6 @@ To manage the `.lb` files in a git repository and see _actual_ text diffs and th
 
 Clone this repository and:
 ```
+./configure
 make
 ```
