@@ -1,3 +1,5 @@
+# bash completion for lb                        -*- shell-script -*-
+
 _lb() {
     local cur opts
     cur=${COMP_WORDS[COMP_CWORD]}

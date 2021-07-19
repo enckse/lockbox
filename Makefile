@@ -1,6 +1,6 @@
 BIN := bin/
 FLG := -ldflags '-linkmode external -extldflags $(LDFLAGS) -w' -trimpath -buildmode=pie -mod=readonly -modcacherw
-CMD := $(BIN)lb-diff $(BIN)lb-stats $(BIN)lb-rekey $(BIN)lb-rw $(BIN)lb $(BIN)lb-totp $(BIN)lb-pwgen
+CMD := $(shell ls cmd | sed "s|^|$(BIN)lb-|g")
 
 all: $(CMD)
 
