@@ -1,11 +1,12 @@
-BIN := bin/
-FLG := -ldflags '-linkmode external -extldflags $(LDFLAGS) -w' -trimpath -buildmode=pie -mod=readonly -modcacherw
-CMD := $(shell ls cmd | sed "s|^|$(BIN)lb-|g")
+BIN    := bin/
+FLAGS  := -ldflags '-linkmode external -extldflags $(LDFLAGS) -w' -trimpath -buildmode=pie -mod=readonly -modcacherw
+FILES  := lb lb-bash lb-diff lb-rekey lb-stats lb-pwgen lb-rw lb-totp
+TARGET := $(addprefix $(BIN),$(FILES))
 
-all: $(CMD)
+all: $(TARGET)
 
-$(CMD): $(shell find . -type f -name "*.go") go.*
-	go build -o $@ $(FLG) cmd/$(shell basename $@ | sed 's/lb-//g')/main.go
+$(TARGET) : $(shell find . -type f -name "*.go") go.*
+	go build -o $@ $(FLAGS) cmd/$(shell basename $@ | sed 's/lb-//g')/main.go
 
 clean:
 	rm -rf $(BIN)
