@@ -5,8 +5,6 @@ VERS_NAME="Version"
 _version_info() {
     echo "// Version is the hash/version info for lb"
     git log -n 1 --format=%h | sed 's/^/'$VERS_NAME' = "/g;s/$/"/g'
-    echo "// BuiltOn is the date lb was built"
-    date "+%Y-%m-%dT%H:%M%S" | sed 's/^/BuiltOn = "/g;s/$/"/g'
 }
 
 _version() {
