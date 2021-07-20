@@ -113,6 +113,8 @@ func main() {
 		for _, f := range files {
 			fmt.Println(f)
 		}
+	case "version":
+		fmt.Printf("version: %s (%s)\n", internal.Version, internal.BuiltOn)
 	case "insert":
 		multi := false
 		idx := 2

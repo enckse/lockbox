@@ -1,2 +1,3 @@
 bin/
 Makefile
+generated.go
