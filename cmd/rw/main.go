@@ -29,6 +29,6 @@ func main() {
 		}
 		fmt.Println(string(results))
 	default:
-		internal.Die("invalid mode", fmt.Errorf("bad mode"))
+		internal.Die("invalid mode", internal.NewLockboxError("bad mode"))
 	}
 }

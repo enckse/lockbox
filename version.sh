@@ -3,7 +3,7 @@ GEN=$1
 VERS=$2
 VERS_NAME="Version"
 _version_info() {
-    echo "// Version is the hash/version info for lb"
+    echo "// Version is the hash/version info for lb."
     git log -n 1 --format=%h | sed 's/^/'$VERS_NAME' = "/g;s/$/"/g'
 }
 

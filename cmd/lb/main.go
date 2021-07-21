@@ -14,7 +14,7 @@ import (
 
 func getEntry(store string, args []string, idx int) string {
 	if len(args) != idx+1 {
-		internal.Die("invalid entry given", fmt.Errorf("specific entry required"))
+		internal.Die("invalid entry given", internal.NewLockboxError("specific entry required"))
 	}
 	return filepath.Join(store, args[idx]) + internal.Extension
 }
@@ -64,7 +64,7 @@ func readInput() (string, error) {
 		return "", err
 	}
 	if first != second {
-		return "", fmt.Errorf("passwords do NOT match")
+		return "", internal.NewLockboxError("passwords do NOT match")
 	}
 	return first, nil
 }
@@ -100,7 +100,7 @@ func clipboard(value string) {
 func main() {
 	args := os.Args
 	if len(args) < 2 {
-		internal.Die("missing arguments", fmt.Errorf("requires subcommand"))
+		internal.Die("missing arguments", internal.NewLockboxError("requires subcommand"))
 	}
 	command := args[1]
 	store := internal.GetStore()
@@ -120,16 +120,16 @@ func main() {
 		idx := 2
 		switch len(args) {
 		case 2:
-			internal.Die("insert missing required arguments", fmt.Errorf("entry required"))
+			internal.Die("insert missing required arguments", internal.NewLockboxError("entry required"))
 		case 3:
 		case 4:
 			multi = args[2] == "-m"
 			if !multi {
-				internal.Die("multi-line insert must be after 'insert'", fmt.Errorf("invalid command"))
+				internal.Die("multi-line insert must be after 'insert'", internal.NewLockboxError("invalid command"))
 			}
 			idx = 3
 		default:
-			internal.Die("too many arguments", fmt.Errorf("insert can only perform one operation"))
+			internal.Die("too many arguments", internal.NewLockboxError("insert can only perform one operation"))
 		}
 		isPipe := isInputFromPipe()
 		entry := getEntry(store, args, idx)
@@ -147,7 +147,7 @@ func main() {
 				}
 			}
 		}
-		password := ""
+		var password string
 		if !multi && !isPipe {
 			input, err := readInput()
 			if err != nil {
@@ -162,7 +162,7 @@ func main() {
 			password = input
 		}
 		if password == "" {
-			internal.Die("empty password provided", fmt.Errorf("password can NOT be empty"))
+			internal.Die("empty password provided", internal.NewLockboxError("password can NOT be empty"))
 		}
 		l, err := internal.NewLockbox("", "", entry)
 		if err != nil {
@@ -175,7 +175,7 @@ func main() {
 	case "rm":
 		entry := getEntry(store, args, 2)
 		if !internal.PathExists(entry) {
-			internal.Die("does not exists", fmt.Errorf("can not delete unknown entry"))
+			internal.Die("does not exists", internal.NewLockboxError("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
@@ -183,7 +183,7 @@ func main() {
 	case "show", "-c", "clip":
 		entry := getEntry(store, args, 2)
 		if !internal.PathExists(entry) {
-			internal.Die("invalid entry", fmt.Errorf("entry not found"))
+			internal.Die("invalid entry", internal.NewLockboxError("entry not found"))
 		}
 		l, err := internal.NewLockbox("", "", entry)
 		if err != nil {

@@ -40,7 +40,7 @@ func main() {
 	special := strings.TrimSpace(os.Getenv("PWGEN_SPECIAL"))
 	transform := *rawTokens
 	if len(allowed) == 0 {
-		internal.Die("no allowed characters found", fmt.Errorf("allowed characters required"))
+		internal.Die("no allowed characters found", internal.NewLockboxError("allowed characters required"))
 	}
 	var paths []string
 	parts := strings.Split(src, ":")
@@ -66,7 +66,7 @@ func main() {
 		}
 	}
 	if len(paths) == 0 {
-		internal.Die("no paths found for generation", fmt.Errorf("unable to read paths"))
+		internal.Die("no paths found for generation", internal.NewLockboxError("unable to read paths"))
 	}
 	result := ""
 	l := *length
@@ -79,7 +79,7 @@ func main() {
 	for len(result) < l {
 		if specialChars > 0 && makeChoice() {
 			subChar := rand.Intn(specialChars)
-			result = result + string(specials[subChar])
+			result += string(specials[subChar])
 		}
 		sub := rand.Intn(pathOptions)
 		name := paths[sub]
@@ -96,7 +96,7 @@ func main() {
 			name = newValue
 		case transformModeSed:
 			if len(sedPattern) == 0 {
-				internal.Die("unable to use sed transform without pattern", fmt.Errorf("set PWGEN_SED"))
+				internal.Die("unable to use sed transform without pattern", internal.NewLockboxError("set PWGEN_SED"))
 			}
 			cmd := exec.Command("sed", "-e", sedPattern)
 			stdin, err := cmd.StdinPipe()
@@ -120,15 +120,15 @@ func main() {
 			}
 			errors := strings.TrimSpace(stderr.String())
 			if len(errors) > 0 {
-				internal.Die("sed stderr failure", fmt.Errorf(errors))
+				internal.Die("sed stderr failure", internal.NewLockboxError(errors))
 			}
 			name = strings.TrimSpace(stdout.String())
 		case transformModeNone:
 			break
 		default:
-			internal.Die("unknown transform mode", fmt.Errorf(transform))
+			internal.Die("unknown transform mode", internal.NewLockboxError(transform))
 		}
-		result = result + name
+		result += name
 	}
 	fmt.Println(result[0:l])
 }

@@ -31,7 +31,7 @@ func list() ([]string, error) {
 		}
 	}
 	if len(results) == 0 {
-		return nil, fmt.Errorf("no objects found")
+		return nil, internal.NewLockboxError("no objects found")
 	}
 	return results, nil
 }
@@ -48,7 +48,7 @@ func display(token string) error {
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(getEnv(), tok+internal.Extension)
 	if !internal.PathExists(store) {
-		return fmt.Errorf("object does not exist")
+		return internal.NewLockboxError("object does not exist")
 	}
 	l, err := internal.NewLockbox("", "", store)
 	if err != nil {
@@ -102,7 +102,7 @@ func display(token string) error {
 func main() {
 	args := os.Args
 	if len(args) != 2 {
-		internal.Die("subkey required", fmt.Errorf("invalid arguments"))
+		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
 	}
 	cmd := args[1]
 	if cmd == "list" || cmd == "ls" {

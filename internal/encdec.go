@@ -2,7 +2,6 @@ package internal
 
 import (
 	"crypto/rand"
-	"fmt"
 	"io"
 	random "math/rand"
 	"os"
@@ -17,21 +16,21 @@ const (
 	keyLength   = 32
 	nonceLength = 24
 	padLength   = 256
-	// MacOSKeyMode is macOS based key resolution
+	// MacOSKeyMode is macOS based key resolution.
 	MacOSKeyMode = "macos"
-	// PlainKeyMode is plaintext based key resolution
+	// PlainKeyMode is plaintext based key resolution.
 	PlainKeyMode = "plaintext"
 )
 
 type (
-	// Lockbox represents a method to encrypt/decrypt locked files
+	// Lockbox represents a method to encrypt/decrypt locked files.
 	Lockbox struct {
 		secret [keyLength]byte
 		file   string
 	}
 )
 
-// NewLockbox creates a new lockbox for encryption/decryption
+// NewLockbox creates a new lockbox for encryption/decryption.
 func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 	useKeyMode := keyMode
 	if useKeyMode == "" {
@@ -47,7 +46,7 @@ func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 	}
 
 	if len(b) > keyLength {
-		return Lockbox{}, fmt.Errorf("key is too large for use")
+		return Lockbox{}, NewLockboxError("key is too large for use")
 	}
 
 	for len(b) < keyLength {
@@ -73,8 +72,7 @@ func getKey(keyMode, name string) ([]byte, error) {
 	case PlainKeyMode:
 		data = []byte(name)
 	default:
-		return nil, fmt.Errorf("unknown keymode")
-
+		return nil, NewLockboxError("unknown keymode")
 	}
 	return []byte(strings.TrimSpace(string(data))), nil
 }
@@ -83,7 +81,7 @@ func init() {
 	random.Seed(time.Now().UnixNano())
 }
 
-// Encrypt will encrypt contents to file
+// Encrypt will encrypt contents to file.
 func (l Lockbox) Encrypt(datum []byte) error {
 	var nonce [nonceLength]byte
 	padTo := random.Intn(padLength)
@@ -110,7 +108,7 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	return os.WriteFile(l.file, encrypted, 0600)
 }
 
-// Decrypt will decrypt an object from file
+// Decrypt will decrypt an object from file.
 func (l Lockbox) Decrypt() ([]byte, error) {
 	var nonce [nonceLength]byte
 	encrypted, err := os.ReadFile(l.file)
@@ -120,7 +118,7 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 	copy(nonce[:], encrypted[:nonceLength])
 	decrypted, ok := secretbox.Open(nil, encrypted[nonceLength:], &nonce, &l.secret)
 	if !ok {
-		return nil, fmt.Errorf("decrypt not ok")
+		return nil, NewLockboxError("decrypt not ok")
 	}
 
 	padding := int(decrypted[0])

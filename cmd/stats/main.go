@@ -18,7 +18,7 @@ type (
 		Date string `json:"date"`
 	}
 
-	// Stats are general entry stats
+	// Stats are general entry stats.
 	Stats struct {
 		Entry   string    `json:"entry"`
 		Name    string    `json:"name"`
@@ -29,11 +29,6 @@ type (
 
 func main() {
 	args := os.Args
-	filtering := len(args) > 1
-	filter := ""
-	if filtering {
-		filter = args[1]
-	}
 	store := internal.GetStore()
 	items, err := internal.Find(store, true)
 	if err != nil {
@@ -41,8 +36,8 @@ func main() {
 	}
 	results := []Stats{}
 	for _, item := range items {
-		if filtering {
-			if !strings.HasPrefix(item, filter) {
+		if len(args) > 1 {
+			if !strings.HasPrefix(item, args[1]) {
 				continue
 			}
 		}
@@ -63,7 +58,7 @@ func main() {
 			}
 			parts := strings.Split(cleaned, " ")
 			if len(parts) != 2 {
-				internal.Die("invalid format entry", fmt.Errorf("mismatch between format string and struct?"))
+				internal.Die("invalid format entry", internal.NewLockboxError("mismatch between format string and struct?"))
 			}
 			history = append(history, History{Hash: parts[0], Date: parts[1]})
 		}
@@ -71,7 +66,7 @@ func main() {
 		results = append(results, stat)
 	}
 	if len(results) == 0 {
-		internal.Die("found no entries", fmt.Errorf("no entries"))
+		internal.Die("found no entries", internal.NewLockboxError("no entries"))
 	}
 	j, err := json.MarshalIndent(results, "", "    ")
 	if err != nil {
