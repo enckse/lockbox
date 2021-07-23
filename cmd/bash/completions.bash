@@ -13,7 +13,7 @@ _lb() {
                     opts="-m $(lb ls)"
                     ;;
                 "totp")
-                    opts=$(lb totp ls)
+                    opts="-c clip $(lb totp ls)"
                     ;;
                 "pwgen")
                     opts="-length -transform -special"
@@ -23,12 +23,21 @@ _lb() {
                     ;;
             esac
         fi
-        if [ $COMP_CWORD -eq 3 ] && [ "${COMP_WORDS[1]}" == "insert" ]; then
-            if [ "${COMP_WORDS[2]}" == "-m" ]; then
-                opts=$(lb ls)
-            else
-                opts="-m"
-            fi
+        if [ $COMP_CWORD -eq 3 ]; then
+            case "${COMP_WORDS[1]}" in
+                "insert")
+                    if [ "${COMP_WORDS[2]}" == "-m" ]; then
+                        opts=$(lb ls)
+                    else
+                        opts="-m"
+                    fi
+                    ;;
+                "totp")
+                    if [ "${COMP_WORDS[2]}" == "-c" ] || [ "${COMP_CWORDS[2]}" == "clip" ]; then
+                        opts=$(lb totp ls)
+                    fi
+                    ;;
+            esac
         fi
         if [ ! -z "$opts" ]; then
             COMPREPLY=( $(compgen -W "$opts" -- $cur) )

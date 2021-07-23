@@ -44,7 +44,7 @@ func clear() {
 	}
 }
 
-func display(token string) error {
+func display(token string, clip bool) error {
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(getEnv(), tok+internal.Extension)
 	if !internal.PathExists(store) {
@@ -58,7 +58,9 @@ func display(token string) error {
 	if err != nil {
 		return err
 	}
-	clear()
+	if !clip {
+		clear()
+	}
 	totpToken := string(val)
 	first := true
 	running := 0
@@ -86,8 +88,14 @@ func display(token string) error {
 		if err != nil {
 			return err
 		}
-		outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
-		outputs = append(outputs, "-> CTRL+C to exit")
+		if !clip {
+			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
+			outputs = append(outputs, "-> CTRL+C to exit")
+		} else {
+			fmt.Printf("\n  -> %s\n\n", expires)
+			internal.CopyToClipboard(code)
+			return nil
+		}
 		startColor := ""
 		endColor := ""
 		if left < 10 {
@@ -101,7 +109,7 @@ func display(token string) error {
 
 func main() {
 	args := os.Args
-	if len(args) != 2 {
+	if len(args) > 3 {
 		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
 	}
 	cmd := args[1]
@@ -116,7 +124,15 @@ func main() {
 		}
 		return
 	}
-	if err := display(cmd); err != nil {
+	clip := false
+	if len(args) == 3 {
+		if cmd != "-c" && cmd != "clip" {
+			internal.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
+		}
+		clip = true
+		cmd = args[2]
+	}
+	if err := display(cmd, clip); err != nil {
 		internal.Die("failed to show totp token", err)
 	}
 }

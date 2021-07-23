@@ -69,34 +69,6 @@ func readInput() (string, error) {
 	return first, nil
 }
 
-func pipeTo(command, value string, wait bool, args ...string) {
-	cmd := exec.Command(command, args...)
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		internal.Die("unable to get stdin pipe", err)
-	}
-
-	go func() {
-		defer stdin.Close()
-		if _, err := stdin.Write([]byte(value)); err != nil {
-			fmt.Printf("failed writing to stdin: %v\n", err)
-		}
-	}()
-	var ran error
-	if wait {
-		ran = cmd.Run()
-	} else {
-		ran = cmd.Start()
-	}
-	if ran != nil {
-		internal.Die("failed to run command", ran)
-	}
-}
-
-func clipboard(value string) {
-	pipeTo("pbcopy", value, true)
-}
-
 func main() {
 	args := os.Args
 	if len(args) < 2 {
@@ -198,9 +170,7 @@ func main() {
 			fmt.Println(value)
 			return
 		}
-		clipboard(value)
-		fmt.Println("clipboard will clear in 45 seconds")
-		pipeTo("lb", value, false, "clear")
+		internal.CopyToClipboard(value)
 	case "clear":
 		idx := 0
 		val, err := stdin(false)
@@ -208,7 +178,7 @@ func main() {
 			internal.Die("unable to read value to clear", err)
 		}
 		val = strings.TrimSpace(val)
-		for idx < 45 {
+		for idx < internal.MaxClipTime {
 			idx++
 			time.Sleep(1 * time.Second)
 			out, err := exec.Command("pbpaste").Output()
@@ -221,7 +191,7 @@ func main() {
 				return
 			}
 		}
-		clipboard("")
+		internal.CopyToClipboard("")
 	default:
 		tryCommand := fmt.Sprintf("lb-%s", command)
 		c := exec.Command(tryCommand, args[2:]...)
