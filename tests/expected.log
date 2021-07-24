@@ -1,0 +1,32 @@
+
+
+
+keys/one
+keys/one2
+keys2/three
+uuuuuuuuuu
+rekeying: bin/lb/keys/one.lb
+rekeying: bin/lb/keys/one2.lb
+rekeying: bin/lb/keys2/three.lb
+remove entry? (y/N) 
+keys/one2
+keys2/three
+test2
+test3
+test4
+
+test
+test
+[
+    {
+        "entry": "keys/one2",
+        "name": "one2",
+        "dir": "keys",
+        "history": []
+    }
+]
+test2
+remove entry? (y/N) 
+remove entry? (y/N) 
+rekeying: bin/lb/keys/one2.lb
+test2

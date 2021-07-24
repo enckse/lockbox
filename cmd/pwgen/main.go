@@ -36,12 +36,8 @@ func main() {
 	rawTokens := flag.String("transform", defaultTransform, "pick how to transform words")
 	flag.Parse()
 	src := strings.TrimSpace(os.Getenv("PWGEN_SOURCE"))
-	allowed := strings.TrimSpace(os.Getenv("PWGEN_ALLOWED"))
 	special := strings.TrimSpace(os.Getenv("PWGEN_SPECIAL"))
 	transform := *rawTokens
-	if len(allowed) == 0 {
-		internal.Die("no allowed characters found", internal.NewLockboxError("allowed characters required"))
-	}
 	var paths []string
 	parts := strings.Split(src, ":")
 	for _, p := range parts {
