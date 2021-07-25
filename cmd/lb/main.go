@@ -12,6 +12,10 @@ import (
 	"voidedtech.com/lockbox/internal"
 )
 
+var (
+	version = "development"
+)
+
 func getEntry(store string, args []string, idx int) string {
 	if len(args) != idx+1 {
 		internal.Die("invalid entry given", internal.NewLockboxError("specific entry required"))
@@ -86,7 +90,7 @@ func main() {
 			fmt.Println(f)
 		}
 	case "version":
-		fmt.Printf("version:\n  %s\n", internal.Version)
+		fmt.Printf("version: %s\n", version)
 	case "insert":
 		multi := false
 		idx := 2
