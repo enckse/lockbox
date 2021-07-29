@@ -16,6 +16,8 @@ git -C $LOCKBOX_STORE init
 echo "TEST" > $LOCKBOX_STORE/init
 git -C $LOCKBOX_STORE add .
 git -C $LOCKBOX_STORE commit -am "init"
+git -C $LOCKBOX_STORE config user.email "you@example.com"
+git -C $LOCKBOX_STORE config user.name "Your Name"
 
 _run() {
     echo "test" | $BIN/lb insert keys/one
