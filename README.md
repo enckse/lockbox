@@ -4,6 +4,8 @@ Lockbox
 A [pass](https://www.passwordstore.org/) inspired password manager that uses a system
 keyring for password input over using a GPG key.
 
+![build](https://github.com/enckse/lockbox/actions/workflows/main.yml/badge.svg)
+
 # usage
 
 Currently `lb` is only working/developed on macOS (though it could be extended to other operating systems)
