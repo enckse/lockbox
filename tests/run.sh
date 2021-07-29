@@ -12,13 +12,17 @@ export PWGEN_SED="s/[[:alnum:]]/u/g;s/\./u/g"
 rm -rf $TESTS
 mkdir -p $LOCKBOX_STORE
 mkdir -p $LOCKBOX_STORE/$LOCKBOX_TOTP
+git -C $LOCKBOX_STORE init
+echo "TEST" > $LOCKBOX_STORE/init
+git -C $LOCKBOX_STORE add .
+git -C $LOCKBOX_STORE commit -am "init"
 
 _run() {
     echo "test" | $BIN/lb insert keys/one
     echo "test2" | $BIN/lb insert keys/one2
     echo -e "test3\ntest4" | $BIN/lb insert keys2/three
     $BIN/lb ls
-    $BIN/lb pwgen -special -length 10
+    $BIN/lb-pwgen -special -length 10
     $BIN/lb-rekey
     yes | $BIN/lb rm keys/one
     echo
