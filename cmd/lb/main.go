@@ -81,12 +81,25 @@ func main() {
 	command := args[1]
 	store := internal.GetStore()
 	switch command {
-	case "ls", "list":
+	case "ls", "list", "find":
+		isFind := command == "find"
+		searchTerm := ""
+		if isFind {
+			if len(args) < 3 {
+				internal.Die("find requires an argument to search for", internal.NewLockboxError("search term required"))
+			}
+			searchTerm = args[2]
+		}
 		files, err := internal.Find(store, true)
 		if err != nil {
 			internal.Die("unable to list files", err)
 		}
 		for _, f := range files {
+			if isFind {
+				if !strings.Contains(f, searchTerm) {
+					continue
+				}
+			}
 			fmt.Println(f)
 		}
 	case "version":

@@ -11,6 +11,8 @@ rekeying: bin/lb/keys2/three.lb
 remove entry? (y/N) 
 keys/one2
 keys2/three
+keys/one2
+keys2/three
 test2
 test3
 test4

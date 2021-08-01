@@ -29,6 +29,7 @@ _run() {
     yes | $BIN/lb rm keys/one
     echo
     $BIN/lb list
+    $BIN/lb find e
     $BIN/lb show keys/one2
     $BIN/lb show keys2/three
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | $BIN/lb insert totp/test
