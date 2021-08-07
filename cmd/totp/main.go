@@ -13,6 +13,11 @@ import (
 	"voidedtech.com/lockbox/internal"
 )
 
+const (
+	beginRed = "\033[1;31m"
+	endRed   = "\033[0m"
+)
+
 func getEnv() string {
 	return filepath.Join(internal.GetStore(), os.Getenv("LOCKBOX_TOTP"))
 }
@@ -88,23 +93,27 @@ func display(token string, clip bool) error {
 		if err != nil {
 			return err
 		}
+		startColor := ""
+		endColor := ""
+		if left < 10 {
+			startColor = beginRed
+			endColor = endRed
+		}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
 			outputs = append(outputs, "-> CTRL+C to exit")
 		} else {
-			fmt.Printf("\n  -> %s\n\n", expires)
+			colorize(startColor, fmt.Sprintf("\n  -> %s\n", expires), endColor)
 			internal.CopyToClipboard(code)
 			return nil
 		}
-		startColor := ""
-		endColor := ""
-		if left < 10 {
-			startColor = "\033[1;31m"
-			endColor = "\033[0m"
-		}
 		clear()
-		fmt.Printf("%s%s%s\n", startColor, strings.Join(outputs, "\n\n"), endColor)
+		colorize(startColor, strings.Join(outputs, "\n\n"), endColor)
 	}
+}
+
+func colorize(start, text, end string) {
+	fmt.Printf("%s%s%s\n", start, text, end)
 }
 
 func main() {
