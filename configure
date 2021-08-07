@@ -76,7 +76,6 @@ clean:
     cnt=0
     for binapp in ${binapps[@]}; do
         app=${APPS[$cnt]}
-        app=$(echo $app | sed 's/lb-//g')
         cnt=$((cnt+1))
         echo "$binapp: \$(shell find . -type f -name '*.go') go.*"
         echo "    go build -o $binapp \$(FLAGS) cmd/$app/main.go"
