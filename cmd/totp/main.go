@@ -118,7 +118,7 @@ func colorize(start, text, end string) {
 
 func main() {
 	args := os.Args
-	if len(args) > 3 {
+	if len(args) > 3 || len(args) < 2 {
 		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
 	}
 	cmd := args[1]
