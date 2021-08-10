@@ -12,7 +12,7 @@ Currently `lb` is only working/developed on macOS (though it could be extended t
 
 ## environment
 
-The fllowing variables must be set to use `lb`
+The following variables must be set to use `lb`
 
 For _macos_ set
 ```
