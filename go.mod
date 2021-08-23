@@ -7,5 +7,5 @@ require (
 	github.com/pquerna/otp v1.3.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-	voidedtech.com/stock v0.0.0-20210823174715-003d4cd6133c
+	voidedtech.com/stock v0.0.0-20210823181432-3a5f2d892234
 )

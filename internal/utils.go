@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"bufio"
-	"bytes"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -51,21 +49,4 @@ func Find(store string, display bool) ([]string, error) {
 		sort.Strings(results)
 	}
 	return results, nil
-}
-
-// Stdin reads one (or more) lines from stdin.
-func Stdin(one bool) ([]byte, error) {
-	scanner := bufio.NewScanner(os.Stdin)
-	var b bytes.Buffer
-	for scanner.Scan() {
-		b.WriteString(scanner.Text())
-		b.WriteString("\n")
-		if one {
-			break
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
 }

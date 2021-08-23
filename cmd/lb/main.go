@@ -222,7 +222,7 @@ func main() {
 }
 
 func stdin(one bool) (string, error) {
-	b, err := internal.Stdin(one)
+	b, err := stock.Stdin(one)
 	if err != nil {
 		return "", err
 	}

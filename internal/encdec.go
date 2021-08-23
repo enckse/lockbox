@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/nacl/secretbox"
+	"voidedtech.com/stock"
 )
 
 const (
@@ -90,7 +91,7 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	}
 	data := datum
 	if data == nil {
-		b, err := Stdin(false)
+		b, err := stock.Stdin(false)
 		if err != nil {
 			return err
 		}
