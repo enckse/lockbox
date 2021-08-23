@@ -11,6 +11,7 @@ import (
 
 	otp "github.com/pquerna/otp/totp"
 	"voidedtech.com/lockbox/internal"
+	"voidedtech.com/stock"
 )
 
 const (
@@ -52,7 +53,7 @@ func clear() {
 func display(token string, clip bool) error {
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(getEnv(), tok+internal.Extension)
-	if !internal.PathExists(store) {
+	if !stock.PathExists(store) {
 		return internal.NewLockboxError("object does not exist")
 	}
 	l, err := internal.NewLockbox("", "", store)
@@ -119,13 +120,13 @@ func colorize(start, text, end string) {
 func main() {
 	args := os.Args
 	if len(args) > 3 || len(args) < 2 {
-		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
+		stock.Die("subkey required", internal.NewLockboxError("invalid arguments"))
 	}
 	cmd := args[1]
 	if cmd == "list" || cmd == "ls" {
 		result, err := list()
 		if err != nil {
-			internal.Die("invalid list response", err)
+			stock.Die("invalid list response", err)
 		}
 		sort.Strings(result)
 		for _, entry := range result {
@@ -136,12 +137,12 @@ func main() {
 	clip := false
 	if len(args) == 3 {
 		if cmd != "-c" && cmd != "clip" {
-			internal.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
+			stock.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
 		}
 		clip = true
 		cmd = args[2]
 	}
 	if err := display(cmd, clip); err != nil {
-		internal.Die("failed to show totp token", err)
+		stock.Die("failed to show totp token", err)
 	}
 }

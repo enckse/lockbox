@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 	"os/exec"
+
+	"voidedtech.com/stock"
 )
 
 const (
@@ -23,7 +25,7 @@ func pipeTo(command, value string, wait bool, args ...string) {
 	cmd := exec.Command(command, args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		Die("unable to get stdin pipe", err)
+		stock.Die("unable to get stdin pipe", err)
 	}
 
 	go func() {
@@ -39,6 +41,6 @@ func pipeTo(command, value string, wait bool, args ...string) {
 		ran = cmd.Start()
 	}
 	if ran != nil {
-		Die("failed to run command", ran)
+		stock.Die("failed to run command", ran)
 	}
 }

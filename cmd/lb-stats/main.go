@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"voidedtech.com/lockbox/internal"
+	"voidedtech.com/stock"
 )
 
 type (
@@ -32,7 +33,7 @@ func main() {
 	store := internal.GetStore()
 	items, err := internal.Find(store, true)
 	if err != nil {
-		internal.Die("unable to find entries", err)
+		stock.Die("unable to find entries", err)
 	}
 	results := []Stats{}
 	for _, item := range items {
@@ -48,7 +49,7 @@ func main() {
 		cmd := exec.Command("git", "-C", store, "log", "--format=%h %aI", fmt.Sprintf("%s%s", item, internal.Extension))
 		b, err := cmd.Output()
 		if err != nil {
-			internal.Die("failed to get git history", err)
+			stock.Die("failed to get git history", err)
 		}
 		history := []History{}
 		for _, value := range strings.Split(string(b), "\n") {
@@ -58,7 +59,7 @@ func main() {
 			}
 			parts := strings.Split(cleaned, " ")
 			if len(parts) != 2 {
-				internal.Die("invalid format entry", internal.NewLockboxError("mismatch between format string and struct?"))
+				stock.Die("invalid format entry", internal.NewLockboxError("mismatch between format string and struct?"))
 			}
 			history = append(history, History{Hash: parts[0], Date: parts[1]})
 		}
@@ -66,11 +67,11 @@ func main() {
 		results = append(results, stat)
 	}
 	if len(results) == 0 {
-		internal.Die("found no entries", internal.NewLockboxError("no entries"))
+		stock.Die("found no entries", internal.NewLockboxError("no entries"))
 	}
 	j, err := json.MarshalIndent(results, "", "    ")
 	if err != nil {
-		internal.Die("unable to prep json", err)
+		stock.Die("unable to prep json", err)
 	}
 	fmt.Println(string(j))
 }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"voidedtech.com/lockbox/internal"
+	"voidedtech.com/stock"
 )
 
 const (
@@ -41,15 +42,15 @@ func main() {
 	var paths []string
 	parts := strings.Split(src, ":")
 	for _, p := range parts {
-		if internal.PathExists(p) {
+		if stock.PathExists(p) {
 			info, err := os.Stat(p)
 			if err != nil {
-				internal.Die("unable to stat", err)
+				stock.Die("unable to stat", err)
 			}
 			if info.IsDir() {
 				files, err := os.ReadDir(p)
 				if err != nil {
-					internal.Die("failed to read directory", err)
+					stock.Die("failed to read directory", err)
 				}
 				var results []string
 				for _, f := range files {
@@ -62,7 +63,7 @@ func main() {
 		}
 	}
 	if len(paths) == 0 {
-		internal.Die("no paths found for generation", internal.NewLockboxError("unable to read paths"))
+		stock.Die("no paths found for generation", internal.NewLockboxError("unable to read paths"))
 	}
 	result := ""
 	l := *length
@@ -92,37 +93,37 @@ func main() {
 			name = newValue
 		case transformModeSed:
 			if len(sedPattern) == 0 {
-				internal.Die("unable to use sed transform without pattern", internal.NewLockboxError("set PWGEN_SED"))
+				stock.Die("unable to use sed transform without pattern", internal.NewLockboxError("set PWGEN_SED"))
 			}
 			cmd := exec.Command("sed", "-e", sedPattern)
 			stdin, err := cmd.StdinPipe()
 			if err != nil {
-				internal.Die("unable to attach stdin to sed", err)
+				stock.Die("unable to attach stdin to sed", err)
 			}
 			var stdout bytes.Buffer
 			var stderr bytes.Buffer
 			cmd.Stdout = &stdout
 			cmd.Stderr = &stderr
 			if err := cmd.Start(); err != nil {
-				internal.Die("failed to run sed", err)
+				stock.Die("failed to run sed", err)
 			}
 			if _, err := io.WriteString(stdin, name); err != nil {
 				stdin.Close()
-				internal.Die("write to stdin failed for sed", err)
+				stock.Die("write to stdin failed for sed", err)
 			}
 			stdin.Close()
 			if err := cmd.Wait(); err != nil {
-				internal.Die("sed failed", err)
+				stock.Die("sed failed", err)
 			}
 			errors := strings.TrimSpace(stderr.String())
 			if len(errors) > 0 {
-				internal.Die("sed stderr failure", internal.NewLockboxError(errors))
+				stock.Die("sed stderr failure", internal.NewLockboxError(errors))
 			}
 			name = strings.TrimSpace(stdout.String())
 		case transformModeNone:
 			break
 		default:
-			internal.Die("unknown transform mode", internal.NewLockboxError(transform))
+			stock.Die("unknown transform mode", internal.NewLockboxError(transform))
 		}
 		result += name
 	}

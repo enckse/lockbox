@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"voidedtech.com/lockbox/internal"
+	"voidedtech.com/stock"
 )
 
 func main() {
@@ -15,20 +16,20 @@ func main() {
 	flag.Parse()
 	l, err := internal.NewLockbox(*key, *keyMode, *file)
 	if err != nil {
-		internal.Die("unable to make lockbox model instance", err)
+		stock.Die("unable to make lockbox model instance", err)
 	}
 	switch *mode {
 	case "encrypt":
 		if err := l.Encrypt(nil); err != nil {
-			internal.Die("failed to encrypt", err)
+			stock.Die("failed to encrypt", err)
 		}
 	case "decrypt":
 		results, err := l.Decrypt()
 		if err != nil {
-			internal.Die("failed to decrypt", err)
+			stock.Die("failed to decrypt", err)
 		}
 		fmt.Println(string(results))
 	default:
-		internal.Die("invalid mode", internal.NewLockboxError("bad mode"))
+		stock.Die("invalid mode", internal.NewLockboxError("bad mode"))
 	}
 }
