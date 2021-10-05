@@ -174,18 +174,17 @@ func main() {
 		inEntry := getEntry(store, args, 2)
 		isShow := command == "show"
 		entries := []string{inEntry}
-		isGlob := false
 		if strings.Contains(inEntry, "*") {
 			if !isShow {
 				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
 			}
-			isGlob = true
 			matches, err := filepath.Glob(inEntry)
 			if err != nil {
 				stock.Die("bad glob", err)
 			}
 			entries = matches
 		}
+		isGlob := len(entries) > 1
 		for _, entry := range entries {
 			if !stock.PathExists(entry) {
 				stock.Die("invalid entry", internal.NewLockboxError("entry not found"))
