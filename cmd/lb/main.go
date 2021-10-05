@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -186,6 +187,7 @@ func main() {
 			if !isShow {
 				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
 			}
+			sort.Strings(entries)
 		}
 		startColor, endColor, err := internal.GetColor(internal.ColorRed)
 		if err != nil {
