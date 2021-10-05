@@ -76,7 +76,12 @@ lb show my/key/value
 To get a totp token
 ```
 lb totp token
-# must be within the subdir of LOCKBOX_TOTP
+# 'token' must be within the subdir of LOCKBOX_TOTP
+```
+
+The token can be automatically copied to the clipboard too
+```
+lb totp -c token
 ```
 
 ### stats
