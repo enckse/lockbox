@@ -187,6 +187,10 @@ func main() {
 				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
 			}
 		}
+		startColor, endColor, err := internal.GetColor(internal.ColorRed)
+		if err != nil {
+			stock.Die("unable to get color for terminal", err)
+		}
 		for _, entry := range entries {
 			if !stock.PathExists(entry) {
 				stock.Die("invalid entry", internal.NewLockboxError("entry not found"))
@@ -207,7 +211,7 @@ func main() {
 						fileName = fileName[1:]
 					}
 					fileName = strings.ReplaceAll(fileName, internal.Extension, "")
-					fmt.Printf("%s%s:%s\n", internal.TermBeginRed, fileName, internal.TermEndRed)
+					fmt.Printf("%s%s:%s\n", startColor, fileName, endColor)
 				}
 				fmt.Println(value)
 				continue

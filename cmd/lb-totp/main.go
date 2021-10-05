@@ -46,6 +46,10 @@ func clear() {
 }
 
 func display(token string, clip bool) error {
+	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
+	if err != nil {
+		return err
+	}
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(getEnv(), tok+internal.Extension)
 	if !stock.PathExists(store) {
@@ -92,8 +96,8 @@ func display(token string, clip bool) error {
 		startColor := ""
 		endColor := ""
 		if left < 10 {
-			startColor = internal.TermBeginRed
-			endColor = internal.TermEndRed
+			startColor = redStart
+			endColor = redEnd
 		}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))

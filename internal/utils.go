@@ -10,14 +10,30 @@ import (
 	"voidedtech.com/stock"
 )
 
+type (
+	// Color are terminal colors for dumb terminal coloring.
+	Color int
+)
+
 const (
 	// Extension is the lockbox file extension.
 	Extension = ".lb"
-	// TermBeginRed will turn terminal text red.
-	TermBeginRed = "\033[1;31m"
-	// TermEndRed will end red terminal text.
-	TermEndRed = "\033[0m"
+	termBeginRed = "\033[1;31m"
+	termEndRed = "\033[0m"
+	// ColorRed will get red terminal coloring.
+	ColorRed = iota
 )
+
+// GetColor will retrieve start/end terminal coloration indicators.
+func GetColor(color Color) (string, string, error) {
+	if color != ColorRed {
+		return "", "", NewLockboxError("bad color")
+	}
+	if os.Getenv("LOCKBOX_NOCOLOR") == "yes" {
+		return "", "", nil
+	}
+	return termBeginRed, termEndRed, nil
+}
 
 // GetStore gets the lockbox directory.
 func GetStore() string {
