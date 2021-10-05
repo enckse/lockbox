@@ -175,9 +175,6 @@ func main() {
 		isShow := command == "show"
 		entries := []string{inEntry}
 		if strings.Contains(inEntry, "*") {
-			if !isShow {
-				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
-			}
 			matches, err := filepath.Glob(inEntry)
 			if err != nil {
 				stock.Die("bad glob", err)
@@ -185,6 +182,11 @@ func main() {
 			entries = matches
 		}
 		isGlob := len(entries) > 1
+		if isGlob {
+			if !isShow {
+				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
+			}
+		}
 		for _, entry := range entries {
 			if !stock.PathExists(entry) {
 				stock.Die("invalid entry", internal.NewLockboxError("entry not found"))
