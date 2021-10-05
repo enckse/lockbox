@@ -26,6 +26,11 @@ LOCKBOX_KEYMODE=macos
 LOCKBOX_TOTP=keys/totp/
 ```
 
+In cases where `lb` outputs colored terminal output this coloring behavior can be disabled:
+```
+LOCKBOX_NOCOLOR="yes"
+```
+
 ## usage
 
 ### clipboard
