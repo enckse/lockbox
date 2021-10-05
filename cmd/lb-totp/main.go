@@ -14,11 +14,6 @@ import (
 	"voidedtech.com/stock"
 )
 
-const (
-	beginRed = "\033[1;31m"
-	endRed   = "\033[0m"
-)
-
 func getEnv() string {
 	return filepath.Join(internal.GetStore(), os.Getenv("LOCKBOX_TOTP"))
 }
@@ -97,8 +92,8 @@ func display(token string, clip bool) error {
 		startColor := ""
 		endColor := ""
 		if left < 10 {
-			startColor = beginRed
-			endColor = endRed
+			startColor = internal.TermBeginRed
+			endColor = internal.TermEndRed
 		}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))

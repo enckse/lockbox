@@ -171,24 +171,48 @@ func main() {
 			os.Remove(entry)
 		}
 	case "show", "-c", "clip":
-		entry := getEntry(store, args, 2)
-		if !stock.PathExists(entry) {
-			stock.Die("invalid entry", internal.NewLockboxError("entry not found"))
+		inEntry := getEntry(store, args, 2)
+		isShow := command == "show"
+		entries := []string{inEntry}
+		isGlob := false
+		if strings.Contains(inEntry, "*") {
+			if !isShow {
+				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
+			}
+			isGlob = true
+			matches, err := filepath.Glob(inEntry)
+			if err != nil {
+				stock.Die("bad glob", err)
+			}
+			entries = matches
 		}
-		l, err := internal.NewLockbox("", "", entry)
-		if err != nil {
-			stock.Die("unable to make lockbox model instance", err)
+		for _, entry := range entries {
+			if !stock.PathExists(entry) {
+				stock.Die("invalid entry", internal.NewLockboxError("entry not found"))
+			}
+			l, err := internal.NewLockbox("", "", entry)
+			if err != nil {
+				stock.Die("unable to make lockbox model instance", err)
+			}
+			decrypt, err := l.Decrypt()
+			if err != nil {
+				stock.Die("unable to decrypt", err)
+			}
+			value := strings.TrimSpace(string(decrypt))
+			if isShow {
+				if isGlob {
+					fileName := strings.ReplaceAll(entry, store, "")
+					if fileName[0] == '/' {
+						fileName = fileName[1:]
+					}
+					fileName = strings.ReplaceAll(fileName, internal.Extension, "")
+					fmt.Printf("%s%s:%s\n", internal.TermBeginRed, fileName, internal.TermEndRed)
+				}
+				fmt.Println(value)
+				continue
+			}
+			internal.CopyToClipboard(value)
 		}
-		decrypt, err := l.Decrypt()
-		if err != nil {
-			stock.Die("unable to decrypt", err)
-		}
-		value := strings.TrimSpace(string(decrypt))
-		if command == "show" {
-			fmt.Println(value)
-			return
-		}
-		internal.CopyToClipboard(value)
 	case "clear":
 		idx := 0
 		val, err := stdin(false)

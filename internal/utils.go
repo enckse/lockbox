@@ -13,6 +13,10 @@ import (
 const (
 	// Extension is the lockbox file extension.
 	Extension = ".lb"
+	// TermBeginRed will turn terminal text red.
+	TermBeginRed = "\033[1;31m"
+	// TermEndRed will end red terminal text.
+	TermEndRed = "\033[0m"
 )
 
 // GetStore gets the lockbox directory.
