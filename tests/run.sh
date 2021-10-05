@@ -22,6 +22,7 @@ git -C $LOCKBOX_STORE commit -am "init"
 _run() {
     echo "test" | $BIN/lb insert keys/one
     echo "test2" | $BIN/lb insert keys/one2
+    $BIN/lb show keys/*
     echo -e "test3\ntest4" | $BIN/lb insert keys2/three
     $BIN/lb ls
     $BIN/lb-pwgen -special -length 10
