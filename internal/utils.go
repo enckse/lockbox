@@ -102,29 +102,16 @@ func termEcho(on bool) {
 	}
 }
 
-func readPassword() (string, error) {
-	return readInput(true)
-}
-
 // ConfirmInput will get 2 inputs and confirm they are the same.
 func ConfirmInput() (string, error) {
-	return readInput(false)
-}
-
-func readInput(onlyOne bool) (string, error) {
-	if !onlyOne {
-		termEcho(false)
-		defer func() {
-			termEcho(true)
-		}()
-		fmt.Printf("please enter password: ")
-	}
+	termEcho(false)
+	defer func() {
+		termEcho(true)
+	}()
+	fmt.Printf("please enter password: ")
 	first, err := Stdin(true)
 	if err != nil {
 		return "", err
-	}
-	if onlyOne {
-		return first, nil
 	}
 	fmt.Printf("\nplease re-enter password: ")
 	second, err := Stdin(true)

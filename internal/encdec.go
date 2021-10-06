@@ -90,7 +90,7 @@ func getKey(keyMode, name string) ([]byte, error) {
 		go func() {
 			defer stdin.Close()
 			termEcho(false)
-			input, err := readPassword()
+			input, err := Stdin(true)
 			if err != nil {
 				stdinErr = err
 				return

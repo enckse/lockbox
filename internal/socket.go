@@ -146,7 +146,9 @@ func SocketHandler(isHost bool) error {
 		return err
 	}
 	if data == respCommand {
-		input, err := readPassword()
+		termEcho(false)
+		input, err := Stdin(true)
+		termEcho(true)
 		if err != nil {
 			return err
 		}
