@@ -75,7 +75,7 @@ func main() {
 		default:
 			stock.Die("too many arguments", internal.NewLockboxError("insert can only perform one operation"))
 		}
-		isPipe := isInputFromPipe()
+		isPipe := internal.IsInputFromPipe()
 		entry := getEntry(store, args, idx)
 		if stock.PathExists(entry) {
 			if !isPipe {
@@ -212,9 +212,4 @@ func confirm(prompt string) bool {
 		stock.Die("failed to get response", err)
 	}
 	return resp == "Y" || resp == "y"
-}
-
-func isInputFromPipe() bool {
-	fileInfo, _ := os.Stdin.Stat()
-	return fileInfo.Mode()&os.ModeCharDevice == 0
 }

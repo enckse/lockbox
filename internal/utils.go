@@ -132,3 +132,9 @@ func Stdin(one bool) (string, error) {
 	}
 	return strings.TrimSpace(string(b)), nil
 }
+
+// IsInputFromPipe will indicate if connected to stdin pipe.
+func IsInputFromPipe() bool {
+	fileInfo, _ := os.Stdin.Stat()
+	return fileInfo.Mode()&os.ModeCharDevice == 0
+}

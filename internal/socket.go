@@ -154,9 +154,14 @@ func SocketHandler(isHost bool) error {
 		return err
 	}
 	if data == respCommand {
-		termEcho(false)
+		isPipe := IsInputFromPipe()
+		if !isPipe {
+			termEcho(false)
+		}
 		input, err := Stdin(true)
-		termEcho(true)
+		if !isPipe {
+			termEcho(true)
+		}
 		if err != nil {
 			return err
 		}
