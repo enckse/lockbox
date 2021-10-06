@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"fmt"
+	"io/fs"
 	"net"
 	"os"
 	"path/filepath"
@@ -81,6 +82,13 @@ func SocketHandler(isHost bool) error {
 			if err := os.MkdirAll(dir, 0700); err != nil {
 				return err
 			}
+		}
+		stats, err := os.Stat(dir)
+		if err != nil {
+			return err
+		}
+		if stats.Mode() != fs.ModeDir|0700 {
+			return NewLockboxError("invalid permissions on lb socket directory, too open")
 		}
 		if stock.PathExists(path) {
 			if err := os.Remove(path); err != nil {
