@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	"voidedtech.com/lockbox/internal"
@@ -23,56 +22,6 @@ func getEntry(store string, args []string, idx int) string {
 		stock.Die("invalid entry given", internal.NewLockboxError("specific entry required"))
 	}
 	return filepath.Join(store, args[idx]) + internal.Extension
-}
-
-func termEcho(on bool) {
-	// Common settings and variables for both stty calls.
-	attrs := syscall.ProcAttr{
-		Dir:   "",
-		Env:   []string{},
-		Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
-		Sys:   nil}
-	var ws syscall.WaitStatus
-	cmd := "echo"
-	if !on {
-		cmd = "-echo"
-	}
-
-	// Enable/disable echoing.
-	pid, err := syscall.ForkExec(
-		"/bin/stty",
-		[]string{"stty", cmd},
-		&attrs)
-	if err != nil {
-		panic(err)
-	}
-
-	// Wait for the stty process to complete.
-	_, err = syscall.Wait4(pid, &ws, 0, nil)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func readInput() (string, error) {
-	termEcho(false)
-	defer func() {
-		termEcho(true)
-	}()
-	fmt.Printf("please enter password: ")
-	first, err := stdin(true)
-	if err != nil {
-		return "", err
-	}
-	fmt.Printf("\nplease re-enter password: ")
-	second, err := stdin(true)
-	if err != nil {
-		return "", err
-	}
-	if first != second {
-		return "", internal.NewLockboxError("passwords do NOT match")
-	}
-	return first, nil
 }
 
 func main() {
@@ -103,6 +52,10 @@ func main() {
 				}
 			}
 			fmt.Println(f)
+		}
+	case "credential-server", "credential-client":
+		if err := internal.SocketHandler(command == "credential-server"); err != nil {
+			stock.Die("credential handler failed", err)
 		}
 	case "version":
 		fmt.Printf("version: %s\n", version)
@@ -140,13 +93,13 @@ func main() {
 		}
 		var password string
 		if !multi && !isPipe {
-			input, err := readInput()
+			input, err := internal.ConfirmInput()
 			if err != nil {
 				stock.Die("password input failed", err)
 			}
 			password = input
 		} else {
-			input, err := stdin(false)
+			input, err := internal.Stdin(false)
 			if err != nil {
 				stock.Die("failed to read stdin", err)
 			}
@@ -222,7 +175,7 @@ func main() {
 		}
 	case "clear":
 		idx := 0
-		val, err := stdin(false)
+		val, err := internal.Stdin(false)
 		if err != nil {
 			stock.Die("unable to read value to clear", err)
 		}
@@ -252,17 +205,9 @@ func main() {
 	}
 }
 
-func stdin(one bool) (string, error) {
-	b, err := stock.Stdin(one)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(b)), nil
-}
-
 func confirm(prompt string) bool {
 	fmt.Printf("%s? (y/N) ", prompt)
-	resp, err := stdin(true)
+	resp, err := internal.Stdin(true)
 	if err != nil {
 		stock.Die("failed to get response", err)
 	}

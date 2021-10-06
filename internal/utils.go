@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"syscall"
 
 	"voidedtech.com/stock"
 )
@@ -17,9 +19,9 @@ type (
 
 const (
 	// Extension is the lockbox file extension.
-	Extension = ".lb"
+	Extension    = ".lb"
 	termBeginRed = "\033[1;31m"
-	termEndRed = "\033[0m"
+	termEndRed   = "\033[0m"
 	// ColorRed will get red terminal coloring.
 	ColorRed = iota
 )
@@ -69,4 +71,77 @@ func Find(store string, display bool) ([]string, error) {
 		sort.Strings(results)
 	}
 	return results, nil
+}
+
+func termEcho(on bool) {
+	// Common settings and variables for both stty calls.
+	attrs := syscall.ProcAttr{
+		Dir:   "",
+		Env:   []string{},
+		Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
+		Sys:   nil}
+	var ws syscall.WaitStatus
+	cmd := "echo"
+	if !on {
+		cmd = "-echo"
+	}
+
+	// Enable/disable echoing.
+	pid, err := syscall.ForkExec(
+		"/bin/stty",
+		[]string{"stty", cmd},
+		&attrs)
+	if err != nil {
+		panic(err)
+	}
+
+	// Wait for the stty process to complete.
+	_, err = syscall.Wait4(pid, &ws, 0, nil)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func readPassword() (string, error) {
+	return readInput(true)
+}
+
+// ConfirmInput will get 2 inputs and confirm they are the same.
+func ConfirmInput() (string, error) {
+	return readInput(false)
+}
+
+func readInput(onlyOne bool) (string, error) {
+	if !onlyOne {
+		termEcho(false)
+		defer func() {
+			termEcho(true)
+		}()
+		fmt.Printf("please enter password: ")
+	}
+	first, err := Stdin(true)
+	if err != nil {
+		return "", err
+	}
+	if onlyOne {
+		return first, nil
+	}
+	fmt.Printf("\nplease re-enter password: ")
+	second, err := Stdin(true)
+	if err != nil {
+		return "", err
+	}
+	if first != second {
+		return "", NewLockboxError("passwords do NOT match")
+	}
+	return first, nil
+}
+
+// Stdin will retrieve stdin data.
+func Stdin(one bool) (string, error) {
+	b, err := stock.Stdin(one)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(b)), nil
 }

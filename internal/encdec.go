@@ -21,6 +21,8 @@ const (
 	MacOSKeyMode = "macos"
 	// PlainKeyMode is plaintext based key resolution.
 	PlainKeyMode = "plaintext"
+	// LockboxKeyMode is a lockbox-based daemon key resolution.
+	LockboxKeyMode = "lockbox"
 )
 
 type (
@@ -68,6 +70,41 @@ func getKey(keyMode, name string) ([]byte, error) {
 		b, err := cmd.Output()
 		if err != nil {
 			return nil, err
+		}
+		data = b
+	case LockboxKeyMode:
+		exe, err := os.Executable()
+		if err != nil {
+			return nil, err
+		}
+		cmd := exec.Command(exe, "credential-client")
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			termEcho(true)
+		}()
+
+		var stdinErr error
+		go func() {
+			defer stdin.Close()
+			termEcho(false)
+			input, err := readPassword()
+			if err != nil {
+				stdinErr = err
+				return
+			}
+			if _, err := io.WriteString(stdin, input); err != nil {
+				stdinErr = err
+			}
+		}()
+		b, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
+		if stdinErr != nil {
+			return nil, stdinErr
 		}
 		data = b
 	case PlainKeyMode:
