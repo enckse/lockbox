@@ -15,7 +15,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v2
       - name: "deps"
-        run: apt-get install -y meson ninja-build
+        run: sudo apt-get install -y meson ninja-build
       - name: "meson"
         run: meson setup build
       - name: "ninja"
