@@ -26,15 +26,46 @@ const (
 	ColorRed = iota
 )
 
+func isYesNoEnv(defaultValue bool, env string) (bool, error) {
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(env)))
+	if len(value) == 0 {
+		return defaultValue, nil
+	}
+	switch value {
+	case "no":
+		return false, nil
+	case "yes":
+		return true, nil
+	}
+	return false, NewLockboxError(fmt.Sprintf("invalid yes/no env value for %s", env))
+}
+
+// IsInteractive indicates if running as a user UI experience.
+func IsInteractive() (bool, error) {
+	return isYesNoEnv(true, "LOCKBOX_INTERACTIVE")
+}
+
 // GetColor will retrieve start/end terminal coloration indicators.
 func GetColor(color Color) (string, string, error) {
 	if color != ColorRed {
 		return "", "", NewLockboxError("bad color")
 	}
-	if os.Getenv("LOCKBOX_NOCOLOR") == "yes" {
-		return "", "", nil
+	interactive, err := IsInteractive()
+	if err != nil {
+		return "", "", err
 	}
-	return termBeginRed, termEndRed, nil
+	colors := interactive
+	if colors {
+		isColored, err := isYesNoEnv(false, "LOCKBOX_NOCOLOR")
+		if err != nil {
+			return "", "", err
+		}
+		colors = isColored
+	}
+	if colors {
+		return termBeginRed, termEndRed, nil
+	}
+	return "", "", nil
 }
 
 // GetStore gets the lockbox directory.

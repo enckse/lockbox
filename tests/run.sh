@@ -5,7 +5,7 @@ TESTS="$PWD/bin"
 export LOCKBOX_STORE="$TESTS/lb"
 export LOCKBOX_KEYMODE="plaintext"
 export LOCKBOX_TOTP="totp"
-export LOCKBOX_NOCOLOR="yes"
+export LOCKBOX_INTERACTIVE="no"
 export PWGEN_SOURCE="$PWD"
 export PWGEN_SPECIAL="u"
 export PWGEN_SED="s/[[:alnum:]]/u/g;s/\./u/g"
@@ -36,7 +36,7 @@ _run() {
     $BIN/lb show keys2/three
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | $BIN/lb insert totp/test
     $BIN/lb-totp ls
-    $BIN/lb-totp test | head -3 | tail -n 1
+    $BIN/lb-totp test | tr '[:digit:]' 'XXXXXX'
     $BIN/lb-stats keys/one
     $BIN/lb-diff bin/lb/keys/one.lb bin/lb/keys/one2.lb
     yes 2>/dev/null | $BIN/lb rm keys2/three

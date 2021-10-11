@@ -46,6 +46,13 @@ func clear() {
 }
 
 func display(token string, clip bool) error {
+	interactive, err := internal.IsInteractive()
+	if err != nil {
+		return err
+	}
+	if !interactive && clip {
+		return internal.NewLockboxError("clipboard not available in non-interactive mode")
+	}
 	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
 	if err != nil {
 		return err
@@ -63,13 +70,21 @@ func display(token string, clip bool) error {
 	if err != nil {
 		return err
 	}
-	if !clip {
-		clear()
-	}
 	totpToken := string(val)
+	if !interactive {
+		code, err := otp.GenerateCode(totpToken, time.Now())
+		if err != nil {
+			return err
+		}
+		fmt.Println(code)
+		return nil
+	}
 	first := true
 	running := 0
 	lastSecond := -1
+	if !clip {
+		clear()
+	}
 	for {
 		if !first {
 			time.Sleep(500 * time.Millisecond)
