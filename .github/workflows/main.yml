@@ -1,21 +1,21 @@
 name: "build"
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: alpine:latest
+    strategy:
+      matrix:
+        go-version: [1.16.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v2
-      - name: "setup deps"
-        run: "apk add make bash git go"
       - name: "configure"
         run: "./configure"
       - name: "build"
         run: make
+
