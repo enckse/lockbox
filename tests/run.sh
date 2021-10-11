@@ -28,7 +28,7 @@ _run() {
     $BIN/lb ls
     $BIN/lb-pwgen -special -length 10
     $BIN/lb-rekey
-    yes 2>yes 1| $BIN/lb rm keys/one
+    yes 2>/dev/null | $BIN/lb rm keys/one
     echo
     $BIN/lb list
     $BIN/lb find e
@@ -39,9 +39,9 @@ _run() {
     $BIN/lb-totp test | head -3 | tail -n 1
     $BIN/lb-stats keys/one
     $BIN/lb-diff bin/lb/keys/one.lb bin/lb/keys/one2.lb
-    yes 2>yes 1| $BIN/lb rm keys2/three
+    yes 2>/dev/null | $BIN/lb rm keys2/three
     echo
-    yes 2>yes 1| $BIN/lb rm totp/test
+    yes 2>/dev/null | $BIN/lb rm totp/test
     echo
     $BIN/lb-rekey -outkey "test" -outmode "plaintext"
     $BIN/lb-rw -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
