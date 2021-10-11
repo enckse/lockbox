@@ -1,6 +1,10 @@
 #!/bin/bash
-BIN=../bin/
-TESTS="$PWD/bin"
+BIN="$1"
+TESTS="bin"
+if [ ! -x "$BIN/lb" ]; then
+    echo "binaries missing?"
+    exit 1
+fi
 
 export LOCKBOX_STORE="$TESTS/lb"
 export LOCKBOX_KEYMODE="plaintext"
@@ -36,8 +40,8 @@ _run() {
     $BIN/lb show keys2/three
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | $BIN/lb insert totp/test
     $BIN/lb-totp ls
-    $BIN/lb-totp test | tr '[:digit:]' 'XXXXXX'
-    $BIN/lb-stats keys/one
+    $BIN/lb-totp test | tr '[:digit:]' 'X'
+    $BIN/lb-stats keys/one2
     $BIN/lb-diff bin/lb/keys/one.lb bin/lb/keys/one2.lb
     yes 2>/dev/null | $BIN/lb rm keys2/three
     echo
@@ -48,7 +52,7 @@ _run() {
 }
 
 LOG=$TESTS/lb.log
-_run | sed "s#$PWD/##g" > $LOG
+_run | sed "s#$LOCKBOX_STORE##g" > $LOG
 diff -u $LOG expected.log
 if [ $? -ne 0 ]; then
     exit 1

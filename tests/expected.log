@@ -9,9 +9,9 @@ keys/one
 keys/one2
 keys2/three
 uuuuuuuuuu
-rekeying: bin/lb/keys/one.lb
-rekeying: bin/lb/keys/one2.lb
-rekeying: bin/lb/keys2/three.lb
+rekeying: /keys/one.lb
+rekeying: /keys/one2.lb
+rekeying: /keys2/three.lb
 remove entry? (y/N) 
 keys/one2
 keys2/three
@@ -34,5 +34,5 @@ XXXXXX
 test2
 remove entry? (y/N) 
 remove entry? (y/N) 
-rekeying: bin/lb/keys/one2.lb
+rekeying: /keys/one2.lb
 test2

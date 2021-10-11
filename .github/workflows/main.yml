@@ -14,8 +14,14 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v2
-      - name: "configure"
-        run: "./configure"
-      - name: "build"
-        run: make
+      - name: "deps"
+        run: apt-get install -y meson ninja-build
+      - name: "meson"
+        run: meson setup build
+      - name: "ninja"
+        working-directory: build
+        run: ninja
+      - name: "test"
+        working-directory: build
+        run: ninja test
 
