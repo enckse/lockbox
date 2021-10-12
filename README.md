@@ -120,8 +120,13 @@ To manage the `.lb` files in a git repository and see _actual_ text diffs and th
 
 ## build
 
+Requires `meson` and `ninja`
+
 Clone this repository and:
 ```
-./configure
-make
+meson setup build
+```
+
+```
+cd build && ninja
 ```
