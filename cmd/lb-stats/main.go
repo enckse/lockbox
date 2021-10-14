@@ -59,7 +59,7 @@ func main() {
 			}
 			parts := strings.Split(cleaned, " ")
 			if len(parts) != 2 {
-				stock.Die("invalid format entry", internal.NewLockboxError("mismatch between format string and struct?"))
+				stock.Die("invalid format entry", stock.NewBasicError("mismatch between format string and struct?"))
 			}
 			history = append(history, History{Hash: parts[0], Date: parts[1]})
 		}
@@ -67,7 +67,7 @@ func main() {
 		results = append(results, stat)
 	}
 	if len(results) == 0 {
-		stock.Die("found no entries", internal.NewLockboxError("no entries"))
+		stock.Die("found no entries", stock.NewBasicError("no entries"))
 	}
 	j, err := json.MarshalIndent(results, "", "    ")
 	if err != nil {

@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"voidedtech.com/lockbox/internal"
 	"voidedtech.com/stock"
 )
 
@@ -63,7 +62,7 @@ func main() {
 		}
 	}
 	if len(paths) == 0 {
-		stock.Die("no paths found for generation", internal.NewLockboxError("unable to read paths"))
+		stock.Die("no paths found for generation", stock.NewBasicError("unable to read paths"))
 	}
 	result := ""
 	l := *length
@@ -93,7 +92,7 @@ func main() {
 			name = newValue
 		case transformModeSed:
 			if len(sedPattern) == 0 {
-				stock.Die("unable to use sed transform without pattern", internal.NewLockboxError("set PWGEN_SED"))
+				stock.Die("unable to use sed transform without pattern", stock.NewBasicError("set PWGEN_SED"))
 			}
 			cmd := exec.Command("sed", "-e", sedPattern)
 			stdin, err := cmd.StdinPipe()
@@ -117,13 +116,13 @@ func main() {
 			}
 			errors := strings.TrimSpace(stderr.String())
 			if len(errors) > 0 {
-				stock.Die("sed stderr failure", internal.NewLockboxError(errors))
+				stock.Die("sed stderr failure", stock.NewBasicError(errors))
 			}
 			name = strings.TrimSpace(stdout.String())
 		case transformModeNone:
 			break
 		default:
-			stock.Die("unknown transform mode", internal.NewLockboxError(transform))
+			stock.Die("unknown transform mode", stock.NewBasicError(transform))
 		}
 		result += name
 	}

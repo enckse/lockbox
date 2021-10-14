@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/pquerna/otp v1.3.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-	voidedtech.com/stock v0.0.0-20210824213509-5e85ba5681f5
+	voidedtech.com/stock v0.0.0-20211014234009-93c0ed43354e
 )
 
 require (

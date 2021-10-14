@@ -49,7 +49,7 @@ func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 	}
 
 	if len(b) > keyLength {
-		return Lockbox{}, NewLockboxError("key is too large for use")
+		return Lockbox{}, stock.NewBasicError("key is too large for use")
 	}
 
 	for len(b) < keyLength {
@@ -110,7 +110,7 @@ func getKey(keyMode, name string) ([]byte, error) {
 	case PlainKeyMode:
 		data = []byte(name)
 	default:
-		return nil, NewLockboxError("unknown keymode")
+		return nil, stock.NewBasicError("unknown keymode")
 	}
 	return []byte(strings.TrimSpace(string(data))), nil
 }
@@ -156,7 +156,7 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 	copy(nonce[:], encrypted[:nonceLength])
 	decrypted, ok := secretbox.Open(nil, encrypted[nonceLength:], &nonce, &l.secret)
 	if !ok {
-		return nil, NewLockboxError("decrypt not ok")
+		return nil, stock.NewBasicError("decrypt not ok")
 	}
 
 	padding := int(decrypted[0])

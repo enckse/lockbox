@@ -30,6 +30,6 @@ func main() {
 		}
 		fmt.Println(string(results))
 	default:
-		stock.Die("invalid mode", internal.NewLockboxError("bad mode"))
+		stock.Die("invalid mode", stock.NewBasicError("bad mode"))
 	}
 }

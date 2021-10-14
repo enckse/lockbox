@@ -57,7 +57,7 @@ func SocketHandler(isHost bool) error {
 	if path == "" {
 		h := os.Getenv("HOME")
 		if h == "" {
-			return NewLockboxError("unable to get HOME")
+			return stock.NewBasicError("unable to get HOME")
 		}
 		path = filepath.Join(h, ".lb", "lockbox.sock")
 	}
@@ -88,7 +88,7 @@ func SocketHandler(isHost bool) error {
 			return err
 		}
 		if stats.Mode() != fs.ModeDir|0700 {
-			return NewLockboxError("invalid permissions on lb socket directory, too open")
+			return stock.NewBasicError("invalid permissions on lb socket directory, too open")
 		}
 		if stock.PathExists(path) {
 			if err := os.Remove(path); err != nil {

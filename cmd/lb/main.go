@@ -19,7 +19,7 @@ var (
 
 func getEntry(store string, args []string, idx int) string {
 	if len(args) != idx+1 {
-		stock.Die("invalid entry given", internal.NewLockboxError("specific entry required"))
+		stock.Die("invalid entry given", stock.NewBasicError("specific entry required"))
 	}
 	return filepath.Join(store, args[idx]) + internal.Extension
 }
@@ -27,7 +27,7 @@ func getEntry(store string, args []string, idx int) string {
 func main() {
 	args := os.Args
 	if len(args) < 2 {
-		stock.Die("missing arguments", internal.NewLockboxError("requires subcommand"))
+		stock.Die("missing arguments", stock.NewBasicError("requires subcommand"))
 	}
 	command := args[1]
 	store := internal.GetStore()
@@ -37,7 +37,7 @@ func main() {
 		searchTerm := ""
 		if isFind {
 			if len(args) < 3 {
-				stock.Die("find requires an argument to search for", internal.NewLockboxError("search term required"))
+				stock.Die("find requires an argument to search for", stock.NewBasicError("search term required"))
 			}
 			searchTerm = args[2]
 		}
@@ -64,16 +64,16 @@ func main() {
 		idx := 2
 		switch len(args) {
 		case 2:
-			stock.Die("insert missing required arguments", internal.NewLockboxError("entry required"))
+			stock.Die("insert missing required arguments", stock.NewBasicError("entry required"))
 		case 3:
 		case 4:
 			multi = args[2] == "-m"
 			if !multi {
-				stock.Die("multi-line insert must be after 'insert'", internal.NewLockboxError("invalid command"))
+				stock.Die("multi-line insert must be after 'insert'", stock.NewBasicError("invalid command"))
 			}
 			idx = 3
 		default:
-			stock.Die("too many arguments", internal.NewLockboxError("insert can only perform one operation"))
+			stock.Die("too many arguments", stock.NewBasicError("insert can only perform one operation"))
 		}
 		isPipe := internal.IsInputFromPipe()
 		entry := getEntry(store, args, idx)
@@ -106,7 +106,7 @@ func main() {
 			password = input
 		}
 		if password == "" {
-			stock.Die("empty password provided", internal.NewLockboxError("password can NOT be empty"))
+			stock.Die("empty password provided", stock.NewBasicError("password can NOT be empty"))
 		}
 		l, err := internal.NewLockbox("", "", entry)
 		if err != nil {
@@ -119,7 +119,7 @@ func main() {
 	case "rm":
 		entry := getEntry(store, args, 2)
 		if !stock.PathExists(entry) {
-			stock.Die("does not exists", internal.NewLockboxError("can not delete unknown entry"))
+			stock.Die("does not exists", stock.NewBasicError("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
@@ -138,7 +138,7 @@ func main() {
 		isGlob := len(entries) > 1
 		if isGlob {
 			if !isShow {
-				stock.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
+				stock.Die("cannot glob to clipboard", stock.NewBasicError("bad glob request"))
 			}
 			sort.Strings(entries)
 		}
@@ -148,7 +148,7 @@ func main() {
 		}
 		for _, entry := range entries {
 			if !stock.PathExists(entry) {
-				stock.Die("invalid entry", internal.NewLockboxError("entry not found"))
+				stock.Die("invalid entry", stock.NewBasicError("entry not found"))
 			}
 			l, err := internal.NewLockbox("", "", entry)
 			if err != nil {

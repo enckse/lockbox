@@ -32,7 +32,7 @@ func list() ([]string, error) {
 		}
 	}
 	if len(results) == 0 {
-		return nil, internal.NewLockboxError("no objects found")
+		return nil, stock.NewBasicError("no objects found")
 	}
 	return results, nil
 }
@@ -51,7 +51,7 @@ func display(token string, clip bool) error {
 		return err
 	}
 	if !interactive && clip {
-		return internal.NewLockboxError("clipboard not available in non-interactive mode")
+		return stock.NewBasicError("clipboard not available in non-interactive mode")
 	}
 	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
 	if err != nil {
@@ -60,7 +60,7 @@ func display(token string, clip bool) error {
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(getEnv(), tok+internal.Extension)
 	if !stock.PathExists(store) {
-		return internal.NewLockboxError("object does not exist")
+		return stock.NewBasicError("object does not exist")
 	}
 	l, err := internal.NewLockbox("", "", store)
 	if err != nil {
@@ -134,7 +134,7 @@ func colorize(start, text, end string) {
 func main() {
 	args := os.Args
 	if len(args) > 3 || len(args) < 2 {
-		stock.Die("subkey required", internal.NewLockboxError("invalid arguments"))
+		stock.Die("subkey required", stock.NewBasicError("invalid arguments"))
 	}
 	cmd := args[1]
 	if cmd == "list" || cmd == "ls" {
@@ -151,7 +151,7 @@ func main() {
 	clip := false
 	if len(args) == 3 {
 		if cmd != "-c" && cmd != "clip" {
-			stock.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
+			stock.Die("subcommand not supported", stock.NewBasicError("invalid sub command"))
 		}
 		clip = true
 		cmd = args[2]

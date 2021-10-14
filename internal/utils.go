@@ -37,7 +37,7 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	case "yes":
 		return true, nil
 	}
-	return false, NewLockboxError(fmt.Sprintf("invalid yes/no env value for %s", env))
+	return false, stock.NewBasicError(fmt.Sprintf("invalid yes/no env value for %s", env))
 }
 
 // IsInteractive indicates if running as a user UI experience.
@@ -48,7 +48,7 @@ func IsInteractive() (bool, error) {
 // GetColor will retrieve start/end terminal coloration indicators.
 func GetColor(color Color) (string, string, error) {
 	if color != ColorRed {
-		return "", "", NewLockboxError("bad color")
+		return "", "", stock.NewBasicError("bad color")
 	}
 	interactive, err := IsInteractive()
 	if err != nil {
@@ -77,7 +77,7 @@ func GetStore() string {
 func Find(store string, display bool) ([]string, error) {
 	var results []string
 	if !stock.PathExists(store) {
-		return nil, NewLockboxError("store does not exists")
+		return nil, stock.NewBasicError("store does not exists")
 	}
 	err := filepath.Walk(store, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -150,7 +150,7 @@ func ConfirmInput() (string, error) {
 		return "", err
 	}
 	if first != second {
-		return "", NewLockboxError("passwords do NOT match")
+		return "", stock.NewBasicError("passwords do NOT match")
 	}
 	return first, nil
 }
