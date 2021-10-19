@@ -60,7 +60,7 @@ func GetColor(color Color) (string, string, error) {
 		if err != nil {
 			return "", "", err
 		}
-		colors = isColored
+		colors = !isColored
 	}
 	if colors {
 		return termBeginRed, termEndRed, nil
