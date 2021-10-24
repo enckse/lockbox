@@ -48,12 +48,13 @@ _run() {
     echo
     yes 2>/dev/null | $BIN/lb rm totp/test
     echo
+    LOCKBOX_KEY="invalid" $BIN/lb show keys/one2
     $BIN/lb-rekey -outkey "test" -outmode "plaintext"
     $BIN/lb-rw -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
 }
 
 LOG=$TESTS/lb.log
-_run | sed "s#$LOCKBOX_STORE##g" > $LOG
+_run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $LOG
 diff -u $LOG expected.log
 if [ $? -ne 0 ]; then
     exit 1
