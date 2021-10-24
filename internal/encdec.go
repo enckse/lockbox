@@ -48,6 +48,10 @@ func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 		return Lockbox{}, err
 	}
 
+	if len(b) == 0 {
+		return Lockbox{}, stock.NewBasicError("key is empty")
+	}
+
 	if len(b) > keyLength {
 		return Lockbox{}, stock.NewBasicError("key is too large for use")
 	}

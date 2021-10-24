@@ -8,6 +8,7 @@ fi
 
 export LOCKBOX_STORE="$TESTS/lb"
 export LOCKBOX_KEYMODE="plaintext"
+export LOCKBOX_KEY="plaintextkey"
 export LOCKBOX_TOTP="totp"
 export LOCKBOX_INTERACTIVE="no"
 export PWGEN_SOURCE="$PWD"
