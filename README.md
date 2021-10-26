@@ -8,8 +8,6 @@ keyring for password input over using a GPG key.
 
 # usage
 
-Currently `lb` is only working/developed on macOS (though it could be extended to other operating systems)
-
 ## environment
 
 The following variables must be set to use `lb`
