@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/shlex"
 	"golang.org/x/crypto/nacl/secretbox"
 	"voidedtech.com/stock"
 )
@@ -66,7 +67,10 @@ func getKey(keyMode, name string) ([]byte, error) {
 	var data []byte
 	switch keyMode {
 	case CommandKeyMode:
-		parts := strings.Split(name, " ")
+		parts, err := shlex.Split(name)
+		if err != nil {
+			return nil, err
+		}
 		cmd := exec.Command(parts[0], parts[1:]...)
 		b, err := cmd.Output()
 		if err != nil {
