@@ -14,14 +14,14 @@ Currently `lb` is only working/developed on macOS (though it could be extended t
 
 The following variables must be set to use `lb`
 
-For _macos_ set
+For example set:
 ```
-# the keychange key name
-LOCKBOX_KEY=com.domain.keyname
+# the keying object to use to ACTUALLY unlock the passwords
+LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 # the location, on disk, of the password store
 LOCKBOX_STORE=/Users/alice/.passwords
-# the keychain is macos keychain
-LOCKBOX_KEYMODE=macos
+# the keymode is a command
+LOCKBOX_KEYMODE="command"
 # to utilize totp token generation set the offset (within the repository) where totp tokens are saved
 LOCKBOX_TOTP=keys/totp/
 ```

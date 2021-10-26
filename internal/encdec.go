@@ -17,8 +17,6 @@ const (
 	keyLength   = 32
 	nonceLength = 24
 	padLength   = 256
-	// MacOSKeyMode is macOS based key resolution.
-	MacOSKeyMode = "macos"
 	// PlainKeyMode is plaintext based key resolution.
 	PlainKeyMode = "plaintext"
 	// LockboxKeyMode is a lockbox-based daemon key resolution.
@@ -69,15 +67,6 @@ func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 func getKey(keyMode, name string) ([]byte, error) {
 	var data []byte
 	switch keyMode {
-	case MacOSKeyMode:
-		// the insert for this is
-		// > security add-generic-password -a NAME -s NAME -w PASSWORD
-		cmd := exec.Command("security", "find-generic-password", "-a", name, "-s", name, "-w")
-		b, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		data = b
 	case CommandKeyMode:
 		parts := strings.Split(name, " ")
 		cmd := exec.Command(parts[0], parts[1:]...)
