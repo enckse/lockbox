@@ -53,10 +53,6 @@ func main() {
 			}
 			fmt.Println(f)
 		}
-	case "credential-server", "credential-client":
-		if err := internal.SocketHandler(command == "credential-server"); err != nil {
-			stock.Die("credential handler failed", err)
-		}
 	case "version":
 		fmt.Printf("version: %s\n", version)
 	case "insert":
