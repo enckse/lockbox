@@ -23,6 +23,8 @@ const (
 	PlainKeyMode = "plaintext"
 	// LockboxKeyMode is a lockbox-based daemon key resolution.
 	LockboxKeyMode = "lockbox"
+	// CommandKeyMode will run an external command to get the key (from stdout).
+	CommandKeyMode = "command"
 )
 
 type (
@@ -71,6 +73,14 @@ func getKey(keyMode, name string) ([]byte, error) {
 		// the insert for this is
 		// > security add-generic-password -a NAME -s NAME -w PASSWORD
 		cmd := exec.Command("security", "find-generic-password", "-a", name, "-s", name, "-w")
+		b, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
+		data = b
+	case CommandKeyMode:
+		parts := strings.Split(name, " ")
+		cmd := exec.Command(parts[0], parts[1:]...)
 		b, err := cmd.Output()
 		if err != nil {
 			return nil, err
