@@ -14,7 +14,7 @@ The following variables must be set to use `lb`
 
 For example set:
 ```
-# the keying object to use to ACTUALLY unlock the passwords
+# the keying object to use to ACTUALLY unlock the passwords (e.g. using a gpg encrypted file with the password inside of it)
 LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 # the location, on disk, of the password store
 LOCKBOX_STORE=/Users/alice/.passwords
