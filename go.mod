@@ -11,5 +11,5 @@ require (
 
 require (
 	github.com/boombuler/barcode v1.0.1 // indirect
-	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
+	golang.org/x/sys v0.0.0-20211101204403-39c9dd37992c // indirect
 )
