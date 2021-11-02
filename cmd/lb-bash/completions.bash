@@ -3,11 +3,12 @@
 _lb() {
     local cur opts
     cur=${COMP_WORDS[COMP_CWORD]}
-    if [ $COMP_CWORD -eq 1 ]; then
+    if [ "$COMP_CWORD" -eq 1 ]; then
         opts="version ls clip show -c insert rm rekey totp list pwgen stats find"
-        COMPREPLY=( $(compgen -W "$opts" -- $cur) )
+        # shellcheck disable=SC2207
+        COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
-        if [ $COMP_CWORD -eq 2 ]; then
+        if [ "$COMP_CWORD" -eq 2 ]; then
             case ${COMP_WORDS[1]} in
                 "insert")
                     opts="-m $(lb ls)"
@@ -23,7 +24,7 @@ _lb() {
                     ;;
             esac
         fi
-        if [ $COMP_CWORD -eq 3 ]; then
+        if [ "$COMP_CWORD" -eq 3 ]; then
             case "${COMP_WORDS[1]}" in
                 "insert")
                     if [ "${COMP_WORDS[2]}" == "-m" ]; then
@@ -39,8 +40,9 @@ _lb() {
                     ;;
             esac
         fi
-        if [ ! -z "$opts" ]; then
-            COMPREPLY=( $(compgen -W "$opts" -- $cur) )
+        if [ -n "$opts" ]; then
+            # shellcheck disable=SC2207
+            COMPREPLY=($(compgen -W "$opts" -- "$cur"))
         fi
     fi
 }
