@@ -175,11 +175,19 @@ func main() {
 		if err != nil {
 			stock.Die("unable to read value to clear", err)
 		}
+		_, paste, err := internal.GetClipboardCommand()
+		if err != nil {
+			stock.Die("unable to get paste command", err)
+		}
+		var args []string
+		if len(paste) > 1 {
+			args = paste[1:]
+		}
 		val = strings.TrimSpace(val)
 		for idx < internal.MaxClipTime {
 			idx++
 			time.Sleep(1 * time.Second)
-			out, err := exec.Command("pbpaste").Output()
+			out, err := exec.Command(paste[0], args...).Output()
 			if err != nil {
 				continue
 			}
