@@ -4,7 +4,7 @@ _lb() {
     local cur opts
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version ls clip show -c insert rm rekey totp list pwgen stats find"
+        opts="version ls clip show -c insert rm rekey totp list pwgen find"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
@@ -19,7 +19,7 @@ _lb() {
                 "pwgen")
                     opts="-length -transform -special"
                     ;;
-                "-c" | "show" | "rm" | "clip" | "stats")
+                "-c" | "show" | "rm" | "clip")
                     opts=$(lb ls)
                     ;;
             esac

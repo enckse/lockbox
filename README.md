@@ -82,13 +82,6 @@ The token can be automatically copied to the clipboard too
 lb totp -c token
 ```
 
-### stats
-
-View password stats/information about changes
-```
-lb stats some/key/to/stat
-```
-
 ### pwgen
 
 Generate passwords
