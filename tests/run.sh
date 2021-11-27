@@ -42,7 +42,6 @@ _run() {
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert totp/test
     "$BIN/lb-totp" ls
     "$BIN/lb-totp" test | tr '[:digit:]' 'X'
-    "$BIN/lb-stats" keys/one2
     "$BIN/lb-diff" bin/lb/keys/one.lb bin/lb/keys/one2.lb
     yes 2>/dev/null | "$BIN/lb" rm keys2/three
     echo

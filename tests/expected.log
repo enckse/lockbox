@@ -23,14 +23,6 @@ test4
 
 test
 XXXXXX
-[
-    {
-        "entry": "keys/one2",
-        "name": "one2",
-        "dir": "keys",
-        "history": []
-    }
-]
 test2
 remove entry? (y/N) 
 remove entry? (y/N) 
