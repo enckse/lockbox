@@ -31,6 +31,9 @@ func GetClipboardCommand() ([]string, []string, error) {
 			env = pbClipMode
 		case "Linux":
 			if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
+				if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
+					return nil, nil, stock.NewBasicError("unable to detect clipboard mode")
+				}
 				env = xClipMode
 			} else {
 				env = waylandClipMode
@@ -90,5 +93,4 @@ func pipeTo(command, value string, wait bool, args ...string) {
 	if ran != nil {
 		stock.Die("failed to run command", ran)
 	}
-
 }
