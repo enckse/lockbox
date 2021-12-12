@@ -9,7 +9,7 @@ _is_clip() {
 }
 
 _lb() {
-    local cur opts clip_enabled
+    local cur opts clip_enabled needs
     clip_enabled=" -c clip"
     if [ -n "$LOCKBOX_CLIPMODE" ]; then
         if [ "$LOCKBOX_CLIPMODE" == "off" ]; then
@@ -56,10 +56,18 @@ _lb() {
                     fi
                     ;;
                 "totp")
-                    if [ -n "$clip_enabled" ]; then
-                        if [ $(_is_clip "${COMP_WORDS[2]}" "-") == 1 ]; then 
-                            opts=$(lb totp ls)
+                    needs=0
+                    if [ "${COMP_WORDS[2]}" == "-once" ]; then
+                        needs=1
+                    else
+                        if [ -n "$clip_enabled" ]; then
+                            if [ $(_is_clip "${COMP_WORDS[2]}" "-") == 1 ]; then 
+                                needs=1
+                            fi
                         fi
+                    fi
+                    if [ $needs -eq 1 ]; then
+                        opts=$(lb totp ls)
                     fi
                     ;;
             esac
