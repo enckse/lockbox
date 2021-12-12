@@ -67,7 +67,7 @@ _lb() {
                         fi
                     fi
                     if [ $needs -eq 1 ]; then
-                        opts=$(lb totp ls)
+                        opts=$(lb totp -ls)
                     fi
                     ;;
             esac
