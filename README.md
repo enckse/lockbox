@@ -29,6 +29,11 @@ In cases where `lb` outputs colored terminal output this coloring behavior can b
 LOCKBOX_NOCOLOR="yes"
 ```
 
+To disable clipboard _completions_ for bash
+```
+LOCKBOX_NOCLIP="yes"
+```
+
 ## usage
 
 ### clipboard
