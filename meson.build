@@ -18,7 +18,7 @@ foreach p : progs
       p,
       output: p,
       build_by_default: true,
-      input: in_files,
+      input: target_files,
       command: [ golang, 'build', flags, '-o','@OUTPUT@', cmd_file],
   )
 endforeach

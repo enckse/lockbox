@@ -45,10 +45,13 @@ func clear() {
 	}
 }
 
-func display(token string, clip bool) error {
+func display(token string, clip, once bool) error {
 	interactive, err := internal.IsInteractive()
 	if err != nil {
 		return err
+	}
+	if once {
+		interactive = false
 	}
 	if !interactive && clip {
 		return stock.NewBasicError("clipboard not available in non-interactive mode")
@@ -137,7 +140,7 @@ func main() {
 		stock.Die("subkey required", stock.NewBasicError("invalid arguments"))
 	}
 	cmd := args[1]
-	if cmd == "list" || cmd == "ls" {
+	if cmd == "-list" || cmd == "-ls" {
 		result, err := list()
 		if err != nil {
 			stock.Die("invalid list response", err)
@@ -149,14 +152,16 @@ func main() {
 		return
 	}
 	clip := false
+	once := false
 	if len(args) == 3 {
-		if cmd != "-c" && cmd != "clip" {
+		if cmd != "-c" && cmd != "clip" && cmd != "-once" {
 			stock.Die("subcommand not supported", stock.NewBasicError("invalid sub command"))
 		}
-		clip = true
+		clip = cmd != "-once"
+		once = !clip
 		cmd = args[2]
 	}
-	if err := display(cmd, clip); err != nil {
+	if err := display(cmd, clip, once); err != nil {
 		stock.Die("failed to show totp token", err)
 	}
 }

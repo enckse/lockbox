@@ -1,7 +1,7 @@
 # bash completion for lb                        -*- shell-script -*-
 
 _is_clip() {
-    if [ "$1" == "-c" ] || [ "$1" == "clip" ]; then
+    if [ "$1" == "-c" ] || [ "$1" == "{2}clip" ]; then
         echo 1
     else
         echo 0
@@ -28,9 +28,9 @@ _lb() {
                     opts="-m $(lb ls)"
                     ;;
                 "totp")
-                    opts=$(lb totp ls)
+                    opts="-once "$(lb totp -ls)
                     if [ -n "$clip_enabled" ]; then
-                        opts="$opts$clip_enabled"
+                        opts="$opts -c -clip"
                     fi
                     ;;
                 "pwgen")
@@ -38,7 +38,7 @@ _lb() {
                     ;;
                 "-c" | "show" | "rm" | "clip")
                     opts=$(lb ls)
-                    if [ $(_is_clip "${COMP_WORDS[1]}") == 1 ]; then 
+                    if [ $(_is_clip "${COMP_WORDS[1]}" "") == 1 ]; then 
                         if [ -z "$clip_enabled" ]; then
                             opts=""
                         fi
@@ -57,7 +57,7 @@ _lb() {
                     ;;
                 "totp")
                     if [ -n "$clip_enabled" ]; then
-                        if [ $(_is_clip "${COMP_WORDS[2]}") == 1 ]; then 
+                        if [ $(_is_clip "${COMP_WORDS[2]}" "-") == 1 ]; then 
                             opts=$(lb totp ls)
                         fi
                     fi
