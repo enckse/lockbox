@@ -1,10 +1,24 @@
 # bash completion for lb                        -*- shell-script -*-
 
+_is_clip() {
+    if [ "$1" == "-c" ] || [ "$1" == "clip" ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 _lb() {
-    local cur opts
+    local cur opts clip_enabled
+    clip_enabled=" -c clip"
+    if [ -n "$LOCKBOX_NOCLIP" ]; then
+        if [ "$LOCKBOX_NOCLIP" == "yes" ]; then
+            clip_enabled=""
+        fi
+    fi
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version ls clip show -c insert rm rekey totp list pwgen find"
+        opts="version ls show insert rm rekey totp list pwgen find$clip_enabled"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
@@ -14,13 +28,21 @@ _lb() {
                     opts="-m $(lb ls)"
                     ;;
                 "totp")
-                    opts="-c clip $(lb totp ls)"
+                    opts=$(lb totp ls)
+                    if [ -n "$clip_enabled" ]; then
+                        opts="$opts$clip_enabled"
+                    fi
                     ;;
                 "pwgen")
                     opts="-length -transform -special"
                     ;;
                 "-c" | "show" | "rm" | "clip")
                     opts=$(lb ls)
+                    if [ $(_is_clip "${COMP_WORDS[1]}") == 1 ]; then 
+                        if [ -z "$clip_enabled" ]; then
+                            opts=""
+                        fi
+                    fi
                     ;;
             esac
         fi
@@ -34,8 +56,10 @@ _lb() {
                     fi
                     ;;
                 "totp")
-                    if [ "${COMP_WORDS[2]}" == "-c" ] || [ "${COMP_CWORDS[2]}" == "clip" ]; then
-                        opts=$(lb totp ls)
+                    if [ -n "$clip_enabled" ]; then
+                        if [ $(_is_clip "${COMP_WORDS[2]}") == 1 ]; then 
+                            opts=$(lb totp ls)
+                        fi
                     fi
                     ;;
             esac
