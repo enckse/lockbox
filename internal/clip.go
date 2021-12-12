@@ -49,6 +49,8 @@ func GetClipboardCommand() ([]string, []string, error) {
 		return []string{"xclip"}, []string{"xclip", "-o"}, nil
 	case waylandClipMode:
 		return []string{"wl-copy"}, []string{"wl-paste"}, nil
+	case "off":
+		return nil, nil, stock.NewBasicError("clipboard is turned off")
 	}
 	return nil, nil, stock.NewBasicError("unable to get clipboard command(s)")
 }

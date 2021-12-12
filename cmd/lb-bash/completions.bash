@@ -11,8 +11,8 @@ _is_clip() {
 _lb() {
     local cur opts clip_enabled
     clip_enabled=" -c clip"
-    if [ -n "$LOCKBOX_NOCLIP" ]; then
-        if [ "$LOCKBOX_NOCLIP" == "yes" ]; then
+    if [ -n "$LOCKBOX_CLIPMODE" ]; then
+        if [ "$LOCKBOX_CLIPMODE" == "off" ]; then
             clip_enabled=""
         fi
     fi
