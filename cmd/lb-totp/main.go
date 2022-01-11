@@ -45,12 +45,12 @@ func clear() {
 	}
 }
 
-func display(token string, clip, once bool) error {
+func display(token string, clip, once, short bool) error {
 	interactive, err := internal.IsInteractive()
 	if err != nil {
 		return err
 	}
-	if once {
+	if short {
 		interactive = false
 	}
 	if !interactive && clip {
@@ -86,7 +86,9 @@ func display(token string, clip, once bool) error {
 	running := 0
 	lastSecond := -1
 	if !clip {
-		clear()
+		if !once {
+			clear()
+		}
 	}
 	for {
 		if !first {
@@ -119,14 +121,21 @@ func display(token string, clip, once bool) error {
 		}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
-			outputs = append(outputs, "-> CTRL+C to exit")
+			if !once {
+				outputs = append(outputs, "-> CTRL+C to exit")
+			}
 		} else {
 			colorize(startColor, fmt.Sprintf("\n  -> %s\n", expires), endColor)
 			internal.CopyToClipboard(code)
 			return nil
 		}
-		clear()
+		if !once {
+			clear()
+		}
 		colorize(startColor, strings.Join(outputs, "\n\n"), endColor)
+		if once {
+			return nil
+		}
 	}
 }
 
@@ -153,15 +162,17 @@ func main() {
 	}
 	clip := false
 	once := false
+	short := false
 	if len(args) == 3 {
-		if cmd != "-c" && cmd != "clip" && cmd != "-once" {
+		if cmd != "-c" && cmd != "clip" && cmd != "-once" && cmd != "-short" {
 			stock.Die("subcommand not supported", stock.NewBasicError("invalid sub command"))
 		}
-		clip = cmd != "-once"
-		once = !clip
+		clip = cmd == "-clip" || cmd == "-c"
+		once = cmd == "-once"
+		short = cmd == "-short"
 		cmd = args[2]
 	}
-	if err := display(cmd, clip, once); err != nil {
+	if err := display(cmd, clip, once, short); err != nil {
 		stock.Die("failed to show totp token", err)
 	}
 }

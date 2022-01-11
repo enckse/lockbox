@@ -28,7 +28,7 @@ _lb() {
                     opts="-m $(lb ls)"
                     ;;
                 "totp")
-                    opts="-once "$(lb totp -ls)
+                    opts="-once -short "$(lb totp -ls)
                     if [ -n "$clip_enabled" ]; then
                         opts="$opts -c -clip"
                     fi
@@ -57,7 +57,7 @@ _lb() {
                     ;;
                 "totp")
                     needs=0
-                    if [ "${COMP_WORDS[2]}" == "-once" ]; then
+                    if [ "${COMP_WORDS[2]}" == "-once" ] || [ "${COMP_WORDS[2]}" == "-short" ]; then
                         needs=1
                     else
                         if [ -n "$clip_enabled" ]; then
