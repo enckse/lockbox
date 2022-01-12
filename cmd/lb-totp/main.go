@@ -107,40 +107,36 @@ func display(token string, clip, once, short bool) error {
 		}
 		lastSecond = last
 		left := 60 - last
-		expires := fmt.Sprintf("%s, expires: %2d (seconds)", now.Format("15:04:05"), left)
-		outputs := []string{expires}
 		code, err := otp.GenerateCode(totpToken, now)
 		if err != nil {
 			return err
 		}
 		startColor := ""
 		endColor := ""
-		if left < 10 {
+		if left < 5 || (left < 35 && left >= 30) {
 			startColor = redStart
 			endColor = redEnd
 		}
+		expires := fmt.Sprintf("%s%s, expires: %2d (seconds)%s", startColor, now.Format("15:04:05"), left, endColor)
+		outputs := []string{expires}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
 			if !once {
 				outputs = append(outputs, "-> CTRL+C to exit")
 			}
 		} else {
-			colorize(startColor, fmt.Sprintf("\n  -> %s\n", expires), endColor)
+			fmt.Printf("-> %s\n", expires)
 			internal.CopyToClipboard(code)
 			return nil
 		}
 		if !once {
 			clear()
 		}
-		colorize(startColor, strings.Join(outputs, "\n\n"), endColor)
+		fmt.Printf("%s\n", strings.Join(outputs, "\n\n"))
 		if once {
 			return nil
 		}
 	}
-}
-
-func colorize(start, text, end string) {
-	fmt.Printf("%s%s%s\n", start, text, end)
 }
 
 func main() {
