@@ -117,7 +117,11 @@ func display(token string, clip, once, short bool) error {
 			startColor = redStart
 			endColor = redEnd
 		}
-		expires := fmt.Sprintf("%s%s (%2d)%s", startColor, now.Format("15:04:05"), left, endColor)
+		leftString := fmt.Sprintf("%d", left)
+		if len(leftString) < 1 {
+			leftString = "0" + leftString
+		}
+		expires := fmt.Sprintf("%s%s (%s)%s", startColor, now.Format("15:04:05"), leftString, endColor)
 		outputs := []string{expires}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
