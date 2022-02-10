@@ -32,7 +32,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 		case "Linux":
 			if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
 				if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
-					return nil, nil, stock.NewBasicError("unable to detect clipboard mode")
+					return nil, nil, stock.NewBasicError("unable to detect linux clipboard mode")
 				}
 				env = xClipMode
 			} else {
