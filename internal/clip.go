@@ -49,7 +49,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 	case waylandClipMode:
 		return []string{"wl-copy"}, []string{"wl-paste"}, nil
 	case wslMode:
-		return []string{"clip.exe"}, []string{"powershell.exe", "-command", "'Get-Clipboard'"}, nil
+		return []string{"clip.exe"}, []string{"powershell.exe", "-command", "Get-Clipboard"}, nil
 	case "off":
 		return nil, nil, NewLockboxError("clipboard is turned off")
 	}
