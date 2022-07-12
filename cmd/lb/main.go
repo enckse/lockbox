@@ -224,7 +224,11 @@ func main() {
 		}
 		internal.CopyToClipboard("")
 	default:
-		tryCommand := fmt.Sprintf("lb-%s", command)
+		exe, err := os.Executable()
+		if err != nil {
+			internal.Die("unable to get exe", err)
+		}
+		tryCommand := fmt.Sprintf(filepath.Join(exe, "lb-%s"), command)
 		c := exec.Command(tryCommand, args[2:]...)
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr

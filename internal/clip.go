@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -70,7 +71,11 @@ func CopyToClipboard(value string) {
 	pipeTo(cp[0], value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", MaxClipTime)
-		pipeTo("lb", value, false, "clear")
+		exe, err := os.Executable()
+		if err != nil {
+			Die("unable to get executable", err)
+		}
+		pipeTo(filepath.Join(filepath.Dir(exe), "lb"), value, false, "clear")
 	}
 }
 
