@@ -1,7 +1,6 @@
-project('lockbox')
+project('lockbox', version: 'development')
 golang = find_program('go')
-git_ver = run_command('git', 'log', '-n', '1', '--format=%h').stdout().strip()
-vers = '-X main.version=' + git_ver
+vers = '-X main.version=' + meson.project_version()
 flags = ['-ldflags'] + [vers] + ['-trimpath', '-buildmode=pie', '-mod=readonly', '-modcacherw']
 
 in_files = run_command('find', join_paths(meson.current_source_dir(), 'internal'), '-type', 'f', '-name', '*.go').stdout().strip().split()
