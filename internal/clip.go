@@ -13,6 +13,7 @@ const (
 	pbClipMode      = "pb"
 	waylandClipMode = "wayland"
 	xClipMode       = "x11"
+	wslMode         = "wsl"
 )
 
 // GetClipboardCommand will retrieve the commands to use for clipboard operations.
@@ -47,6 +48,8 @@ func GetClipboardCommand() ([]string, []string, error) {
 		return []string{"xclip"}, []string{"xclip", "-o"}, nil
 	case waylandClipMode:
 		return []string{"wl-copy"}, []string{"wl-paste"}, nil
+	case wslMode:
+		return []string{"clip.exe"}, []string{"powershell.exe", "-command", "'Get-Clipboard'"}, nil
 	case "off":
 		return nil, nil, NewLockboxError("clipboard is turned off")
 	}
