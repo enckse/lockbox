@@ -11,6 +11,7 @@ export LOCKBOX_KEYMODE="plaintext"
 export LOCKBOX_KEY="plaintextkey"
 export LOCKBOX_TOTP="totp"
 export LOCKBOX_INTERACTIVE="no"
+export LOCKBOX_HOOKDIR="$TESTS/hooks"
 export PWGEN_SOURCE="$PWD"
 export PWGEN_SPECIAL="u"
 export PWGEN_SED="s/[[:alnum:]]/u/g;s/\./u/g"
@@ -24,6 +25,13 @@ git -C $LOCKBOX_STORE add .
 git -C $LOCKBOX_STORE config user.email "you@example.com"
 git -C $LOCKBOX_STORE config user.name "Your Name"
 git -C $LOCKBOX_STORE commit -am "init"
+HOOK=$LOCKBOX_HOOKDIR/hook
+mkdir -p $LOCKBOX_HOOKDIR
+
+_hook() {
+    echo "#!/bin/sh"
+    echo "echo HOOK RAN"
+}
 
 _run() {
     echo "test" | "$BIN/lb" insert keys/one
@@ -53,6 +61,8 @@ _run() {
 }
 
 LOG=$TESTS/lb.log
+_hook > $HOOK
+chmod 755 $HOOK
 _run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $LOG
 if ! diff -u $LOG expected.log; then
     exit 1

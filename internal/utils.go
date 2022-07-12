@@ -15,8 +15,9 @@ import (
 type (
 	// Color are terminal colors for dumb terminal coloring.
 	Color int
+	// LockboxError for internal errors for lockbox operations.
 	LockboxError struct {
-		message  string
+		message string
 	}
 )
 

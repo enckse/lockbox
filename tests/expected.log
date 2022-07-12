@@ -1,10 +1,13 @@
 
+HOOK RAN
 
+HOOK RAN
 keys/one:
 test
 keys/one2:
 test2
 
+HOOK RAN
 keys/one
 keys/one2
 keys2/three
@@ -12,7 +15,8 @@ uuuuuuuuuu
 rekeying: /keys/one.lb
 rekeying: /keys/one2.lb
 rekeying: /keys2/three.lb
-remove entry? (y/N) 
+remove entry? (y/N) HOOK RAN
+
 keys/one2
 keys2/three
 keys/one2
@@ -21,11 +25,14 @@ test2
 test3
 test4
 
+HOOK RAN
 test
 XXXXXX
 test2
-remove entry? (y/N) 
-remove entry? (y/N) 
+remove entry? (y/N) HOOK RAN
+
+remove entry? (y/N) HOOK RAN
+
 unable to decrypt (decrypt not ok)
 rekeying: /keys/one2.lb
 test2

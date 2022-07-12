@@ -34,16 +34,14 @@ func hooks() {
 	}
 	for _, d := range dirs {
 		if !d.IsDir() {
-			if d.Type() & 0111 == 011 {
-				name := d.Name()
-				cmd := exec.Command(filepath.Join(hookDir, name))
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-				if err := cmd.Run(); err != nil {
-					internal.Die(fmt.Sprintf("hook failed: %s", name), err)
-				}
-				continue
+			name := d.Name()
+			cmd := exec.Command(filepath.Join(hookDir, name))
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				internal.Die(fmt.Sprintf("hook failed: %s", name), err)
 			}
+			continue
 		}
 		internal.Die("invalid hook", internal.NewLockboxError("hook is not file and/or has wrong mode"))
 	}
