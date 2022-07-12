@@ -11,7 +11,6 @@ import (
 
 	otp "github.com/pquerna/otp/totp"
 	"voidedtech.com/lockbox/internal"
-	"voidedtech.com/stock"
 )
 
 func getEnv() string {
@@ -32,7 +31,7 @@ func list() ([]string, error) {
 		}
 	}
 	if len(results) == 0 {
-		return nil, stock.NewBasicError("no objects found")
+		return nil, internal.NewLockboxError("no objects found")
 	}
 	return results, nil
 }
@@ -54,7 +53,7 @@ func display(token string, clip, once, short bool) error {
 		interactive = false
 	}
 	if !interactive && clip {
-		return stock.NewBasicError("clipboard not available in non-interactive mode")
+		return internal.NewLockboxError("clipboard not available in non-interactive mode")
 	}
 	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
 	if err != nil {
@@ -62,8 +61,8 @@ func display(token string, clip, once, short bool) error {
 	}
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(getEnv(), tok+internal.Extension)
-	if !stock.PathExists(store) {
-		return stock.NewBasicError("object does not exist")
+	if !internal.PathExists(store) {
+		return internal.NewLockboxError("object does not exist")
 	}
 	l, err := internal.NewLockbox("", "", store)
 	if err != nil {
@@ -146,13 +145,13 @@ func display(token string, clip, once, short bool) error {
 func main() {
 	args := os.Args
 	if len(args) > 3 || len(args) < 2 {
-		stock.Die("subkey required", stock.NewBasicError("invalid arguments"))
+		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
 	}
 	cmd := args[1]
 	if cmd == "-list" || cmd == "-ls" {
 		result, err := list()
 		if err != nil {
-			stock.Die("invalid list response", err)
+			internal.Die("invalid list response", err)
 		}
 		sort.Strings(result)
 		for _, entry := range result {
@@ -165,7 +164,7 @@ func main() {
 	short := false
 	if len(args) == 3 {
 		if cmd != "-c" && cmd != "clip" && cmd != "-once" && cmd != "-short" {
-			stock.Die("subcommand not supported", stock.NewBasicError("invalid sub command"))
+			internal.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
 		}
 		clip = cmd == "-clip" || cmd == "-c"
 		once = cmd == "-once"
@@ -173,6 +172,6 @@ func main() {
 		cmd = args[2]
 	}
 	if err := display(cmd, clip, once, short); err != nil {
-		stock.Die("failed to show totp token", err)
+		internal.Die("failed to show totp token", err)
 	}
 }

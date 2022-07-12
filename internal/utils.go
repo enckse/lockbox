@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -8,13 +10,14 @@ import (
 	"sort"
 	"strings"
 	"syscall"
-
-	"voidedtech.com/stock"
 )
 
 type (
 	// Color are terminal colors for dumb terminal coloring.
 	Color int
+	LockboxError struct {
+		message  string
+	}
 )
 
 const (
@@ -37,7 +40,7 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	case "yes":
 		return true, nil
 	}
-	return false, stock.NewBasicError(fmt.Sprintf("invalid yes/no env value for %s", env))
+	return false, NewLockboxError(fmt.Sprintf("invalid yes/no env value for %s", env))
 }
 
 // IsInteractive indicates if running as a user UI experience.
@@ -48,7 +51,7 @@ func IsInteractive() (bool, error) {
 // GetColor will retrieve start/end terminal coloration indicators.
 func GetColor(color Color) (string, string, error) {
 	if color != ColorRed {
-		return "", "", stock.NewBasicError("bad color")
+		return "", "", NewLockboxError("bad color")
 	}
 	interactive, err := IsInteractive()
 	if err != nil {
@@ -76,8 +79,8 @@ func GetStore() string {
 // Find will find all lockbox files in a directory store.
 func Find(store string, display bool) ([]string, error) {
 	var results []string
-	if !stock.PathExists(store) {
-		return nil, stock.NewBasicError("store does not exists")
+	if !PathExists(store) {
+		return nil, NewLockboxError("store does not exists")
 	}
 	err := filepath.Walk(store, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -150,14 +153,14 @@ func ConfirmInput() (string, error) {
 		return "", err
 	}
 	if first != second {
-		return "", stock.NewBasicError("passwords do NOT match")
+		return "", NewLockboxError("passwords do NOT match")
 	}
 	return first, nil
 }
 
 // Stdin will retrieve stdin data.
 func Stdin(one bool) (string, error) {
-	b, err := stock.Stdin(one)
+	b, err := getStdin(one)
 	if err != nil {
 		return "", err
 	}
@@ -168,4 +171,55 @@ func Stdin(one bool) (string, error) {
 func IsInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
 	return fileInfo.Mode()&os.ModeCharDevice == 0
+}
+
+// NewLockboxError creates a non-category error.
+func NewLockboxError(message string) error {
+	return &LockboxError{message}
+}
+
+// Error gets the error message for a basic error.
+func (err *LockboxError) Error() string {
+	return err.message
+}
+
+// LogError will log an error to stderr.
+func LogError(message string, err error) {
+	msg := message
+	if err != nil {
+		msg = fmt.Sprintf("%s (%v)", msg, err)
+	}
+	fmt.Fprintln(os.Stderr, msg)
+}
+
+// Die will print messages and exit.
+func Die(message string, err error) {
+	LogError(message, err)
+	os.Exit(1)
+}
+
+// PathExists indicates if a path exists.
+func PathExists(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
+}
+
+func getStdin(one bool) ([]byte, error) {
+	scanner := bufio.NewScanner(os.Stdin)
+	var b bytes.Buffer
+	for scanner.Scan() {
+		b.WriteString(scanner.Text())
+		b.WriteString("\n")
+		if one {
+			break
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
 }

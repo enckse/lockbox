@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/shlex"
 	"golang.org/x/crypto/nacl/secretbox"
-	"voidedtech.com/stock"
 )
 
 const (
@@ -48,11 +47,11 @@ func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 	}
 
 	if len(b) == 0 {
-		return Lockbox{}, stock.NewBasicError("key is empty")
+		return Lockbox{}, NewLockboxError("key is empty")
 	}
 
 	if len(b) > keyLength {
-		return Lockbox{}, stock.NewBasicError("key is too large for use")
+		return Lockbox{}, NewLockboxError("key is too large for use")
 	}
 
 	for len(b) < keyLength {
@@ -80,7 +79,7 @@ func getKey(keyMode, name string) ([]byte, error) {
 	case PlainKeyMode:
 		data = []byte(name)
 	default:
-		return nil, stock.NewBasicError("unknown keymode")
+		return nil, NewLockboxError("unknown keymode")
 	}
 	return []byte(strings.TrimSpace(string(data))), nil
 }
@@ -98,7 +97,7 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	}
 	data := datum
 	if data == nil {
-		b, err := stock.Stdin(false)
+		b, err := getStdin(false)
 		if err != nil {
 			return err
 		}
@@ -126,7 +125,7 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 	copy(nonce[:], encrypted[:nonceLength])
 	decrypted, ok := secretbox.Open(nil, encrypted[nonceLength:], &nonce, &l.secret)
 	if !ok {
-		return nil, stock.NewBasicError("decrypt not ok")
+		return nil, NewLockboxError("decrypt not ok")
 	}
 
 	padding := int(decrypted[0])

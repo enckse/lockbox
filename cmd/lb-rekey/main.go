@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"voidedtech.com/lockbox/internal"
-	"voidedtech.com/stock"
 )
 
 func main() {
@@ -17,24 +16,24 @@ func main() {
 	flag.Parse()
 	found, err := internal.Find(internal.GetStore(), false)
 	if err != nil {
-		stock.Die("failed finding entries", err)
+		internal.Die("failed finding entries", err)
 	}
 	for _, file := range found {
 		fmt.Printf("rekeying: %s\n", file)
 		in, err := internal.NewLockbox(*inKey, *inMode, file)
 		if err != nil {
-			stock.Die("unable to make input lockbox", err)
+			internal.Die("unable to make input lockbox", err)
 		}
 		decrypt, err := in.Decrypt()
 		if err != nil {
-			stock.Die("failed to process file decryption", err)
+			internal.Die("failed to process file decryption", err)
 		}
 		out, err := internal.NewLockbox(*outKey, *outMode, file)
 		if err != nil {
-			stock.Die("unable to make output lockbox", err)
+			internal.Die("unable to make output lockbox", err)
 		}
 		if err := out.Encrypt([]byte(strings.TrimSpace(string(decrypt)))); err != nil {
-			stock.Die("failed to encrypt file", err)
+			internal.Die("failed to encrypt file", err)
 		}
 	}
 }

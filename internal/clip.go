@@ -5,8 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"voidedtech.com/stock"
 )
 
 const (
@@ -32,14 +30,14 @@ func GetClipboardCommand() ([]string, []string, error) {
 		case "Linux":
 			if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
 				if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
-					return nil, nil, stock.NewBasicError("unable to detect linux clipboard mode")
+					return nil, nil, NewLockboxError("unable to detect linux clipboard mode")
 				}
 				env = xClipMode
 			} else {
 				env = waylandClipMode
 			}
 		default:
-			return nil, nil, stock.NewBasicError("unable to detect clipboard mode")
+			return nil, nil, NewLockboxError("unable to detect clipboard mode")
 		}
 	}
 	switch env {
@@ -50,9 +48,9 @@ func GetClipboardCommand() ([]string, []string, error) {
 	case waylandClipMode:
 		return []string{"wl-copy"}, []string{"wl-paste"}, nil
 	case "off":
-		return nil, nil, stock.NewBasicError("clipboard is turned off")
+		return nil, nil, NewLockboxError("clipboard is turned off")
 	}
-	return nil, nil, stock.NewBasicError("unable to get clipboard command(s)")
+	return nil, nil, NewLockboxError("unable to get clipboard command(s)")
 }
 
 // CopyToClipboard will copy to clipboard, if non-empty will clear later.
@@ -77,7 +75,7 @@ func pipeTo(command, value string, wait bool, args ...string) {
 	cmd := exec.Command(command, args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		stock.Die("unable to get stdin pipe", err)
+		Die("unable to get stdin pipe", err)
 	}
 
 	go func() {
@@ -93,6 +91,6 @@ func pipeTo(command, value string, wait bool, args ...string) {
 		ran = cmd.Start()
 	}
 	if ran != nil {
-		stock.Die("failed to run command", ran)
+		Die("failed to run command", ran)
 	}
 }

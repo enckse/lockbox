@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"voidedtech.com/lockbox/internal"
-	"voidedtech.com/stock"
 )
 
 var (
@@ -19,15 +18,41 @@ var (
 
 func getEntry(store string, args []string, idx int) string {
 	if len(args) != idx+1 {
-		stock.Die("invalid entry given", stock.NewBasicError("specific entry required"))
+		internal.Die("invalid entry given", internal.NewLockboxError("specific entry required"))
 	}
 	return filepath.Join(store, args[idx]) + internal.Extension
+}
+
+func hooks() {
+	hookDir := os.Getenv("LOCKBOX_HOOKDIR")
+	if !internal.PathExists(hookDir) {
+		return
+	}
+	dirs, err := os.ReadDir(hookDir)
+	if err != nil {
+		internal.Die("unable to read hookdir", err)
+	}
+	for _, d := range dirs {
+		if !d.IsDir() {
+			if d.Type() & 0111 == 011 {
+				name := d.Name()
+				cmd := exec.Command(filepath.Join(hookDir, name))
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				if err := cmd.Run(); err != nil {
+					internal.Die(fmt.Sprintf("hook failed: %s", name), err)
+				}
+				continue
+			}
+		}
+		internal.Die("invalid hook", internal.NewLockboxError("hook is not file and/or has wrong mode"))
+	}
 }
 
 func main() {
 	args := os.Args
 	if len(args) < 2 {
-		stock.Die("missing arguments", stock.NewBasicError("requires subcommand"))
+		internal.Die("missing arguments", internal.NewLockboxError("requires subcommand"))
 	}
 	command := args[1]
 	store := internal.GetStore()
@@ -37,13 +62,13 @@ func main() {
 		searchTerm := ""
 		if isFind {
 			if len(args) < 3 {
-				stock.Die("find requires an argument to search for", stock.NewBasicError("search term required"))
+				internal.Die("find requires an argument to search for", internal.NewLockboxError("search term required"))
 			}
 			searchTerm = args[2]
 		}
 		files, err := internal.Find(store, true)
 		if err != nil {
-			stock.Die("unable to list files", err)
+			internal.Die("unable to list files", err)
 		}
 		for _, f := range files {
 			if isFind {
@@ -60,20 +85,20 @@ func main() {
 		idx := 2
 		switch len(args) {
 		case 2:
-			stock.Die("insert missing required arguments", stock.NewBasicError("entry required"))
+			internal.Die("insert missing required arguments", internal.NewLockboxError("entry required"))
 		case 3:
 		case 4:
 			multi = args[2] == "-m"
 			if !multi {
-				stock.Die("multi-line insert must be after 'insert'", stock.NewBasicError("invalid command"))
+				internal.Die("multi-line insert must be after 'insert'", internal.NewLockboxError("invalid command"))
 			}
 			idx = 3
 		default:
-			stock.Die("too many arguments", stock.NewBasicError("insert can only perform one operation"))
+			internal.Die("too many arguments", internal.NewLockboxError("insert can only perform one operation"))
 		}
 		isPipe := internal.IsInputFromPipe()
 		entry := getEntry(store, args, idx)
-		if stock.PathExists(entry) {
+		if internal.PathExists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
 					return
@@ -81,9 +106,9 @@ func main() {
 			}
 		} else {
 			dir := filepath.Dir(entry)
-			if !stock.PathExists(dir) {
+			if !internal.PathExists(dir) {
 				if err := os.MkdirAll(dir, 0755); err != nil {
-					stock.Die("failed to create directory structure", err)
+					internal.Die("failed to create directory structure", err)
 				}
 			}
 		}
@@ -91,34 +116,36 @@ func main() {
 		if !multi && !isPipe {
 			input, err := internal.ConfirmInput()
 			if err != nil {
-				stock.Die("password input failed", err)
+				internal.Die("password input failed", err)
 			}
 			password = input
 		} else {
 			input, err := internal.Stdin(false)
 			if err != nil {
-				stock.Die("failed to read stdin", err)
+				internal.Die("failed to read stdin", err)
 			}
 			password = input
 		}
 		if password == "" {
-			stock.Die("empty password provided", stock.NewBasicError("password can NOT be empty"))
+			internal.Die("empty password provided", internal.NewLockboxError("password can NOT be empty"))
 		}
 		l, err := internal.NewLockbox("", "", entry)
 		if err != nil {
-			stock.Die("unable to make lockbox model instance", err)
+			internal.Die("unable to make lockbox model instance", err)
 		}
 		if err := l.Encrypt([]byte(password)); err != nil {
-			stock.Die("failed to save password", err)
+			internal.Die("failed to save password", err)
 		}
 		fmt.Println("")
+		hooks()
 	case "rm":
 		entry := getEntry(store, args, 2)
-		if !stock.PathExists(entry) {
-			stock.Die("does not exists", stock.NewBasicError("can not delete unknown entry"))
+		if !internal.PathExists(entry) {
+			internal.Die("does not exists", internal.NewLockboxError("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
+			hooks()
 		}
 	case "show", "-c", "clip":
 		inEntry := getEntry(store, args, 2)
@@ -127,32 +154,32 @@ func main() {
 		if strings.Contains(inEntry, "*") {
 			matches, err := filepath.Glob(inEntry)
 			if err != nil {
-				stock.Die("bad glob", err)
+				internal.Die("bad glob", err)
 			}
 			entries = matches
 		}
 		isGlob := len(entries) > 1
 		if isGlob {
 			if !isShow {
-				stock.Die("cannot glob to clipboard", stock.NewBasicError("bad glob request"))
+				internal.Die("cannot glob to clipboard", internal.NewLockboxError("bad glob request"))
 			}
 			sort.Strings(entries)
 		}
 		startColor, endColor, err := internal.GetColor(internal.ColorRed)
 		if err != nil {
-			stock.Die("unable to get color for terminal", err)
+			internal.Die("unable to get color for terminal", err)
 		}
 		for _, entry := range entries {
-			if !stock.PathExists(entry) {
-				stock.Die("invalid entry", stock.NewBasicError("entry not found"))
+			if !internal.PathExists(entry) {
+				internal.Die("invalid entry", internal.NewLockboxError("entry not found"))
 			}
 			l, err := internal.NewLockbox("", "", entry)
 			if err != nil {
-				stock.Die("unable to make lockbox model instance", err)
+				internal.Die("unable to make lockbox model instance", err)
 			}
 			decrypt, err := l.Decrypt()
 			if err != nil {
-				stock.Die("unable to decrypt", err)
+				internal.Die("unable to decrypt", err)
 			}
 			value := strings.TrimSpace(string(decrypt))
 			if isShow {
@@ -173,11 +200,11 @@ func main() {
 		idx := 0
 		val, err := internal.Stdin(false)
 		if err != nil {
-			stock.Die("unable to read value to clear", err)
+			internal.Die("unable to read value to clear", err)
 		}
 		_, paste, err := internal.GetClipboardCommand()
 		if err != nil {
-			stock.Die("unable to get paste command", err)
+			internal.Die("unable to get paste command", err)
 		}
 		var args []string
 		if len(paste) > 1 {
@@ -204,7 +231,7 @@ func main() {
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		if err := c.Run(); err != nil {
-			stock.Die("bad command", err)
+			internal.Die("bad command", err)
 		}
 	}
 }
@@ -213,7 +240,7 @@ func confirm(prompt string) bool {
 	fmt.Printf("%s? (y/N) ", prompt)
 	resp, err := internal.Stdin(true)
 	if err != nil {
-		stock.Die("failed to get response", err)
+		internal.Die("failed to get response", err)
 	}
 	return resp == "Y" || resp == "y"
 }
