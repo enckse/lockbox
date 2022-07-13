@@ -2,7 +2,7 @@ Lockbox
 ===
 
 A [pass](https://www.passwordstore.org/) inspired password manager that uses a system
-keyring for password input over using a GPG key.
+keyring or command for password input over using a GPG key.
 
 ![build](https://github.com/enckse/lockbox/actions/workflows/main.yml/badge.svg)
 
