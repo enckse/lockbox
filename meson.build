@@ -3,11 +3,11 @@ golang = find_program('go')
 vers = '-X main.version=' + meson.project_version()
 flags = ['-ldflags'] + [vers] + ['-trimpath', '-buildmode=pie', '-mod=readonly', '-modcacherw']
 
-in_files = run_command('find', join_paths(meson.current_source_dir(), 'internal'), '-type', 'f', '-name', '*.go').stdout().strip().split()
+in_files = run_command('find', join_paths(meson.current_source_dir(), 'internal'), '-type', 'f', '-name', '*.go', check: true).stdout().strip().split()
 in_files += 'go.mod'
 in_files += 'go.sum'
 
-progs = run_command('ls', join_paths(meson.current_source_dir(), 'cmd')).stdout().strip().split()
+progs = run_command('ls', join_paths(meson.current_source_dir(), 'cmd'), check: true).stdout().strip().split()
 
 foreach p : progs
   cmd_file = join_paths(meson.current_source_dir(), 'cmd', p, 'main.go')
