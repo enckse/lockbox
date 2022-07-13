@@ -24,7 +24,6 @@ HOOK RAN
 keys/one
 keys/one2
 keys2/three
-uuuuuuuuuu
 rekeying: /keys/one.lb
 rekeying: /keys/one2.lb
 rekeying: /keys2/three.lb

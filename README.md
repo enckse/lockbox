@@ -87,25 +87,6 @@ The token can be automatically copied to the clipboard too
 lb totp -c token
 ```
 
-### pwgen
-
-Generate passwords
-```
-lb pwgen
-```
-
-This _requires_ these additional environment variables
-```
-# list of directories which provide a list of word/inputs to pwgen
-PWGEN_SOURCE=/directories/:/colondelimited
-# the characters allowed via password generation from the SOURCE entries
-PWGEN_ALLOWED=abcABC123
-# special characters that will be inserted randomly into passwords
-PWGEN_SPECIAL=.,[]{};:^
-# a 'sed' command that will be run against the generated password
-PWGEN_SED=s/a/z/g
-```
-
 ## git integration
 
 To manage the `.lb` files in a git repository and see _actual_ text diffs and this to a `.gitconfig`

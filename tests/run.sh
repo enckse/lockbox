@@ -12,9 +12,6 @@ export LOCKBOX_KEY="plaintextkey"
 export LOCKBOX_TOTP="totp"
 export LOCKBOX_INTERACTIVE="no"
 export LOCKBOX_HOOKDIR="$TESTS/hooks"
-export PWGEN_SOURCE="$PWD"
-export PWGEN_SPECIAL="u"
-export PWGEN_SED="s/[[:alnum:]]/u/g;s/\./u/g"
 
 rm -rf $TESTS
 mkdir -p $LOCKBOX_STORE
@@ -41,7 +38,6 @@ _run() {
     "$BIN/lb" dump -yes '***'
     echo -e "test3\ntest4" | "$BIN/lb" insert keys2/three
     "$BIN/lb" ls
-    "$BIN/lb-pwgen" -special -length 10
     "$BIN/lb-rekey"
     yes 2>/dev/null | "$BIN/lb" rm keys/one
     echo
