@@ -25,7 +25,7 @@ func list() ([]string, error) {
 		}
 		dir := strings.TrimPrefix(filepath.Dir(path), store)
 		if strings.HasSuffix(dir, "/") {
-			dir = dir[0:len(dir)-1]
+			dir = dir[0 : len(dir)-1]
 		}
 		if strings.HasPrefix(dir, "/") {
 			dir = dir[1:]
@@ -56,7 +56,11 @@ func clear() {
 }
 
 func totpToken() string {
-	return os.Getenv("LOCKBOX_TOTP") + internal.Extension
+	t := os.Getenv("LOCKBOX_TOTP")
+	if t == "" {
+		t = "totp"
+	}
+	return t + internal.Extension
 }
 
 func display(token string, clip, once, short bool) error {
