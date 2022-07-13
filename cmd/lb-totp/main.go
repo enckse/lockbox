@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,22 +14,32 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
-func getEnv() string {
-	return filepath.Join(internal.GetStore(), os.Getenv("LOCKBOX_TOTP"))
-}
-
 func list() ([]string, error) {
-	path := getEnv()
-	files, err := os.ReadDir(path)
+	files := []string{}
+	token := totpToken()
+	store := internal.GetStore()
+	err := filepath.Walk(store, func(path string, info fs.FileInfo, err error) error {
+		name := info.Name()
+		if name != token {
+			return nil
+		}
+		dir := strings.TrimPrefix(filepath.Dir(path), store)
+		if strings.HasSuffix(dir, "/") {
+			dir = dir[0:len(dir)-1]
+		}
+		if strings.HasPrefix(dir, "/") {
+			dir = dir[1:]
+		}
+		files = append(files, dir)
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
+
 	var results []string
 	for _, obj := range files {
-		f := obj.Name()
-		if strings.HasSuffix(f, internal.Extension) {
-			results = append(results, strings.TrimSuffix(f, internal.Extension))
-		}
+		results = append(results, obj)
 	}
 	if len(results) == 0 {
 		return nil, internal.NewLockboxError("no objects found")
@@ -42,6 +53,10 @@ func clear() {
 	if err := cmd.Run(); err != nil {
 		fmt.Printf("unable to clear screen: %v\n", err)
 	}
+}
+
+func totpToken() string {
+	return os.Getenv("LOCKBOX_TOTP") + internal.Extension
 }
 
 func display(token string, clip, once, short bool) error {
@@ -60,7 +75,7 @@ func display(token string, clip, once, short bool) error {
 		return err
 	}
 	tok := strings.TrimSpace(token)
-	store := filepath.Join(getEnv(), tok+internal.Extension)
+	store := filepath.Join(internal.GetStore(), tok, totpToken())
 	if !internal.PathExists(store) {
 		return internal.NewLockboxError("object does not exist")
 	}

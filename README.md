@@ -20,8 +20,8 @@ LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 LOCKBOX_STORE=/Users/alice/.passwords
 # the keymode is a command
 LOCKBOX_KEYMODE="command"
-# to utilize totp token generation set the offset (within the repository) where totp tokens are saved
-LOCKBOX_TOTP=keys/totp/
+# to utilize totp token generation set the name of files for TOTP tokens
+LOCKBOX_TOTP=totp
 ```
 
 In cases where `lb` outputs colored terminal output this coloring behavior can be disabled:
@@ -79,7 +79,7 @@ lb show my/key/value
 To get a totp token
 ```
 lb totp token
-# 'token' must be within the subdir of LOCKBOX_TOTP
+# 'token' must contain an entry with the name of LOCKBOX_TOTP
 ```
 
 The token can be automatically copied to the clipboard too
