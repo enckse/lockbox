@@ -1,7 +1,9 @@
 project('lockbox', version: 'development')
 golang = find_program('go')
-vers = '-X main.version=' + meson.project_version()
-flags = ['-ldflags'] + [vers] + ['-trimpath', '-buildmode=pie', '-mod=readonly', '-modcacherw']
+proj_exec = join_paths(get_option('libexecdir'), meson.project_name())
+lib_exec = join_paths(get_option('prefix'), proj_exec)
+vers_flag = '-X main.version=' + meson.project_version() + ' -X main.libExec=' + lib_exec
+flags = ['-ldflags'] + [vers_flag] + ['-trimpath', '-buildmode=pie', '-mod=readonly', '-modcacherw']
 
 in_files = run_command('find', join_paths(meson.current_source_dir(), 'internal'), '-type', 'f', '-name', '*.go', check: true).stdout().strip().split()
 in_files += 'go.mod'
@@ -13,6 +15,10 @@ foreach p : progs
   cmd_file = join_paths(meson.current_source_dir(), 'cmd', p, 'main.go')
   target_files = in_files
   target_files += cmd_file
+  dest_dir = proj_exec
+  if p == 'lb'
+    dest_dir = 'bin'
+  endif
   p = custom_target(
       p,
       output: p,

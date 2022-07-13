@@ -14,6 +14,7 @@ import (
 
 var (
 	version = "development"
+	libExec = ""
 )
 
 func getEntry(store string, args []string, idx int) string {
@@ -224,11 +225,11 @@ func main() {
 		}
 		internal.CopyToClipboard("")
 	default:
-		exe, err := os.Executable()
-		if err != nil {
-			internal.Die("unable to get exe", err)
+		lib := os.Getenv("LOCKBOX_LIBEXEC")
+		if lib == "" {
+			lib = libExec
 		}
-		tryCommand := fmt.Sprintf(filepath.Join(exe, "lb-%s"), command)
+		tryCommand := fmt.Sprintf(filepath.Join(lib, "lb-%s"), command)
 		c := exec.Command(tryCommand, args[2:]...)
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
