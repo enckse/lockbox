@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,6 +16,14 @@ import (
 var (
 	version = "development"
 	libExec = ""
+)
+
+type (
+	// Dump represents the output structure from a JSON dump.
+	Dump struct {
+		Path  string `json:"path,omitempty"`
+		Value string `json:"name"`
+	}
 )
 
 func getEntry(store string, args []string, idx int) string {
@@ -146,9 +155,20 @@ func main() {
 			os.Remove(entry)
 			hooks()
 		}
-	case "show", "-c", "clip":
-		inEntry := getEntry(store, args, 2)
-		isShow := command == "show"
+	case "show", "-c", "clip", "dump":
+		isDump := command == "dump"
+		startEntry := 2
+		confirmDump := true
+		if isDump {
+			if len(args) > 2 {
+				if args[2] == "-yes" {
+					startEntry = 3
+					confirmDump = false
+				}
+			}
+		}
+		inEntry := getEntry(store, args, startEntry)
+		isShow := command == "show" || isDump
 		entries := []string{inEntry}
 		if strings.Contains(inEntry, "*") {
 			matches, err := filepath.Glob(inEntry)
@@ -168,6 +188,7 @@ func main() {
 		if err != nil {
 			internal.Die("unable to get color for terminal", err)
 		}
+		dumpData := []Dump{}
 		for _, entry := range entries {
 			if !internal.PathExists(entry) {
 				internal.Die("invalid entry", internal.NewLockboxError("entry not found"))
@@ -181,6 +202,7 @@ func main() {
 				internal.Die("unable to decrypt", err)
 			}
 			value := strings.TrimSpace(string(decrypt))
+			dump := Dump{}
 			if isShow {
 				if isGlob {
 					fileName := strings.ReplaceAll(entry, store, "")
@@ -188,12 +210,40 @@ func main() {
 						fileName = fileName[1:]
 					}
 					fileName = strings.ReplaceAll(fileName, internal.Extension, "")
-					fmt.Printf("%s%s:%s\n", startColor, fileName, endColor)
+					if isDump {
+						dump.Path = fileName
+					} else {
+						fmt.Printf("%s%s:%s\n", startColor, fileName, endColor)
+					}
 				}
-				fmt.Println(value)
+				if isDump {
+					dump.Value = value
+					dumpData = append(dumpData, dump)
+				} else {
+					fmt.Println(value)
+				}
 				continue
 			}
 			internal.CopyToClipboard(value)
+		}
+		if isDump {
+			if confirmDump {
+				if !confirm("dump data to stdout as plaintext") {
+					return
+				}
+			}
+			fmt.Println("[")
+			for idx, d := range dumpData {
+				if idx > 0 {
+					fmt.Println(",")
+				}
+				b, err := json.MarshalIndent(d, "", "  ")
+				if err != nil {
+					internal.Die("failed to marshal dump item", err)
+				}
+				fmt.Println(string(b))
+			}
+			fmt.Println("]")
 		}
 	case "clear":
 		idx := 0

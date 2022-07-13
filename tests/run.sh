@@ -37,6 +37,7 @@ _run() {
     echo "test" | "$BIN/lb" insert keys/one
     echo "test2" | "$BIN/lb" insert keys/one2
     "$BIN/lb" show keys/*
+    "$BIN/lb" dump -yes 'keys/*'
     echo -e "test3\ntest4" | "$BIN/lb" insert keys2/three
     "$BIN/lb" ls
     "$BIN/lb-pwgen" -special -length 10
@@ -47,6 +48,7 @@ _run() {
     "$BIN/lb" find e
     "$BIN/lb" show keys/one2
     "$BIN/lb" show keys2/three
+    echo "y" | "$BIN/lb" dump keys2/three
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert totp/test
     "$BIN/lb-totp" -ls
     "$BIN/lb-totp" test | tr '[:digit:]' 'X'
@@ -58,6 +60,7 @@ _run() {
     LOCKBOX_KEY="invalid" "$BIN/lb" show keys/one2
     "$BIN/lb-rekey" -outkey "test" -outmode "plaintext"
     "$BIN/lb-rw" -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
+    echo "y" | "$BIN/lb" dump -yes "*"
 }
 
 LOG=$TESTS/lb.log

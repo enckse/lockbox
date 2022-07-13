@@ -18,12 +18,15 @@ _lb() {
     fi
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version ls show insert rm rekey totp list pwgen find$clip_enabled"
+        opts="version ls show insert rm rekey totp list pwgen dump find$clip_enabled"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
         if [ "$COMP_CWORD" -eq 2 ]; then
             case ${COMP_WORDS[1]} in
+                "dump")
+                    opts="-yes $(lb ls)"
+                    ;;
                 "insert")
                     opts="-m $(lb ls)"
                     ;;

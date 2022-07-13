@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	otp "github.com/pquerna/otp/totp"
 	"github.com/enckse/lockbox/internal"
+	otp "github.com/pquerna/otp/totp"
 )
 
 func getEnv() string {

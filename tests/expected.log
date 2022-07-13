@@ -6,6 +6,17 @@ keys/one:
 test
 keys/one2:
 test2
+[
+{
+  "path": "keys/one",
+  "name": "test"
+}
+,
+{
+  "path": "keys/one2",
+  "name": "test2"
+}
+]
 
 HOOK RAN
 keys/one
@@ -24,6 +35,11 @@ keys2/three
 test2
 test3
 test4
+dump data to stdout as plaintext? (y/N) [
+{
+  "name": "test3\ntest4"
+}
+]
 
 HOOK RAN
 test
@@ -36,3 +52,5 @@ remove entry? (y/N) HOOK RAN
 unable to decrypt (decrypt not ok)
 rekeying: /keys/one2.lb
 test2
+[
+]
