@@ -171,11 +171,19 @@ func main() {
 		isShow := command == "show" || isDump
 		entries := []string{inEntry}
 		if strings.Contains(inEntry, "*") {
-			matches, err := filepath.Glob(inEntry)
-			if err != nil {
-				internal.Die("bad glob", err)
+			if inEntry == getEntry(store, []string{"***"}, 0) {
+				all, err := internal.Find(store, false)
+				if err != nil {
+					internal.Die("unable to get all files", err)
+				}
+				entries = all
+			} else {
+				matches, err := filepath.Glob(inEntry)
+				if err != nil {
+					internal.Die("bad glob", err)
+				}
+				entries = matches
 			}
-			entries = matches
 		}
 		isGlob := len(entries) > 1
 		if isGlob {
