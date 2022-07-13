@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"voidedtech.com/lockbox/internal"
+	"github.com/enckse/lockbox/internal"
 )
 
 func main() {

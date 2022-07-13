@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"voidedtech.com/lockbox/internal"
+	"github.com/enckse/lockbox/internal"
 )
 
 const (
