@@ -6,7 +6,7 @@ LIBEXEC := $(DESTDIR)libexec/lockbox/
 
 all: $(TARGETS)
 
-$(TARGETS): cmd/$@/* internal/*
+$(TARGETS): cmd/$@/* internal/* go.*
 	go build -ldflags '-X main.version=$(VERSION) -X main.libExec=$(LIBEXEC)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
 
 check: $(TARGETS)
