@@ -4,24 +4,15 @@ on: [push, pull_request]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        go-version: [1.16.x]
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:latest
     steps:
-      - uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v2
       - name: "deps"
-        run: sudo apt-get install -y meson ninja-build
-      - name: "meson"
-        run: meson setup build
-      - name: "ninja"
-        working-directory: build
-        run: ninja
-      - name: "test"
-        working-directory: build
-        run: ninja test
+        run: apk add go make
+      - name: "build"
+        run: make
+      - name: "check"
+        run: make check
 
