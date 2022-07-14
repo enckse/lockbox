@@ -21,22 +21,27 @@ const (
 func GetClipboardCommand() ([]string, []string, error) {
 	env := strings.TrimSpace(os.Getenv("LOCKBOX_CLIPMODE"))
 	if env == "" {
-		b, err := exec.Command("uname").Output()
+		b, err := exec.Command("uname", "-a").Output()
 		if err != nil {
 			return nil, nil, err
 		}
-		uname := strings.TrimSpace(string(b))
-		switch uname {
+		raw := strings.TrimSpace(string(b))
+		parts := strings.Split(raw, "")
+		switch parts[0] {
 		case "Darwin":
 			env = pbClipMode
 		case "Linux":
-			if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
-				if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
-					return nil, nil, NewLockboxError("unable to detect linux clipboard mode")
-				}
-				env = xClipMode
+			if strings.Contains(raw, "microsoft-standard-WSL2") {
+				env = wslMode
 			} else {
-				env = waylandClipMode
+				if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
+					if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
+						return nil, nil, NewLockboxError("unable to detect linux clipboard mode")
+					}
+					env = xClipMode
+				} else {
+					env = waylandClipMode
+				}
 			}
 		default:
 			return nil, nil, NewLockboxError("unable to detect clipboard mode")
