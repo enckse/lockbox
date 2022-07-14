@@ -1,10 +1,6 @@
 #!/bin/bash
 BIN="$1"
 TESTS="bin"
-if [ ! -x "$BIN/lb" ]; then
-    echo "binaries missing?"
-    exit 1
-fi
 
 export LOCKBOX_STORE="$TESTS/lb"
 export LOCKBOX_KEYMODE="plaintext"
@@ -63,6 +59,3 @@ LOG=$TESTS/lb.log
 _hook > $HOOK
 chmod 755 $HOOK
 _run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $LOG
-if ! diff -u $LOG expected.log; then
-    exit 1
-fi
