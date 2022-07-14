@@ -1,6 +1,6 @@
 #!/bin/bash
 BIN="$1"
-TESTS="bin"
+TESTS="$2"
 
 export LOCKBOX_STORE="$TESTS/lb"
 export LOCKBOX_KEYMODE="plaintext"
@@ -55,7 +55,6 @@ _run() {
     "$BIN/lb-rw" -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
 }
 
-LOG=$TESTS/lb.log
 _hook > $HOOK
 chmod 755 $HOOK
-_run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $LOG
+_run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $TESTS/actual.log

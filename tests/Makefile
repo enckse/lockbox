@@ -1,5 +1,6 @@
 BUILD := 
+DATA  := bin
 
 all:
-	./run.sh $(BUILD)
-	diff -u bin/lb.log expected.log
+	./run.sh $(BUILD) $(DATA)
+	diff -u $(DATA)/actual.log expected.log
