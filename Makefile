@@ -14,3 +14,8 @@ check: $(TARGETS)
 
 clean:
 	rm -rf $(BUILD)
+
+install:
+	install -Dm755 $(BUILD)lb $(DESTDIR)bin/lb
+	install -Dm755 -d $(LIBEXEC)
+	install -Dm755 $(BUILD)lb-* $(LIBEXEC)
