@@ -26,7 +26,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 			return nil, nil, err
 		}
 		raw := strings.TrimSpace(string(b))
-		parts := strings.Split(raw, "")
+		parts := strings.Split(raw, " ")
 		switch parts[0] {
 		case "Darwin":
 			env = pbClipMode
