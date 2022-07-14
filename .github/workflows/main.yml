@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: "deps"
-        run: apk add go make
+        run: apk add go make bash
       - name: "build"
         run: make
       - name: "check"
