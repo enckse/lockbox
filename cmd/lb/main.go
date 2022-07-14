@@ -22,7 +22,7 @@ type (
 	// Dump represents the output structure from a JSON dump.
 	Dump struct {
 		Path  string `json:"path,omitempty"`
-		Value string `json:"name"`
+		Value string `json:"value"`
 	}
 )
 

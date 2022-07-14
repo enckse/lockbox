@@ -11,12 +11,12 @@ test2
 [
 {
   "path": "keys/one",
-  "name": "test"
+  "value": "test"
 }
 ,
 {
   "path": "keys/one2",
-  "name": "test2"
+  "value": "test2"
 }
 ]
 
@@ -38,7 +38,7 @@ test3
 test4
 dump data to stdout as plaintext? (y/N) [
 {
-  "name": "test3\ntest4"
+  "value": "test3\ntest4"
 }
 ]
 
