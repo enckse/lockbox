@@ -13,6 +13,10 @@ import (
 	"github.com/enckse/lockbox/internal"
 )
 
+const (
+	postStep = "post"
+)
+
 var (
 	version = "development"
 	libExec = ""
@@ -33,7 +37,7 @@ func getEntry(store string, args []string, idx int) string {
 	return filepath.Join(store, args[idx]) + internal.Extension
 }
 
-func hooks() {
+func hooks(store, action, step string) {
 	hookDir := os.Getenv("LOCKBOX_HOOKDIR")
 	if !internal.PathExists(hookDir) {
 		return
@@ -45,7 +49,7 @@ func hooks() {
 	for _, d := range dirs {
 		if !d.IsDir() {
 			name := d.Name()
-			cmd := exec.Command(filepath.Join(hookDir, name))
+			cmd := exec.Command(filepath.Join(hookDir, name), action, step)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
@@ -145,7 +149,7 @@ func main() {
 			internal.Die("failed to save password", err)
 		}
 		fmt.Println("")
-		hooks()
+		hooks(store, command, postStep)
 	case "rm":
 		entry := getEntry(store, args, 2)
 		if !internal.PathExists(entry) {
@@ -153,7 +157,7 @@ func main() {
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
-			hooks()
+			hooks(store, command, postStep)
 		}
 	case "show", "-c", "clip", "dump":
 		isDump := command == "dump"

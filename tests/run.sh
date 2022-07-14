@@ -27,7 +27,7 @@ mkdir -p $LOCKBOX_HOOKDIR
 
 _hook() {
     echo "#!/bin/sh"
-    echo "echo HOOK RAN"
+    echo "echo HOOK RAN \$@"
 }
 
 _run() {

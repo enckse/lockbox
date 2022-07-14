@@ -1,9 +1,9 @@
 [
 ]
 
-HOOK RAN
+HOOK RAN insert post
 
-HOOK RAN
+HOOK RAN insert post
 keys/one:
 test
 keys/one2:
@@ -20,14 +20,14 @@ test2
 }
 ]
 
-HOOK RAN
+HOOK RAN insert post
 keys/one
 keys/one2
 keys2/three
 rekeying: /keys/one.lb
 rekeying: /keys/one2.lb
 rekeying: /keys2/three.lb
-remove entry? (y/N) HOOK RAN
+remove entry? (y/N) HOOK RAN rm post
 
 keys/one2
 keys2/three
@@ -42,13 +42,13 @@ dump data to stdout as plaintext? (y/N) [
 }
 ]
 
-HOOK RAN
+HOOK RAN insert post
 test
 XXXXXX
 test2
-remove entry? (y/N) HOOK RAN
+remove entry? (y/N) HOOK RAN rm post
 
-remove entry? (y/N) HOOK RAN
+remove entry? (y/N) HOOK RAN rm post
 
 unable to decrypt (decrypt not ok)
 rekeying: /keys/one2.lb
