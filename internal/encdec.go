@@ -37,6 +37,9 @@ func NewLockbox(key, keyMode, file string) (Lockbox, error) {
 	if useKeyMode == "" {
 		useKeyMode = os.Getenv("LOCKBOX_KEYMODE")
 	}
+	if useKeyMode == "" {
+		useKeyMode = CommandKeyMode
+	}
 	useKey := key
 	if useKey == "" {
 		useKey = os.Getenv("LOCKBOX_KEY")

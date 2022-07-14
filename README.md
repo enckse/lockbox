@@ -18,13 +18,9 @@ For example set:
 LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 # the location, on disk, of the password store
 LOCKBOX_STORE=/Users/alice/.passwords
-# the keymode is a command
-LOCKBOX_KEYMODE="command"
-# to utilize totp token generation set the name of files for TOTP tokens
-LOCKBOX_TOTP=totp
 ```
 
-In cases where `lb` outputs colored terminal output this coloring behavior can be disabled:
+In cases where `lb` outputs colored terminal output, this coloring behavior can be disabled:
 ```
 LOCKBOX_NOCOLOR="yes"
 ```
