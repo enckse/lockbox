@@ -14,6 +14,10 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
+var (
+	mainExe = ""
+)
+
 func list() ([]string, error) {
 	files := []string{}
 	token := totpToken()
@@ -91,6 +95,10 @@ func display(token string, args internal.Arguments) error {
 	if err != nil {
 		return err
 	}
+	exe := os.Getenv("LOCKBOX_EXE")
+	if exe == "" {
+		exe = mainExe
+	}
 	totpToken := string(val)
 	if !interactive {
 		code, err := otp.GenerateCode(totpToken, time.Now())
@@ -148,7 +156,7 @@ func display(token string, args internal.Arguments) error {
 			}
 		} else {
 			fmt.Printf("-> %s\n", expires)
-			internal.CopyToClipboard(code)
+			internal.CopyToClipboard(code, exe)
 			return nil
 		}
 		if !args.Once {

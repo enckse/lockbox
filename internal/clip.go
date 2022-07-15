@@ -63,7 +63,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 }
 
 // CopyToClipboard will copy to clipboard, if non-empty will clear later.
-func CopyToClipboard(value string) {
+func CopyToClipboard(value, executable string) {
 	cp, _, err := GetClipboardCommand()
 	if err != nil {
 		fmt.Printf("unable to copy to clipboard: %v\n", err)

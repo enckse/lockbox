@@ -37,6 +37,14 @@ func getEntry(store string, args []string, idx int) string {
 	return filepath.Join(store, args[idx]) + internal.Extension
 }
 
+func getExecutable() string {
+	exe, err := os.Executable()
+	if err != nil {
+		internal.Die("unable to get exe", err)
+	}
+	return exe
+}
+
 func main() {
 	args := os.Args
 	if len(args) < 2 {
@@ -212,7 +220,7 @@ func main() {
 				}
 				continue
 			}
-			internal.CopyToClipboard(value)
+			internal.CopyToClipboard(value, getExecutable())
 		}
 		if isDump {
 			if !options.Yes {
@@ -261,7 +269,7 @@ func main() {
 				return
 			}
 		}
-		internal.CopyToClipboard("")
+		internal.CopyToClipboard("", getExecutable())
 	default:
 		lib := os.Getenv("LOCKBOX_LIBEXEC")
 		if lib == "" {
