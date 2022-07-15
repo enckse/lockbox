@@ -182,7 +182,7 @@ func main() {
 	once := false
 	short := false
 	if len(args) == 3 {
-		if cmd != "-c" && cmd != "clip" && cmd != "-once" && cmd != "-short" {
+		if cmd != "-c" && cmd != "-clip" && cmd != "-once" && cmd != "-short" {
 			internal.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
 		}
 		clip = cmd == "-clip" || cmd == "-c"

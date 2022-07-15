@@ -100,7 +100,7 @@ func main() {
 			internal.Die("insert missing required arguments", internal.NewLockboxError("entry required"))
 		case 3:
 		case 4:
-			multi = args[2] == "-m"
+			multi = args[2] == "-m" || args[2] == "-multi"
 			if !multi {
 				internal.Die("multi-line insert must be after 'insert'", internal.NewLockboxError("invalid command"))
 			}

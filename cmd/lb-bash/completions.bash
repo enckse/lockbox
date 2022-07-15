@@ -28,7 +28,7 @@ _lb() {
                     opts="-yes $(lb ls)"
                     ;;
                 "insert")
-                    opts="-m $(lb ls)"
+                    opts="-m -multi $(lb ls)"
                     ;;
                 "totp")
                     opts="-once -short "$(lb totp -ls)
