@@ -137,24 +137,24 @@ func termEcho(on bool) {
 	}
 }
 
-// ConfirmInput will get 2 inputs and confirm they are the same.
-func ConfirmInput() (string, error) {
+// ConfirmInputsMatch will get 2 inputs and confirm they are the same.
+func ConfirmInputsMatch(object string) (string, error) {
 	termEcho(false)
 	defer func() {
 		termEcho(true)
 	}()
-	fmt.Printf("please enter password: ")
+	fmt.Printf("please enter %s: ", object)
 	first, err := Stdin(true)
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("\nplease re-enter password: ")
+	fmt.Printf("\nplease re-enter %s: ", object)
 	second, err := Stdin(true)
 	if err != nil {
 		return "", err
 	}
 	if first != second {
-		return "", NewLockboxError("passwords do NOT match")
+		return "", NewLockboxError(fmt.Sprintf("%s(s) do NOT match", object))
 	}
 	return first, nil
 }
@@ -207,6 +207,16 @@ func PathExists(path string) bool {
 		}
 	}
 	return true
+}
+
+// ConfirmYesNoPrompt will ask a yes/no question.
+func ConfirmYesNoPrompt(prompt string) (bool, error) {
+	fmt.Printf("%s? (y/N) ", prompt)
+	resp, err := Stdin(true)
+	if err != nil {
+		return false, err
+	}
+	return resp == "Y" || resp == "y", nil
 }
 
 func getStdin(one bool) ([]byte, error) {

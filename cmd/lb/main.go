@@ -102,7 +102,7 @@ func main() {
 		}
 		var password string
 		if !options.Multi && !isPipe {
-			input, err := internal.ConfirmInput()
+			input, err := internal.ConfirmInputsMatch("password")
 			if err != nil {
 				internal.Die("password input failed", err)
 			}
@@ -278,10 +278,9 @@ func main() {
 }
 
 func confirm(prompt string) bool {
-	fmt.Printf("%s? (y/N) ", prompt)
-	resp, err := internal.Stdin(true)
+	yesNo, err := internal.ConfirmYesNoPrompt(prompt)
 	if err != nil {
 		internal.Die("failed to get response", err)
 	}
-	return resp == "Y" || resp == "y"
+	return yesNo
 }
