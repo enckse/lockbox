@@ -37,30 +37,6 @@ func getEntry(store string, args []string, idx int) string {
 	return filepath.Join(store, args[idx]) + internal.Extension
 }
 
-func hooks(store, action, step string) {
-	hookDir := os.Getenv("LOCKBOX_HOOKDIR")
-	if !internal.PathExists(hookDir) {
-		return
-	}
-	dirs, err := os.ReadDir(hookDir)
-	if err != nil {
-		internal.Die("unable to read hookdir", err)
-	}
-	for _, d := range dirs {
-		if !d.IsDir() {
-			name := d.Name()
-			cmd := exec.Command(filepath.Join(hookDir, name), action, step)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				internal.Die(fmt.Sprintf("hook failed: %s", name), err)
-			}
-			continue
-		}
-		internal.Die("invalid hook", internal.NewLockboxError("hook is not file and/or has wrong mode"))
-	}
-}
-
 func main() {
 	args := os.Args
 	if len(args) < 2 {
@@ -149,7 +125,7 @@ func main() {
 			internal.Die("failed to save password", err)
 		}
 		fmt.Println("")
-		hooks(store, command, postStep)
+		internal.Hooks(store, internal.InsertHook, internal.PostHookStep)
 	case "rm":
 		entry := getEntry(store, args, 2)
 		if !internal.PathExists(entry) {
@@ -157,7 +133,7 @@ func main() {
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
-			hooks(store, command, postStep)
+			internal.Hooks(store, internal.RemoveHook, internal.PostHookStep)
 		}
 	case "show", "-c", "clip", "dump":
 		isDump := command == "dump"

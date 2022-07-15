@@ -27,7 +27,7 @@ keys2/three
 rekeying: /keys/one.lb
 rekeying: /keys/one2.lb
 rekeying: /keys2/three.lb
-remove entry? (y/N) HOOK RAN rm post
+remove entry? (y/N) HOOK RAN remove post
 
 keys/one2
 keys2/three
@@ -46,9 +46,9 @@ HOOK RAN insert post
 test
 XXXXXX
 test2
-remove entry? (y/N) HOOK RAN rm post
+remove entry? (y/N) HOOK RAN remove post
 
-remove entry? (y/N) HOOK RAN rm post
+remove entry? (y/N) HOOK RAN remove post
 
 unable to decrypt (decrypt not ok)
 rekeying: /keys/one2.lb
