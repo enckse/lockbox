@@ -1,7 +1,7 @@
 # bash completion for lb                        -*- shell-script -*-
 
 _is_clip() {
-    if [ "$1" == "-c" ] || [ "$1" == "{2}clip" ]; then
+    if [ "$1" == "-c" ] || [ "$1" == "${2}clip" ]; then
         echo 1
     else
         echo 0
