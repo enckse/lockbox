@@ -8,6 +8,7 @@ type (
 		Short bool
 		List  bool
 		Multi bool
+		Yes   bool
 	}
 )
 
@@ -19,5 +20,6 @@ func ParseArgs(arg string) Arguments {
 	args.Short = arg == "-short"
 	args.List = arg == "-ls" || arg == "-list"
 	args.Multi = arg == "-m" || arg == "-multi"
+	args.Yes = arg == "-yes"
 	return args
 }

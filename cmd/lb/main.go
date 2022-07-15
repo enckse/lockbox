@@ -138,12 +138,12 @@ func main() {
 	case "show", "-c", "clip", "dump":
 		isDump := command == "dump"
 		startEntry := 2
-		confirmDump := true
+		options := internal.Arguments{}
 		if isDump {
 			if len(args) > 2 {
-				if args[2] == "-yes" {
+				options = internal.ParseArgs(args[2])
+				if options.Yes {
 					startEntry = 3
-					confirmDump = false
 				}
 			}
 		}
@@ -215,7 +215,7 @@ func main() {
 			internal.CopyToClipboard(value)
 		}
 		if isDump {
-			if confirmDump {
+			if !options.Yes {
 				if !confirm("dump data to stdout as plaintext") {
 					return
 				}
