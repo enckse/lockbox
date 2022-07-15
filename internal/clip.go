@@ -76,11 +76,7 @@ func CopyToClipboard(value, executable string) {
 	pipeTo(cp[0], value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", MaxClipTime)
-		exe, err := os.Executable()
-		if err != nil {
-			Die("unable to get executable", err)
-		}
-		pipeTo(filepath.Join(filepath.Dir(exe), "lb"), value, false, "clear")
+		pipeTo(filepath.Join(filepath.Dir(executable), "lb"), value, false, "clear")
 	}
 }
 
