@@ -78,7 +78,7 @@ func main() {
 			}
 			searchTerm = args[2]
 		}
-		files, err := internal.Find(store, true)
+		files, err := internal.List(store, true)
 		if err != nil {
 			internal.Die("unable to list files", err)
 		}
@@ -176,7 +176,7 @@ func main() {
 		entries := []string{inEntry}
 		if strings.Contains(inEntry, "*") {
 			if inEntry == getEntry(store, []string{"***"}, 0) {
-				all, err := internal.Find(store, false)
+				all, err := internal.List(store, false)
 				if err != nil {
 					internal.Die("unable to get all files", err)
 				}

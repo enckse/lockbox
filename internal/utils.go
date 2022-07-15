@@ -77,8 +77,8 @@ func GetStore() string {
 	return os.Getenv("LOCKBOX_STORE")
 }
 
-// Find will find all lockbox files in a directory store.
-func Find(store string, display bool) ([]string, error) {
+// List will get all lockbox files in a directory store.
+func List(store string, display bool) ([]string, error) {
 	var results []string
 	if !PathExists(store) {
 		return nil, NewLockboxError("store does not exists")

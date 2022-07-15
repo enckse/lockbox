@@ -14,7 +14,7 @@ func main() {
 	inMode := flag.String("inmode", "", "input encryption key mode")
 	outMode := flag.String("outmode", "", "output encryption key mode")
 	flag.Parse()
-	found, err := internal.Find(internal.GetStore(), false)
+	found, err := internal.List(internal.GetStore(), false)
 	if err != nil {
 		internal.Die("failed finding entries", err)
 	}
