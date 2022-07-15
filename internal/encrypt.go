@@ -29,10 +29,21 @@ type (
 		secret [keyLength]byte
 		file   string
 	}
+
+	// LockboxOptions represent options to create a lockbox from.
+	LockboxOptions struct {
+		Key     string
+		KeyMode string
+		File    string
+	}
 )
 
-// NewLockbox creates a new lockbox for encryption/decryption.
-func NewLockbox(key, keyMode, file string) (Lockbox, error) {
+// NewLockbox creates a new usable lockbox instance.
+func NewLockbox(options LockboxOptions) (Lockbox, error) {
+	return newLockbox(options.Key, options.KeyMode, options.File)
+}
+
+func newLockbox(key, keyMode, file string) (Lockbox, error) {
 	useKeyMode := keyMode
 	if useKeyMode == "" {
 		useKeyMode = os.Getenv("LOCKBOX_KEYMODE")

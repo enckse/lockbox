@@ -83,7 +83,7 @@ func display(token string, clip, once, short bool) error {
 	if !internal.PathExists(store) {
 		return internal.NewLockboxError("object does not exist")
 	}
-	l, err := internal.NewLockbox("", "", store)
+	l, err := internal.NewLockbox(internal.LockboxOptions{File: store})
 	if err != nil {
 		return err
 	}

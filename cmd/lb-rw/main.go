@@ -13,7 +13,7 @@ func main() {
 	file := flag.String("file", "", "file to process")
 	keyMode := flag.String("keymode", "", "key lookup mode")
 	flag.Parse()
-	l, err := internal.NewLockbox(*key, *keyMode, *file)
+	l, err := internal.NewLockbox(internal.LockboxOptions{Key: *key, KeyMode: *keyMode, File: *file})
 	if err != nil {
 		internal.Die("unable to make lockbox model instance", err)
 	}

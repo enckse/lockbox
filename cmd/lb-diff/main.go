@@ -9,7 +9,7 @@ import (
 
 func main() {
 	args := os.Args
-	l, err := internal.NewLockbox("", "", args[len(args)-1])
+	l, err := internal.NewLockbox(internal.LockboxOptions{File: args[len(args)-1]})
 	if err != nil {
 		internal.Die("unable to make lockbox model instance", err)
 	}

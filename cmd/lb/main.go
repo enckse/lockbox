@@ -141,7 +141,7 @@ func main() {
 		if password == "" {
 			internal.Die("empty password provided", internal.NewLockboxError("password can NOT be empty"))
 		}
-		l, err := internal.NewLockbox("", "", entry)
+		l, err := internal.NewLockbox(internal.LockboxOptions{File: entry})
 		if err != nil {
 			internal.Die("unable to make lockbox model instance", err)
 		}
@@ -205,7 +205,7 @@ func main() {
 			if !internal.PathExists(entry) {
 				internal.Die("invalid entry", internal.NewLockboxError("entry not found"))
 			}
-			l, err := internal.NewLockbox("", "", entry)
+			l, err := internal.NewLockbox(internal.LockboxOptions{File: entry})
 			if err != nil {
 				internal.Die("unable to make lockbox model instance", err)
 			}
