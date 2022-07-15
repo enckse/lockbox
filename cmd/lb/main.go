@@ -93,15 +93,15 @@ func main() {
 	case "version":
 		fmt.Printf("version: %s\n", version)
 	case "insert":
-		multi := false
+		options := internal.Arguments{}
 		idx := 2
 		switch len(args) {
 		case 2:
 			internal.Die("insert missing required arguments", internal.NewLockboxError("entry required"))
 		case 3:
 		case 4:
-			multi = args[2] == "-m" || args[2] == "-multi"
-			if !multi {
+			options = internal.ParseArgs(args[2])
+			if !options.Multi {
 				internal.Die("multi-line insert must be after 'insert'", internal.NewLockboxError("invalid command"))
 			}
 			idx = 3
@@ -125,7 +125,7 @@ func main() {
 			}
 		}
 		var password string
-		if !multi && !isPipe {
+		if !options.Multi && !isPipe {
 			input, err := internal.ConfirmInput()
 			if err != nil {
 				internal.Die("password input failed", err)
