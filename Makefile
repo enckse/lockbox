@@ -1,7 +1,7 @@
 VERSION := development
 DESTDIR :=
 BUILD   := bin/
-TARGETS := $(BUILD)lb $(BUILD)lb-rw $(BUILD)lb-bash $(BUILD)lb-rekey $(BUILD)lb-textconv $(BUILD)lb-totp
+TARGETS := $(BUILD)lb $(BUILD)lb-rw $(BUILD)lb-rekey $(BUILD)lb-textconv $(BUILD)lb-totp
 LIBEXEC := $(DESTDIR)libexec/lockbox/
 MAIN    := $(DESTDIR)bin/lb
 
