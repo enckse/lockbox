@@ -63,15 +63,15 @@ func totpToken() string {
 	return t + internal.Extension
 }
 
-func display(token string, clip, once, short bool) error {
+func display(token string, args internal.Arguments) error {
 	interactive, err := internal.IsInteractive()
 	if err != nil {
 		return err
 	}
-	if short {
+	if args.Short {
 		interactive = false
 	}
-	if !interactive && clip {
+	if !interactive && args.Clip {
 		return internal.NewLockboxError("clipboard not available in non-interactive mode")
 	}
 	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
@@ -103,8 +103,8 @@ func display(token string, clip, once, short bool) error {
 	first := true
 	running := 0
 	lastSecond := -1
-	if !clip {
-		if !once {
+	if !args.Clip {
+		if !args.Once {
 			clear()
 		}
 	}
@@ -141,9 +141,9 @@ func display(token string, clip, once, short bool) error {
 		}
 		expires := fmt.Sprintf("%s%s (%s)%s", startColor, now.Format("15:04:05"), leftString, endColor)
 		outputs := []string{expires}
-		if !clip {
+		if !args.Clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
-			if !once {
+			if !args.Once {
 				outputs = append(outputs, "-> CTRL+C to exit")
 			}
 		} else {
@@ -151,11 +151,11 @@ func display(token string, clip, once, short bool) error {
 			internal.CopyToClipboard(code)
 			return nil
 		}
-		if !once {
+		if !args.Once {
 			clear()
 		}
 		fmt.Printf("%s\n", strings.Join(outputs, "\n\n"))
-		if once {
+		if args.Once {
 			return nil
 		}
 	}
@@ -167,7 +167,8 @@ func main() {
 		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
 	}
 	cmd := args[1]
-	if cmd == "-list" || cmd == "-ls" {
+	options := internal.ParseArgs(cmd)
+	if options.List {
 		result, err := list()
 		if err != nil {
 			internal.Die("invalid list response", err)
@@ -178,19 +179,13 @@ func main() {
 		}
 		return
 	}
-	clip := false
-	once := false
-	short := false
 	if len(args) == 3 {
-		if cmd != "-c" && cmd != "-clip" && cmd != "-once" && cmd != "-short" {
+		if !options.Clip && !options.Short && !options.Once {
 			internal.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
 		}
-		clip = cmd == "-clip" || cmd == "-c"
-		once = cmd == "-once"
-		short = cmd == "-short"
 		cmd = args[2]
 	}
-	if err := display(cmd, clip, once, short); err != nil {
+	if err := display(cmd, options); err != nil {
 		internal.Die("failed to show totp token", err)
 	}
 }

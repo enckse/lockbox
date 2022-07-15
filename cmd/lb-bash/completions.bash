@@ -49,10 +49,10 @@ _lb() {
         if [ "$COMP_CWORD" -eq 3 ]; then
             case "${COMP_WORDS[1]}" in
                 "insert")
-                    if [ "${COMP_WORDS[2]}" == "-m" ]; then
+                    if [ "${COMP_WORDS[2]}" == "-m" ] || [ "${COMP_WORDS[2]}" == "-multi" ]; then
                         opts=$(lb ls)
                     else
-                        opts="-m"
+                        opts="-m -multi"
                     fi
                     ;;
                 "totp")
