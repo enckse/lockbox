@@ -125,12 +125,8 @@ func main() {
 		if password == "" {
 			misc.Die("empty password provided", errors.New("password can NOT be empty"))
 		}
-		l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: entry})
-		if err != nil {
-			misc.Die("unable to make lockbox model instance", err)
-		}
-		if err := l.Encrypt([]byte(password)); err != nil {
-			misc.Die("failed to save password", err)
+		if err := encrypt.ToFile(entry, []byte(password)); err != nil {
+			misc.Die("unable to encrypt object", err)
 		}
 		fmt.Println("")
 		hooks.Run(hooks.Insert, hooks.PostStep)

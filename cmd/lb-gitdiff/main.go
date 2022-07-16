@@ -10,11 +10,7 @@ import (
 
 func main() {
 	args := os.Args
-	l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: args[len(args)-1]})
-	if err != nil {
-		misc.Die("unable to make lockbox model instance", err)
-	}
-	result, err := l.Decrypt()
+	result, err := encrypt.FromFile(args[len(args)-1])
 	if err != nil {
 		misc.Die("unable to read file", err)
 	}

@@ -41,6 +41,24 @@ type (
 	}
 )
 
+// FromFile decrypts a file-system based encrypted file.
+func FromFile(file string) ([]byte, error) {
+	l, err := NewLockbox(LockboxOptions{File: file})
+	if err != nil {
+		return nil, err
+	}
+	return l.Decrypt()
+}
+
+// ToFile encrypts data to a file-system based file.
+func ToFile(file string, data []byte) error {
+	l, err := NewLockbox(LockboxOptions{File: file})
+	if err != nil {
+		return err
+	}
+	return l.Encrypt(data)
+}
+
 // NewLockbox creates a new usable lockbox instance.
 func NewLockbox(options LockboxOptions) (Lockbox, error) {
 	return newLockbox(options.Key, options.KeyMode, options.File)

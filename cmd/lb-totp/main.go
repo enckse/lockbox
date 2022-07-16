@@ -82,11 +82,7 @@ func display(token string, args cli.Arguments) error {
 	if !misc.PathExists(pathing) {
 		return errors.New("object does not exist")
 	}
-	l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: pathing})
-	if err != nil {
-		return err
-	}
-	val, err := l.Decrypt()
+	val, err := encrypt.FromFile(pathing)
 	if err != nil {
 		return err
 	}
