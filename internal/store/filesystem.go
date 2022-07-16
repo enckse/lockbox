@@ -45,7 +45,7 @@ func (s FileSystem) List(options ViewOptions) ([]string, error) {
 			usePath := path
 			if options.Display {
 				usePath = strings.TrimPrefix(usePath, s.path)
-				usePath = strings.TrimPrefix(usePath, "/")
+				usePath = strings.TrimPrefix(usePath, string(os.PathSeparator))
 				usePath = strings.TrimSuffix(usePath, extension)
 			}
 			results = append(results, usePath)
@@ -64,7 +64,12 @@ func (s FileSystem) List(options ViewOptions) ([]string, error) {
 
 // NewPath creates a new filesystem store path for an entry.
 func (s FileSystem) NewPath(file string) string {
-	return filepath.Join(s.path, file) + extension
+	return s.NewFile(filepath.Join(s.path, file))
+}
+
+// NewFile creates a new file with the proper extension.
+func (s FileSystem) NewFile(file string) string {
+	return file + extension
 }
 
 // CleanPath will clean store and extension information from an entry.
@@ -73,7 +78,7 @@ func (s FileSystem) CleanPath(fullPath string) string {
 	if strings.HasPrefix(fullPath, s.path) {
 		fileName = fileName[len(s.path):]
 	}
-	if fileName[0] == '/' {
+	if fileName[0] == os.PathSeparator {
 		fileName = fileName[1:]
 	}
 	if strings.HasSuffix(fileName, extension) {

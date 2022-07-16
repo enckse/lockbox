@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,9 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/lockbox/internal"
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/clipboard"
+	"github.com/enckse/lockbox/internal/clip"
+	"github.com/enckse/lockbox/internal/colors"
+	"github.com/enckse/lockbox/internal/encrypt"
+	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/misc"
+	"github.com/enckse/lockbox/internal/store"
 	otp "github.com/pquerna/otp/totp"
 )
 
@@ -23,30 +26,17 @@ var (
 
 func list() ([]string, error) {
 	files := []string{}
-	token := totpToken()
-	store := internal.GetStore()
-	err := filepath.Walk(store, func(path string, info fs.FileInfo, err error) error {
-		name := info.Name()
-		if name != token {
-			return nil
-		}
-		dir := strings.TrimPrefix(filepath.Dir(path), store)
-		if strings.HasSuffix(dir, "/") {
-			dir = dir[0 : len(dir)-1]
-		}
-		if strings.HasPrefix(dir, "/") {
-			dir = dir[1:]
-		}
-		files = append(files, dir)
-		return nil
-	})
+	f := store.NewFileSystemStore()
+	files, err := f.List(store.ViewOptions{})
 	if err != nil {
 		return nil, err
 	}
-
+	token := totpToken()
 	var results []string
 	for _, obj := range files {
-		results = append(results, obj)
+		if filepath.Base(obj) == token {
+			results = append(results, obj)
+		}
 	}
 	if len(results) == 0 {
 		return nil, errors.New("no objects found")
@@ -67,11 +57,11 @@ func totpToken() string {
 	if t == "" {
 		t = "totp"
 	}
-	return t + internal.Extension
+	return t
 }
 
 func display(token string, args cli.Arguments) error {
-	interactive, err := internal.IsInteractive()
+	interactive, err := inputs.IsInteractive()
 	if err != nil {
 		return err
 	}
@@ -81,16 +71,19 @@ func display(token string, args cli.Arguments) error {
 	if !interactive && args.Clip {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
-	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
+	coloring, err := colors.NewTerminal(colors.Red)
 	if err != nil {
 		return err
 	}
 	tok := strings.TrimSpace(token)
-	store := filepath.Join(internal.GetStore(), tok, totpToken())
-	if !internal.PathExists(store) {
+	if !strings.HasSuffix(tok, totpToken()) {
+		return errors.New("does not look like a totp token path")
+	}
+	pathing := store.NewFileSystemStore().NewPath(tok)
+	if !misc.PathExists(pathing) {
 		return errors.New("object does not exist")
 	}
-	l, err := internal.NewLockbox(internal.LockboxOptions{File: store})
+	l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: pathing})
 	if err != nil {
 		return err
 	}
@@ -119,11 +112,11 @@ func display(token string, args cli.Arguments) error {
 			clear()
 		}
 	}
-	clip := clipboard.Commands{}
+	clipboard := clip.Commands{}
 	if args.Clip {
-		clip, err = clipboard.NewCommands()
+		clipboard, err = clip.NewCommands()
 		if err != nil {
-			internal.Die("invalid clipboard", err)
+			misc.Die("invalid clipboard", err)
 		}
 	}
 	for {
@@ -150,8 +143,8 @@ func display(token string, args cli.Arguments) error {
 		startColor := ""
 		endColor := ""
 		if left < 5 || (left < 35 && left >= 30) {
-			startColor = redStart
-			endColor = redEnd
+			startColor = coloring.Start
+			endColor = coloring.End
 		}
 		leftString := fmt.Sprintf("%d", left)
 		if len(leftString) < 2 {
@@ -166,7 +159,7 @@ func display(token string, args cli.Arguments) error {
 			}
 		} else {
 			fmt.Printf("-> %s\n", expires)
-			clip.CopyToClipboard(code, exe)
+			clipboard.CopyTo(code, exe)
 			return nil
 		}
 		if !args.Once {
@@ -182,14 +175,14 @@ func display(token string, args cli.Arguments) error {
 func main() {
 	args := os.Args
 	if len(args) > 3 || len(args) < 2 {
-		internal.Die("subkey required", errors.New("invalid arguments"))
+		misc.Die("subkey required", errors.New("invalid arguments"))
 	}
 	cmd := args[1]
 	options := cli.ParseArgs(cmd)
 	if options.List {
 		result, err := list()
 		if err != nil {
-			internal.Die("invalid list response", err)
+			misc.Die("invalid list response", err)
 		}
 		sort.Strings(result)
 		for _, entry := range result {
@@ -199,11 +192,11 @@ func main() {
 	}
 	if len(args) == 3 {
 		if !options.Clip && !options.Short && !options.Once {
-			internal.Die("subcommand not supported", errors.New("invalid sub command"))
+			misc.Die("subcommand not supported", errors.New("invalid sub command"))
 		}
 		cmd = args[2]
 	}
 	if err := display(cmd, options); err != nil {
-		internal.Die("failed to show totp token", err)
+		misc.Die("failed to show totp token", err)
 	}
 }

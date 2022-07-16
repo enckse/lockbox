@@ -73,3 +73,10 @@ func TestCleanPath(t *testing.T) {
 		t.Error("invalid clean")
 	}
 }
+
+func TestNewFile(t *testing.T) {
+	f := FileSystem{path: "abc"}.NewFile("xyz")
+	if f != "xyz.lb" {
+		t.Error("invalid file")
+	}
+}
