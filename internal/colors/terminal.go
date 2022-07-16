@@ -8,13 +8,9 @@ import (
 const (
 	termBeginRed = "\033[1;31m"
 	termEndRed   = "\033[0m"
-	// Red will get red terminal coloring.
-	Red = iota
 )
 
 type (
-	// Color are terminal colors for dumb terminal coloring.
-	Color int
 	// Terminal represents terminal coloring information.
 	Terminal struct {
 		Start string
