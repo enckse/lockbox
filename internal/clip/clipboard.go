@@ -6,14 +6,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/misc"
 )
 
 const (
-	// MaxTime is the max time to let something stay in the clipboard.
-	MaxTime         = 45
+	maxTime         = 45
 	pbClipMode      = "pb"
 	waylandClipMode = "wayland"
 	xClipMode       = "x11"
@@ -23,8 +23,9 @@ const (
 type (
 	// Commands represent system clipboard operations.
 	Commands struct {
-		Copy  []string
-		Paste []string
+		copying []string
+		pasting []string
+		MaxTime int
 	}
 )
 
@@ -58,31 +59,62 @@ func NewCommands() (Commands, error) {
 			return Commands{}, errors.New("unable to detect clipboard mode")
 		}
 	}
+	max := maxTime
+	useMax := os.Getenv("LOCKBOX_CLIPMAX")
+	if useMax != "" {
+		i, err := strconv.Atoi(useMax)
+		if err != nil {
+			return Commands{}, err
+		}
+		if i < 1 {
+			return Commands{}, errors.New("clipboard max time must be greater than 0")
+		}
+		max = i
+	}
+	var copying []string
+	var pasting []string
 	switch env {
 	case pbClipMode:
-		return Commands{Copy: []string{"pbcopy"}, Paste: []string{"pbpaste"}}, nil
+		copying = []string{"pbcopy"}
+		pasting = []string{"pbpaste"}
 	case xClipMode:
-		return Commands{Copy: []string{"xclip"}, Paste: []string{"xclip", "-o"}}, nil
+		copying = []string{"xclip"}
+		pasting = []string{"xclip", "-o"}
 	case waylandClipMode:
-		return Commands{Copy: []string{"wl-copy"}, Paste: []string{"wl-paste"}}, nil
+		copying = []string{"wl-copy"}
+		pasting = []string{"wl-paste"}
 	case wslMode:
-		return Commands{Copy: []string{"clip.exe"}, Paste: []string{"powershell.exe", "-command", "Get-Clipboard"}}, nil
+		copying = []string{"clip.exe"}
+		pasting = []string{"powershell.exe", "-command", "Get-Clipboard"}
 	default:
 		return Commands{}, errors.New("clipboard is unavailable")
 	}
+	return Commands{copying: copying, pasting: pasting, MaxTime: max}, nil
 }
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
 func (c Commands) CopyTo(value, executable string) {
-	var args []string
-	if len(c.Copy) > 1 {
-		args = c.Copy[1:]
-	}
-	pipeTo(c.Copy[0], value, true, args...)
+	cmd, args := c.Args(true)
+	pipeTo(cmd, value, true, args...)
 	if value != "" {
-		fmt.Printf("clipboard will clear in %d seconds\n", MaxTime)
+		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
 		pipeTo(filepath.Join(filepath.Dir(executable), "lb"), value, false, "clear")
 	}
+}
+
+// Args returns clipboard args for execution.
+func (c Commands) Args(copying bool) (string, []string) {
+	var using []string
+	if copying {
+		using = c.copying
+	} else {
+		using = c.pasting
+	}
+	var args []string
+	if len(using) > 1 {
+		args = using[1:]
+	}
+	return using[0], args
 }
 
 func pipeTo(command, value string, wait bool, args ...string) {

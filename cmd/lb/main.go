@@ -251,15 +251,12 @@ func main() {
 		if err != nil {
 			misc.Die("unable to get paste command", err)
 		}
-		var args []string
-		if len(clipboard.Paste) > 1 {
-			args = clipboard.Paste[1:]
-		}
+		pCmd, pArgs := clipboard.Args(false)
 		val = strings.TrimSpace(val)
-		for idx < clip.MaxTime {
+		for idx < clipboard.MaxTime {
 			idx++
 			time.Sleep(1 * time.Second)
-			out, err := exec.Command(clipboard.Paste[0], args...).Output()
+			out, err := exec.Command(pCmd, pArgs...).Output()
 			if err != nil {
 				continue
 			}
