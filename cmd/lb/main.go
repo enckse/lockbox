@@ -192,11 +192,7 @@ func main() {
 			if !misc.PathExists(entry) {
 				misc.Die("invalid entry", errors.New("entry not found"))
 			}
-			l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: entry})
-			if err != nil {
-				misc.Die("unable to make lockbox model instance", err)
-			}
-			decrypt, err := l.Decrypt()
+			decrypt, err := encrypt.FromFile(entry)
 			if err != nil {
 				misc.Die("unable to decrypt", err)
 			}
