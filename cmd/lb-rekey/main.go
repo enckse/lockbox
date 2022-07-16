@@ -20,9 +20,12 @@ func main() {
 	if err != nil {
 		misc.Die("failed finding entries", err)
 	}
+	inOpts := encrypt.LockboxOptions{Key: *inKey, KeyMode: *inMode}
+	outOpts := encrypt.LockboxOptions{Key: *outKey, KeyMode: *outMode}
 	for _, file := range found {
 		fmt.Printf("rekeying: %s\n", file)
-		in, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: *inKey, KeyMode: *inMode, File: file})
+		inOpts.File = file
+		in, err := encrypt.NewLockbox(inOpts)
 		if err != nil {
 			misc.Die("unable to make input lockbox", err)
 		}
@@ -30,7 +33,8 @@ func main() {
 		if err != nil {
 			misc.Die("failed to process file decryption", err)
 		}
-		out, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: *outKey, KeyMode: *outMode, File: file})
+		outOpts.File = file
+		out, err := encrypt.NewLockbox(outOpts)
 		if err != nil {
 			misc.Die("unable to make output lockbox", err)
 		}
