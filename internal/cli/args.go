@@ -1,4 +1,4 @@
-package internal
+package cli
 
 type (
 	// Arguments options for operations.

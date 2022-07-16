@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal"
+	"github.com/enckse/lockbox/internal/cli"
 )
 
 const (
@@ -78,14 +79,14 @@ func main() {
 	case "version":
 		fmt.Printf("version: %s\n", version)
 	case "insert":
-		options := internal.Arguments{}
+		options := cli.Arguments{}
 		idx := 2
 		switch len(args) {
 		case 2:
 			internal.Die("insert missing required arguments", errors.New("entry required"))
 		case 3:
 		case 4:
-			options = internal.ParseArgs(args[2])
+			options = cli.ParseArgs(args[2])
 			if !options.Multi {
 				internal.Die("multi-line insert must be after 'insert'", errors.New("invalid command"))
 			}
@@ -147,10 +148,10 @@ func main() {
 	case "show", "-c", "clip", "dump":
 		isDump := command == "dump"
 		startEntry := 2
-		options := internal.Arguments{}
+		options := cli.Arguments{}
 		if isDump {
 			if len(args) > 2 {
-				options = internal.ParseArgs(args[2])
+				options = cli.ParseArgs(args[2])
 				if options.Yes {
 					startEntry = 3
 				}

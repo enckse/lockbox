@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal"
+	"github.com/enckse/lockbox/internal/cli"
 	otp "github.com/pquerna/otp/totp"
 )
 
@@ -68,7 +69,7 @@ func totpToken() string {
 	return t + internal.Extension
 }
 
-func display(token string, args internal.Arguments) error {
+func display(token string, args cli.Arguments) error {
 	interactive, err := internal.IsInteractive()
 	if err != nil {
 		return err
@@ -183,7 +184,7 @@ func main() {
 		internal.Die("subkey required", errors.New("invalid arguments"))
 	}
 	cmd := args[1]
-	options := internal.ParseArgs(cmd)
+	options := cli.ParseArgs(cmd)
 	if options.List {
 		result, err := list()
 		if err != nil {
