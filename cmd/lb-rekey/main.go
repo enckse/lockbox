@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/enckse/lockbox/internal"
+	"github.com/enckse/lockbox/internal/encrypt"
+	"github.com/enckse/lockbox/internal/misc"
+	"github.com/enckse/lockbox/internal/store"
 )
 
 func main() {
@@ -14,26 +16,26 @@ func main() {
 	inMode := flag.String("inmode", "", "input encryption key mode")
 	outMode := flag.String("outmode", "", "output encryption key mode")
 	flag.Parse()
-	found, err := internal.List(internal.GetStore(), false)
+	found, err := store.NewFileSystemStore().List(store.ViewOptions{})
 	if err != nil {
-		internal.Die("failed finding entries", err)
+		misc.Die("failed finding entries", err)
 	}
 	for _, file := range found {
 		fmt.Printf("rekeying: %s\n", file)
-		in, err := internal.NewLockbox(internal.LockboxOptions{Key: *inKey, KeyMode: *inMode, File: file})
+		in, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: *inKey, KeyMode: *inMode, File: file})
 		if err != nil {
-			internal.Die("unable to make input lockbox", err)
+			misc.Die("unable to make input lockbox", err)
 		}
 		decrypt, err := in.Decrypt()
 		if err != nil {
-			internal.Die("failed to process file decryption", err)
+			misc.Die("failed to process file decryption", err)
 		}
-		out, err := internal.NewLockbox(internal.LockboxOptions{Key: *outKey, KeyMode: *outMode, File: file})
+		out, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: *outKey, KeyMode: *outMode, File: file})
 		if err != nil {
-			internal.Die("unable to make output lockbox", err)
+			misc.Die("unable to make output lockbox", err)
 		}
 		if err := out.Encrypt([]byte(strings.TrimSpace(string(decrypt)))); err != nil {
-			internal.Die("failed to encrypt file", err)
+			misc.Die("failed to encrypt file", err)
 		}
 	}
 }

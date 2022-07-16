@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/enckse/lockbox/internal"
+	"github.com/enckse/lockbox/internal/encrypt"
+	"github.com/enckse/lockbox/internal/misc"
 )
 
 func main() {
 	args := os.Args
-	l, err := internal.NewLockbox(internal.LockboxOptions{File: args[len(args)-1]})
+	l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: args[len(args)-1]})
 	if err != nil {
-		internal.Die("unable to make lockbox model instance", err)
+		misc.Die("unable to make lockbox model instance", err)
 	}
 	result, err := l.Decrypt()
 	if err != nil {
-		internal.Die("unable to read file", err)
+		misc.Die("unable to read file", err)
 	}
 	if result != nil {
 		fmt.Println(string(result))
