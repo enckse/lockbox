@@ -24,7 +24,7 @@ const (
 )
 
 // Hooks executes any configured hooks.
-func Hooks(store string, action HookAction, step HookStep) error {
+func Hooks(action HookAction, step HookStep) error {
 	hookDir := os.Getenv("LOCKBOX_HOOKDIR")
 	if !PathExists(hookDir) {
 		return nil

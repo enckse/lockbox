@@ -134,7 +134,7 @@ func main() {
 			internal.Die("failed to save password", err)
 		}
 		fmt.Println("")
-		internal.Hooks(store, internal.InsertHook, internal.PostHookStep)
+		internal.Hooks(internal.InsertHook, internal.PostHookStep)
 	case "rm":
 		entry := getEntry(store, args, 2)
 		if !internal.PathExists(entry) {
@@ -142,7 +142,7 @@ func main() {
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
-			internal.Hooks(store, internal.RemoveHook, internal.PostHookStep)
+			internal.Hooks(internal.RemoveHook, internal.PostHookStep)
 		}
 	case "show", "-c", "clip", "dump":
 		isDump := command == "dump"
