@@ -73,8 +73,8 @@ func DisplayCallback(args DisplayOptions) ([]dump.ExportEntity, error) {
 					entity.Path = fmt.Sprintf("%s%s:%s", coloring.Start, fileName, coloring.End)
 				}
 			}
-			dumpData = append(dumpData, entity)
 		}
+		dumpData = append(dumpData, entity)
 	}
 	return dumpData, nil
 }
