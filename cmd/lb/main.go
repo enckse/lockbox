@@ -142,14 +142,7 @@ func main() {
 		fs := store.NewFileSystemStore()
 		inEntry := getEntry(fs, args, startEntry)
 		opts := subcommands.DisplayOptions{Dump: isDump, Entry: inEntry, Show: command == "show" || isDump, Glob: getEntry(fs, []string{"***"}, 0), Store: fs}
-		clipboard := platform.Clipboard{}
 		var err error
-		if !opts.Show {
-			clipboard, err = platform.NewClipboard()
-			if err != nil {
-				misc.Die("unable to get clipboard", err)
-			}
-		}
 		dumpData, err := subcommands.DisplayCallback(opts)
 		if err != nil {
 			misc.Die("display command failed to retrieve data", err)
@@ -166,6 +159,13 @@ func main() {
 			}
 			fmt.Println(string(d))
 			return
+		}
+		clipboard := platform.Clipboard{}
+		if !opts.Show {
+			clipboard, err = platform.NewClipboard()
+			if err != nil {
+				misc.Die("unable to get clipboard", err)
+			}
 		}
 		for _, obj := range dumpData {
 			if opts.Show {
