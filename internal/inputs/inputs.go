@@ -1,4 +1,4 @@
-package internal
+package inputs
 
 import (
 	"bufio"
@@ -21,6 +21,10 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 		return true, nil
 	}
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
+}
+
+func IsColorEnabled() (bool, error) {
+	return isYesNoEnv(false, "LOCKBOX_NOCOLOR")
 }
 
 // IsInteractive indicates if running as a user UI experience.
@@ -102,6 +106,11 @@ func ConfirmYesNoPrompt(prompt string) (bool, error) {
 		return false, err
 	}
 	return resp == "Y" || resp == "y", nil
+}
+
+// RawStdin will get raw stdin data.
+func RawStdin() ([]byte, error) {
+	return getStdin(false)
 }
 
 func getStdin(one bool) ([]byte, error) {

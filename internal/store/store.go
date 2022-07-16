@@ -1,4 +1,4 @@
-package internal
+package store
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"github.com/enckse/lockbox/internal/misc"
 )
 
 const (
@@ -14,25 +15,36 @@ const (
 	Extension = ".lb"
 )
 
-// GetStore gets the lockbox directory.
-func GetStore() string {
+type (
+	// FileSystem represents a filesystem store.
+	FileSystem struct {
+		path string
+	}
+	ViewOptions struct {
+		Display bool
+	}
+
+)
+
+// NewFileSystemStore gets the lockbox directory (filesystem-based) store.
+func NewFileSystemStore() string {
 	return os.Getenv("LOCKBOX_STORE")
 }
 
-// List will get all lockbox files in a directory store.
-func List(store string, display bool) ([]string, error) {
+// List will get all lockbox files in a store.
+func (s FileSystem) List(options ViewOptions) ([]string, error) {
 	var results []string
-	if !PathExists(store) {
-		return nil, errors.New("store does not exists")
+	if !misc.PathExists(s.path) {
+		return nil, errors.New("store does not exist")
 	}
-	err := filepath.Walk(store, func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk(s.path, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if strings.HasSuffix(path, Extension) {
 			usePath := path
-			if display {
-				usePath = strings.TrimPrefix(usePath, store)
+			if options.Display {
+				usePath = strings.TrimPrefix(usePath, s.path)
 				usePath = strings.TrimPrefix(usePath, "/")
 				usePath = strings.TrimSuffix(usePath, Extension)
 			}
@@ -44,7 +56,7 @@ func List(store string, display bool) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if display {
+	if options.Display {
 		sort.Strings(results)
 	}
 	return results, nil

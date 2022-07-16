@@ -1,32 +1,33 @@
-package internal
+package hooks
 
 import (
 	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"github.com/enckse/lockbox/internal/misc"
 )
 
 type (
 	// HookAction are specific steps that may call a hook.
-	HookAction string
+	Action string
 	// HookStep is the step, during command execution, when the hook was called.
-	HookStep string
+	Step string
 )
 
 const (
 	// RemoveHook is called when a store entry is removed.
-	RemoveHook HookAction = "remove"
+	Remove Action = "remove"
 	// InsertHook is called when a store entry is inserted.
-	InsertHook HookAction = "insert"
+	Insert Action = "insert"
 	// PostHookStep is a hook running at the end of a command.
-	PostHookStep HookStep = "post"
+	PostStep Step = "post"
 )
 
-// Hooks executes any configured hooks.
-func Hooks(action HookAction, step HookStep) error {
+// Run executes any configured hooks.
+func Run(action Action, step Step) error {
 	hookDir := os.Getenv("LOCKBOX_HOOKDIR")
-	if !PathExists(hookDir) {
+	if !misc.PathExists(hookDir) {
 		return nil
 	}
 	dirs, err := os.ReadDir(hookDir)

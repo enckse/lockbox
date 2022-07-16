@@ -4,16 +4,21 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"github.com/enckse/lockbox/internal/misc"
 )
 
 func setupData(t *testing.T) string {
 	os.Setenv("LOCKBOX_KEYMODE", "")
 	os.Setenv("LOCKBOX_KEY", "")
-	if !PathExists("bin") {
+	if misc.PathExists("bin") {
+		if err := os.RemoveAll("bin"); err != nil {
+			t.Errorf("unable to cleanup dir: %v")
+		}
+	}
+
 		if err := os.MkdirAll("bin", 0755); err != nil {
 			t.Errorf("failed to setup bin directory: %v", err)
 		}
-	}
 	return filepath.Join("bin", "test.lb")
 }
 

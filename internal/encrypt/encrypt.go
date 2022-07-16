@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/shlex"
 	"golang.org/x/crypto/nacl/secretbox"
+	"github.com/enckse/lockbox/internal/inputs"
 )
 
 const (
@@ -116,7 +117,7 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	}
 	data := datum
 	if data == nil {
-		b, err := getStdin(false)
+		b, err := inputs.RawStdin(false)
 		if err != nil {
 			return err
 		}

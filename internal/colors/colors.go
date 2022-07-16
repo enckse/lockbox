@@ -1,40 +1,46 @@
-package internal
+package colors
 
 import (
 	"errors"
-)
-
-type (
-	// Color are terminal colors for dumb terminal coloring.
-	Color int
+	"github.com/enckse/lockbox/internal/inputs"
 )
 
 const (
 	termBeginRed = "\033[1;31m"
 	termEndRed   = "\033[0m"
-	// ColorRed will get red terminal coloring.
-	ColorRed = iota
+	// Red will get red terminal coloring.
+	Red = iota
 )
 
-// GetColor will retrieve start/end terminal coloration indicators.
-func GetColor(color Color) (string, string, error) {
-	if color != ColorRed {
-		return "", "", errors.New("bad color")
+type (
+	// Color are terminal colors for dumb terminal coloring.
+	Color int
+	// Terminal represents terminal coloring information.
+	Terminal struct {
+		Start string
+		End   string
 	}
-	interactive, err := IsInteractive()
+)
+
+// NewTerminal will retrieve start/end terminal coloration indicators.
+func NewTerminal(color Color) (Terminal, error) {
+	if color != Red {
+		return Terminal{}, errors.New("bad color")
+	}
+	interactive, err := inputs.IsInteractive()
 	if err != nil {
-		return "", "", err
+		return Terminal{}, err
 	}
 	colors := interactive
 	if colors {
-		isColored, err := isYesNoEnv(false, "LOCKBOX_NOCOLOR")
+		isColored, err := inputs.IsColorEnabled()
 		if err != nil {
-			return "", "", err
+			return Terminal{}, err
 		}
 		colors = !isColored
 	}
 	if colors {
-		return termBeginRed, termEndRed, nil
+		return Terminal{Start: termBeginRed, End: termEndRed}, nil
 	}
-	return "", "", nil
+	return Terminal{}, nil
 }

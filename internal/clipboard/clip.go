@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/enckse/lockbox/internal"
+	"github.com/enckse/lockbox/internal/misc"
 )
 
 const (
@@ -89,7 +89,7 @@ func pipeTo(command, value string, wait bool, args ...string) {
 	cmd := exec.Command(command, args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		internal.Die("unable to get stdin pipe", err)
+		misc.Die("unable to get stdin pipe", err)
 	}
 
 	go func() {
@@ -105,6 +105,6 @@ func pipeTo(command, value string, wait bool, args ...string) {
 		ran = cmd.Start()
 	}
 	if ran != nil {
-		internal.Die("failed to run command", ran)
+		misc.Die("failed to run command", ran)
 	}
 }

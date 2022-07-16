@@ -11,7 +11,7 @@ SOURCE  := $(shell find . -type f -name "*.go")
 
 all: $(TARGETS)
 
-$(TARGETS): $(SOURCE)
+$(TARGETS): $(SOURCE) go.*
 	go build -ldflags '-X main.version=$(VERSION) -X main.libExec=$(LIBEXEC) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
 
 $(TESTDIR): $(TARGETS)
