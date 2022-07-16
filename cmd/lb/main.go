@@ -45,15 +45,14 @@ func main() {
 	command := args[1]
 	switch command {
 	case "ls", "list", "find":
-		isFind := command == "find"
-		searchTerm := ""
-		if isFind {
+		opts := subcommands.ListFindOptions{Find: command == "find", Search: "", Store: store.NewFileSystemStore()}
+		if opts.Find {
 			if len(args) < 3 {
 				misc.Die("find requires an argument to search for", errors.New("search term required"))
 			}
-			searchTerm = args[2]
+			opts.Search = args[2]
 		}
-		files, err := subcommands.ListFindCallback(subcommands.ListFindOptions{Find: isFind, Search: searchTerm, Store: store.NewFileSystemStore()})
+		files, err := subcommands.ListFindCallback(opts)
 		if err != nil {
 			misc.Die("unable to list files", err)
 		}
@@ -79,8 +78,7 @@ func main() {
 			misc.Die("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
-		fs := store.NewFileSystemStore()
-		entry := getEntry(fs, args, idx)
+		entry := getEntry(store.NewFileSystemStore(), args, idx)
 		if misc.PathExists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
@@ -118,8 +116,7 @@ func main() {
 		fmt.Println("")
 		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
-		fs := store.NewFileSystemStore()
-		entry := getEntry(fs, args, 2)
+		entry := getEntry(store.NewFileSystemStore(), args, 2)
 		if !misc.PathExists(entry) {
 			misc.Die("does not exists", errors.New("can not delete unknown entry"))
 		}
@@ -128,10 +125,12 @@ func main() {
 			hooks.Run(hooks.Remove, hooks.PostStep)
 		}
 	case "show", "-c", "clip", "dump":
-		isDump := command == "dump"
+		fs := store.NewFileSystemStore()
+		opts := subcommands.DisplayOptions{Dump: command == "dump", Show: command == "show", Glob: getEntry(fs, []string{"***"}, 0), Store: fs}
+		opts.Show = opts.Show || opts.Dump
 		startEntry := 2
 		options := cli.Arguments{}
-		if isDump {
+		if opts.Dump {
 			if len(args) > 2 {
 				options = cli.ParseArgs(args[2])
 				if options.Yes {
@@ -139,9 +138,7 @@ func main() {
 				}
 			}
 		}
-		fs := store.NewFileSystemStore()
-		inEntry := getEntry(fs, args, startEntry)
-		opts := subcommands.DisplayOptions{Dump: isDump, Entry: inEntry, Show: command == "show" || isDump, Glob: getEntry(fs, []string{"***"}, 0), Store: fs}
+		opts.Entry = getEntry(fs, args, startEntry)
 		var err error
 		dumpData, err := subcommands.DisplayCallback(opts)
 		if err != nil {
