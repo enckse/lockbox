@@ -4,14 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"sort"
-	"strings"
-	"time"
 
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/dump"
 	"github.com/enckse/lockbox/internal/encrypt"
 	"github.com/enckse/lockbox/internal/hooks"
@@ -19,6 +14,7 @@ import (
 	"github.com/enckse/lockbox/internal/misc"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/store"
+	"github.com/enckse/lockbox/internal/subcommands"
 )
 
 var (
@@ -47,7 +43,6 @@ func main() {
 		misc.Die("missing arguments", errors.New("requires subcommand"))
 	}
 	command := args[1]
-	fs := store.NewFileSystemStore()
 	switch command {
 	case "ls", "list", "find":
 		isFind := command == "find"
@@ -58,16 +53,7 @@ func main() {
 			}
 			searchTerm = args[2]
 		}
-		viewOptions := store.ViewOptions{Display: true}
-		if isFind {
-			viewOptions.Filter = func(inPath string) string {
-				if strings.Contains(inPath, searchTerm) {
-					return inPath
-				}
-				return ""
-			}
-		}
-		files, err := fs.List(viewOptions)
+		files, err := subcommands.ListFindCallback(subcommands.ListFindOptions{Find: isFind, Search: searchTerm, Store: store.NewFileSystemStore()})
 		if err != nil {
 			misc.Die("unable to list files", err)
 		}
@@ -93,6 +79,7 @@ func main() {
 			misc.Die("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
+		fs := store.NewFileSystemStore()
 		entry := getEntry(fs, args, idx)
 		if misc.PathExists(entry) {
 			if !isPipe {
@@ -131,6 +118,7 @@ func main() {
 		fmt.Println("")
 		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
+		fs := store.NewFileSystemStore()
 		entry := getEntry(fs, args, 2)
 		if !misc.PathExists(entry) {
 			misc.Die("does not exists", errors.New("can not delete unknown entry"))
@@ -151,73 +139,22 @@ func main() {
 				}
 			}
 		}
+		fs := store.NewFileSystemStore()
 		inEntry := getEntry(fs, args, startEntry)
-		isShow := command == "show" || isDump
-		entries := []string{inEntry}
-		if strings.Contains(inEntry, "*") {
-			if inEntry == getEntry(fs, []string{"***"}, 0) {
-				all, err := fs.List(store.ViewOptions{})
-				if err != nil {
-					misc.Die("unable to get all files", err)
-				}
-				entries = all
-			} else {
-				matches, err := filepath.Glob(inEntry)
-				if err != nil {
-					misc.Die("bad glob", err)
-				}
-				entries = matches
-			}
-		}
-		isGlob := len(entries) > 1
-		if isGlob {
-			if !isShow {
-				misc.Die("cannot glob to clipboard", errors.New("bad glob request"))
-			}
-			sort.Strings(entries)
-		}
-		coloring, err := colors.NewTerminal(colors.Red)
-		if err != nil {
-			misc.Die("unable to get color for terminal", err)
-		}
-		dumpData := []dump.ExportEntity{}
+		opts := subcommands.DisplayOptions{Dump: isDump, Entry: inEntry, Show: command == "show" || isDump, Glob: getEntry(fs, []string{"***"}, 0), Store: fs}
 		clipboard := platform.Clipboard{}
-		if !isShow {
+		var err error
+		if !opts.Show {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
 				misc.Die("unable to get clipboard", err)
 			}
 		}
-		for _, entry := range entries {
-			if !misc.PathExists(entry) {
-				misc.Die("invalid entry", errors.New("entry not found"))
-			}
-			decrypt, err := encrypt.FromFile(entry)
-			if err != nil {
-				misc.Die("unable to decrypt", err)
-			}
-			value := strings.TrimSpace(string(decrypt))
-			entity := dump.ExportEntity{}
-			if isShow {
-				if isGlob {
-					fileName := fs.CleanPath(entry)
-					if isDump {
-						entity.Path = fileName
-					} else {
-						fmt.Printf("%s%s:%s\n", coloring.Start, fileName, coloring.End)
-					}
-				}
-				if isDump {
-					entity.Value = value
-					dumpData = append(dumpData, entity)
-				} else {
-					fmt.Println(value)
-				}
-				continue
-			}
-			clipboard.CopyTo(value, getExecutable())
+		dumpData, err := subcommands.DisplayCallback(opts)
+		if err != nil {
+			misc.Die("display command failed to retrieve data", err)
 		}
-		if isDump {
+		if opts.Dump {
 			if !options.Yes {
 				if !confirm("dump data to stdout as plaintext") {
 					return
@@ -228,47 +165,29 @@ func main() {
 				misc.Die("failed to marshal items", err)
 			}
 			fmt.Println(string(d))
+			return
 		}
-	case "clear":
-		idx := 0
-		val, err := inputs.Stdin(false)
-		if err != nil {
-			misc.Die("unable to read value to clear", err)
-		}
-		clipboard, err := platform.NewClipboard()
-		if err != nil {
-			misc.Die("unable to get paste command", err)
-		}
-		pCmd, pArgs := clipboard.Args(false)
-		val = strings.TrimSpace(val)
-		for idx < clipboard.MaxTime {
-			idx++
-			time.Sleep(1 * time.Second)
-			out, err := exec.Command(pCmd, pArgs...).Output()
-			if err != nil {
+		for _, obj := range dumpData {
+			if opts.Show {
+				if obj.Path != "" {
+					fmt.Println(obj.Path)
+				}
+				fmt.Println(obj.Value)
 				continue
 			}
-			fmt.Println(string(out))
-			fmt.Println(val)
-			if strings.TrimSpace(string(out)) != val {
-				return
-			}
+			clipboard.CopyTo(obj.Value, getExecutable())
 		}
-		clipboard.CopyTo("", getExecutable())
+	case "clear":
+		if err := subcommands.ClearClipboardCallback(); err != nil {
+			misc.Die("failed to handle clipboard clear", err)
+		}
 	default:
 		lib := os.Getenv("LOCKBOX_LIBEXEC")
 		if lib == "" {
 			lib = libExec
 		}
-		tryCommand := fmt.Sprintf(filepath.Join(lib, "lb-%s"), command)
-		if !misc.PathExists(tryCommand) {
-			misc.Die("unknown subcommand", errors.New(command))
-		}
-		c := exec.Command(tryCommand, args[2:]...)
-		c.Stdout = os.Stdout
-		c.Stderr = os.Stderr
-		if err := c.Run(); err != nil {
-			misc.Die("bad command", err)
+		if err := subcommands.LibExecCallback(subcommands.LibExecOptions{Directory: lib, Command: command, Args: args[2:]}); err != nil {
+			misc.Die("subcommand failed", err)
 		}
 	}
 }

@@ -48,6 +48,6 @@ remove entry? (y/N) HOOK RAN remove post
 
 remove entry? (y/N) HOOK RAN remove post
 
-unable to decrypt (decrypt not ok)
+display command failed to retrieve data (decrypt not ok)
 rekeying: /keys/one2.lb
 test2
