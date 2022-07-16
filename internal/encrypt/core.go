@@ -2,6 +2,7 @@ package encrypt
 
 import (
 	"crypto/rand"
+	"crypto/sha512"
 	"errors"
 	"io"
 	random "math/rand"
@@ -13,12 +14,14 @@ import (
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/google/shlex"
 	"golang.org/x/crypto/nacl/secretbox"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
 	keyLength   = 32
 	nonceLength = 24
 	padLength   = 256
+	saltLength  = 16
 	// PlainKeyMode is plaintext based key resolution.
 	PlainKeyMode = "plaintext"
 	// CommandKeyMode will run an external command to get the key (from stdout).
@@ -88,16 +91,19 @@ func newLockbox(key, keyMode, file string) (Lockbox, error) {
 		return Lockbox{}, errors.New("key is empty")
 	}
 
-	if len(b) > keyLength {
-		return Lockbox{}, errors.New("key is too large for use")
-	}
-
-	for len(b) < keyLength {
-		b = append(b, byte(0))
-	}
 	var secretKey [keyLength]byte
 	copy(secretKey[:], b)
 	return Lockbox{secret: secretKey, file: file}, nil
+}
+
+func pad(salt, key []byte) ([keyLength]byte, error) {
+	d := pbkdf2.Key(key, salt, 4096, keyLength, sha512.New)
+	if len(d) != keyLength {
+		return [keyLength]byte{}, errors.New("invalid key result from pad")
+	}
+	var obj [keyLength]byte
+	copy(obj[:], d[:keyLength])
+	return obj, nil
 }
 
 func getKey(keyMode, name string) ([]byte, error) {
@@ -145,23 +151,40 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	if _, err := io.ReadFull(rand.Reader, padding[:]); err != nil {
 		return err
 	}
+	var salt [saltLength]byte
+	if _, err := io.ReadFull(rand.Reader, salt[:]); err != nil {
+		return err
+	}
 	var write []byte
 	write = append(write, byte(padTo))
 	write = append(write, padding[0:padTo]...)
 	write = append(write, data...)
-	encrypted := secretbox.Seal(nonce[:], write, &nonce, &l.secret)
-	return os.WriteFile(l.file, encrypted, 0600)
+	key, err := pad(salt[:], l.secret[:])
+	if err != nil {
+		return err
+	}
+	encrypted := secretbox.Seal(nonce[:], write, &nonce, &key)
+	var persist []byte
+	persist = append(persist, salt[:]...)
+	persist = append(persist, encrypted...)
+	return os.WriteFile(l.file, persist, 0600)
 }
 
 // Decrypt will decrypt an object from file.
 func (l Lockbox) Decrypt() ([]byte, error) {
 	var nonce [nonceLength]byte
+	var salt [saltLength]byte
 	encrypted, err := os.ReadFile(l.file)
 	if err != nil {
 		return nil, err
 	}
-	copy(nonce[:], encrypted[:nonceLength])
-	decrypted, ok := secretbox.Open(nil, encrypted[nonceLength:], &nonce, &l.secret)
+	copy(salt[:], encrypted[:saltLength])
+	copy(nonce[:], encrypted[saltLength:saltLength+nonceLength])
+	key, err := pad(salt[:], l.secret[:])
+	if err != nil {
+		return nil, err
+	}
+	decrypted, ok := secretbox.Open(nil, encrypted[saltLength+nonceLength:], &nonce, &key)
 	if !ok {
 		return nil, errors.New("decrypt not ok")
 	}
