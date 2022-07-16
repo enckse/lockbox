@@ -2,6 +2,7 @@ package colors
 
 import (
 	"errors"
+
 	"github.com/enckse/lockbox/internal/inputs"
 )
 
@@ -29,7 +30,7 @@ func NewTerminal(color Color) (Terminal, error) {
 	}
 	colors := interactive
 	if colors {
-		isColored, err := inputs.IsColorEnabled()
+		isColored, err := inputs.IsNoColorEnabled()
 		if err != nil {
 			return Terminal{}, err
 		}

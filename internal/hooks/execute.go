@@ -5,22 +5,23 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
 	"github.com/enckse/lockbox/internal/misc"
 )
 
 type (
-	// HookAction are specific steps that may call a hook.
+	// Action are specific steps that may call a hook.
 	Action string
-	// HookStep is the step, during command execution, when the hook was called.
+	// Step is the step, during command execution, when the hook was called.
 	Step string
 )
 
 const (
-	// RemoveHook is called when a store entry is removed.
+	// Remove is called when a store entry is removed.
 	Remove Action = "remove"
-	// InsertHook is called when a store entry is inserted.
+	// Insert is called when a store entry is inserted.
 	Insert Action = "insert"
-	// PostHookStep is a hook running at the end of a command.
+	// PostStep is a hook running at the end of a command.
 	PostStep Step = "post"
 )
 

@@ -20,6 +20,7 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
 }
 
+// IsNoColorEnabled indicates if the flag is set to disable color.
 func IsNoColorEnabled() (bool, error) {
 	return isYesNoEnv(false, "LOCKBOX_NOCOLOR")
 }

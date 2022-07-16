@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
 	"github.com/enckse/lockbox/internal/misc"
 )
 

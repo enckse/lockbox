@@ -12,6 +12,7 @@ type (
 	}
 )
 
+// Marshal handles marshalling of entities to output formats.
 func Marshal(entities []ExportEntity) ([]byte, error) {
 	return json.MarshalIndent(entities, "", "    ")
 }

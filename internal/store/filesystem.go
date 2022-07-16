@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
 	"github.com/enckse/lockbox/internal/misc"
 )
 
@@ -20,10 +21,10 @@ type (
 	FileSystem struct {
 		path string
 	}
+	// ViewOptions represent list options for parsing store entries.
 	ViewOptions struct {
 		Display bool
 	}
-
 )
 
 // NewFileSystemStore gets the lockbox directory (filesystem-based) store.
