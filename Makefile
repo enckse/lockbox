@@ -11,6 +11,7 @@ $(TARGETS): cmd/$@/* internal/* go.*
 	go build -ldflags '-X main.version=$(VERSION) -X main.libExec=$(LIBEXEC) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
 
 check: $(TARGETS)
+	cd internal && go test .
 	cd tests && make BUILD=../$(BUILD)
 
 clean:

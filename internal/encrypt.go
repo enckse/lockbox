@@ -32,9 +32,10 @@ type (
 
 	// LockboxOptions represent options to create a lockbox from.
 	LockboxOptions struct {
-		Key     string
-		KeyMode string
-		File    string
+		Key      string
+		KeyMode  string
+		File     string
+		callback func(string) string
 	}
 )
 
@@ -54,6 +55,9 @@ func newLockbox(key, keyMode, file string) (Lockbox, error) {
 	useKey := key
 	if useKey == "" {
 		useKey = os.Getenv("LOCKBOX_KEY")
+	}
+	if useKey == "" {
+		return Lockbox{}, NewLockboxError("no key given")
 	}
 	b, err := getKey(useKeyMode, useKey)
 	if err != nil {
