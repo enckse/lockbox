@@ -59,16 +59,20 @@ func main() {
 			}
 			searchTerm = args[2]
 		}
+		viewOptions := store.ViewOptions{Display: true}
+		if isFind {
+			viewOptions.Filter = func(inPath string) string {
+				if strings.Contains(inPath, searchTerm) {
+					return inPath
+				}
+				return ""
+			}
+		}
 		files, err := fs.List(store.ViewOptions{Display: true})
 		if err != nil {
 			misc.Die("unable to list files", err)
 		}
 		for _, f := range files {
-			if isFind {
-				if !strings.Contains(f, searchTerm) {
-					continue
-				}
-			}
 			fmt.Println(f)
 		}
 	case "version":
