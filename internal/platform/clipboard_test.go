@@ -1,4 +1,4 @@
-package clip
+package platform
 
 import (
 	"os"
@@ -7,17 +7,18 @@ import (
 
 func TestNoClipboard(t *testing.T) {
 	os.Setenv("LOCKBOX_CLIPMAX", "")
-	os.Setenv("LOCKBOX_CLIPMODE", "off")
-	_, err := NewCommands()
-	if err == nil || err.Error() != "clipboard is unavailable" {
+	os.Setenv("LOCKBOX_NOCLIP", "yes")
+	_, err := NewClipboard()
+	if err == nil || err.Error() != "clipboard is off" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestMaxTime(t *testing.T) {
-	os.Setenv("LOCKBOX_CLIPMODE", pbClipMode)
+	os.Setenv("LOCKBOX_NOCLIP", "no")
+	os.Setenv("LOCKBOX_PLATFORM", string(LinuxWayland))
 	os.Setenv("LOCKBOX_CLIPMAX", "")
-	c, err := NewCommands()
+	c, err := NewClipboard()
 	if err != nil {
 		t.Errorf("invalid clipboard: %v", err)
 	}
@@ -25,7 +26,7 @@ func TestMaxTime(t *testing.T) {
 		t.Error("invalid default")
 	}
 	os.Setenv("LOCKBOX_CLIPMAX", "1")
-	c, err = NewCommands()
+	c, err = NewClipboard()
 	if err != nil {
 		t.Errorf("invalid clipboard: %v", err)
 	}
@@ -33,22 +34,23 @@ func TestMaxTime(t *testing.T) {
 		t.Error("invalid default")
 	}
 	os.Setenv("LOCKBOX_CLIPMAX", "-1")
-	_, err = NewCommands()
+	_, err = NewClipboard()
 	if err == nil || err.Error() != "clipboard max time must be greater than 0" {
 		t.Errorf("invalid max time error: %v", err)
 	}
 	os.Setenv("LOCKBOX_CLIPMAX", "$&(+")
-	_, err = NewCommands()
+	_, err = NewClipboard()
 	if err == nil || err.Error() != "strconv.Atoi: parsing \"$&(+\": invalid syntax" {
 		t.Errorf("invalid max time error: %v", err)
 	}
 }
 
 func TestClipboardInstances(t *testing.T) {
+	os.Setenv("LOCKBOX_NOCLIP", "no")
 	os.Setenv("LOCKBOX_CLIPMAX", "")
-	for _, item := range []string{pbClipMode, xClipMode, waylandClipMode, wslMode} {
-		os.Setenv("LOCKBOX_CLIPMODE", item)
-		c, err := NewCommands()
+	for _, item := range []System{MacOS, LinuxWayland, LinuxX, WindowsLinux} {
+		os.Setenv("LOCKBOX_PLATFORM", string(item))
+		c, err := NewClipboard()
 		if err != nil {
 			t.Errorf("invalid clipboard: %v", err)
 		}
@@ -59,7 +61,7 @@ func TestClipboardInstances(t *testing.T) {
 }
 
 func TestArgs(t *testing.T) {
-	c := Commands{copying: []string{"cp"}, pasting: []string{"paste", "with", "args"}}
+	c := Clipboard{copying: []string{"cp"}, pasting: []string{"paste", "with", "args"}}
 	cmd, args := c.Args(true)
 	if cmd != "cp" || len(args) != 0 {
 		t.Error("invalid parse")

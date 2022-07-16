@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/clip"
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/dump"
 	"github.com/enckse/lockbox/internal/encrypt"
 	"github.com/enckse/lockbox/internal/hooks"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/misc"
+	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/store"
 )
 
@@ -181,9 +181,9 @@ func main() {
 			misc.Die("unable to get color for terminal", err)
 		}
 		dumpData := []dump.ExportEntity{}
-		clipboard := clip.Commands{}
+		clipboard := platform.Clipboard{}
 		if !isShow {
-			clipboard, err = clip.NewCommands()
+			clipboard, err = platform.NewClipboard()
 			if err != nil {
 				misc.Die("unable to get clipboard", err)
 			}
@@ -239,7 +239,7 @@ func main() {
 		if err != nil {
 			misc.Die("unable to read value to clear", err)
 		}
-		clipboard, err := clip.NewCommands()
+		clipboard, err := platform.NewClipboard()
 		if err != nil {
 			misc.Die("unable to get paste command", err)
 		}

@@ -20,6 +20,11 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
 }
 
+// IsNoClipEnabled indicates if clipboard mode is enabled.
+func IsNoClipEnabled() (bool, error) {
+	return isYesNoEnv(false, "LOCKBOX_NOCLIP")
+}
+
 // IsNoColorEnabled indicates if the flag is set to disable color.
 func IsNoColorEnabled() (bool, error) {
 	return isYesNoEnv(false, "LOCKBOX_NOCOLOR")

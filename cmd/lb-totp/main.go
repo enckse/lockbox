@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/clip"
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/encrypt"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/misc"
+	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/store"
 	otp "github.com/pquerna/otp/totp"
 )
@@ -107,9 +107,9 @@ func display(token string, args cli.Arguments) error {
 			clear()
 		}
 	}
-	clipboard := clip.Commands{}
+	clipboard := platform.Clipboard{}
 	if args.Clip {
-		clipboard, err = clip.NewCommands()
+		clipboard, err = platform.NewClipboard()
 		if err != nil {
 			misc.Die("invalid clipboard", err)
 		}
