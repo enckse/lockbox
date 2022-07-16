@@ -67,7 +67,7 @@ func main() {
 				return ""
 			}
 		}
-		files, err := fs.List(store.ViewOptions{Display: true})
+		files, err := fs.List(viewOptions)
 		if err != nil {
 			misc.Die("unable to list files", err)
 		}
