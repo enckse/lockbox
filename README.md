@@ -85,10 +85,10 @@ lb totp -c token
 
 ## git integration
 
-To manage the `.lb` files in a git repository and see _actual_ text diffs and this to a `.gitconfig`
+To manage the `.lb` files in a git repository and see _actual_ text diffs add this to a `.gitconfig`
 ```
 [diff "lb"]
-    textconv = lb textconv
+    textconv = lb gitdiff
 ```
 
 ## build
