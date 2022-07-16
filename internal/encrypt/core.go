@@ -28,6 +28,11 @@ const (
 	CommandKeyMode = "command"
 )
 
+var (
+	cryptoVers       = []byte{1}
+	cryptoVersLength = len(cryptoVers)
+)
+
 type (
 	// Lockbox represents a method to encrypt/decrypt locked files.
 	Lockbox struct {
@@ -165,6 +170,7 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	}
 	encrypted := secretbox.Seal(nonce[:], write, &nonce, &key)
 	var persist []byte
+	persist = append(persist, cryptoVers...)
 	persist = append(persist, salt[:]...)
 	persist = append(persist, encrypted...)
 	return os.WriteFile(l.file, persist, 0600)
@@ -178,13 +184,13 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	copy(salt[:], encrypted[:saltLength])
-	copy(nonce[:], encrypted[saltLength:saltLength+nonceLength])
+	copy(salt[:], encrypted[cryptoVersLength:saltLength+cryptoVersLength])
+	copy(nonce[:], encrypted[cryptoVersLength+saltLength:cryptoVersLength+saltLength+nonceLength])
 	key, err := pad(salt[:], l.secret[:])
 	if err != nil {
 		return nil, err
 	}
-	decrypted, ok := secretbox.Open(nil, encrypted[saltLength+nonceLength:], &nonce, &key)
+	decrypted, ok := secretbox.Open(nil, encrypted[cryptoVersLength+saltLength+nonceLength:], &nonce, &key)
 	if !ok {
 		return nil, errors.New("decrypt not ok")
 	}
