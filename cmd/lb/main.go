@@ -12,7 +12,12 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/clipboard"
+	"github.com/enckse/lockbox/internal/clip"
+	"github.com/enckse/lockbox/internal/colors"
+	"github.com/enckse/lockbox/internal/dump"
+	"github.com/enckse/lockbox/internal/encrypt"
+	"github.com/enckse/lockbox/internal/hooks"
+	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/misc"
 	"github.com/enckse/lockbox/internal/store"
 )
@@ -22,11 +27,11 @@ var (
 	libExec = ""
 )
 
-func getEntry(store string, args []string, idx int) string {
+func getEntry(fs store.FileSystem, args []string, idx int) string {
 	if len(args) != idx+1 {
 		misc.Die("invalid entry given", errors.New("specific entry required"))
 	}
-	return filepath.Join(store, args[idx]) + store.Extension
+	return fs.NewPath(args[idx])
 }
 
 func getExecutable() string {
@@ -43,7 +48,7 @@ func main() {
 		misc.Die("missing arguments", errors.New("requires subcommand"))
 	}
 	command := args[1]
-	store := internal.GetStore()
+	fs := store.NewFileSystemStore()
 	switch command {
 	case "ls", "list", "find":
 		isFind := command == "find"
@@ -54,7 +59,7 @@ func main() {
 			}
 			searchTerm = args[2]
 		}
-		files, err := internal.List(store, true)
+		files, err := fs.List(store.ViewOptions{Display: true})
 		if err != nil {
 			misc.Die("unable to list files", err)
 		}
@@ -84,9 +89,9 @@ func main() {
 		default:
 			misc.Die("too many arguments", errors.New("insert can only perform one operation"))
 		}
-		isPipe := internal.IsInputFromPipe()
-		entry := getEntry(store, args, idx)
-		if internal.PathExists(entry) {
+		isPipe := inputs.IsInputFromPipe()
+		entry := getEntry(fs, args, idx)
+		if misc.PathExists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
 					return
@@ -94,7 +99,7 @@ func main() {
 			}
 		} else {
 			dir := filepath.Dir(entry)
-			if !internal.PathExists(dir) {
+			if !misc.PathExists(dir) {
 				if err := os.MkdirAll(dir, 0755); err != nil {
 					misc.Die("failed to create directory structure", err)
 				}
@@ -102,13 +107,13 @@ func main() {
 		}
 		var password string
 		if !options.Multi && !isPipe {
-			input, err := internal.ConfirmInputsMatch("password")
+			input, err := inputs.ConfirmInputsMatch("password")
 			if err != nil {
 				misc.Die("password input failed", err)
 			}
 			password = input
 		} else {
-			input, err := internal.Stdin(false)
+			input, err := inputs.Stdin(false)
 			if err != nil {
 				misc.Die("failed to read stdin", err)
 			}
@@ -117,7 +122,7 @@ func main() {
 		if password == "" {
 			misc.Die("empty password provided", errors.New("password can NOT be empty"))
 		}
-		l, err := internal.NewLockbox(internal.LockboxOptions{File: entry})
+		l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: entry})
 		if err != nil {
 			misc.Die("unable to make lockbox model instance", err)
 		}
@@ -125,15 +130,15 @@ func main() {
 			misc.Die("failed to save password", err)
 		}
 		fmt.Println("")
-		internal.Hooks(internal.InsertHook, internal.PostHookStep)
+		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
-		entry := getEntry(store, args, 2)
-		if !internal.PathExists(entry) {
+		entry := getEntry(fs, args, 2)
+		if !misc.PathExists(entry) {
 			misc.Die("does not exists", errors.New("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
-			internal.Hooks(internal.RemoveHook, internal.PostHookStep)
+			hooks.Run(hooks.Remove, hooks.PostStep)
 		}
 	case "show", "-c", "clip", "dump":
 		isDump := command == "dump"
@@ -147,12 +152,12 @@ func main() {
 				}
 			}
 		}
-		inEntry := getEntry(store, args, startEntry)
+		inEntry := getEntry(fs, args, startEntry)
 		isShow := command == "show" || isDump
 		entries := []string{inEntry}
 		if strings.Contains(inEntry, "*") {
-			if inEntry == getEntry(store, []string{"***"}, 0) {
-				all, err := internal.List(store, false)
+			if inEntry == getEntry(fs, []string{"***"}, 0) {
+				all, err := fs.List(store.ViewOptions{})
 				if err != nil {
 					misc.Die("unable to get all files", err)
 				}
@@ -172,23 +177,23 @@ func main() {
 			}
 			sort.Strings(entries)
 		}
-		startColor, endColor, err := internal.GetColor(internal.ColorRed)
+		coloring, err := colors.NewTerminal(colors.Red)
 		if err != nil {
 			misc.Die("unable to get color for terminal", err)
 		}
-		dumpData := []Dump{}
-		clip := clipboard.Commands{}
+		dumpData := []dump.ExportEntity{}
+		clipboard := clip.Commands{}
 		if !isShow {
-			clip, err = clipboard.NewCommands()
+			clipboard, err = clip.NewCommands()
 			if err != nil {
 				misc.Die("unable to get clipboard", err)
 			}
 		}
 		for _, entry := range entries {
-			if !internal.PathExists(entry) {
+			if !misc.PathExists(entry) {
 				misc.Die("invalid entry", errors.New("entry not found"))
 			}
-			l, err := internal.NewLockbox(internal.LockboxOptions{File: entry})
+			l, err := encrypt.NewLockbox(encrypt.LockboxOptions{File: entry})
 			if err != nil {
 				misc.Die("unable to make lockbox model instance", err)
 			}
@@ -197,29 +202,25 @@ func main() {
 				misc.Die("unable to decrypt", err)
 			}
 			value := strings.TrimSpace(string(decrypt))
-			dump := Dump{}
+			entity := dump.ExportEntity{}
 			if isShow {
 				if isGlob {
-					fileName := strings.ReplaceAll(entry, store, "")
-					if fileName[0] == '/' {
-						fileName = fileName[1:]
-					}
-					fileName = strings.ReplaceAll(fileName, internal.Extension, "")
+					fileName := fs.CleanPath(entry)
 					if isDump {
-						dump.Path = fileName
+						entity.Path = fileName
 					} else {
-						fmt.Printf("%s%s:%s\n", startColor, fileName, endColor)
+						fmt.Printf("%s%s:%s\n", coloring.Start, fileName, coloring.End)
 					}
 				}
 				if isDump {
-					dump.Value = value
-					dumpData = append(dumpData, dump)
+					entity.Value = value
+					dumpData = append(dumpData, entity)
 				} else {
 					fmt.Println(value)
 				}
 				continue
 			}
-			clip.CopyToClipboard(value, getExecutable())
+			clipboard.CopyTo(value, getExecutable())
 		}
 		if isDump {
 			if !options.Yes {
@@ -242,23 +243,23 @@ func main() {
 		}
 	case "clear":
 		idx := 0
-		val, err := internal.Stdin(false)
+		val, err := inputs.Stdin(false)
 		if err != nil {
 			misc.Die("unable to read value to clear", err)
 		}
-		clip, err := clipboard.NewCommands()
+		clipboard, err := clip.NewCommands()
 		if err != nil {
 			misc.Die("unable to get paste command", err)
 		}
 		var args []string
-		if len(clip.Paste) > 1 {
-			args = clip.Paste[1:]
+		if len(clipboard.Paste) > 1 {
+			args = clipboard.Paste[1:]
 		}
 		val = strings.TrimSpace(val)
-		for idx < clipboard.MaxTime {
+		for idx < clip.MaxTime {
 			idx++
 			time.Sleep(1 * time.Second)
-			out, err := exec.Command(clip.Paste[0], args...).Output()
+			out, err := exec.Command(clipboard.Paste[0], args...).Output()
 			if err != nil {
 				continue
 			}
@@ -268,7 +269,7 @@ func main() {
 				return
 			}
 		}
-		clip.CopyToClipboard("", getExecutable())
+		clipboard.CopyTo("", getExecutable())
 	default:
 		lib := os.Getenv("LOCKBOX_LIBEXEC")
 		if lib == "" {
@@ -285,7 +286,7 @@ func main() {
 }
 
 func confirm(prompt string) bool {
-	yesNo, err := internal.ConfirmYesNoPrompt(prompt)
+	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
 		misc.Die("failed to get response", err)
 	}

@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	// Extension is the lockbox file extension.
-	Extension = ".lb"
+	extension = ".lb"
 )
 
 type (
@@ -28,8 +27,8 @@ type (
 )
 
 // NewFileSystemStore gets the lockbox directory (filesystem-based) store.
-func NewFileSystemStore() string {
-	return os.Getenv("LOCKBOX_STORE")
+func NewFileSystemStore() FileSystem {
+	return FileSystem{path: os.Getenv("LOCKBOX_STORE")}
 }
 
 // List will get all lockbox files in a store.
@@ -42,12 +41,12 @@ func (s FileSystem) List(options ViewOptions) ([]string, error) {
 		if err != nil {
 			return err
 		}
-		if strings.HasSuffix(path, Extension) {
+		if strings.HasSuffix(path, extension) {
 			usePath := path
 			if options.Display {
 				usePath = strings.TrimPrefix(usePath, s.path)
 				usePath = strings.TrimPrefix(usePath, "/")
-				usePath = strings.TrimSuffix(usePath, Extension)
+				usePath = strings.TrimSuffix(usePath, extension)
 			}
 			results = append(results, usePath)
 		}
@@ -61,4 +60,24 @@ func (s FileSystem) List(options ViewOptions) ([]string, error) {
 		sort.Strings(results)
 	}
 	return results, nil
+}
+
+// NewPath creates a new filesystem store path for an entry.
+func (s FileSystem) NewPath(file string) string {
+	return filepath.Join(s.path, file) + extension
+}
+
+// CleanPath will clean store and extension information from an entry.
+func (s FileSystem) CleanPath(fullPath string) string {
+	fileName := fullPath
+	if strings.HasPrefix(fullPath, s.path) {
+		fileName = fileName[len(s.path):]
+	}
+	if fileName[0] == '/' {
+		fileName = fileName[1:]
+	}
+	if strings.HasSuffix(fileName, extension) {
+		fileName = fileName[0 : len(fileName)-len(extension)]
+	}
+	return fileName
 }

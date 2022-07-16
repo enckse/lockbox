@@ -72,8 +72,8 @@ func NewCommands() (Commands, error) {
 	}
 }
 
-// CopyToClipboard will copy to clipboard, if non-empty will clear later.
-func (c Commands) CopyToClipboard(value, executable string) {
+// CopyTo will copy to clipboard, if non-empty will clear later.
+func (c Commands) CopyTo(value, executable string) {
 	var args []string
 	if len(c.Copy) > 1 {
 		args = c.Copy[1:]

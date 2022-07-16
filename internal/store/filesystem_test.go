@@ -26,7 +26,7 @@ func TestList(t *testing.T) {
 		t.Errorf("unable to makedir: %v", err)
 	}
 	for _, path := range []string{"test", "test2", "aaa", "sub/aaaaajk", "sub/12lkjafav"} {
-		if err := os.WriteFile(filepath.Join(testStore, path+Extension), []byte(""), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(testStore, path+extension), []byte(""), 0644); err != nil {
 			t.Errorf("failed to write %s: %v", path, err)
 		}
 	}
@@ -47,5 +47,29 @@ func TestList(t *testing.T) {
 	}
 	if res[0] != "aaa" || res[1] != "sub/12lkjafav" || res[2] != "sub/aaaaajk" || res[3] != "test" || res[4] != "test2" {
 		t.Errorf("not sorted: %v", res)
+	}
+}
+
+func TestFileSystemFile(t *testing.T) {
+	f := FileSystem{path: "abc"}
+	p := f.NewPath("test")
+	if p != "abc/test.lb" {
+		t.Error("invalid join result")
+	}
+}
+
+func TestCleanPath(t *testing.T) {
+	f := FileSystem{path: "abc"}
+	c := f.CleanPath("xyz")
+	if c != "xyz" {
+		t.Error("invalid clean")
+	}
+	c = f.CleanPath("abc/xyz")
+	if c != "xyz" {
+		t.Error("invalid clean")
+	}
+	c = f.CleanPath("xyz.lb.lb")
+	if c != "xyz.lb" {
+		t.Error("invalid clean")
 	}
 }
