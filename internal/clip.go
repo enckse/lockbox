@@ -18,13 +18,21 @@ const (
 	wslMode         = "wsl"
 )
 
-// GetClipboardCommand will retrieve the commands to use for clipboard operations.
-func GetClipboardCommand() ([]string, []string, error) {
+type (
+	// ClipboardCommands represent system clipboard operations.
+	ClipboardCommands struct {
+		Copy  []string
+		Paste []string
+	}
+)
+
+// NewClipboardCommands will retrieve the commands to use for clipboard operations.
+func NewClipboardCommands() (ClipboardCommands, error) {
 	env := strings.TrimSpace(os.Getenv("LOCKBOX_CLIPMODE"))
 	if env == "" {
 		b, err := exec.Command("uname", "-a").Output()
 		if err != nil {
-			return nil, nil, err
+			return ClipboardCommands{}, err
 		}
 		raw := strings.TrimSpace(string(b))
 		parts := strings.Split(raw, " ")
@@ -37,7 +45,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 			} else {
 				if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
 					if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
-						return nil, nil, errors.New("unable to detect linux clipboard mode")
+						return ClipboardCommands{}, errors.New("unable to detect linux clipboard mode")
 					}
 					env = xClipMode
 				} else {
@@ -45,36 +53,30 @@ func GetClipboardCommand() ([]string, []string, error) {
 				}
 			}
 		default:
-			return nil, nil, errors.New("unable to detect clipboard mode")
+			return ClipboardCommands{}, errors.New("unable to detect clipboard mode")
 		}
 	}
 	switch env {
 	case pbClipMode:
-		return []string{"pbcopy"}, []string{"pbpaste"}, nil
+		return ClipboardCommands{Copy: []string{"pbcopy"}, Paste: []string{"pbpaste"}}, nil
 	case xClipMode:
-		return []string{"xclip"}, []string{"xclip", "-o"}, nil
+		return ClipboardCommands{Copy: []string{"xclip"}, Paste: []string{"xclip", "-o"}}, nil
 	case waylandClipMode:
-		return []string{"wl-copy"}, []string{"wl-paste"}, nil
+		return ClipboardCommands{Copy: []string{"wl-copy"}, Paste: []string{"wl-paste"}}, nil
 	case wslMode:
-		return []string{"clip.exe"}, []string{"powershell.exe", "-command", "Get-Clipboard"}, nil
-	case "off":
-		return nil, nil, errors.New("clipboard is turned off")
+		return ClipboardCommands{Copy: []string{"clip.exe"}, Paste: []string{"powershell.exe", "-command", "Get-Clipboard"}}, nil
+	default:
+		return ClipboardCommands{}, errors.New("clipboard is unavailable")
 	}
-	return nil, nil, errors.New("unable to get clipboard command(s)")
 }
 
 // CopyToClipboard will copy to clipboard, if non-empty will clear later.
-func CopyToClipboard(value, executable string) {
-	cp, _, err := GetClipboardCommand()
-	if err != nil {
-		fmt.Printf("unable to copy to clipboard: %v\n", err)
-		return
-	}
+func (c ClipboardCommands) CopyToClipboard(value, executable string) {
 	var args []string
-	if len(cp) > 1 {
-		args = cp[1:]
+	if len(c.Copy) > 1 {
+		args = c.Copy[1:]
 	}
-	pipeTo(cp[0], value, true, args...)
+	pipeTo(c.Copy[0], value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", MaxClipTime)
 		pipeTo(filepath.Join(filepath.Dir(executable), "lb"), value, false, "clear")

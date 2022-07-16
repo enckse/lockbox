@@ -186,6 +186,13 @@ func main() {
 			internal.Die("unable to get color for terminal", err)
 		}
 		dumpData := []Dump{}
+		clip := internal.ClipboardCommands{}
+		if !isShow {
+			clip, err = internal.NewClipboardCommands()
+			if err != nil {
+				internal.Die("unable to get clipboard", err)
+			}
+		}
 		for _, entry := range entries {
 			if !internal.PathExists(entry) {
 				internal.Die("invalid entry", errors.New("entry not found"))
@@ -221,7 +228,7 @@ func main() {
 				}
 				continue
 			}
-			internal.CopyToClipboard(value, getExecutable())
+			clip.CopyToClipboard(value, getExecutable())
 		}
 		if isDump {
 			if !options.Yes {
@@ -248,19 +255,19 @@ func main() {
 		if err != nil {
 			internal.Die("unable to read value to clear", err)
 		}
-		_, paste, err := internal.GetClipboardCommand()
+		clip, err := internal.NewClipboardCommands()
 		if err != nil {
 			internal.Die("unable to get paste command", err)
 		}
 		var args []string
-		if len(paste) > 1 {
-			args = paste[1:]
+		if len(clip.Paste) > 1 {
+			args = clip.Paste[1:]
 		}
 		val = strings.TrimSpace(val)
 		for idx < internal.MaxClipTime {
 			idx++
 			time.Sleep(1 * time.Second)
-			out, err := exec.Command(paste[0], args...).Output()
+			out, err := exec.Command(clip.Paste[0], args...).Output()
 			if err != nil {
 				continue
 			}
@@ -270,7 +277,7 @@ func main() {
 				return
 			}
 		}
-		internal.CopyToClipboard("", getExecutable())
+		clip.CopyToClipboard("", getExecutable())
 	default:
 		lib := os.Getenv("LOCKBOX_LIBEXEC")
 		if lib == "" {

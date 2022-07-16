@@ -117,6 +117,13 @@ func display(token string, args internal.Arguments) error {
 			clear()
 		}
 	}
+	clip := internal.ClipboardCommands{}
+	if args.Clip {
+		clip, err = internal.NewClipboardCommands()
+		if err != nil {
+			internal.Die("invalid clipboard", err)
+		}
+	}
 	for {
 		if !first {
 			time.Sleep(500 * time.Millisecond)
@@ -157,7 +164,7 @@ func display(token string, args internal.Arguments) error {
 			}
 		} else {
 			fmt.Printf("-> %s\n", expires)
-			internal.CopyToClipboard(code, exe)
+			clip.CopyToClipboard(code, exe)
 			return nil
 		}
 		if !args.Once {
