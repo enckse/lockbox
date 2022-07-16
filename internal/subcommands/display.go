@@ -64,14 +64,12 @@ func DisplayCallback(args DisplayOptions) ([]dump.ExportEntity, error) {
 			return nil, err
 		}
 		entity := dump.ExportEntity{Value: strings.TrimSpace(string(decrypt))}
-		if args.Show {
-			if isGlob {
-				fileName := args.Store.CleanPath(entry)
-				if args.Dump {
-					entity.Path = fileName
-				} else {
-					entity.Path = fmt.Sprintf("%s%s:%s", coloring.Start, fileName, coloring.End)
-				}
+		if args.Show && isGlob {
+			fileName := args.Store.CleanPath(entry)
+			if args.Dump {
+				entity.Path = fileName
+			} else {
+				entity.Path = fmt.Sprintf("%s%s:%s", coloring.Start, fileName, coloring.End)
 			}
 		}
 		dumpData = append(dumpData, entity)
