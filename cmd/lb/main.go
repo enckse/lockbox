@@ -277,6 +277,9 @@ func main() {
 			lib = libExec
 		}
 		tryCommand := fmt.Sprintf(filepath.Join(lib, "lb-%s"), command)
+		if !misc.PathExists(tryCommand) {
+			misc.Die("unknown subcommand", errors.New(command))
+		}
 		c := exec.Command(tryCommand, args[2:]...)
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
