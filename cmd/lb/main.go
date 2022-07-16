@@ -13,6 +13,7 @@ import (
 
 	"github.com/enckse/lockbox/internal"
 	"github.com/enckse/lockbox/internal/cli"
+	"github.com/enckse/lockbox/internal/clipboard"
 )
 
 const (
@@ -187,9 +188,9 @@ func main() {
 			internal.Die("unable to get color for terminal", err)
 		}
 		dumpData := []Dump{}
-		clip := internal.ClipboardCommands{}
+		clip := clipboard.Commands{}
 		if !isShow {
-			clip, err = internal.NewClipboardCommands()
+			clip, err = clipboard.NewCommands()
 			if err != nil {
 				internal.Die("unable to get clipboard", err)
 			}
@@ -256,7 +257,7 @@ func main() {
 		if err != nil {
 			internal.Die("unable to read value to clear", err)
 		}
-		clip, err := internal.NewClipboardCommands()
+		clip, err := clipboard.NewCommands()
 		if err != nil {
 			internal.Die("unable to get paste command", err)
 		}
@@ -265,7 +266,7 @@ func main() {
 			args = clip.Paste[1:]
 		}
 		val = strings.TrimSpace(val)
-		for idx < internal.MaxClipTime {
+		for idx < clipboard.MaxTime {
 			idx++
 			time.Sleep(1 * time.Second)
 			out, err := exec.Command(clip.Paste[0], args...).Output()

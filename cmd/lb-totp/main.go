@@ -13,6 +13,7 @@ import (
 
 	"github.com/enckse/lockbox/internal"
 	"github.com/enckse/lockbox/internal/cli"
+	"github.com/enckse/lockbox/internal/clipboard"
 	otp "github.com/pquerna/otp/totp"
 )
 
@@ -118,9 +119,9 @@ func display(token string, args cli.Arguments) error {
 			clear()
 		}
 	}
-	clip := internal.ClipboardCommands{}
+	clip := clipboard.Commands{}
 	if args.Clip {
-		clip, err = internal.NewClipboardCommands()
+		clip, err = clipboard.NewCommands()
 		if err != nil {
 			internal.Die("invalid clipboard", err)
 		}

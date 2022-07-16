@@ -1,4 +1,4 @@
-package internal
+package clipboard
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 
 func TestNoClipboard(t *testing.T) {
 	os.Setenv("LOCKBOX_CLIPMODE", "off")
-	_, err := NewClipboardCommands()
+	_, err := NewCommands()
 	if err == nil || err.Error() != "clipboard is unavailable" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -16,7 +16,7 @@ func TestNoClipboard(t *testing.T) {
 func TestClipboardInstances(t *testing.T) {
 	for _, item := range []string{pbClipMode, xClipMode, waylandClipMode, wslMode} {
 		os.Setenv("LOCKBOX_CLIPMODE", item)
-		c, err := NewClipboardCommands()
+		c, err := NewCommands()
 		if err != nil {
 			t.Errorf("invalid clipboard: %v", err)
 		}
