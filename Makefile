@@ -14,10 +14,10 @@ all: $(TARGETS)
 $(TARGETS): $(SOURCE) go.*
 	go build -ldflags '-X main.version=$(VERSION) -X main.libExec=$(LIBEXEC) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
 
-$(TESTDIR): $(TARGETS)
+$(TESTDIR):
 	cd $@ && go test
 
-check: $(TESTDIR)
+check: $(TARGETS) $(TESTDIR)
 	cd tests && make BUILD=../$(BUILD)
 
 clean:
