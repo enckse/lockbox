@@ -64,6 +64,21 @@ func TestList(t *testing.T) {
 	if len(res) != 2 || res[0] != "1" || res[1] != "2" {
 		t.Error("mismatch filter results")
 	}
+	res, err = s.List(ViewOptions{ErrorOnEmpty: false, Filter: func(path string) string {
+		return ""
+	}})
+	if err != nil {
+		t.Errorf("should be non-error: %v", err)
+	}
+	if len(res) != 0 {
+		t.Error("should be empty list")
+	}
+	_, err = s.List(ViewOptions{ErrorOnEmpty: true, Filter: func(path string) string {
+		return ""
+	}})
+	if err == nil || err.Error() != "no results found" {
+		t.Errorf("should be non-error: %v", err)
+	}
 }
 
 func TestFileSystemFile(t *testing.T) {

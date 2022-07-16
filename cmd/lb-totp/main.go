@@ -24,24 +24,6 @@ var (
 	mainExe = ""
 )
 
-func list() ([]string, error) {
-	f := store.NewFileSystemStore()
-	token := totpToken(f, true)
-	results, err := f.List(store.ViewOptions{Filter: func(path string) string {
-		if filepath.Base(path) == token {
-			return filepath.Dir(f.CleanPath(path))
-		}
-		return ""
-	}})
-	if err != nil {
-		return nil, err
-	}
-	if len(results) == 0 {
-		return nil, errors.New("no objects found")
-	}
-	return results, nil
-}
-
 func clear() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
@@ -175,12 +157,19 @@ func main() {
 	cmd := args[1]
 	options := cli.ParseArgs(cmd)
 	if options.List {
-		result, err := list()
+		f := store.NewFileSystemStore()
+		token := totpToken(f, true)
+		results, err := f.List(store.ViewOptions{ErrorOnEmpty: true, Filter: func(path string) string {
+			if filepath.Base(path) == token {
+				return filepath.Dir(f.CleanPath(path))
+			}
+			return ""
+		}})
 		if err != nil {
 			misc.Die("invalid list response", err)
 		}
-		sort.Strings(result)
-		for _, entry := range result {
+		sort.Strings(results)
+		for _, entry := range results {
 			fmt.Println(entry)
 		}
 		return

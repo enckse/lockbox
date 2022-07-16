@@ -24,8 +24,9 @@ type (
 	}
 	// ViewOptions represent list options for parsing store entries.
 	ViewOptions struct {
-		Display bool
-		Filter  ListEntryFilter
+		Display      bool
+		Filter       ListEntryFilter
+		ErrorOnEmpty bool
 	}
 )
 
@@ -62,6 +63,9 @@ func (s FileSystem) List(options ViewOptions) ([]string, error) {
 
 	if err != nil {
 		return nil, err
+	}
+	if options.ErrorOnEmpty && len(results) == 0 {
+		return nil, errors.New("no results found")
 	}
 	if options.Display {
 		sort.Strings(results)
