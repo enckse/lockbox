@@ -31,11 +31,11 @@ func list() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	token := totpToken()
+	token := totpToken(f, true)
 	var results []string
 	for _, obj := range files {
 		if filepath.Base(obj) == token {
-			results = append(results, obj)
+			results = append(results, filepath.Dir(f.CleanPath(obj)))
 		}
 	}
 	if len(results) == 0 {
@@ -52,12 +52,15 @@ func clear() {
 	}
 }
 
-func totpToken() string {
+func totpToken(f store.FileSystem, extension bool) string {
 	t := os.Getenv("LOCKBOX_TOTP")
 	if t == "" {
 		t = "totp"
 	}
-	return t
+	if !extension {
+		return t
+	}
+	return f.NewFile(t)
 }
 
 func display(token string, args cli.Arguments) error {
@@ -75,11 +78,9 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	tok := strings.TrimSpace(token)
-	if !strings.HasSuffix(tok, totpToken()) {
-		return errors.New("does not look like a totp token path")
-	}
-	pathing := store.NewFileSystemStore().NewPath(tok)
+	f := store.NewFileSystemStore()
+	tok := filepath.Join(strings.TrimSpace(token), totpToken(f, false))
+	pathing := f.NewPath(tok)
 	if !misc.PathExists(pathing) {
 		return errors.New("object does not exist")
 	}
