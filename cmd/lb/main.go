@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -232,18 +231,11 @@ func main() {
 					return
 				}
 			}
-			fmt.Println("[")
-			for idx, d := range dumpData {
-				if idx > 0 {
-					fmt.Println(",")
-				}
-				b, err := json.MarshalIndent(d, "", "  ")
-				if err != nil {
-					misc.Die("failed to marshal dump item", err)
-				}
-				fmt.Println(string(b))
+			d, err := dump.Marshal(dumpData)
+			if err != nil {
+				misc.Die("failed to marshal items", err)
 			}
-			fmt.Println("]")
+			fmt.Println(string(d))
 		}
 	case "clear":
 		idx := 0

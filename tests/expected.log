@@ -1,5 +1,4 @@
-[
-]
+[]
 
 HOOK RAN insert post
 
@@ -9,15 +8,14 @@ test
 keys/one2:
 test2
 [
-{
-  "path": "keys/one",
-  "value": "test"
-}
-,
-{
-  "path": "keys/one2",
-  "value": "test2"
-}
+    {
+        "path": "keys/one",
+        "value": "test"
+    },
+    {
+        "path": "keys/one2",
+        "value": "test2"
+    }
 ]
 
 HOOK RAN insert post
@@ -37,9 +35,9 @@ test2
 test3
 test4
 dump data to stdout as plaintext? (y/N) [
-{
-  "value": "test3\ntest4"
-}
+    {
+        "value": "test3\ntest4"
+    }
 ]
 
 HOOK RAN insert post
