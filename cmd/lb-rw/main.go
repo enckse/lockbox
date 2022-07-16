@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 
@@ -29,6 +30,6 @@ func main() {
 		}
 		fmt.Println(string(results))
 	default:
-		internal.Die("invalid mode", internal.NewLockboxError("bad mode"))
+		internal.Die("invalid mode", errors.New("bad mode"))
 	}
 }

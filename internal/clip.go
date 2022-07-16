@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -36,7 +37,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 			} else {
 				if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
 					if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
-						return nil, nil, NewLockboxError("unable to detect linux clipboard mode")
+						return nil, nil, errors.New("unable to detect linux clipboard mode")
 					}
 					env = xClipMode
 				} else {
@@ -44,7 +45,7 @@ func GetClipboardCommand() ([]string, []string, error) {
 				}
 			}
 		default:
-			return nil, nil, NewLockboxError("unable to detect clipboard mode")
+			return nil, nil, errors.New("unable to detect clipboard mode")
 		}
 	}
 	switch env {
@@ -57,9 +58,9 @@ func GetClipboardCommand() ([]string, []string, error) {
 	case wslMode:
 		return []string{"clip.exe"}, []string{"powershell.exe", "-command", "Get-Clipboard"}, nil
 	case "off":
-		return nil, nil, NewLockboxError("clipboard is turned off")
+		return nil, nil, errors.New("clipboard is turned off")
 	}
-	return nil, nil, NewLockboxError("unable to get clipboard command(s)")
+	return nil, nil, errors.New("unable to get clipboard command(s)")
 }
 
 // CopyToClipboard will copy to clipboard, if non-empty will clear later.

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,7 +44,7 @@ func Hooks(store string, action HookAction, step HookStep) error {
 			}
 			continue
 		}
-		return NewLockboxError("hook is not a file")
+		return errors.New("hook is not a file")
 	}
 	return nil
 }

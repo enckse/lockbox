@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -46,7 +47,7 @@ func list() ([]string, error) {
 		results = append(results, obj)
 	}
 	if len(results) == 0 {
-		return nil, internal.NewLockboxError("no objects found")
+		return nil, errors.New("no objects found")
 	}
 	return results, nil
 }
@@ -76,7 +77,7 @@ func display(token string, args internal.Arguments) error {
 		interactive = false
 	}
 	if !interactive && args.Clip {
-		return internal.NewLockboxError("clipboard not available in non-interactive mode")
+		return errors.New("clipboard not available in non-interactive mode")
 	}
 	redStart, redEnd, err := internal.GetColor(internal.ColorRed)
 	if err != nil {
@@ -85,7 +86,7 @@ func display(token string, args internal.Arguments) error {
 	tok := strings.TrimSpace(token)
 	store := filepath.Join(internal.GetStore(), tok, totpToken())
 	if !internal.PathExists(store) {
-		return internal.NewLockboxError("object does not exist")
+		return errors.New("object does not exist")
 	}
 	l, err := internal.NewLockbox(internal.LockboxOptions{File: store})
 	if err != nil {
@@ -172,7 +173,7 @@ func display(token string, args internal.Arguments) error {
 func main() {
 	args := os.Args
 	if len(args) > 3 || len(args) < 2 {
-		internal.Die("subkey required", internal.NewLockboxError("invalid arguments"))
+		internal.Die("subkey required", errors.New("invalid arguments"))
 	}
 	cmd := args[1]
 	options := internal.ParseArgs(cmd)
@@ -189,7 +190,7 @@ func main() {
 	}
 	if len(args) == 3 {
 		if !options.Clip && !options.Short && !options.Once {
-			internal.Die("subcommand not supported", internal.NewLockboxError("invalid sub command"))
+			internal.Die("subcommand not supported", errors.New("invalid sub command"))
 		}
 		cmd = args[2]
 	}

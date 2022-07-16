@@ -2,6 +2,7 @@ package internal
 
 import (
 	"crypto/rand"
+	"errors"
 	"io"
 	random "math/rand"
 	"os"
@@ -57,7 +58,7 @@ func newLockbox(key, keyMode, file string) (Lockbox, error) {
 		useKey = os.Getenv("LOCKBOX_KEY")
 	}
 	if useKey == "" {
-		return Lockbox{}, NewLockboxError("no key given")
+		return Lockbox{}, errors.New("no key given")
 	}
 	b, err := getKey(useKeyMode, useKey)
 	if err != nil {
@@ -65,11 +66,11 @@ func newLockbox(key, keyMode, file string) (Lockbox, error) {
 	}
 
 	if len(b) == 0 {
-		return Lockbox{}, NewLockboxError("key is empty")
+		return Lockbox{}, errors.New("key is empty")
 	}
 
 	if len(b) > keyLength {
-		return Lockbox{}, NewLockboxError("key is too large for use")
+		return Lockbox{}, errors.New("key is too large for use")
 	}
 
 	for len(b) < keyLength {
@@ -97,7 +98,7 @@ func getKey(keyMode, name string) ([]byte, error) {
 	case PlainKeyMode:
 		data = []byte(name)
 	default:
-		return nil, NewLockboxError("unknown keymode")
+		return nil, errors.New("unknown keymode")
 	}
 	return []byte(strings.TrimSpace(string(data))), nil
 }
@@ -143,7 +144,7 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 	copy(nonce[:], encrypted[:nonceLength])
 	decrypted, ok := secretbox.Open(nil, encrypted[nonceLength:], &nonce, &l.secret)
 	if !ok {
-		return nil, NewLockboxError("decrypt not ok")
+		return nil, errors.New("decrypt not ok")
 	}
 
 	padding := int(decrypted[0])

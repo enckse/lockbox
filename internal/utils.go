@@ -3,6 +3,7 @@ package internal
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -15,10 +16,6 @@ import (
 type (
 	// Color are terminal colors for dumb terminal coloring.
 	Color int
-	// LockboxError for internal errors for lockbox operations.
-	LockboxError struct {
-		message string
-	}
 )
 
 const (
@@ -41,7 +38,7 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	case "yes":
 		return true, nil
 	}
-	return false, NewLockboxError(fmt.Sprintf("invalid yes/no env value for %s", env))
+	return false, fmt.Errorf("invalid yes/no env value for %s", env)
 }
 
 // IsInteractive indicates if running as a user UI experience.
@@ -52,7 +49,7 @@ func IsInteractive() (bool, error) {
 // GetColor will retrieve start/end terminal coloration indicators.
 func GetColor(color Color) (string, string, error) {
 	if color != ColorRed {
-		return "", "", NewLockboxError("bad color")
+		return "", "", errors.New("bad color")
 	}
 	interactive, err := IsInteractive()
 	if err != nil {
@@ -81,7 +78,7 @@ func GetStore() string {
 func List(store string, display bool) ([]string, error) {
 	var results []string
 	if !PathExists(store) {
-		return nil, NewLockboxError("store does not exists")
+		return nil, errors.New("store does not exists")
 	}
 	err := filepath.Walk(store, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -154,7 +151,7 @@ func ConfirmInputsMatch(object string) (string, error) {
 		return "", err
 	}
 	if first != second {
-		return "", NewLockboxError(fmt.Sprintf("%s(s) do NOT match", object))
+		return "", fmt.Errorf("%s(s) do NOT match", object)
 	}
 	return first, nil
 }
@@ -172,16 +169,6 @@ func Stdin(one bool) (string, error) {
 func IsInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
 	return fileInfo.Mode()&os.ModeCharDevice == 0
-}
-
-// NewLockboxError creates a non-category error.
-func NewLockboxError(message string) error {
-	return &LockboxError{message}
-}
-
-// Error gets the error message for a basic error.
-func (err *LockboxError) Error() string {
-	return err.message
 }
 
 // LogError will log an error to stderr.
