@@ -3,6 +3,7 @@ package inputs
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -38,8 +39,29 @@ func termEcho(on bool) {
 	}
 }
 
-// ConfirmInputsMatch will get 2 inputs and confirm they are the same.
-func ConfirmInputsMatch(object string) (string, error) {
+// GetUserInputPassword will read the user's input from stdin via multiple means.
+func GetUserInputPassword(piping, multiLine bool) ([]byte, error) {
+	var password string
+	if !multiLine && !piping {
+		input, err := confirmInputsMatch("password")
+		if err != nil {
+			return nil, err
+		}
+		password = input
+	} else {
+		input, err := Stdin(false)
+		if err != nil {
+			return nil, err
+		}
+		password = input
+	}
+	if password == "" {
+		return nil, errors.New("password can NOT be empty")
+	}
+	return []byte(password), nil
+}
+
+func confirmInputsMatch(object string) (string, error) {
 	termEcho(false)
 	defer func() {
 		termEcho(true)
@@ -60,7 +82,7 @@ func ConfirmInputsMatch(object string) (string, error) {
 	return first, nil
 }
 
-// Stdin will retrieve stdin data.
+// Stdin will get one (or more) lines of stdin as string.
 func Stdin(one bool) (string, error) {
 	b, err := getStdin(one)
 	if err != nil {

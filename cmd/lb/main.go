@@ -29,14 +29,6 @@ func getEntry(fs store.FileSystem, args []string, idx int) string {
 	return fs.NewPath(args[idx])
 }
 
-func getExecutable() string {
-	exe, err := os.Executable()
-	if err != nil {
-		misc.Die("unable to get exe", err)
-	}
-	return exe
-}
-
 func main() {
 	args := os.Args
 	if len(args) < 2 {
@@ -93,24 +85,11 @@ func main() {
 				}
 			}
 		}
-		var password string
-		if !options.Multi && !isPipe {
-			input, err := inputs.ConfirmInputsMatch("password")
-			if err != nil {
-				misc.Die("password input failed", err)
-			}
-			password = input
-		} else {
-			input, err := inputs.Stdin(false)
-			if err != nil {
-				misc.Die("failed to read stdin", err)
-			}
-			password = input
+		password, err := inputs.GetUserInputPassword(isPipe, options.Multi)
+		if err != nil {
+			misc.Die("invalid input", err)
 		}
-		if password == "" {
-			misc.Die("empty password provided", errors.New("password can NOT be empty"))
-		}
-		if err := encrypt.ToFile(entry, []byte(password)); err != nil {
+		if err := encrypt.ToFile(entry, password); err != nil {
 			misc.Die("unable to encrypt object", err)
 		}
 		fmt.Println("")
@@ -158,10 +137,15 @@ func main() {
 			return
 		}
 		clipboard := platform.Clipboard{}
+		exe := ""
 		if !opts.Show {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
 				misc.Die("unable to get clipboard", err)
+			}
+			exe, err = os.Executable()
+			if err != nil {
+				misc.Die("unable to get executable", err)
 			}
 		}
 		for _, obj := range dumpData {
@@ -172,7 +156,7 @@ func main() {
 				fmt.Println(obj.Value)
 				continue
 			}
-			clipboard.CopyTo(obj.Value, getExecutable())
+			clipboard.CopyTo(obj.Value, exe)
 		}
 	case "clear":
 		if err := subcommands.ClearClipboardCallback(); err != nil {
