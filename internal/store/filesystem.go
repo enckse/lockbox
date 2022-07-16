@@ -16,6 +16,8 @@ const (
 )
 
 type (
+	// ListEntryFilter allows for filtering/changing view results.
+	ListEntryFilter func(string) string
 	// FileSystem represents a filesystem store.
 	FileSystem struct {
 		path string
@@ -23,6 +25,7 @@ type (
 	// ViewOptions represent list options for parsing store entries.
 	ViewOptions struct {
 		Display bool
+		Filter  ListEntryFilter
 	}
 )
 
@@ -45,6 +48,12 @@ func (s FileSystem) List(options ViewOptions) ([]string, error) {
 			usePath := path
 			if options.Display {
 				usePath = s.trim(usePath)
+			}
+			if options.Filter != nil {
+				usePath = options.Filter(usePath)
+				if usePath == "" {
+					return nil
+				}
 			}
 			results = append(results, usePath)
 		}

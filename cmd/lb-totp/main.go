@@ -25,18 +25,16 @@ var (
 )
 
 func list() ([]string, error) {
-	files := []string{}
 	f := store.NewFileSystemStore()
-	files, err := f.List(store.ViewOptions{})
+	token := totpToken(f, true)
+	results, err := f.List(store.ViewOptions{Filter: func(path string) string {
+		if filepath.Base(path) == token {
+			return filepath.Dir(f.CleanPath(path))
+		}
+		return ""
+	}})
 	if err != nil {
 		return nil, err
-	}
-	token := totpToken(f, true)
-	var results []string
-	for _, obj := range files {
-		if filepath.Base(obj) == token {
-			results = append(results, filepath.Dir(f.CleanPath(obj)))
-		}
 	}
 	if len(results) == 0 {
 		return nil, errors.New("no objects found")

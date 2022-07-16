@@ -1,8 +1,10 @@
 package store
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/misc"
@@ -47,6 +49,20 @@ func TestList(t *testing.T) {
 	}
 	if res[0] != "aaa" || res[1] != "sub/12lkjafav" || res[2] != "sub/aaaaajk" || res[3] != "test" || res[4] != "test2" {
 		t.Errorf("not sorted: %v", res)
+	}
+	idx := 0
+	res, err = s.List(ViewOptions{Filter: func(path string) string {
+		if strings.Contains(path, "test") {
+			idx++
+			return fmt.Sprintf("%d", idx)
+		}
+		return ""
+	}})
+	if err != nil {
+		t.Errorf("unable to list: %v", err)
+	}
+	if len(res) != 2 || res[0] != "1" || res[1] != "2" {
+		t.Error("mismatch filter results")
 	}
 }
 
