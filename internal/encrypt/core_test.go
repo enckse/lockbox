@@ -1,6 +1,7 @@
 package encrypt
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -51,7 +52,18 @@ func TestEmptyKey(t *testing.T) {
 	if err == nil || err.Error() != "key is empty" {
 		t.Errorf("invalid error: %v", err)
 	}
-	_, err = NewLockbox(LockboxOptions{KeyMode: CommandKeyMode, Key: "echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"})
+}
+
+func TestKeyLength(t *testing.T) {
+	val := ""
+	for i := 0; i < 32; i++ {
+		val = fmt.Sprintf("a%s", val)
+		_, err := NewLockbox(LockboxOptions{KeyMode: PlainKeyMode, Key: val})
+		if err != nil {
+			t.Error("no error expected")
+		}
+	}
+	_, err := NewLockbox(LockboxOptions{KeyMode: PlainKeyMode, Key: fmt.Sprintf("%sa", val)})
 	if err == nil || err.Error() != "key is too large for use" {
 		t.Errorf("invalid error: %v", err)
 	}
