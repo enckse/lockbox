@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	cryptoVers       = []byte{1}
+	cryptoVers       = []byte{0, 1}
 	cryptoVersLength = len(cryptoVers)
 )
 
