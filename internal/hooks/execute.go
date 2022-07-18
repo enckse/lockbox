@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/misc"
 )
 
@@ -27,7 +28,7 @@ const (
 
 // Run executes any configured hooks.
 func Run(action Action, step Step) error {
-	hookDir := os.Getenv("LOCKBOX_HOOKDIR")
+	hookDir := os.Getenv(inputs.HooksDirEnv)
 	if !misc.PathExists(hookDir) {
 		return nil
 	}

@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/enckse/lockbox/internal/inputs"
 )
 
 type (
@@ -27,7 +29,7 @@ const (
 
 // NewPlatform gets a new system platform.
 func NewPlatform() (System, error) {
-	env := os.Getenv("LOCKBOX_PLATFORM")
+	env := os.Getenv(inputs.PlatformEnv)
 	if env != "" {
 		switch env {
 		case string(MacOS):

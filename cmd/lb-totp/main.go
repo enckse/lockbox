@@ -33,11 +33,7 @@ func clear() {
 }
 
 func totpEnv() string {
-	t := os.Getenv("LOCKBOX_TOTP")
-	if t == "" {
-		t = "totp"
-	}
-	return t
+	return inputs.EnvOrDefault(inputs.TotpEnv, "totp")
 }
 
 func display(token string, args cli.Arguments) error {
@@ -65,10 +61,7 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	exe := os.Getenv("LOCKBOX_EXE")
-	if exe == "" {
-		exe = mainExe
-	}
+	exe := inputs.EnvOrDefault(inputs.ExeEnv, mainExe)
 	totpToken := string(val)
 	if !interactive {
 		code, err := otp.GenerateCode(totpToken, time.Now())

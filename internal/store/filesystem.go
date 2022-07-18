@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/misc"
 )
 
@@ -32,7 +33,7 @@ type (
 
 // NewFileSystemStore gets the lockbox directory (filesystem-based) store.
 func NewFileSystemStore() FileSystem {
-	return FileSystem{path: os.Getenv("LOCKBOX_STORE")}
+	return FileSystem{path: os.Getenv(inputs.StoreEnv)}
 }
 
 // List will get all lockbox files in a store.

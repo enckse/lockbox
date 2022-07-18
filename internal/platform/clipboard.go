@@ -39,7 +39,7 @@ func NewClipboard() (Clipboard, error) {
 		return Clipboard{}, err
 	}
 	max := maxTime
-	useMax := os.Getenv("LOCKBOX_CLIPMAX")
+	useMax := os.Getenv(inputs.ClipMaxEnv)
 	if useMax != "" {
 		i, err := strconv.Atoi(useMax)
 		if err != nil {

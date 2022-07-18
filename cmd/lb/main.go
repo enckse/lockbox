@@ -163,10 +163,7 @@ func main() {
 			misc.Die("failed to handle clipboard clear", err)
 		}
 	default:
-		lib := os.Getenv("LOCKBOX_LIBEXEC")
-		if lib == "" {
-			lib = libExec
-		}
+		lib := inputs.EnvOrDefault(inputs.LibExecEnv, libExec)
 		if err := subcommands.LibExecCallback(subcommands.LibExecOptions{Directory: lib, Command: command, Args: args[2:]}); err != nil {
 			misc.Die("subcommand failed", err)
 		}

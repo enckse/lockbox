@@ -75,14 +75,14 @@ func NewLockbox(options LockboxOptions) (Lockbox, error) {
 func newLockbox(key, keyMode, file string) (Lockbox, error) {
 	useKeyMode := keyMode
 	if useKeyMode == "" {
-		useKeyMode = os.Getenv("LOCKBOX_KEYMODE")
+		useKeyMode = os.Getenv(inputs.KeyModeEnv)
 	}
 	if useKeyMode == "" {
 		useKeyMode = CommandKeyMode
 	}
 	useKey := key
 	if useKey == "" {
-		useKey = os.Getenv("LOCKBOX_KEY")
+		useKey = os.Getenv(inputs.KeyEnv)
 	}
 	if useKey == "" {
 		return Lockbox{}, errors.New("no key given")
