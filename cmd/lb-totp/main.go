@@ -32,15 +32,12 @@ func clear() {
 	}
 }
 
-func totpToken(f store.FileSystem, extension bool) string {
+func totpEnv() string {
 	t := os.Getenv("LOCKBOX_TOTP")
 	if t == "" {
 		t = "totp"
 	}
-	if !extension {
-		return t
-	}
-	return f.NewFile(t)
+	return t
 }
 
 func display(token string, args cli.Arguments) error {
@@ -59,7 +56,7 @@ func display(token string, args cli.Arguments) error {
 		return err
 	}
 	f := store.NewFileSystemStore()
-	tok := filepath.Join(strings.TrimSpace(token), totpToken(f, false))
+	tok := filepath.Join(strings.TrimSpace(token), totpEnv())
 	pathing := f.NewPath(tok)
 	if !misc.PathExists(pathing) {
 		return errors.New("object does not exist")
@@ -158,7 +155,7 @@ func main() {
 	options := cli.ParseArgs(cmd)
 	if options.List {
 		f := store.NewFileSystemStore()
-		token := totpToken(f, true)
+		token := f.NewFile(totpEnv())
 		results, err := f.List(store.ViewOptions{ErrorOnEmpty: true, Filter: func(path string) string {
 			if filepath.Base(path) == token {
 				return filepath.Dir(f.CleanPath(path))
