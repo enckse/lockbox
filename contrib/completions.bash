@@ -1,7 +1,7 @@
 # bash completion for lb                        -*- shell-script -*-
 
 _is_clip() {
-    if [ "$1" == "-c" ] || [ "$1" == "${2}clip" ]; then
+    if [ "$1" == "${2}clip" ]; then
         echo 1
     else
         echo 0
@@ -10,7 +10,7 @@ _is_clip() {
 
 _lb() {
     local cur opts clip_enabled needs
-    clip_enabled=" -c clip"
+    clip_enabled=" clip"
     if [ -n "$LOCKBOX_NOCLIP" ]; then
         if [ "$LOCKBOX_NOCLIP" == "yes" ]; then
             clip_enabled=""
@@ -28,15 +28,15 @@ _lb() {
                     opts="-yes $(lb ls)"
                     ;;
                 "insert")
-                    opts="-m -multi $(lb ls)"
+                    opts="-multi $(lb ls)"
                     ;;
                 "totp")
                     opts="-once -short "$(lb totp -ls)
                     if [ -n "$clip_enabled" ]; then
-                        opts="$opts -c -clip"
+                        opts="$opts -clip"
                     fi
                     ;;
-                "-c" | "show" | "rm" | "clip")
+                "show" | "rm" | "clip")
                     opts=$(lb ls)
                     if [ $(_is_clip "${COMP_WORDS[1]}" "") == 1 ]; then 
                         if [ -z "$clip_enabled" ]; then
@@ -49,10 +49,10 @@ _lb() {
         if [ "$COMP_CWORD" -eq 3 ]; then
             case "${COMP_WORDS[1]}" in
                 "insert")
-                    if [ "${COMP_WORDS[2]}" == "-m" ] || [ "${COMP_WORDS[2]}" == "-multi" ]; then
+                    if [ "${COMP_WORDS[2]}" == "-multi" ]; then
                         opts=$(lb ls)
                     else
-                        opts="-m -multi"
+                        opts="-multi"
                     fi
                     ;;
                 "totp")

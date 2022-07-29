@@ -36,8 +36,7 @@ LOCKBOX_NOCLIP="yes"
 
 Copy entries to clipboard
 ```
-lb -c my/secret/password
-# or lb clip
+lb clip my/secret/password
 ```
 
 ### insert
@@ -80,7 +79,7 @@ lb totp token
 
 The token can be automatically copied to the clipboard too
 ```
-lb totp -c token
+lb totp -clip token
 ```
 
 ## git integration

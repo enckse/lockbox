@@ -103,7 +103,7 @@ func main() {
 			os.Remove(entry)
 			hooks.Run(hooks.Remove, hooks.PostStep)
 		}
-	case "show", "-c", "clip", "dump":
+	case "show", "clip", "dump":
 		fs := store.NewFileSystemStore()
 		opts := subcommands.DisplayOptions{Dump: command == "dump", Show: command == "show", Glob: getEntry(fs, []string{"***"}, 0), Store: fs}
 		opts.Show = opts.Show || opts.Dump

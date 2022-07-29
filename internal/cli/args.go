@@ -15,11 +15,11 @@ type (
 // ParseArgs parses CLI arguments.
 func ParseArgs(arg string) Arguments {
 	args := Arguments{}
-	args.Clip = arg == "-clip" || arg == "-c"
+	args.Clip = arg == "-clip"
 	args.Once = arg == "-once"
 	args.Short = arg == "-short"
-	args.List = arg == "-ls" || arg == "-list"
-	args.Multi = arg == "-m" || arg == "-multi"
+	args.List = arg == "-list"
+	args.Multi = arg == "-multi"
 	args.Yes = arg == "-yes"
 	return args
 }

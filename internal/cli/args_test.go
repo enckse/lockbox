@@ -5,29 +5,23 @@ import (
 )
 
 func TestClipArg(t *testing.T) {
-	for _, check := range []string{"-c", "-clip"} {
-		options := ParseArgs(check)
-		if !options.Clip {
-			t.Error("clip should be set")
-		}
+	options := ParseArgs("-clip")
+	if !options.Clip {
+		t.Error("clip should be set")
 	}
 }
 
 func TestMultiArg(t *testing.T) {
-	for _, check := range []string{"-m", "-multi"} {
-		options := ParseArgs(check)
-		if !options.Multi {
-			t.Error("multi should be set")
-		}
+	options := ParseArgs("-multi")
+	if !options.Multi {
+		t.Error("multi should be set")
 	}
 }
 
 func TestListArg(t *testing.T) {
-	for _, check := range []string{"-list", "-ls"} {
-		options := ParseArgs(check)
-		if !options.List {
-			t.Error("list should be set")
-		}
+	options := ParseArgs("-list")
+	if !options.List {
+		t.Error("list should be set")
 	}
 }
 
