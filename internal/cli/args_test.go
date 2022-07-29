@@ -42,3 +42,10 @@ func TestYes(t *testing.T) {
 		t.Error("yes should be set")
 	}
 }
+
+func TestDefaults(t *testing.T) {
+	args := ParseArgs("this/is/a/test")
+	if args.Clip || args.Once || args.Short || args.List || args.Multi || args.Yes {
+		t.Error("defaults should all be false")
+	}
+}
