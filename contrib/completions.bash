@@ -31,7 +31,7 @@ _lb() {
                     opts="-multi $(lb ls)"
                     ;;
                 "totp")
-                    opts="-once -short "$(lb totp -ls)
+                    opts="-once -short "$(lb totp -list)
                     if [ -n "$clip_enabled" ]; then
                         opts="$opts -clip"
                     fi
@@ -67,7 +67,7 @@ _lb() {
                         fi
                     fi
                     if [ $needs -eq 1 ]; then
-                        opts=$(lb totp -ls)
+                        opts=$(lb totp -list)
                     fi
                     ;;
             esac
