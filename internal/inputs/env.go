@@ -29,6 +29,8 @@ const (
 	StoreEnv = prefixKey + "STORE"
 	// ClipMaxEnv is the max time a value should be stored in the clipboard.
 	ClipMaxEnv = prefixKey + "CLIPMAX"
+	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
+	ColorBetweenEnv = prefixKey + "TOTPBETWEEN"
 )
 
 // EnvOrDefault will get the environment value OR default if env is not set.

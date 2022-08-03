@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +25,13 @@ var (
 	mainExe = ""
 )
 
+type (
+	colorWhen struct {
+		start int
+		end   int
+	}
+)
+
 func clear() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
@@ -34,6 +42,43 @@ func clear() {
 
 func totpEnv() string {
 	return inputs.EnvOrDefault(inputs.TotpEnv, "totp")
+}
+
+func colorWhenRules() ([]colorWhen, error) {
+	envTime := os.Getenv(inputs.ColorBetweenEnv)
+	if envTime == "" {
+		return []colorWhen{
+			colorWhen{start: 0, end: 5},
+			colorWhen{start: 30, end: 35},
+		}, nil
+	}
+	var rules []colorWhen
+	for _, item := range strings.Split(envTime, ",") {
+		line := strings.TrimSpace(item)
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid colorization rule found: %s", line)
+		}
+		s, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return nil, err
+		}
+		e, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return nil, err
+		}
+		if s < 0 || e < 0 || e < s || s > 59 || e > 59 {
+			return nil, fmt.Errorf("invalid time found for colorization rule: %s", line)
+		}
+		rules = append(rules, colorWhen{start: s, end: e})
+	}
+	if len(rules) == 0 {
+		return nil, errors.New("invalid colorization rules for totp, none found")
+	}
+	return rules, nil
 }
 
 func display(token string, args cli.Arguments) error {
@@ -86,6 +131,10 @@ func display(token string, args cli.Arguments) error {
 			misc.Die("invalid clipboard", err)
 		}
 	}
+	colorRules, err := colorWhenRules()
+	if err != nil {
+		misc.Die("invalid totp output coloring rules", err)
+	}
 	for {
 		if !first {
 			time.Sleep(500 * time.Millisecond)
@@ -109,9 +158,11 @@ func display(token string, args cli.Arguments) error {
 		}
 		startColor := ""
 		endColor := ""
-		if left < 5 || (left < 35 && left >= 30) {
-			startColor = coloring.Start
-			endColor = coloring.End
+		for _, when := range colorRules {
+			if left < when.end && left >= when.start {
+				startColor = coloring.Start
+				endColor = coloring.End
+			}
 		}
 		leftString := fmt.Sprintf("%d", left)
 		if len(leftString) < 2 {
