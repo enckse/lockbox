@@ -110,4 +110,8 @@ func TestNewFile(t *testing.T) {
 	if f != "xyz.lb" {
 		t.Error("invalid file")
 	}
+	f = FileSystem{path: "abc"}.NewFile("xyz.lb")
+	if f != "xyz.lb" {
+		t.Error("invalid file, had suffix")
+	}
 }

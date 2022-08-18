@@ -81,7 +81,10 @@ func (s FileSystem) NewPath(file string) string {
 
 // NewFile creates a new file with the proper extension.
 func (s FileSystem) NewFile(file string) string {
-	return file + extension
+	if !strings.HasSuffix(file, extension) {
+		return file + extension
+	}
+	return file
 }
 
 // CleanPath will clean store and extension information from an entry.
