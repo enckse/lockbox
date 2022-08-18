@@ -1,3 +1,4 @@
+// Package subcommands handles displaying various lockbox structures to the UI.
 package subcommands
 
 import (

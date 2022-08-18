@@ -1,3 +1,4 @@
+// Package misc handles error logging/handling for UI outputs.
 package misc
 
 import (

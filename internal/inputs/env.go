@@ -1,3 +1,4 @@
+// Package inputs handles user inputs/UI elements.
 package inputs
 
 import (

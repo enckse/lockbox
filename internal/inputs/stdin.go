@@ -1,3 +1,4 @@
+// Package inputs handles stdin management/access.
 package inputs
 
 import (

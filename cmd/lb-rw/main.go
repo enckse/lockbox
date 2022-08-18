@@ -1,3 +1,4 @@
+// perform a read/write against a specific lockbox object.
 package main
 
 import (

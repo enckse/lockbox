@@ -1,3 +1,4 @@
+// Package platform handles platform-specific operations.
 package platform
 
 import (

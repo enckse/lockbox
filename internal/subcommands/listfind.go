@@ -1,3 +1,4 @@
+// Package subcommands handles listing items from the lockbox store.
 package subcommands
 
 import (

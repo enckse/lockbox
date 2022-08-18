@@ -1,3 +1,4 @@
+// Package colors manages definitions within lockbox for colorization.
 package colors
 
 const (

@@ -1,3 +1,4 @@
+// Package dump handles export lockbox definitions to other formats.
 package dump
 
 import (

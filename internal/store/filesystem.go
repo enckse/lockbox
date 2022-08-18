@@ -1,3 +1,4 @@
+// Package store handles filesystem operations for a lockbox store.
 package store
 
 import (

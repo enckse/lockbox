@@ -1,3 +1,4 @@
+// Package cli handles simplistic CLI handler for flags.
 package cli
 
 type (

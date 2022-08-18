@@ -1,3 +1,4 @@
+// Package hooks handles executing lockbox hooks.
 package hooks
 
 import (

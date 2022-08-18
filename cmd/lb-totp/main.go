@@ -1,3 +1,4 @@
+// support TOTP tokens in lockbox.
 package main
 
 import (

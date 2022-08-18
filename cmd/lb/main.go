@@ -1,3 +1,4 @@
+// provides the binary runs or calls lockbox commands.
 package main
 
 import (

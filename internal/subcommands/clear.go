@@ -1,3 +1,4 @@
+// Package subcommands handles clearing the clipboard.
 package subcommands
 
 import (

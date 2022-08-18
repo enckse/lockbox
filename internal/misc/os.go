@@ -1,3 +1,4 @@
+// Package misc handles os operations.
 package misc
 
 import (

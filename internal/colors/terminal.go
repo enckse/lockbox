@@ -1,3 +1,4 @@
+// Package colors handles terminal handling for lockbox.
 package colors
 
 import (

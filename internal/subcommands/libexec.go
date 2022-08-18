@@ -1,3 +1,4 @@
+// Package subcommands handles calling library commands.
 package subcommands
 
 import (

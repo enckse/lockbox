@@ -1,3 +1,4 @@
+// rekey an entire lockbox.
 package main
 
 import (

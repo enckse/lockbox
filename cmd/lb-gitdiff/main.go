@@ -1,3 +1,4 @@
+// lockbox support for git+diff operations.
 package main
 
 import (
