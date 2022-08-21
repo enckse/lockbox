@@ -155,15 +155,10 @@ func main() {
 			return
 		}
 		clipboard := platform.Clipboard{}
-		exe := ""
 		if !opts.Show {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
 				misc.Die("unable to get clipboard", err)
-			}
-			exe, err = os.Executable()
-			if err != nil {
-				misc.Die("unable to get executable", err)
 			}
 		}
 		for _, obj := range dumpData {
@@ -174,7 +169,9 @@ func main() {
 				fmt.Println(obj.Value)
 				continue
 			}
-			clipboard.CopyTo(obj.Value, exe)
+			if err := clipboard.CopyTo(obj.Value); err != nil {
+				misc.Die("clipboard failed", err)
+			}
 		}
 	case "clear":
 		if err := subcommands.ClearClipboardCallback(); err != nil {

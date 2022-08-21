@@ -2,7 +2,6 @@
 package subcommands
 
 import (
-	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -35,10 +34,5 @@ func ClearClipboardCallback() error {
 			return nil
 		}
 	}
-	exe, err := os.Executable()
-	if err != nil {
-		return err
-	}
-	clipboard.CopyTo("", exe)
-	return nil
+	return clipboard.CopyTo("")
 }

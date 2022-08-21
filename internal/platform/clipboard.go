@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 
 	"github.com/enckse/lockbox/internal/inputs"
@@ -73,13 +72,18 @@ func NewClipboard() (Clipboard, error) {
 }
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
-func (c Clipboard) CopyTo(value, executable string) {
+func (c Clipboard) CopyTo(value string) error {
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
 	cmd, args := c.Args(true)
 	pipeTo(cmd, value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
-		pipeTo(filepath.Join(filepath.Dir(executable), "lb"), value, false, "clear")
+		pipeTo(exe, value, false, "clear")
 	}
+	return nil
 }
 
 // Args returns clipboard args for execution.

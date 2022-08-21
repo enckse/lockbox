@@ -107,10 +107,6 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	exe, err := os.Executable()
-	if err != nil {
-		return err
-	}
 	totpToken := string(val)
 	if !interactive {
 		code, err := otp.GenerateCode(totpToken, time.Now())
@@ -181,8 +177,7 @@ func display(token string, args cli.Arguments) error {
 			}
 		} else {
 			fmt.Printf("-> %s\n", expires)
-			clipboard.CopyTo(code, exe)
-			return nil
+			return clipboard.CopyTo(code)
 		}
 		if !args.Once {
 			clear()
