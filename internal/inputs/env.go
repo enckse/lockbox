@@ -20,8 +20,6 @@ const (
 	KeyModeEnv = prefixKey + "KEYMODE"
 	// KeyEnv is the key value used by the lockbox store.
 	KeyEnv = prefixKey + "KEY"
-	// LibExecEnv is the location of libexec files for callbacks to internal exes.
-	LibExecEnv = prefixKey + "LIBEXEC"
 	// HooksDirEnv is the location of hooks to run before/after operations.
 	HooksDirEnv = prefixKey + "HOOKDIR"
 	// PlatformEnv is the platform lb is running on.

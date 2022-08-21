@@ -2,7 +2,6 @@ VERSION := development
 DESTDIR :=
 BUILD   := bin/
 TARGETS := $(BUILD)lb $(BUILD)lb-totp
-LIBEXEC := $(DESTDIR)libexec/lockbox/
 MAIN    := $(DESTDIR)bin/lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 
@@ -11,7 +10,7 @@ TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 all: $(TARGETS)
 
 $(TARGETS): cmd/**/* internal/**/*.go  go.*
-	go build -ldflags '-X main.version=$(VERSION) -X main.libExec=$(LIBEXEC) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
+	go build -ldflags '-X main.version=$(VERSION) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
 
 $(TESTDIR):
 	cd $@ && go test
@@ -24,5 +23,3 @@ clean:
 
 install:
 	install -Dm755 $(BUILD)lb $(MAIN)
-	install -Dm755 -d $(LIBEXEC)
-	install -Dm755 $(BUILD)lb-* $(LIBEXEC)
