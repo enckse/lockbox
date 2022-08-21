@@ -23,11 +23,27 @@ var (
 	libExec = ""
 )
 
+type (
+	callbackFunction func([]string) error
+)
+
 func getEntry(fs store.FileSystem, args []string, idx int) string {
 	if len(args) != idx+1 {
 		misc.Die("invalid entry given", errors.New("specific entry required"))
 	}
 	return fs.NewPath(args[idx])
+}
+
+func internalCallback(name string) callbackFunction {
+	switch name {
+	case "gitdiff":
+		return subcommands.GitDiff
+	case "rekey":
+		return subcommands.Rekey
+	case "rw":
+		return subcommands.ReadWrite
+	}
+	return nil
 }
 
 func main() {
@@ -163,17 +179,17 @@ func main() {
 		if err := subcommands.ClearClipboardCallback(); err != nil {
 			misc.Die("failed to handle clipboard clear", err)
 		}
-	case "gitdiff":
-		if err := subcommands.GitDiff(args[2:]); err != nil {
-			misc.Die("git-diff failed", err)
-		}
-	case "rw":
-		if err := subcommands.ReadWrite(args[2:]); err != nil {
-			misc.Die("read/write failed", err)
-		}
 	default:
+		a := args[2:]
+		callback := internalCallback(command)
+		if callback != nil {
+			if err := callback(a); err != nil {
+				misc.Die(fmt.Sprintf("%s command failure", command), err)
+			}
+			return
+		}
 		lib := inputs.EnvOrDefault(inputs.LibExecEnv, libExec)
-		if err := subcommands.LibExecCallback(subcommands.LibExecOptions{Directory: lib, Command: command, Args: args[2:]}); err != nil {
+		if err := subcommands.LibExecCallback(subcommands.LibExecOptions{Directory: lib, Command: command, Args: a}); err != nil {
 			misc.Die("subcommand failed", err)
 		}
 	}

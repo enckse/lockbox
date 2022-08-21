@@ -34,7 +34,7 @@ _run() {
     "$BIN/lb" dump -yes '***'
     echo -e "test3\ntest4" | "$BIN/lb" insert keys2/three
     "$BIN/lb" ls
-    "$BIN/lb-rekey"
+    "$BIN/lb" "rekey"
     yes 2>/dev/null | "$BIN/lb" rm keys/one
     echo
     "$BIN/lb" list
@@ -51,7 +51,7 @@ _run() {
     yes 2>/dev/null | "$BIN/lb" rm test/totp
     echo
     LOCKBOX_KEY="invalid" "$BIN/lb" show keys/one2
-    "$BIN/lb-rekey" -outkey "test" -outmode "plaintext"
+    "$BIN/lb" "rekey" -outkey "test" -outmode "plaintext"
     "$BIN/lb" rw -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
 }
 
