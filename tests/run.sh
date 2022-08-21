@@ -52,7 +52,7 @@ _run() {
     echo
     LOCKBOX_KEY="invalid" "$BIN/lb" show keys/one2
     "$BIN/lb-rekey" -outkey "test" -outmode "plaintext"
-    "$BIN/lb-rw" -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
+    "$BIN/lb" rw -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
 }
 
 _hook > $HOOK

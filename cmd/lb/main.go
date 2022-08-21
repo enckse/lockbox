@@ -163,6 +163,10 @@ func main() {
 		if err := subcommands.ClearClipboardCallback(); err != nil {
 			misc.Die("failed to handle clipboard clear", err)
 		}
+	case "rw":
+		if err := subcommands.ReadWrite(args[2:]); err != nil {
+			misc.Die("read/write failed", err)
+		}
 	default:
 		lib := inputs.EnvOrDefault(inputs.LibExecEnv, libExec)
 		if err := subcommands.LibExecCallback(subcommands.LibExecOptions{Directory: lib, Command: command, Args: args[2:]}); err != nil {
