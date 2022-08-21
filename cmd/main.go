@@ -20,7 +20,6 @@ import (
 
 var (
 	version = "development"
-	libExec = ""
 )
 
 type (
@@ -42,6 +41,8 @@ func internalCallback(name string) callbackFunction {
 		return subcommands.Rekey
 	case "rw":
 		return subcommands.ReadWrite
+	case "totp":
+		return subcommands.TOTP
 	}
 	return nil
 }
@@ -188,10 +189,7 @@ func main() {
 			}
 			return
 		}
-		lib := inputs.EnvOrDefault(inputs.LibExecEnv, libExec)
-		if err := subcommands.LibExecCallback(subcommands.LibExecOptions{Directory: lib, Command: command, Args: a}); err != nil {
-			misc.Die("subcommand failed", err)
-		}
+		misc.Die("unknown command", errors.New(command))
 	}
 }
 

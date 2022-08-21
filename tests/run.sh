@@ -43,8 +43,8 @@ _run() {
     "$BIN/lb" show keys2/three
     echo "y" | "$BIN/lb" dump keys2/three
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert test/totp
-    "$BIN/lb-totp" -list
-    "$BIN/lb-totp" test | tr '[:digit:]' 'X'
+    "$BIN/lb" "totp" -list
+    "$BIN/lb" "totp" test | tr '[:digit:]' 'X'
     "$BIN/lb" "gitdiff" bin/lb/keys/one.lb bin/lb/keys/one2.lb
     yes 2>/dev/null | "$BIN/lb" rm keys2/three
     echo

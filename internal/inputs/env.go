@@ -14,8 +14,6 @@ const (
 	interactiveEnv = prefixKey + "INTERACTIVE"
 	// TotpEnv allows for overriding of the special name for totp entries.
 	TotpEnv = prefixKey + "TOTP"
-	// ExeEnv allows for installing lb to various locations.
-	ExeEnv = prefixKey + "EXE"
 	// KeyModeEnv indicates what the KEY value is (e.g. command, plaintext).
 	KeyModeEnv = prefixKey + "KEYMODE"
 	// KeyEnv is the key value used by the lockbox store.

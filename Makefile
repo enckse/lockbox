@@ -1,21 +1,21 @@
 VERSION := development
 DESTDIR :=
 BUILD   := bin/
-TARGETS := $(BUILD)lb $(BUILD)lb-totp
+TARGET  := $(BUILD)lb
 MAIN    := $(DESTDIR)bin/lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 
 .PHONY: $(TESTDIR)
 
-all: $(TARGETS)
+all: $(TARGET)
 
-$(TARGETS): cmd/**/* internal/**/*.go  go.*
-	go build -ldflags '-X main.version=$(VERSION) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/$(shell basename $@)/main.go
+$(TARGET): cmd/main.go internal/**/*.go  go.*
+	go build -ldflags '-X main.version=$(VERSION) -X main.mainExe=$(MAIN)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/main.go
 
 $(TESTDIR):
 	cd $@ && go test
 
-check: $(TARGETS) $(TESTDIR)
+check: $(TARGET) $(TESTDIR)
 	cd tests && make BUILD=../$(BUILD)
 
 clean:

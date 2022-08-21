@@ -1,5 +1,5 @@
-// support TOTP tokens in lockbox.
-package main
+// Package subcommands handles TOTP tokens.
+package subcommands
 
 import (
 	"errors"
@@ -107,7 +107,10 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	exe := inputs.EnvOrDefault(inputs.ExeEnv, mainExe)
+	exe, err := os.Executable()
+	if err != nil {
+		return err
+	}
 	totpToken := string(val)
 	if !interactive {
 		code, err := otp.GenerateCode(totpToken, time.Now())
@@ -191,12 +194,12 @@ func display(token string, args cli.Arguments) error {
 	}
 }
 
-func main() {
-	args := os.Args
-	if len(args) > 3 || len(args) < 2 {
-		misc.Die("subkey required", errors.New("invalid arguments"))
+// TOTP handles UI for TOTP tokens.
+func TOTP(args []string) error {
+	if len(args) > 2 || len(args) < 1 {
+		return errors.New("invalid arguments, subkey and entry required")
 	}
-	cmd := args[1]
+	cmd := args[0]
 	options := cli.ParseArgs(cmd)
 	if options.List {
 		f := store.NewFileSystemStore()
@@ -208,21 +211,22 @@ func main() {
 			return ""
 		}})
 		if err != nil {
-			misc.Die("invalid list response", err)
+			return err
 		}
 		sort.Strings(results)
 		for _, entry := range results {
 			fmt.Println(entry)
 		}
-		return
+		return nil
 	}
-	if len(args) == 3 {
+	if len(args) == 2 {
 		if !options.Clip && !options.Short && !options.Once {
-			misc.Die("subcommand not supported", errors.New("invalid sub command"))
+			return errors.New("invalid sub command")
 		}
-		cmd = args[2]
+		cmd = args[1]
 	}
 	if err := display(cmd, options); err != nil {
-		misc.Die("failed to show totp token", err)
+		return err
 	}
+	return nil
 }
