@@ -1,7 +1,7 @@
 VERSION := development
 DESTDIR :=
 BUILD   := bin/
-TARGETS := $(BUILD)lb $(BUILD)lb-rekey $(BUILD)lb-gitdiff $(BUILD)lb-totp
+TARGETS := $(BUILD)lb $(BUILD)lb-rekey $(BUILD)lb-totp
 LIBEXEC := $(DESTDIR)libexec/lockbox/
 MAIN    := $(DESTDIR)bin/lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))

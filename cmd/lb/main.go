@@ -163,6 +163,10 @@ func main() {
 		if err := subcommands.ClearClipboardCallback(); err != nil {
 			misc.Die("failed to handle clipboard clear", err)
 		}
+	case "gitdiff":
+		if err := subcommands.GitDiff(args[2:]); err != nil {
+			misc.Die("git-diff failed", err)
+		}
 	case "rw":
 		if err := subcommands.ReadWrite(args[2:]); err != nil {
 			misc.Die("read/write failed", err)
