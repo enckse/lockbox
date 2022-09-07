@@ -22,10 +22,6 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
-var (
-	mainExe = ""
-)
-
 type (
 	colorWhen struct {
 		start int
@@ -49,8 +45,8 @@ func colorWhenRules() ([]colorWhen, error) {
 	envTime := os.Getenv(inputs.ColorBetweenEnv)
 	if envTime == "" {
 		return []colorWhen{
-			colorWhen{start: 0, end: 5},
-			colorWhen{start: 30, end: 35},
+			{start: 0, end: 5},
+			{start: 30, end: 35},
 		}, nil
 	}
 	var rules []colorWhen

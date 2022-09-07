@@ -43,10 +43,9 @@ type (
 
 	// LockboxOptions represent options to create a lockbox from.
 	LockboxOptions struct {
-		Key      string
-		KeyMode  string
-		File     string
-		callback func(string) string
+		Key     string
+		KeyMode string
+		File    string
 	}
 )
 
