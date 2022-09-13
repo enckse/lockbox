@@ -16,7 +16,6 @@ import (
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/encrypt"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/misc"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/store"
 	otp "github.com/pquerna/otp/totp"
@@ -96,7 +95,7 @@ func display(token string, args cli.Arguments) error {
 	f := store.NewFileSystemStore()
 	tok := filepath.Join(strings.TrimSpace(token), totpEnv())
 	pathing := f.NewPath(tok)
-	if !misc.PathExists(pathing) {
+	if !store.PathExists(pathing) {
 		return errors.New("object does not exist")
 	}
 	val, err := encrypt.FromFile(pathing)

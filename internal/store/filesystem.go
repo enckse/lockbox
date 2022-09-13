@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/misc"
 )
 
 const (
@@ -40,7 +39,7 @@ func NewFileSystemStore() FileSystem {
 // List will get all lockbox files in a store.
 func (s FileSystem) List(options ViewOptions) ([]string, error) {
 	var results []string
-	if !misc.PathExists(s.path) {
+	if !PathExists(s.path) {
 		return nil, errors.New("store does not exist")
 	}
 	err := filepath.Walk(s.path, func(path string, info fs.FileInfo, err error) error {
@@ -97,4 +96,14 @@ func (s FileSystem) trim(path string) string {
 	f := strings.TrimPrefix(path, s.path)
 	f = strings.TrimPrefix(f, string(os.PathSeparator))
 	return strings.TrimSuffix(f, extension)
+}
+
+// PathExists indicates if a path exists.
+func PathExists(path string) bool {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }

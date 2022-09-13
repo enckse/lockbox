@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/misc"
+	"github.com/enckse/lockbox/internal/store"
 )
 
 func setupData(t *testing.T) string {
 	os.Setenv("LOCKBOX_KEYMODE", "")
 	os.Setenv("LOCKBOX_KEY", "")
-	if misc.PathExists("bin") {
+	if store.PathExists("bin") {
 		if err := os.RemoveAll("bin"); err != nil {
 			t.Errorf("unable to cleanup dir: %v", err)
 		}

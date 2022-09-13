@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/enckse/lockbox/internal/misc"
 )
 
 func TestListErrors(t *testing.T) {
@@ -19,7 +17,7 @@ func TestListErrors(t *testing.T) {
 
 func TestList(t *testing.T) {
 	testStore := "bin"
-	if misc.PathExists(testStore) {
+	if PathExists(testStore) {
 		if err := os.RemoveAll(testStore); err != nil {
 			t.Errorf("invalid error on remove: %v", err)
 		}

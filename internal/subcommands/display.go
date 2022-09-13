@@ -11,7 +11,6 @@ import (
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/dump"
 	"github.com/enckse/lockbox/internal/encrypt"
-	"github.com/enckse/lockbox/internal/misc"
 	"github.com/enckse/lockbox/internal/store"
 )
 
@@ -57,7 +56,7 @@ func DisplayCallback(args DisplayOptions) ([]dump.ExportEntity, error) {
 	}
 	dumpData := []dump.ExportEntity{}
 	for _, entry := range entries {
-		if !misc.PathExists(entry) {
+		if !store.PathExists(entry) {
 			return nil, errors.New("entry not found")
 		}
 		decrypt, err := encrypt.FromFile(entry)

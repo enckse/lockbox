@@ -12,7 +12,6 @@ import (
 	"github.com/enckse/lockbox/internal/encrypt"
 	"github.com/enckse/lockbox/internal/hooks"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/misc"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/store"
 	"github.com/enckse/lockbox/internal/subcommands"
@@ -98,7 +97,7 @@ func main() {
 		}
 		isPipe := inputs.IsInputFromPipe()
 		entry := getEntry(store.NewFileSystemStore(), args, idx)
-		if misc.PathExists(entry) {
+		if store.PathExists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
 					return
@@ -106,7 +105,7 @@ func main() {
 			}
 		} else {
 			dir := filepath.Dir(entry)
-			if !misc.PathExists(dir) {
+			if !store.PathExists(dir) {
 				if err := os.MkdirAll(dir, 0755); err != nil {
 					die("failed to create directory structure", err)
 				}
@@ -123,7 +122,7 @@ func main() {
 		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
 		entry := getEntry(store.NewFileSystemStore(), args, 2)
-		if !misc.PathExists(entry) {
+		if !store.PathExists(entry) {
 			die("does not exists", errors.New("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
