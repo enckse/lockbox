@@ -124,12 +124,12 @@ func display(token string, args cli.Arguments) error {
 	if args.Clip {
 		clipboard, err = platform.NewClipboard()
 		if err != nil {
-			misc.Die("invalid clipboard", err)
+			return err
 		}
 	}
 	colorRules, err := colorWhenRules()
 	if err != nil {
-		misc.Die("invalid totp output coloring rules", err)
+		return err
 	}
 	for {
 		if !first {
