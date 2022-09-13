@@ -1,13 +1,15 @@
-package inputs
+package inputs_test
 
 import (
 	"os"
 	"testing"
+
+	"github.com/enckse/lockbox/internal/inputs"
 )
 
 func TestColorSetting(t *testing.T) {
 	os.Setenv("LOCKBOX_NOCOLOR", "yes")
-	c, err := IsNoColorEnabled()
+	c, err := inputs.IsNoColorEnabled()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -15,7 +17,7 @@ func TestColorSetting(t *testing.T) {
 		t.Error("invalid setting")
 	}
 	os.Setenv("LOCKBOX_NOCOLOR", "")
-	c, err = IsNoColorEnabled()
+	c, err = inputs.IsNoColorEnabled()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -23,7 +25,7 @@ func TestColorSetting(t *testing.T) {
 		t.Error("invalid setting")
 	}
 	os.Setenv("LOCKBOX_NOCOLOR", "no")
-	c, err = IsNoColorEnabled()
+	c, err = inputs.IsNoColorEnabled()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -31,7 +33,7 @@ func TestColorSetting(t *testing.T) {
 		t.Error("invalid setting")
 	}
 	os.Setenv("LOCKBOX_NOCOLOR", "lkaj;f")
-	_, err = IsNoColorEnabled()
+	_, err = inputs.IsNoColorEnabled()
 	if err == nil || err.Error() != "invalid yes/no env value for LOCKBOX_NOCOLOR" {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -39,7 +41,7 @@ func TestColorSetting(t *testing.T) {
 
 func TestInteractiveSetting(t *testing.T) {
 	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
-	c, err := IsInteractive()
+	c, err := inputs.IsInteractive()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -47,7 +49,7 @@ func TestInteractiveSetting(t *testing.T) {
 		t.Error("invalid setting")
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "no")
-	c, err = IsInteractive()
+	c, err = inputs.IsInteractive()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -55,7 +57,7 @@ func TestInteractiveSetting(t *testing.T) {
 		t.Error("invalid setting")
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "")
-	c, err = IsInteractive()
+	c, err = inputs.IsInteractive()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -63,7 +65,7 @@ func TestInteractiveSetting(t *testing.T) {
 		t.Error("invalid setting")
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "yaojia")
-	_, err = IsInteractive()
+	_, err = inputs.IsInteractive()
 	if err == nil || err.Error() != "invalid yes/no env value for LOCKBOX_INTERACTIVE" {
 		t.Errorf("unexpected error: %v", err)
 	}
