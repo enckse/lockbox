@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/misc"
 )
 
 const (
@@ -101,11 +100,11 @@ func (c Clipboard) Args(copying bool) (string, []string) {
 	return using[0], args
 }
 
-func pipeTo(command, value string, wait bool, args ...string) {
+func pipeTo(command, value string, wait bool, args ...string) error {
 	cmd := exec.Command(command, args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		misc.Die("unable to get stdin pipe", err)
+		return err
 	}
 
 	go func() {
@@ -121,6 +120,7 @@ func pipeTo(command, value string, wait bool, args ...string) {
 		ran = cmd.Start()
 	}
 	if ran != nil {
-		misc.Die("failed to run command", ran)
+		return errors.New("failed to run command")
 	}
+	return nil
 }

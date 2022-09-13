@@ -28,7 +28,7 @@ type (
 
 func getEntry(fs store.FileSystem, args []string, idx int) string {
 	if len(args) != idx+1 {
-		misc.Die("invalid entry given", errors.New("specific entry required"))
+		die("invalid entry given", errors.New("specific entry required"))
 	}
 	return fs.NewPath(args[idx])
 }
@@ -47,10 +47,19 @@ func internalCallback(name string) callbackFunction {
 	return nil
 }
 
+func die(message string, err error) {
+	msg := message
+	if err != nil {
+		msg = fmt.Sprintf("%s (%v)", msg, err)
+	}
+	fmt.Fprintln(os.Stderr, msg)
+	os.Exit(1)
+}
+
 func main() {
 	args := os.Args
 	if len(args) < 2 {
-		misc.Die("missing arguments", errors.New("requires subcommand"))
+		die("missing arguments", errors.New("requires subcommand"))
 	}
 	command := args[1]
 	switch command {
@@ -58,13 +67,13 @@ func main() {
 		opts := subcommands.ListFindOptions{Find: command == "find", Search: "", Store: store.NewFileSystemStore()}
 		if opts.Find {
 			if len(args) < 3 {
-				misc.Die("find requires an argument to search for", errors.New("search term required"))
+				die("find requires an argument to search for", errors.New("search term required"))
 			}
 			opts.Search = args[2]
 		}
 		files, err := subcommands.ListFindCallback(opts)
 		if err != nil {
-			misc.Die("unable to list files", err)
+			die("unable to list files", err)
 		}
 		for _, f := range files {
 			fmt.Println(f)
@@ -76,16 +85,16 @@ func main() {
 		idx := 2
 		switch len(args) {
 		case 2:
-			misc.Die("insert missing required arguments", errors.New("entry required"))
+			die("insert missing required arguments", errors.New("entry required"))
 		case 3:
 		case 4:
 			options = cli.ParseArgs(args[2])
 			if !options.Multi {
-				misc.Die("multi-line insert must be after 'insert'", errors.New("invalid command"))
+				die("multi-line insert must be after 'insert'", errors.New("invalid command"))
 			}
 			idx = 3
 		default:
-			misc.Die("too many arguments", errors.New("insert can only perform one operation"))
+			die("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
 		entry := getEntry(store.NewFileSystemStore(), args, idx)
@@ -99,23 +108,23 @@ func main() {
 			dir := filepath.Dir(entry)
 			if !misc.PathExists(dir) {
 				if err := os.MkdirAll(dir, 0755); err != nil {
-					misc.Die("failed to create directory structure", err)
+					die("failed to create directory structure", err)
 				}
 			}
 		}
 		password, err := inputs.GetUserInputPassword(isPipe, options.Multi)
 		if err != nil {
-			misc.Die("invalid input", err)
+			die("invalid input", err)
 		}
 		if err := encrypt.ToFile(entry, password); err != nil {
-			misc.Die("unable to encrypt object", err)
+			die("unable to encrypt object", err)
 		}
 		fmt.Println("")
 		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
 		entry := getEntry(store.NewFileSystemStore(), args, 2)
 		if !misc.PathExists(entry) {
-			misc.Die("does not exists", errors.New("can not delete unknown entry"))
+			die("does not exists", errors.New("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
 			os.Remove(entry)
@@ -139,7 +148,7 @@ func main() {
 		var err error
 		dumpData, err := subcommands.DisplayCallback(opts)
 		if err != nil {
-			misc.Die("display command failed to retrieve data", err)
+			die("display command failed to retrieve data", err)
 		}
 		if opts.Dump {
 			if !options.Yes {
@@ -149,7 +158,7 @@ func main() {
 			}
 			d, err := dump.Marshal(dumpData)
 			if err != nil {
-				misc.Die("failed to marshal items", err)
+				die("failed to marshal items", err)
 			}
 			fmt.Println(string(d))
 			return
@@ -158,7 +167,7 @@ func main() {
 		if !opts.Show {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
-				misc.Die("unable to get clipboard", err)
+				die("unable to get clipboard", err)
 			}
 		}
 		for _, obj := range dumpData {
@@ -170,30 +179,30 @@ func main() {
 				continue
 			}
 			if err := clipboard.CopyTo(obj.Value); err != nil {
-				misc.Die("clipboard failed", err)
+				die("clipboard failed", err)
 			}
 		}
 	case "clear":
 		if err := subcommands.ClearClipboardCallback(); err != nil {
-			misc.Die("failed to handle clipboard clear", err)
+			die("failed to handle clipboard clear", err)
 		}
 	default:
 		a := args[2:]
 		callback := internalCallback(command)
 		if callback != nil {
 			if err := callback(a); err != nil {
-				misc.Die(fmt.Sprintf("%s command failure", command), err)
+				die(fmt.Sprintf("%s command failure", command), err)
 			}
 			return
 		}
-		misc.Die("unknown command", errors.New(command))
+		die("unknown command", errors.New(command))
 	}
 }
 
 func confirm(prompt string) bool {
 	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		misc.Die("failed to get response", err)
+		die("failed to get response", err)
 	}
 	return yesNo
 }
