@@ -126,7 +126,9 @@ func main() {
 			die("does not exists", errors.New("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
-			os.Remove(entry)
+			if err := os.Remove(entry); err != nil {
+				die("unable to remove entry", err)
+			}
 			hooks.Run(hooks.Remove, hooks.PostStep)
 		}
 	case "show", "clip", "dump":
