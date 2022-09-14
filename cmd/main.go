@@ -119,11 +119,11 @@ func main() {
 		if err := encrypt.ToFile(entry, password); err != nil {
 			die("unable to encrypt object", err)
 		}
+		fmt.Println("")
+		hooks.Run(hooks.Insert, hooks.PostStep)
 		if err := s.GitCommit(entry); err != nil {
 			die("failed to git commit changed", err)
 		}
-		fmt.Println("")
-		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
 		s := store.NewFileSystemStore()
 		entry := getEntry(s, args, 2)
@@ -134,10 +134,10 @@ func main() {
 			if err := os.Remove(entry); err != nil {
 				die("unable to remove entry", err)
 			}
+			hooks.Run(hooks.Remove, hooks.PostStep)
 			if err := s.GitRemove(entry); err != nil {
 				die("failed to git remove", err)
 			}
-			hooks.Run(hooks.Remove, hooks.PostStep)
 		}
 	case "show", "clip", "dump":
 		fs := store.NewFileSystemStore()
