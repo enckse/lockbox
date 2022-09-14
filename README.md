@@ -95,6 +95,14 @@ Setup the `.gitattributes` for the repository to include
 *.lb diff=lb
 ```
 
+The `insert` and `rm` actions will attempt to perform a git operation (if the
+lockbox directory has a `.git/` directory), this
+functionality can be disabled via
+
+```
+export LOCKBOX_GIT="no"
+```
+
 ## build
 
 Requires `make`

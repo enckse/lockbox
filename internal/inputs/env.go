@@ -12,6 +12,8 @@ const (
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
 	interactiveEnv = prefixKey + "INTERACTIVE"
+	gitEnabledEnv  = prefixKey + "GIT"
+	gitQuietEnv    = gitEnabledEnv + "_QUIET"
 	// TotpEnv allows for overriding of the special name for totp entries.
 	TotpEnv = prefixKey + "TOTP"
 	// KeyModeEnv indicates what the KEY value is (e.g. command, plaintext).
@@ -56,6 +58,16 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 // IsNoClipEnabled indicates if clipboard mode is enabled.
 func IsNoClipEnabled() (bool, error) {
 	return isYesNoEnv(false, noClipEnv)
+}
+
+// IsGitQuiet indicates if git operations should be 'quiet' (no stdout/stderr)
+func IsGitQuiet() (bool, error) {
+	return isYesNoEnv(true, gitQuietEnv)
+}
+
+// IsGitEnabled indicates if the filesystem store is a git repo
+func IsGitEnabled() (bool, error) {
+	return isYesNoEnv(true, gitEnabledEnv)
 }
 
 // IsNoColorEnabled indicates if the flag is set to disable color.

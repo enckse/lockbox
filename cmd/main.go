@@ -96,7 +96,8 @@ func main() {
 			die("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
-		entry := getEntry(store.NewFileSystemStore(), args, idx)
+		s := store.NewFileSystemStore()
+		entry := getEntry(s, args, idx)
 		if store.PathExists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
@@ -118,16 +119,23 @@ func main() {
 		if err := encrypt.ToFile(entry, password); err != nil {
 			die("unable to encrypt object", err)
 		}
+		if err := s.GitCommit(entry); err != nil {
+			die("failed to git commit changed", err)
+		}
 		fmt.Println("")
 		hooks.Run(hooks.Insert, hooks.PostStep)
 	case "rm":
-		entry := getEntry(store.NewFileSystemStore(), args, 2)
+		s := store.NewFileSystemStore()
+		entry := getEntry(s, args, 2)
 		if !store.PathExists(entry) {
 			die("does not exists", errors.New("can not delete unknown entry"))
 		}
 		if confirm("remove entry") {
 			if err := os.Remove(entry); err != nil {
 				die("unable to remove entry", err)
+			}
+			if err := s.GitRemove(entry); err != nil {
+				die("failed to git remove", err)
 			}
 			hooks.Run(hooks.Remove, hooks.PostStep)
 		}

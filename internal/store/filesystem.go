@@ -3,8 +3,10 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -106,4 +108,46 @@ func PathExists(path string) bool {
 		}
 	}
 	return true
+}
+
+// GitCommit is for adding/changing entities
+func (s FileSystem) GitCommit(entry string) error {
+	return s.gitAction("add", entry)
+}
+
+// GitRemove is for removing entities
+func (s FileSystem) GitRemove(entry string) error {
+	return s.gitAction("rm", entry)
+}
+
+func (s FileSystem) gitAction(action, entry string) error {
+	ok, err := inputs.IsGitEnabled()
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return nil
+	}
+	if !PathExists(filepath.Join(s.path, ".git")) {
+		return nil
+	}
+	if err := s.gitRun(action, entry); err != nil {
+		return err
+	}
+	return s.gitRun("commit", "-m", fmt.Sprintf("lb %s: %s", action, entry))
+}
+
+func (s FileSystem) gitRun(args ...string) error {
+	arguments := []string{"-C", s.path}
+	arguments = append(arguments, args...)
+	cmd := exec.Command("git", arguments...)
+	ok, err := inputs.IsGitQuiet()
+	if err != nil {
+		return err
+	}
+	if !ok {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
+	return cmd.Run()
 }
