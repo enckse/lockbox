@@ -131,10 +131,14 @@ func (s FileSystem) gitAction(action, entry string) error {
 	if !PathExists(filepath.Join(s.path, ".git")) {
 		return nil
 	}
-	if err := s.gitRun(action, entry); err != nil {
+	useEntry, err := filepath.Rel(s.path, entry)
+	if err != nil {
 		return err
 	}
-	return s.gitRun("commit", "-m", fmt.Sprintf("lb %s: %s", action, entry))
+	if err := s.gitRun(action, useEntry); err != nil {
+		return err
+	}
+	return s.gitRun("commit", "-m", fmt.Sprintf("lb %s: %s", action, useEntry))
 }
 
 func (s FileSystem) gitRun(args ...string) error {
