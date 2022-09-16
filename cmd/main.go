@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/dump"
@@ -126,16 +127,37 @@ func main() {
 		}
 	case "rm":
 		s := store.NewFileSystemStore()
-		entry := getEntry(s, args, 2)
-		if !store.PathExists(entry) {
-			die("does not exists", errors.New("can not delete unknown entry"))
+		value := args[2]
+		var deletes []string
+		confirmText := "entry"
+		if strings.Contains(value, "*") {
+			globs, err := s.Globs(value)
+			if err != nil {
+				die("rm glob failed", err)
+			}
+			if len(globs) > 1 {
+				confirmText = "entries"
+			}
+			deletes = append(deletes, globs...)
+		} else {
+			deletes = []string{getEntry(s, args, 2)}
 		}
-		if confirm("remove entry") {
-			if err := os.Remove(entry); err != nil {
-				die("unable to remove entry", err)
+		if len(deletes) == 0 {
+			die("nothing to delete", errors.New("no files to remove"))
+		}
+		if confirm(fmt.Sprintf("remove %s", confirmText)) {
+			for _, entry := range deletes {
+				if !store.PathExists(entry) {
+					die("does not exists", errors.New("can not delete unknown entry"))
+				}
+			}
+			for _, entry := range deletes {
+				if err := os.Remove(entry); err != nil {
+					die("unable to remove entry", err)
+				}
 			}
 			hooks.Run(hooks.Remove, hooks.PostStep)
-			if err := s.GitRemove(entry); err != nil {
+			if err := s.GitRemove(deletes); err != nil {
 				die("failed to git remove", err)
 			}
 		}

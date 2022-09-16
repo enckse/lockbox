@@ -38,6 +38,11 @@ func NewFileSystemStore() FileSystem {
 	return FileSystem{path: os.Getenv(inputs.StoreEnv)}
 }
 
+// Globs will return any globs from the input path from within the store.
+func (s FileSystem) Globs(inputPath string) ([]string, error) {
+	return filepath.Glob(filepath.Join(s.path, inputPath))
+}
+
 // List will get all lockbox files in a store.
 func (s FileSystem) List(options ViewOptions) ([]string, error) {
 	var results []string
@@ -112,15 +117,15 @@ func PathExists(path string) bool {
 
 // GitCommit is for adding/changing entities
 func (s FileSystem) GitCommit(entry string) error {
-	return s.gitAction("add", entry)
+	return s.gitAction("add", []string{entry})
 }
 
 // GitRemove is for removing entities
-func (s FileSystem) GitRemove(entry string) error {
-	return s.gitAction("rm", entry)
+func (s FileSystem) GitRemove(entries []string) error {
+	return s.gitAction("rm", entries)
 }
 
-func (s FileSystem) gitAction(action, entry string) error {
+func (s FileSystem) gitAction(action string, entries []string) error {
 	ok, err := inputs.IsGitEnabled()
 	if err != nil {
 		return err
@@ -131,14 +136,18 @@ func (s FileSystem) gitAction(action, entry string) error {
 	if !PathExists(filepath.Join(s.path, ".git")) {
 		return nil
 	}
-	useEntry, err := filepath.Rel(s.path, entry)
-	if err != nil {
-		return err
+	var message []string
+	for _, entry := range entries {
+		useEntry, err := filepath.Rel(s.path, entry)
+		if err != nil {
+			return err
+		}
+		if err := s.gitRun(action, useEntry); err != nil {
+			return err
+		}
+		message = append(message, fmt.Sprintf("lb %s: %s", action, useEntry))
 	}
-	if err := s.gitRun(action, useEntry); err != nil {
-		return err
-	}
-	return s.gitRun("commit", "-m", fmt.Sprintf("lb %s: %s", action, useEntry))
+	return s.gitRun("commit", "-m", strings.Join(message, "\n"))
 }
 
 func (s FileSystem) gitRun(args ...string) error {
