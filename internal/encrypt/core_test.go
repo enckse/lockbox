@@ -91,3 +91,39 @@ func TestEncryptDecryptPlainText(t *testing.T) {
 		t.Error("data mismatch")
 	}
 }
+
+func TestEncryptDecryptSecretBox(t *testing.T) {
+	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t), Algorithm: "secretbox"})
+	if err != nil {
+		t.Errorf("failed to create lockbox: %v", err)
+	}
+	data := []byte("datum")
+	if err := e.Encrypt(data); err != nil {
+		t.Errorf("failed to encrypt: %v", err)
+	}
+	d, err := e.Decrypt()
+	if err != nil {
+		t.Errorf("failed to decrypt: %v", err)
+	}
+	if string(d) != string(data) {
+		t.Error("data mismatch")
+	}
+}
+
+func TestEncryptDecryptAESBox(t *testing.T) {
+	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t), Algorithm: "aes"})
+	if err != nil {
+		t.Errorf("failed to create lockbox: %v", err)
+	}
+	data := []byte("datum")
+	if err := e.Encrypt(data); err != nil {
+		t.Errorf("failed to encrypt: %v", err)
+	}
+	d, err := e.Decrypt()
+	if err != nil {
+		t.Errorf("failed to decrypt: %v", err)
+	}
+	if string(d) != string(data) {
+		t.Error("data mismatch")
+	}
+}

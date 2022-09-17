@@ -34,6 +34,8 @@ const (
 	ClipMaxEnv = prefixKey + "CLIPMAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = prefixKey + "TOTPBETWEEN"
+	// EncryptModeEnv indicates the underlying algorith to use for encryption.
+	EncryptModeEnv  = prefixKey + "ALGORITHM"
 	// PlainKeyMode is plaintext based key resolution.
 	PlainKeyMode = "plaintext"
 	// CommandKeyMode will run an external command to get the key (from stdout).
