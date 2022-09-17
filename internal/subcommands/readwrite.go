@@ -16,11 +16,12 @@ func ReadWrite(args []string) error {
 	key := flags.String("key", "", "security key")
 	file := flags.String("file", "", "file to process")
 	keyMode := flags.String("keymode", "", "key lookup mode")
+	algo := flags.String("algorithm", "", "algorithm to use")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 
-	l, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: *key, KeyMode: *keyMode, File: *file})
+	l, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: *key, KeyMode: *keyMode, File: *file, Algorithm: *algo})
 	if err != nil {
 		return err
 	}

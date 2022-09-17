@@ -111,7 +111,7 @@ func TestEncryptDecryptSecretBox(t *testing.T) {
 }
 
 func TestEncryptDecryptAESBox(t *testing.T) {
-	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t), Algorithm: "aes"})
+	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t), Algorithm: "aesgcm"})
 	if err != nil {
 		t.Errorf("failed to create lockbox: %v", err)
 	}
