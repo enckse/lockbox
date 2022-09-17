@@ -21,6 +21,7 @@ type (
 		Entry string
 		Show  bool
 		Glob  string
+		All   bool
 		Store store.FileSystem
 	}
 )
@@ -28,8 +29,8 @@ type (
 // DisplayCallback handles getting entries for display.
 func DisplayCallback(args DisplayOptions) ([]dump.ExportEntity, error) {
 	entries := []string{args.Entry}
-	if strings.Contains(args.Entry, "*") {
-		if args.Entry == args.Glob {
+	if strings.Contains(args.Entry, "*") || args.All {
+		if args.Entry == args.Glob || args.All {
 			all, err := args.Store.List(store.ViewOptions{})
 			if err != nil {
 				return nil, err

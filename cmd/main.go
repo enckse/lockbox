@@ -47,6 +47,8 @@ func internalCallback(name string) callbackFunction {
 		return subcommands.ReadWrite
 	case "totp":
 		return subcommands.TOTP
+	case "kdbx":
+		return subcommands.ToKeepass
 	}
 	return nil
 }

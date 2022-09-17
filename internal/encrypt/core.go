@@ -8,12 +8,9 @@ import (
 	"io"
 	random "math/rand"
 	"os"
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/google/shlex"
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -23,10 +20,6 @@ const (
 	nonceLength = 24
 	padLength   = 256
 	saltLength  = 16
-	// PlainKeyMode is plaintext based key resolution.
-	PlainKeyMode = "plaintext"
-	// CommandKeyMode will run an external command to get the key (from stdout).
-	CommandKeyMode = "command"
 )
 
 var (
@@ -73,29 +66,10 @@ func NewLockbox(options LockboxOptions) (Lockbox, error) {
 }
 
 func newLockbox(key, keyMode, file string) (Lockbox, error) {
-	useKeyMode := keyMode
-	if useKeyMode == "" {
-		useKeyMode = os.Getenv(inputs.KeyModeEnv)
-	}
-	if useKeyMode == "" {
-		useKeyMode = CommandKeyMode
-	}
-	useKey := key
-	if useKey == "" {
-		useKey = os.Getenv(inputs.KeyEnv)
-	}
-	if useKey == "" {
-		return Lockbox{}, errors.New("no key given")
-	}
-	b, err := getKey(useKeyMode, useKey)
+	b, err := inputs.GetKey(key, keyMode)
 	if err != nil {
 		return Lockbox{}, err
 	}
-
-	if len(b) == 0 {
-		return Lockbox{}, errors.New("key is empty")
-	}
-
 	var secretKey [keyLength]byte
 	copy(secretKey[:], b)
 	return Lockbox{secret: secretKey, file: file}, nil
@@ -109,28 +83,6 @@ func pad(salt, key []byte) ([keyLength]byte, error) {
 	var obj [keyLength]byte
 	copy(obj[:], d[:keyLength])
 	return obj, nil
-}
-
-func getKey(keyMode, name string) ([]byte, error) {
-	var data []byte
-	switch keyMode {
-	case CommandKeyMode:
-		parts, err := shlex.Split(name)
-		if err != nil {
-			return nil, err
-		}
-		cmd := exec.Command(parts[0], parts[1:]...)
-		b, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}
-		data = b
-	case PlainKeyMode:
-		data = []byte(name)
-	default:
-		return nil, errors.New("unknown keymode")
-	}
-	return []byte(strings.TrimSpace(string(data))), nil
 }
 
 func init() {

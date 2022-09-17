@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/enckse/lockbox/internal/encrypt"
+	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/store"
 )
 
@@ -26,7 +27,7 @@ func setupData(t *testing.T) string {
 }
 
 func TestEncryptDecryptCommand(t *testing.T) {
-	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "echo test", KeyMode: encrypt.CommandKeyMode, File: setupData(t)})
+	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "echo test", KeyMode: inputs.CommandKeyMode, File: setupData(t)})
 	if err != nil {
 		t.Errorf("failed to create lockbox: %v", err)
 	}
@@ -49,7 +50,7 @@ func TestEmptyKey(t *testing.T) {
 	if err == nil || err.Error() != "no key given" {
 		t.Errorf("invalid error: %v", err)
 	}
-	_, err = encrypt.NewLockbox(encrypt.LockboxOptions{KeyMode: encrypt.CommandKeyMode, Key: "echo"})
+	_, err = encrypt.NewLockbox(encrypt.LockboxOptions{KeyMode: inputs.CommandKeyMode, Key: "echo"})
 	if err == nil || err.Error() != "key is empty" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -59,7 +60,7 @@ func TestKeyLength(t *testing.T) {
 	val := ""
 	for i := 0; i < 42; i++ {
 		val = fmt.Sprintf("a%s", val)
-		_, err := encrypt.NewLockbox(encrypt.LockboxOptions{KeyMode: encrypt.PlainKeyMode, Key: val})
+		_, err := encrypt.NewLockbox(encrypt.LockboxOptions{KeyMode: inputs.PlainKeyMode, Key: val})
 		if err != nil {
 			t.Error("no error expected")
 		}
@@ -74,7 +75,7 @@ func TestUnknownMode(t *testing.T) {
 }
 
 func TestEncryptDecryptPlainText(t *testing.T) {
-	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: encrypt.PlainKeyMode, File: setupData(t)})
+	e, err := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t)})
 	if err != nil {
 		t.Errorf("failed to create lockbox: %v", err)
 	}

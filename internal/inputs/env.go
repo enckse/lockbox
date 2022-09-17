@@ -2,9 +2,13 @@
 package inputs
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
+
+	"github.com/google/shlex"
 )
 
 const (
@@ -30,6 +34,10 @@ const (
 	ClipMaxEnv = prefixKey + "CLIPMAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = prefixKey + "TOTPBETWEEN"
+	// PlainKeyMode is plaintext based key resolution.
+	PlainKeyMode = "plaintext"
+	// CommandKeyMode will run an external command to get the key (from stdout).
+	CommandKeyMode = "command"
 )
 
 // EnvOrDefault will get the environment value OR default if env is not set.
@@ -39,6 +47,54 @@ func EnvOrDefault(envKey, defaultValue string) string {
 		return defaultValue
 	}
 	return val
+}
+
+// GetKey will get the encryption key setup for lb
+func GetKey(key, keyMode string) ([]byte, error) {
+	useKeyMode := keyMode
+	if useKeyMode == "" {
+		useKeyMode = os.Getenv(KeyModeEnv)
+	}
+	if useKeyMode == "" {
+		useKeyMode = CommandKeyMode
+	}
+	useKey := key
+	if useKey == "" {
+		useKey = os.Getenv(KeyEnv)
+	}
+	if useKey == "" {
+		return nil, errors.New("no key given")
+	}
+	b, err := getKey(useKeyMode, useKey)
+	if err != nil {
+		return nil, err
+	}
+	if len(b) == 0 {
+		return nil, errors.New("key is empty")
+	}
+	return b, nil
+}
+
+func getKey(keyMode, name string) ([]byte, error) {
+	var data []byte
+	switch keyMode {
+	case CommandKeyMode:
+		parts, err := shlex.Split(name)
+		if err != nil {
+			return nil, err
+		}
+		cmd := exec.Command(parts[0], parts[1:]...)
+		b, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
+		data = b
+	case PlainKeyMode:
+		data = []byte(name)
+	default:
+		return nil, errors.New("unknown keymode")
+	}
+	return []byte(strings.TrimSpace(string(data))), nil
 }
 
 func isYesNoEnv(defaultValue bool, env string) (bool, error) {
