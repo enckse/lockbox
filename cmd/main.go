@@ -24,11 +24,15 @@ var (
 
 type (
 	callbackFunction func([]string) error
+	programError     struct {
+		message string
+		err     error
+	}
 )
 
 func getEntry(fs store.FileSystem, args []string, idx int) string {
 	if len(args) != idx+1 {
-		die("invalid entry given", errors.New("specific entry required"))
+		exit("invalid entry given", errors.New("specific entry required"))
 	}
 	return fs.NewPath(args[idx])
 }
@@ -47,7 +51,7 @@ func internalCallback(name string) callbackFunction {
 	return nil
 }
 
-func die(message string, err error) {
+func exit(message string, err error) {
 	msg := message
 	if err != nil {
 		msg = fmt.Sprintf("%s (%v)", msg, err)
@@ -56,10 +60,20 @@ func die(message string, err error) {
 	os.Exit(1)
 }
 
+func newError(message string, err error) *programError {
+	return &programError{message: message, err: err}
+}
+
 func main() {
+	if err := run(); err != nil {
+		exit(err.message, err.err)
+	}
+}
+
+func run() *programError {
 	args := os.Args
 	if len(args) < 2 {
-		die("missing arguments", errors.New("requires subcommand"))
+		return newError("missing arguments", errors.New("requires subcommand"))
 	}
 	command := args[1]
 	switch command {
@@ -67,13 +81,13 @@ func main() {
 		opts := subcommands.ListFindOptions{Find: command == "find", Search: "", Store: store.NewFileSystemStore()}
 		if opts.Find {
 			if len(args) < 3 {
-				die("find requires an argument to search for", errors.New("search term required"))
+				return newError("find requires an argument to search for", errors.New("search term required"))
 			}
 			opts.Search = args[2]
 		}
 		files, err := subcommands.ListFindCallback(opts)
 		if err != nil {
-			die("unable to list files", err)
+			return newError("unable to list files", err)
 		}
 		for _, f := range files {
 			fmt.Println(f)
@@ -85,16 +99,16 @@ func main() {
 		idx := 2
 		switch len(args) {
 		case 2:
-			die("insert missing required arguments", errors.New("entry required"))
+			return newError("insert missing required arguments", errors.New("entry required"))
 		case 3:
 		case 4:
 			options = cli.ParseArgs(args[2])
 			if !options.Multi {
-				die("multi-line insert must be after 'insert'", errors.New("invalid command"))
+				return newError("multi-line insert must be after 'insert'", errors.New("invalid command"))
 			}
 			idx = 3
 		default:
-			die("too many arguments", errors.New("insert can only perform one operation"))
+			return newError("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
 		s := store.NewFileSystemStore()
@@ -102,28 +116,28 @@ func main() {
 		if store.PathExists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
-					return
+					return nil
 				}
 			}
 		} else {
 			dir := filepath.Dir(entry)
 			if !store.PathExists(dir) {
 				if err := os.MkdirAll(dir, 0755); err != nil {
-					die("failed to create directory structure", err)
+					return newError("failed to create directory structure", err)
 				}
 			}
 		}
 		password, err := inputs.GetUserInputPassword(isPipe, options.Multi)
 		if err != nil {
-			die("invalid input", err)
+			return newError("invalid input", err)
 		}
 		if err := encrypt.ToFile(entry, password); err != nil {
-			die("unable to encrypt object", err)
+			return newError("unable to encrypt object", err)
 		}
 		fmt.Println("")
 		hooks.Run(hooks.Insert, hooks.PostStep)
 		if err := s.GitCommit(entry); err != nil {
-			die("failed to git commit changed", err)
+			return newError("failed to git commit changed", err)
 		}
 	case "rm":
 		s := store.NewFileSystemStore()
@@ -133,7 +147,7 @@ func main() {
 		if strings.Contains(value, "*") {
 			globs, err := s.Globs(value)
 			if err != nil {
-				die("rm glob failed", err)
+				return newError("rm glob failed", err)
 			}
 			if len(globs) > 1 {
 				confirmText = "entries"
@@ -143,22 +157,22 @@ func main() {
 			deletes = []string{getEntry(s, args, 2)}
 		}
 		if len(deletes) == 0 {
-			die("nothing to delete", errors.New("no files to remove"))
+			return newError("nothing to delete", errors.New("no files to remove"))
 		}
 		if confirm(fmt.Sprintf("remove %s", confirmText)) {
 			for _, entry := range deletes {
 				if !store.PathExists(entry) {
-					die("does not exists", errors.New("can not delete unknown entry"))
+					return newError("does not exists", errors.New("can not delete unknown entry"))
 				}
 			}
 			for _, entry := range deletes {
 				if err := os.Remove(entry); err != nil {
-					die("unable to remove entry", err)
+					return newError("unable to remove entry", err)
 				}
 			}
 			hooks.Run(hooks.Remove, hooks.PostStep)
 			if err := s.GitRemove(deletes); err != nil {
-				die("failed to git remove", err)
+				return newError("failed to git remove", err)
 			}
 		}
 	case "show", "clip", "dump":
@@ -179,26 +193,26 @@ func main() {
 		var err error
 		dumpData, err := subcommands.DisplayCallback(opts)
 		if err != nil {
-			die("display command failed to retrieve data", err)
+			return newError("display command failed to retrieve data", err)
 		}
 		if opts.Dump {
 			if !options.Yes {
 				if !confirm("dump data to stdout as plaintext") {
-					return
+					return nil
 				}
 			}
 			d, err := dump.Marshal(dumpData)
 			if err != nil {
-				die("failed to marshal items", err)
+				return newError("failed to marshal items", err)
 			}
 			fmt.Println(string(d))
-			return
+			return nil
 		}
 		clipboard := platform.Clipboard{}
 		if !opts.Show {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
-				die("unable to get clipboard", err)
+				return newError("unable to get clipboard", err)
 			}
 		}
 		for _, obj := range dumpData {
@@ -210,30 +224,31 @@ func main() {
 				continue
 			}
 			if err := clipboard.CopyTo(obj.Value); err != nil {
-				die("clipboard failed", err)
+				return newError("clipboard failed", err)
 			}
 		}
 	case "clear":
 		if err := subcommands.ClearClipboardCallback(); err != nil {
-			die("failed to handle clipboard clear", err)
+			return newError("failed to handle clipboard clear", err)
 		}
 	default:
 		a := args[2:]
 		callback := internalCallback(command)
 		if callback != nil {
 			if err := callback(a); err != nil {
-				die(fmt.Sprintf("%s command failure", command), err)
+				return newError(fmt.Sprintf("%s command failure", command), err)
 			}
-			return
+			return nil
 		}
-		die("unknown command", errors.New(command))
+		return newError("unknown command", errors.New(command))
 	}
+	return nil
 }
 
 func confirm(prompt string) bool {
 	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		die("failed to get response", err)
+		exit("failed to get response", err)
 	}
 	return yesNo
 }
