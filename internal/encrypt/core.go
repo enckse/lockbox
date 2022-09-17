@@ -13,9 +13,13 @@ import (
 )
 
 const (
-	keyLength                                   = 32
-	algorithmBaseVersion                        = 0
-	secretBoxAlgorithmVersion algorithmVersions = iota
+	keyLength            = 32
+	algorithmBaseVersion = 0
+)
+
+const (
+	noopBoxAlgorithVersion algorithmVersions = iota
+	secretBoxAlgorithmVersion
 	aesGCMAlgorithmVersion
 )
 

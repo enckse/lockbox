@@ -154,7 +154,11 @@ func TestDecryptErrors(t *testing.T) {
 	if _, err := e.Decrypt(); err.Error() != "unable to detect algorithm" {
 		t.Errorf("failed to decrypt, bad algorithm: %v", err)
 	}
-	os.WriteFile(d, []byte{0, 2, 1}, 0600)
+	os.WriteFile(d, []byte{0, 0, 1}, 0600)
+	if _, err := e.Decrypt(); err.Error() != "unable to detect algorithm" {
+		t.Errorf("failed to decrypt, bad algorithm: %v", err)
+	}
+	os.WriteFile(d, []byte{0, 1, 1}, 0600)
 	if _, err := e.Decrypt(); err.Error() != "data is invalid for decryption" {
 		t.Errorf("failed to decrypt, bad data: %v", err)
 	}
