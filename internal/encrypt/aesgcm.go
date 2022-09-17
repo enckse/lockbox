@@ -58,6 +58,10 @@ func (a aesGCMAlgorithm) encrypt(key, data []byte) ([]byte, error) {
 	return d, nil
 }
 
+func (a aesGCMAlgorithm) dataSize() int {
+	return aesGCMAlgorithmSaltLength
+}
+
 func (a aesGCMAlgorithm) decrypt(key, encrypted []byte) ([]byte, error) {
 	var salt [aesGCMAlgorithmSaltLength]byte
 	copy(salt[:], encrypted[0:aesGCMAlgorithmSaltLength])

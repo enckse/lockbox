@@ -127,3 +127,35 @@ func TestEncryptDecryptAESBox(t *testing.T) {
 		t.Error("data mismatch")
 	}
 }
+
+func TestEncryptErrors(t *testing.T) {
+	e, _ := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t)})
+	if err := e.Encrypt([]byte{}); err.Error() != "no data given" {
+		t.Errorf("no data expected: %v", err)
+	}
+	e, _ = encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: setupData(t), Algorithm: "bad"})
+	if err := e.Encrypt([]byte{0, 10, 10, 10, 10, 10, 10, 10, 1}); err.Error() != "unknown algorithm detected" {
+		t.Errorf("unknown algorithm expected: %v", err)
+	}
+}
+
+func TestDecryptErrors(t *testing.T) {
+	d := setupData(t)
+	e, _ := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: d})
+	os.WriteFile(d, []byte{}, 0600)
+	if _, err := e.Decrypt(); err.Error() != "invalid decryption data" {
+		t.Errorf("failed to decrypt, invalid: %v", err)
+	}
+	os.WriteFile(d, []byte{1, 80, 1}, 0600)
+	if _, err := e.Decrypt(); err.Error() != "unknown input data header" {
+		t.Errorf("failed to decrypt, bad base: %v", err)
+	}
+	os.WriteFile(d, []byte{0, 80, 1}, 0600)
+	if _, err := e.Decrypt(); err.Error() != "unable to detect algorithm" {
+		t.Errorf("failed to decrypt, bad algorithm: %v", err)
+	}
+	os.WriteFile(d, []byte{0, 2, 1}, 0600)
+	if _, err := e.Decrypt(); err.Error() != "data is invalid for decryption" {
+		t.Errorf("failed to decrypt, bad data: %v", err)
+	}
+}

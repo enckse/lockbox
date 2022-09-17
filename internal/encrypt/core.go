@@ -14,6 +14,7 @@ import (
 
 const (
 	keyLength                                   = 32
+	algorithmBaseVersion                        = 0
 	secretBoxAlgorithmVersion algorithmVersions = iota
 	aesGCMAlgorithmVersion
 )
@@ -44,6 +45,7 @@ type (
 		decrypt(k, d []byte) ([]byte, error)
 		version() algorithmVersions
 		name() string
+		dataSize() int
 	}
 )
 
@@ -74,7 +76,7 @@ func newAlgorithm(mode string) algorithm {
 }
 
 func algoVersion(v uint8) []byte {
-	return []byte{0, v}
+	return []byte{algorithmBaseVersion, v}
 }
 
 func pad(salt, key []byte) ([keyLength]byte, error) {
@@ -130,6 +132,9 @@ func (l Lockbox) Encrypt(datum []byte) error {
 		}
 		data = b
 	}
+	if len(data) == 0 {
+		return errors.New("no data given")
+	}
 	box := newAlgorithm(l.algo)
 	if box == nil {
 		return errors.New("unknown algorithm detected")
@@ -156,9 +161,15 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 		return nil, errors.New("invalid decryption data")
 	}
 	data := encrypted[version:]
+	if encrypted[0] != algorithmBaseVersion {
+		return nil, errors.New("unknown input data header")
+	}
 	box := newAlgorithmFromVersion(algorithmVersions(encrypted[1]))
 	if box == nil {
 		return nil, errors.New("unable to detect algorithm")
+	}
+	if len(data) <= box.dataSize() {
+		return nil, errors.New("data is invalid for decryption")
 	}
 	return box.decrypt(l.secret[:], data)
 }

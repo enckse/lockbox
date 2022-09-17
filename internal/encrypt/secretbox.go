@@ -20,6 +20,10 @@ const (
 	secretBoxAlgorithmSaltLength  = 16
 )
 
+func (s secretBoxAlgorithm) dataSize() int {
+	return secretBoxAlgorithmSaltLength + secretBoxAlgorithmNonceLength
+}
+
 func (s secretBoxAlgorithm) name() string {
 	return "secretbox"
 }
