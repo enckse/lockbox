@@ -48,6 +48,7 @@ remove entry? (y/N) HOOK RAN remove post
 
 remove entry? (y/N) HOOK RAN remove post
 
+exported 1 entries to bin/file.kdbx
 display command failed to retrieve data (decrypt not ok)
 rekeying: /keys/one2.lb
 test2

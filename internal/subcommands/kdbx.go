@@ -3,6 +3,7 @@ package subcommands
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,8 +49,12 @@ func ToKeepass(args []string) error {
 	if err != nil {
 		return err
 	}
+	if len(entries) == 0 {
+		return errors.New("nothing to convert")
+	}
 	root := gokeepasslib.NewGroup()
 	root.Name = "root"
+	count := 0
 	for _, entry := range entries {
 		e := gokeepasslib.NewEntry()
 		path := entry.Path
@@ -63,6 +68,7 @@ func ToKeepass(args []string) error {
 			e.Values = append(e.Values, protectedValue("Password", val))
 		}
 		root.Entries = append(root.Entries, e)
+		count++
 	}
 	db := &gokeepasslib.Database{
 		Header:      gokeepasslib.NewHeader(),
@@ -86,5 +92,6 @@ func ToKeepass(args []string) error {
 	if err := encoder.Encode(db); err != nil {
 		return err
 	}
+	fmt.Printf("exported %d entries to %s\n", count, fileName)
 	return nil
 }

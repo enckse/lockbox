@@ -51,6 +51,7 @@ _run() {
     echo
     yes 2>/dev/null | "$BIN/lb" rm test/totp
     echo
+    "$BIN/lb" kdbx -file bin/file.kdbx
     LOCKBOX_KEY="invalid" "$BIN/lb" show keys/one2
     "$BIN/lb" "rekey" -outkey "test" -outmode "plaintext"
     "$BIN/lb" rw -file bin/lb/keys/one2.lb -key "test" -keymode "plaintext" -mode "decrypt"
