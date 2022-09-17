@@ -9,6 +9,7 @@ export LOCKBOX_TOTP="totp"
 export LOCKBOX_INTERACTIVE="no"
 export LOCKBOX_HOOKDIR="$TESTS/hooks"
 export LOCKBOX_GIT="no"
+export LOCKBOX_ALGORITHM="$3"
 
 rm -rf $TESTS
 mkdir -p $LOCKBOX_STORE
@@ -59,4 +60,8 @@ _run() {
 
 _hook > $HOOK
 chmod 755 $HOOK
-_run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $TESTS/actual.log
+LOG=$TESTS/actual.log
+_run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $LOG
+if [[ "$3" != "secretbox" ]]; then
+    sed -i 's/cipher: message authentication failed/decrypt not ok/g' $LOG
+fi
