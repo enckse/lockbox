@@ -16,8 +16,12 @@ type (
 	}
 )
 
-func (a aesGCMAlgorithm) version() []byte {
-	return algoVersion(aesGCMAlgorithmVersion)
+func (a aesGCMAlgorithm) version() algorithmVersions {
+	return aesGCMAlgorithmVersion
+}
+
+func (a aesGCMAlgorithm) name() string {
+	return "aesgcm"
 }
 
 func newCipher(key []byte, salt []byte) (cipher.Block, error) {

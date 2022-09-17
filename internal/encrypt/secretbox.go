@@ -20,8 +20,12 @@ const (
 	secretBoxAlgorithmSaltLength  = 16
 )
 
-func (s secretBoxAlgorithm) version() []byte {
-	return algoVersion(secretBoxAlgorithmVersion)
+func (s secretBoxAlgorithm) name() string {
+	return "secretbox"
+}
+
+func (s secretBoxAlgorithm) version() algorithmVersions {
+	return secretBoxAlgorithmVersion
 }
 
 func (s secretBoxAlgorithm) encrypt(encryptKey, data []byte) ([]byte, error) {

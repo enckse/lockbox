@@ -13,13 +13,18 @@ import (
 )
 
 const (
-	keyLength                       = 32
-	secretBoxAlgorithmVersion uint8 = 1
-	isSecretBox                     = "secretbox"
-	aesGCMAlgorithmVersion    uint8 = 2
+	keyLength                                   = 32
+	secretBoxAlgorithmVersion algorithmVersions = iota
+	aesGCMAlgorithmVersion
+)
+
+var (
+	defaultAlgorithm = secretBoxAlgorithm{}
+	algorithms       = []algorithm{defaultAlgorithm, aesGCMAlgorithm{}}
 )
 
 type (
+	algorithmVersions uint8
 	// Lockbox represents a method to encrypt/decrypt locked files.
 	Lockbox struct {
 		secret [keyLength]byte
@@ -37,7 +42,8 @@ type (
 	algorithm interface {
 		encrypt(k, d []byte) ([]byte, error)
 		decrypt(k, d []byte) ([]byte, error)
-		version() []byte
+		version() algorithmVersions
+		name() string
 	}
 )
 
@@ -45,12 +51,11 @@ func init() {
 	random.Seed(time.Now().UnixNano())
 }
 
-func newAlgorithmFromVersion(vers uint8) algorithm {
-	switch vers {
-	case secretBoxAlgorithmVersion:
-		return secretBoxAlgorithm{}
-	case aesGCMAlgorithmVersion:
-		return aesGCMAlgorithm{}
+func newAlgorithmFromVersion(vers algorithmVersions) algorithm {
+	for _, a := range algorithms {
+		if a.version() == vers {
+			return a
+		}
 	}
 	return nil
 }
@@ -58,13 +63,12 @@ func newAlgorithmFromVersion(vers uint8) algorithm {
 func newAlgorithm(mode string) algorithm {
 	useMode := mode
 	if mode == "" {
-		useMode = inputs.EnvOrDefault(inputs.EncryptModeEnv, isSecretBox)
+		useMode = inputs.EnvOrDefault(inputs.EncryptModeEnv, defaultAlgorithm.name())
 	}
-	switch useMode {
-	case isSecretBox:
-		return secretBoxAlgorithm{}
-	case "aesgcm":
-		return aesGCMAlgorithm{}
+	for _, a := range algorithms {
+		if useMode == a.name() {
+			return a
+		}
 	}
 	return nil
 }
@@ -135,7 +139,8 @@ func (l Lockbox) Encrypt(datum []byte) error {
 		return err
 	}
 	var persist []byte
-	persist = append(persist, box.version()...)
+	algo := algoVersion(uint8(box.version()))
+	persist = append(persist, algo...)
 	persist = append(persist, b...)
 	return os.WriteFile(l.file, persist, 0600)
 }
@@ -151,7 +156,7 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 		return nil, errors.New("invalid decryption data")
 	}
 	data := encrypted[version:]
-	box := newAlgorithmFromVersion(encrypted[1])
+	box := newAlgorithmFromVersion(algorithmVersions(encrypted[1]))
 	if box == nil {
 		return nil, errors.New("unable to detect algorithm")
 	}
