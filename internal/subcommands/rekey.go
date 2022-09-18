@@ -17,8 +17,6 @@ func Rekey(args []string) error {
 	outKey := flags.String("outkey", "", "output encryption key to update values with")
 	inMode := flags.String("inmode", "", "input encryption key mode")
 	outMode := flags.String("outmode", "", "output encryption key mode")
-	inAlgo := flags.String("inalgorithm", "", "input encryption algorithm")
-	outAlgo := flags.String("outalgorithm", "", "output encryption algorithm")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -26,8 +24,8 @@ func Rekey(args []string) error {
 	if err != nil {
 		return err
 	}
-	inOpts := encrypt.LockboxOptions{Key: *inKey, KeyMode: *inMode, Algorithm: *inAlgo}
-	outOpts := encrypt.LockboxOptions{Key: *outKey, KeyMode: *outMode, Algorithm: *outAlgo}
+	inOpts := encrypt.LockboxOptions{Key: *inKey, KeyMode: *inMode}
+	outOpts := encrypt.LockboxOptions{Key: *outKey, KeyMode: *outMode}
 	for _, file := range found {
 		fmt.Printf("rekeying: %s\n", file)
 		inOpts.File = file
