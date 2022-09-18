@@ -51,7 +51,7 @@ func (a aesGCMAlgorithm) encrypt(key, data []byte) ([]byte, error) {
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
-	b := gcm.Seal(nonce, nonce, data, nil) //, nil
+	b := gcm.Seal(nonce, nonce, data, nil)
 	var d []byte
 	d = append(d, salt[:]...)
 	d = append(d, b...)
@@ -78,6 +78,5 @@ func (a aesGCMAlgorithm) decrypt(key, encrypted []byte) ([]byte, error) {
 	nonceSize := gcm.NonceSize()
 	nonce := data[:nonceSize]
 	datum := data[nonceSize:]
-
 	return gcm.Open(nil, nonce, datum, nil)
 }
