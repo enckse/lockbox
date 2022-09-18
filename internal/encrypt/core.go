@@ -161,6 +161,9 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 		return nil, errors.New("decrypt not ok")
 	}
 
-	padding := int(decrypted[0])
-	return decrypted[1+padding:], nil
+	padding := 1 + int(decrypted[0])
+	if len(decrypted) < padding {
+		return nil, errors.New("invalid decrypted data, bad padding")
+	}
+	return decrypted[padding:], nil
 }
