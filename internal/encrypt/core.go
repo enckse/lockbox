@@ -23,8 +23,11 @@ const (
 )
 
 var (
-	cryptoVers       = []byte{0, 1}
-	cryptoVersLength = len(cryptoVers)
+	cryptoMajorVers       = uint8(0)
+	cryptoMinorVers       = uint8(1)
+	cryptoVers            = []byte{cryptoMajorVers, cryptoMinorVers}
+	cryptoVersLength      = len(cryptoVers)
+	requiredEncryptLength = cryptoVersLength + saltLength + nonceLength
 )
 
 type (
@@ -91,11 +94,6 @@ func init() {
 
 // Encrypt will encrypt contents to file.
 func (l Lockbox) Encrypt(datum []byte) error {
-	var nonce [nonceLength]byte
-	padTo := random.Intn(padLength)
-	if _, err := io.ReadFull(rand.Reader, nonce[:]); err != nil {
-		return err
-	}
 	data := datum
 	if data == nil {
 		b, err := inputs.RawStdin()
@@ -104,18 +102,26 @@ func (l Lockbox) Encrypt(datum []byte) error {
 		}
 		data = b
 	}
+	if len(data) == 0 {
+		return errors.New("no data")
+	}
 	var padding [padLength]byte
 	if _, err := io.ReadFull(rand.Reader, padding[:]); err != nil {
 		return err
 	}
-	var salt [saltLength]byte
-	if _, err := io.ReadFull(rand.Reader, salt[:]); err != nil {
-		return err
-	}
+	padTo := random.Intn(padLength)
 	var write []byte
 	write = append(write, byte(padTo))
 	write = append(write, padding[0:padTo]...)
 	write = append(write, data...)
+	var salt [saltLength]byte
+	if _, err := io.ReadFull(rand.Reader, salt[:]); err != nil {
+		return err
+	}
+	var nonce [nonceLength]byte
+	if _, err := io.ReadFull(rand.Reader, nonce[:]); err != nil {
+		return err
+	}
 	key, err := pad(salt[:], l.secret[:])
 	if err != nil {
 		return err
@@ -130,18 +136,26 @@ func (l Lockbox) Encrypt(datum []byte) error {
 
 // Decrypt will decrypt an object from file.
 func (l Lockbox) Decrypt() ([]byte, error) {
-	var nonce [nonceLength]byte
-	var salt [saltLength]byte
 	encrypted, err := os.ReadFile(l.file)
 	if err != nil {
 		return nil, err
 	}
+	if len(encrypted) <= requiredEncryptLength {
+		return nil, errors.New("invalid encrypted data")
+	}
+	major := encrypted[0]
+	minor := encrypted[1]
+	if major != cryptoMajorVers || minor != cryptoMinorVers {
+		return nil, errors.New("invalid data, bad header")
+	}
+	var salt [saltLength]byte
 	copy(salt[:], encrypted[cryptoVersLength:saltLength+cryptoVersLength])
-	copy(nonce[:], encrypted[cryptoVersLength+saltLength:cryptoVersLength+saltLength+nonceLength])
 	key, err := pad(salt[:], l.secret[:])
 	if err != nil {
 		return nil, err
 	}
+	var nonce [nonceLength]byte
+	copy(nonce[:], encrypted[cryptoVersLength+saltLength:cryptoVersLength+saltLength+nonceLength])
 	decrypted, ok := secretbox.Open(nil, encrypted[cryptoVersLength+saltLength+nonceLength:], &nonce, &key)
 	if !ok {
 		return nil, errors.New("decrypt not ok")

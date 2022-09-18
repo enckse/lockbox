@@ -91,3 +91,33 @@ func TestEncryptDecryptPlainText(t *testing.T) {
 		t.Error("data mismatch")
 	}
 }
+
+func TestEncryptDecryptErrors(t *testing.T) {
+	file := setupData(t)
+	e, _ := encrypt.NewLockbox(encrypt.LockboxOptions{Key: "plain", KeyMode: inputs.PlainKeyMode, File: file})
+	if err := e.Encrypt([]byte{}); err.Error() != "no data" {
+		t.Errorf("failed, should be no data: %v", err)
+	}
+	os.WriteFile(file, []byte{0, 2, 3}, 0600)
+	if _, err := e.Decrypt(); err.Error() != "invalid encrypted data" {
+		t.Errorf("failed, should be invalid data: %v", err)
+	}
+	e.Encrypt([]byte("TEST"))
+	b, _ := os.ReadFile(file)
+	b[0] = 1
+	os.WriteFile(file, b, 0600)
+	if _, err := e.Decrypt(); err.Error() != "invalid data, bad header" {
+		t.Errorf("failed, should be invalid header data: %v", err)
+	}
+	b[0] = 0
+	b[1] = 0
+	os.WriteFile(file, b, 0600)
+	if _, err := e.Decrypt(); err.Error() != "invalid data, bad header" {
+		t.Errorf("failed, should be invalid header data: %v", err)
+	}
+	b[1] = 1
+	os.WriteFile(file, b, 0600)
+	if _, err := e.Decrypt(); err != nil {
+		t.Error("decrypt should succeed")
+	}
+}
