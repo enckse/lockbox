@@ -2,8 +2,10 @@
 package encrypt
 
 import (
+	"crypto/rand"
 	"crypto/sha512"
 	"errors"
+	"io"
 	random "math/rand"
 	"os"
 	"time"
@@ -15,6 +17,7 @@ import (
 const (
 	keyLength            = 32
 	algorithmBaseVersion = 0
+	padLength            = 256
 )
 
 const (
@@ -139,11 +142,20 @@ func (l Lockbox) Encrypt(datum []byte) error {
 	if len(data) == 0 {
 		return errors.New("no data given")
 	}
+	padTo := random.Intn(padLength)
+	var padding [padLength]byte
+	if _, err := io.ReadFull(rand.Reader, padding[:]); err != nil {
+		return err
+	}
 	box := newAlgorithm(l.algo)
 	if box == nil {
 		return errors.New("unknown algorithm detected")
 	}
-	b, err := box.encrypt(l.secret[:], data)
+	var write []byte
+	write = append(write, byte(padTo))
+	write = append(write, padding[0:padTo]...)
+	write = append(write, data...)
+	b, err := box.encrypt(l.secret[:], write)
 	if err != nil {
 		return err
 	}
@@ -175,5 +187,10 @@ func (l Lockbox) Decrypt() ([]byte, error) {
 	if len(data) <= box.dataSize() {
 		return nil, errors.New("data is invalid for decryption")
 	}
-	return box.decrypt(l.secret[:], data)
+	decrypted, err := box.decrypt(l.secret[:], data)
+	if err != nil {
+		return nil, err
+	}
+	padding := int(decrypted[0])
+	return decrypted[1+padding:], nil
 }
