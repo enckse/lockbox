@@ -1,4 +1,3 @@
-VERSION := development
 DESTDIR :=
 BUILD   := bin/
 TARGET  := $(BUILD)lb
@@ -9,7 +8,8 @@ TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 all: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.*
-	go build -ldflags '-X main.version=$(VERSION)' -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/main.go
+	./contrib/version
+	go build -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/main.go
 
 $(TESTDIR):
 	cd $@ && go test

@@ -2,6 +2,7 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"os"
@@ -19,7 +20,8 @@ import (
 )
 
 var (
-	version = "development"
+	//go:embed "vers.txt"
+	version string
 )
 
 type (
