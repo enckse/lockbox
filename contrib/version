@@ -10,7 +10,7 @@ _version() {
     tag=$(git describe --tags --abbrev=0)
     minor=00
     if [[ "$tag" == $curr* ]]; then
-        minor=$(echo "$tag" | cut -d '.' -f 3)
+        minor=$(echo "$tag" | cut -d '.' -f 3 | sed 's/^0//g')
         minor=$((minor+1))
         if [ $minor -lt 10 ]; then
             minor="0$minor"

@@ -13,5 +13,5 @@ require (
 	github.com/aead/argon2 v0.0.0-20180111183520-a87724528b07 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/boombuler/barcode v1.0.1 // indirect
-	golang.org/x/sys v0.0.0-20220926163933-8cfa568d3c25 // indirect
+	golang.org/x/sys v0.0.0-20220927170352-d9d178bc13c6 // indirect
 )
