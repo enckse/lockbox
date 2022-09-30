@@ -61,25 +61,20 @@ func ToKeepass(args []string) error {
 		val := entry.Value
 		e.Values = append(e.Values, value("Title", filepath.Dir(path)))
 		e.Values = append(e.Values, value("UserName", filepath.Base(path)))
-		multi := len(strings.Split(strings.TrimSpace(val), "\n")) > 1
-		if multi {
-			e.Values = append(e.Values, value("Notes", val))
-		} else {
-			e.Values = append(e.Values, protectedValue("Password", val))
+		field := "Password"
+		if len(strings.Split(strings.TrimSpace(val), "\n")) > 1 {
+			field = "Notes"
 		}
+		e.Values = append(e.Values, protectedValue(field, val))
 		root.Entries = append(root.Entries, e)
 		count++
 	}
-	db := &gokeepasslib.Database{
-		Header:      gokeepasslib.NewHeader(),
-		Credentials: gokeepasslib.NewPasswordCredentials(key),
-		Content: &gokeepasslib.DBContent{
-			Meta: gokeepasslib.NewMetaData(),
-			Root: &gokeepasslib.RootData{
-				Groups: []gokeepasslib.Group{root},
-			},
-		},
-	}
+	db := gokeepasslib.NewDatabase(gokeepasslib.WithDatabaseKDBXVersion4())
+	db.Credentials = gokeepasslib.NewPasswordCredentials(key)
+	db.Content.Root =
+		&gokeepasslib.RootData{
+			Groups: []gokeepasslib.Group{root},
+		}
 	if err := db.LockProtectedEntries(); err != nil {
 		return err
 	}
