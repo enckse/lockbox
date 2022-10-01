@@ -93,7 +93,7 @@ func run() *programError {
 			fmt.Println(f.Path)
 		}
 	case "version":
-		fmt.Printf("version: %s\n", version)
+		fmt.Printf("version: %s\n", strings.TrimSpace(version))
 	case "insert":
 		options := cli.Arguments{}
 		idx := 2
