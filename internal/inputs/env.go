@@ -16,16 +16,12 @@ const (
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
 	interactiveEnv = prefixKey + "INTERACTIVE"
-	gitEnabledEnv  = prefixKey + "GIT"
-	gitQuietEnv    = gitEnabledEnv + "_QUIET"
 	// TotpEnv allows for overriding of the special name for totp entries.
 	TotpEnv = prefixKey + "TOTP"
 	// KeyModeEnv indicates what the KEY value is (e.g. command, plaintext).
 	KeyModeEnv = prefixKey + "KEYMODE"
 	// KeyEnv is the key value used by the lockbox store.
 	KeyEnv = prefixKey + "KEY"
-	// HooksDirEnv is the location of hooks to run before/after operations.
-	HooksDirEnv = prefixKey + "HOOKDIR"
 	// PlatformEnv is the platform lb is running on.
 	PlatformEnv = prefixKey + "PLATFORM"
 	// StoreEnv is the location of the filesystem store that lb is operating on.
@@ -114,16 +110,6 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 // IsNoClipEnabled indicates if clipboard mode is enabled.
 func IsNoClipEnabled() (bool, error) {
 	return isYesNoEnv(false, noClipEnv)
-}
-
-// IsGitQuiet indicates if git operations should be 'quiet' (no stdout/stderr)
-func IsGitQuiet() (bool, error) {
-	return isYesNoEnv(true, gitQuietEnv)
-}
-
-// IsGitEnabled indicates if the filesystem store is a git repo
-func IsGitEnabled() (bool, error) {
-	return isYesNoEnv(true, gitEnabledEnv)
 }
 
 // IsNoColorEnabled indicates if the flag is set to disable color.

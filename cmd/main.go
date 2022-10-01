@@ -6,16 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
+	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/dump"
-	"github.com/enckse/lockbox/internal/encrypt"
-	"github.com/enckse/lockbox/internal/hooks"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/lockbox/internal/store"
 	"github.com/enckse/lockbox/internal/subcommands"
 )
 
@@ -32,25 +28,19 @@ type (
 	}
 )
 
-func getEntry(fs store.FileSystem, args []string, idx int) string {
+func getEntry(args []string, idx int) string {
 	if len(args) != idx+1 {
 		exit("invalid entry given", errors.New("specific entry required"))
 	}
-	return fs.NewPath(args[idx])
+	return args[idx]
 }
 
 func internalCallback(name string) callbackFunction {
 	switch name {
-	case "gitdiff":
+	case "diff":
 		return subcommands.GitDiff
-	case "rekey":
-		return subcommands.Rekey
-	case "rw":
-		return subcommands.ReadWrite
 	case "totp":
 		return subcommands.TOTP
-	case "kdbx":
-		return subcommands.ToKeepass
 	}
 	return nil
 }
@@ -79,22 +69,28 @@ func run() *programError {
 	if len(args) < 2 {
 		return newError("missing arguments", errors.New("requires subcommand"))
 	}
+	t, err := backend.NewTransaction()
+	if err != nil {
+		return newError("unable to build transaction model", err)
+	}
 	command := args[1]
 	switch command {
-	case "ls", "list", "find":
-		opts := subcommands.ListFindOptions{Find: command == "find", Search: "", Store: store.NewFileSystemStore()}
-		if opts.Find {
+	case "ls", "find":
+		opts := backend.QueryOptions{}
+		opts.Mode = backend.ListMode
+		if command == "find" {
+			opts.Mode = backend.FindMode
 			if len(args) < 3 {
 				return newError("find requires an argument to search for", errors.New("search term required"))
 			}
-			opts.Search = args[2]
+			opts.Criteria = args[2]
 		}
-		files, err := subcommands.ListFindCallback(opts)
+		e, err := t.QueryCallback(opts)
 		if err != nil {
 			return newError("unable to list files", err)
 		}
-		for _, f := range files {
-			fmt.Println(f)
+		for _, f := range e {
+			fmt.Println(f.Path)
 		}
 	case "version":
 		fmt.Printf("version: %s\n", version)
@@ -115,19 +111,15 @@ func run() *programError {
 			return newError("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
-		s := store.NewFileSystemStore()
-		entry := getEntry(s, args, idx)
-		if s.Exists(entry) {
+		entry := getEntry(args, idx)
+		existing, err := t.Get(entry, backend.BlankValue)
+		if err != nil {
+			return newError("unable to find an exact, existing match", err)
+		}
+		if existing != nil {
 			if !isPipe {
 				if !confirm("overwrite existing") {
 					return nil
-				}
-			}
-		} else {
-			dir := filepath.Dir(entry)
-			if !s.Exists(dir) {
-				if err := os.MkdirAll(dir, 0755); err != nil {
-					return newError("failed to create directory structure", err)
 				}
 			}
 		}
@@ -135,102 +127,48 @@ func run() *programError {
 		if err != nil {
 			return newError("invalid input", err)
 		}
-		if err := encrypt.ToFile(entry, password); err != nil {
-			return newError("unable to encrypt object", err)
+		p := strings.TrimSpace(string(password))
+		if err := t.Insert(entry, p, len(strings.Split(p, "\n")) > 1); err != nil {
+			return newError("failed to insert", err)
 		}
 		fmt.Println("")
-		hooks.Run(hooks.Insert, hooks.PostStep)
-		if err := s.GitCommit(entry); err != nil {
-			return newError("failed to git commit changed", err)
-		}
 	case "rm":
-		s := store.NewFileSystemStore()
-		value := args[2]
-		var deletes []string
-		confirmText := "entry"
-		if strings.Contains(value, "*") {
-			globs, err := s.Globs(value)
-			if err != nil {
-				return newError("rm glob failed", err)
-			}
-			if len(globs) > 1 {
-				confirmText = "entries"
-			}
-			deletes = append(deletes, globs...)
-		} else {
-			deletes = []string{getEntry(s, args, 2)}
-		}
-		if len(deletes) == 0 {
-			return newError("nothing to delete", errors.New("no files to remove"))
-		}
-		if confirm(fmt.Sprintf("remove %s", confirmText)) {
-			for _, entry := range deletes {
-				if !s.Exists(entry) {
-					return newError("does not exists", errors.New("can not delete unknown entry"))
-				}
-			}
-			for _, entry := range deletes {
-				if err := os.Remove(entry); err != nil {
-					return newError("unable to remove entry", err)
-				}
-			}
-			hooks.Run(hooks.Remove, hooks.PostStep)
-			if err := s.GitRemove(deletes); err != nil {
-				return newError("failed to git remove", err)
-			}
-		}
-	case "show", "clip", "dump":
-		fs := store.NewFileSystemStore()
-		opts := subcommands.DisplayOptions{Dump: command == "dump", Show: command == "show", Glob: getEntry(fs, []string{"***"}, 0), Store: fs}
-		opts.Show = opts.Show || opts.Dump
-		startEntry := 2
-		options := cli.Arguments{}
-		if opts.Dump {
-			if len(args) > 2 {
-				options = cli.ParseArgs(args[2])
-				if options.Yes {
-					startEntry = 3
-				}
-			}
-		}
-		opts.Entry = getEntry(fs, args, startEntry)
-		var err error
-		dumpData, err := subcommands.DisplayCallback(opts)
+		deleting := getEntry(args, 2)
+		existing, err := t.Get(deleting, backend.BlankValue)
 		if err != nil {
-			return newError("display command failed to retrieve data", err)
+			return newError("unable to get entity to delete", err)
 		}
-		if opts.Dump {
-			if !options.Yes {
-				if !confirm("dump data to stdout as plaintext") {
-					return nil
-				}
+		if confirm("delete entry") {
+			if err := t.Remove(existing); err != nil {
+				return newError("unable to remove entry", err)
 			}
-			d, err := dump.Marshal(dumpData)
-			if err != nil {
-				return newError("failed to marshal items", err)
-			}
-			fmt.Println(string(d))
-			return nil
+
 		}
+	case "show", "clip":
+		entry := getEntry(args, 2)
 		clipboard := platform.Clipboard{}
-		if !opts.Show {
+		isShow := command == "show"
+		if isShow {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
 				return newError("unable to get clipboard", err)
 			}
 		}
-		for _, obj := range dumpData {
-			if opts.Show {
-				if obj.Path != "" {
-					fmt.Println(obj.Path)
-				}
-				fmt.Println(obj.Value)
-				continue
-			}
-			if err := clipboard.CopyTo(obj.Value); err != nil {
-				return newError("clipboard failed", err)
-			}
+		existing, err := t.Get(entry, backend.SecretValue)
+		if err != nil {
+			return newError("unable to get entity", err)
 		}
+		if existing == nil {
+			return newError("entity not found", errors.New("can not find entry"))
+		}
+		if isShow {
+			fmt.Println(existing.Value)
+			return nil
+		}
+		if err := clipboard.CopyTo(existing.Value); err != nil {
+			return newError("clipboard failed", err)
+		}
+
 	case "clear":
 		if err := subcommands.ClearClipboardCallback(); err != nil {
 			return newError("failed to handle clipboard clear", err)

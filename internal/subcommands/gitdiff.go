@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/enckse/lockbox/internal/encrypt"
+	"github.com/enckse/lockbox/internal/backend"
 )
 
 // GitDiff handles git diffing of lb entries.
@@ -13,12 +13,16 @@ func GitDiff(args []string) error {
 	if len(args) == 0 {
 		return errors.New("git diff requires a file")
 	}
-	result, err := encrypt.FromFile(args[len(args)-1])
+	t, err := backend.Load(args[len(args)-1])
 	if err != nil {
 		return err
 	}
-	if result != nil {
-		fmt.Println(string(result))
+	e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.HashedValue})
+	if err != nil {
+		return err
+	}
+	for _, item := range e {
+		fmt.Printf("%s:\nhash:%s\n", item.Path, item.Value)
 	}
 	return nil
 }

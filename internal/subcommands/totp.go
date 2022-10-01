@@ -6,18 +6,15 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/colors"
-	"github.com/enckse/lockbox/internal/encrypt"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/lockbox/internal/store"
 	otp "github.com/pquerna/otp/totp"
 )
 
@@ -92,17 +89,18 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	f := store.NewFileSystemStore()
-	tok := filepath.Join(strings.TrimSpace(token), totpEnv())
-	pathing := f.NewPath(tok)
-	if !f.Exists(pathing) {
-		return errors.New("object does not exist")
-	}
-	val, err := encrypt.FromFile(pathing)
+	t, err := backend.NewTransaction()
 	if err != nil {
 		return err
 	}
-	totpToken := string(val)
+	entity, err := t.Get(token, backend.SecretValue)
+	if err != nil {
+		return err
+	}
+	if entity == nil {
+		return errors.New("object does not exist")
+	}
+	totpToken := string(entity.Value)
 	if !interactive {
 		code, err := otp.GenerateCode(totpToken, time.Now())
 		if err != nil {
@@ -166,7 +164,7 @@ func display(token string, args cli.Arguments) error {
 		expires := fmt.Sprintf("%s%s (%s)%s", startColor, now.Format("15:04:05"), leftString, endColor)
 		outputs := []string{expires}
 		if !args.Clip {
-			outputs = append(outputs, fmt.Sprintf("%s\n    %s", tok, code))
+			outputs = append(outputs, fmt.Sprintf("%s\n    %s", token, code))
 			if !args.Once {
 				outputs = append(outputs, "-> CTRL+C to exit")
 			}
@@ -192,20 +190,16 @@ func TOTP(args []string) error {
 	cmd := args[0]
 	options := cli.ParseArgs(cmd)
 	if options.List {
-		f := store.NewFileSystemStore()
-		token := f.NewFile(totpEnv())
-		results, err := f.List(store.ViewOptions{ErrorOnEmpty: true, Filter: func(path string) string {
-			if filepath.Base(path) == token {
-				return filepath.Dir(f.CleanPath(path))
-			}
-			return ""
-		}})
+		t, err := backend.NewTransaction()
 		if err != nil {
 			return err
 		}
-		sort.Strings(results)
-		for _, entry := range results {
-			fmt.Println(entry)
+		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: fmt.Sprintf("%c%s", os.PathSeparator, totpEnv())})
+		if err != nil {
+			return err
+		}
+		for _, entry := range e {
+			fmt.Println(entry.Path)
 		}
 		return nil
 	}

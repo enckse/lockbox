@@ -18,15 +18,12 @@ _lb() {
     fi
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version ls show insert rm rekey totp list dump kdbx find$clip_enabled"
+        opts="version ls show insert rm totp find$clip_enabled"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
         if [ "$COMP_CWORD" -eq 2 ]; then
             case ${COMP_WORDS[1]} in
-                "dump")
-                    opts="-yes $(lb ls)"
-                    ;;
                 "insert")
                     opts="-multi $(lb ls)"
                     ;;
@@ -35,9 +32,6 @@ _lb() {
                     if [ -n "$clip_enabled" ]; then
                         opts="$opts -clip"
                     fi
-                    ;;
-                "kdbx")
-                    opts="-file -password"
                     ;;
                 "show" | "rm" | "clip")
                     opts=$(lb ls)

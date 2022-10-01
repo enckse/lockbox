@@ -1,32 +1,10 @@
-[]
 
-HOOK RAN insert post
 
-HOOK RAN insert post
-keys/one:
-test
-keys/one2:
-test2
-[
-    {
-        "path": "keys/one",
-        "value": "test"
-    },
-    {
-        "path": "keys/one2",
-        "value": "test2"
-    }
-]
 
-HOOK RAN insert post
 keys/one
 keys/one2
 keys2/three
-rekeying: /keys/one.lb
-rekeying: /keys/one2.lb
-rekeying: /keys2/three.lb
-remove entry? (y/N) HOOK RAN remove post
-
+delete entry? (y/N) 
 keys/one2
 keys2/three
 keys/one2
@@ -34,21 +12,14 @@ keys2/three
 test2
 test3
 test4
-dump data to stdout as plaintext? (y/N) [
-    {
-        "value": "test3\ntest4"
-    }
-]
 
-HOOK RAN insert post
-test
-XXXXXX
-test2
-remove entry? (y/N) HOOK RAN remove post
-
-remove entry? (y/N) HOOK RAN remove post
-
-exported 1 entries to bin/file.kdbx
-display command failed to retrieve data (decrypt not ok)
-rekeying: /keys/one2.lb
-test2
+test/totp
+totp command failure (object does not exist)
+keys/one2:
+hash:7465737432cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+keys2/three:
+hash:74657374330a7465737434cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+test/totp:
+hash:35616534373261627164656b6a71796b6f79786b37687663326c656b6c71356ecf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+delete entry? (y/N) 
+delete entry? (y/N) 
