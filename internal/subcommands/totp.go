@@ -200,7 +200,7 @@ func TOTP(args []string) error {
 			return err
 		}
 		for _, entry := range e {
-			fmt.Println(entry.Path)
+			fmt.Println(filepath.Dir(entry.Path))
 		}
 		return nil
 	}
