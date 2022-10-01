@@ -42,6 +42,10 @@ func create(file, key string) error {
 		&gokeepasslib.RootData{
 			Groups: []gokeepasslib.Group{root},
 		}
+	if err := db.LockProtectedEntries(); err != nil {
+		return err
+	}
+
 	f, err := os.Create(file)
 	if err != nil {
 		return err
