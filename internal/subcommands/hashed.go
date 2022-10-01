@@ -8,8 +8,8 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 )
 
-// GitDiff handles git diffing of lb entries.
-func GitDiff(args []string) error {
+// Hashed handles dumping of lb entries.
+func Hashed(args []string) error {
 	if len(args) == 0 {
 		return errors.New("git diff requires a file")
 	}

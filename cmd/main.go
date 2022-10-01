@@ -37,8 +37,8 @@ func getEntry(args []string, idx int) string {
 
 func internalCallback(name string) callbackFunction {
 	switch name {
-	case "diff":
-		return subcommands.GitDiff
+	case "hash":
+		return subcommands.Hashed
 	case "totp":
 		return subcommands.TOTP
 	}

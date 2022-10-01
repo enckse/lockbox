@@ -26,7 +26,7 @@ _run() {
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert test/totp
     "$BIN/lb" "totp" -list
     "$BIN/lb" "totp" test | tr '[:digit:]' 'X'
-    "$BIN/lb" "diff" $LOCKBOX_STORE
+    "$BIN/lb" "hash" $LOCKBOX_STORE
     yes 2>/dev/null | "$BIN/lb" rm keys2/three
     echo
     yes 2>/dev/null | "$BIN/lb" rm test/totp
