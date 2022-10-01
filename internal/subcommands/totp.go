@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -93,7 +94,7 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	entity, err := t.Get(token, backend.SecretValue)
+	entity, err := t.Get(filepath.Join(token, totpEnv()), backend.SecretValue)
 	if err != nil {
 		return err
 	}
