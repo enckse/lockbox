@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -94,7 +93,7 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	entity, err := t.Get(filepath.Join(token, totpEnv()), backend.SecretValue)
+	entity, err := t.Get(backend.NewPath(token, totpEnv()), backend.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -195,12 +194,12 @@ func TOTP(args []string) error {
 		if err != nil {
 			return err
 		}
-		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: fmt.Sprintf("%c%s", os.PathSeparator, totpEnv())})
+		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(totpEnv())})
 		if err != nil {
 			return err
 		}
 		for _, entry := range e {
-			fmt.Println(filepath.Dir(entry.Path))
+			fmt.Println(entry.Directory())
 		}
 		return nil
 	}

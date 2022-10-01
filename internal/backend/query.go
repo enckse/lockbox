@@ -5,6 +5,8 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -131,4 +133,19 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 		results = append(results, entity)
 	}
 	return results, nil
+}
+
+// NewSuffix creates a new user 'name' suffix
+func NewSuffix(name string) string {
+	return fmt.Sprintf("%c%s", os.PathSeparator, name)
+}
+
+// NewPath creates a new storage location path.
+func NewPath(segments ...string) string {
+	return filepath.Join(segments...)
+}
+
+// Directory gets the offset location of the entry without the 'name'
+func (e QueryEntity) Directory() string {
+	return filepath.Dir(e.Path)
 }
