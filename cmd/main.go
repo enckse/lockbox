@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
@@ -37,10 +39,12 @@ func getEntry(args []string, idx int) string {
 
 func internalCallback(name string) callbackFunction {
 	switch name {
-	case "hash":
-		return subcommands.Hashed
 	case "totp":
 		return subcommands.TOTP
+	case "hash":
+		return hashText
+	case "clear":
+		return clearClipboard
 	}
 	return nil
 }
@@ -168,11 +172,6 @@ func run() *programError {
 		if err := clipboard.CopyTo(existing.Value); err != nil {
 			return newError("clipboard failed", err)
 		}
-
-	case "clear":
-		if err := subcommands.ClearClipboardCallback(); err != nil {
-			return newError("failed to handle clipboard clear", err)
-		}
 	default:
 		a := args[2:]
 		callback := internalCallback(command)
@@ -185,6 +184,50 @@ func run() *programError {
 		return newError("unknown command", errors.New(command))
 	}
 	return nil
+}
+
+func hashText(args []string) error {
+	if len(args) == 0 {
+		return errors.New("git diff requires a file")
+	}
+	t, err := backend.Load(args[len(args)-1])
+	if err != nil {
+		return err
+	}
+	e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.HashedValue})
+	if err != nil {
+		return err
+	}
+	for _, item := range e {
+		fmt.Printf("%s:\nhash:%s\n", item.Path, item.Value)
+	}
+	return nil
+}
+
+func clearClipboard(args []string) error {
+	idx := 0
+	val, err := inputs.Stdin(false)
+	if err != nil {
+		return err
+	}
+	clipboard, err := platform.NewClipboard()
+	if err != nil {
+		return err
+	}
+	pCmd, pArgs := clipboard.Args(false)
+	val = strings.TrimSpace(val)
+	for idx < clipboard.MaxTime {
+		idx++
+		time.Sleep(1 * time.Second)
+		out, err := exec.Command(pCmd, pArgs...).Output()
+		if err != nil {
+			continue
+		}
+		if strings.TrimSpace(string(out)) != val {
+			return nil
+		}
+	}
+	return clipboard.CopyTo("")
 }
 
 func confirm(prompt string) bool {
