@@ -2,7 +2,7 @@ Lockbox
 ===
 
 A [pass](https://www.passwordstore.org/) inspired password manager that uses a system
-keyring or command for password input over using a GPG key.
+keyring or command for password input over using a GPG key and uses a keepass database as the backing data store.
 
 ![build](https://github.com/enckse/lockbox/actions/workflows/main.yml/badge.svg)
 
@@ -17,7 +17,7 @@ For example set:
 # the keying object to use to ACTUALLY unlock the passwords (e.g. using a gpg encrypted file with the password inside of it)
 LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 # the location, on disk, of the password store
-LOCKBOX_STORE=/Users/alice/.passwords
+LOCKBOX_STORE=/Users/alice/.passwords/secrets.kdbx
 ```
 
 In cases where `lb` outputs colored terminal output, this coloring behavior can be disabled:
@@ -52,7 +52,6 @@ lb insert my/new/key
 List entries
 ```
 lb ls
-# or lb list
 ```
 
 ### remove
@@ -87,20 +86,12 @@ lb totp -clip token
 To manage the `.lb` files in a git repository and see _actual_ text diffs add this to a `.gitconfig`
 ```
 [diff "lb"]
-    textconv = lb gitdiff
+    textconv = lb hash
 ```
 
 Setup the `.gitattributes` for the repository to include
 ```
 *.lb diff=lb
-```
-
-The `insert` and `rm` actions will attempt to perform a git operation (if the
-lockbox directory has a `.git/` directory), this
-functionality can be disabled via
-
-```
-export LOCKBOX_GIT="no"
 ```
 
 ## build
