@@ -1,0 +1,117 @@
+package backend_test
+
+import (
+	"path/filepath"
+	"testing"
+
+	"github.com/enckse/lockbox/internal/backend"
+)
+
+func setupInserts(t *testing.T) {
+	setup(t)
+	fullSetup(t, true).Insert("abc", "tedst", nil, false)
+	fullSetup(t, true).Insert("abcx", "tedst", nil, false)
+	fullSetup(t, true).Insert("ab11c", "tdest", nil, true)
+	fullSetup(t, true).Insert("abc1ak", "atest", nil, false)
+}
+
+func TestGet(t *testing.T) {
+	setupInserts(t)
+	q, err := fullSetup(t, true).Get("abc", backend.BlankValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Path != "abc" || q.Value != "" {
+		t.Error("invalid query result")
+	}
+	q, err = fullSetup(t, true).Get("aaaa", backend.BlankValue)
+	if err != nil || q != nil {
+		t.Error("invalid result, should be empty")
+	}
+}
+
+func TestValueModes(t *testing.T) {
+	setupInserts(t)
+	q, err := fullSetup(t, true).Get("abc", backend.BlankValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	q, err = fullSetup(t, true).Get("abc", backend.HashedValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	q, err = fullSetup(t, true).Get("ab11c", backend.SecretValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "tdest" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+}
+
+func TestQueryCallback(t *testing.T) {
+	setupInserts(t)
+	if _, err := fullSetup(t, true).QueryCallback(backend.QueryOptions{}); err.Error() != "no query mode specified" {
+		t.Errorf("wrong error: %v", err)
+	}
+	res, err := fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ListMode})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(res) != 4 {
+		t.Error("invalid results: not enough")
+	}
+	if res[0].Path != "ab11c" || res[1].Path != "abc" || res[2].Path != "abc1ak" || res[3].Path != "abcx" {
+		t.Errorf("invalid results: %v", res)
+	}
+	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.FindMode, Criteria: "1"})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(res) != 2 {
+		t.Error("invalid results: not enough")
+	}
+	if res[0].Path != "ab11c" || res[1].Path != "abc1ak" {
+		t.Errorf("invalid results: %v", res)
+	}
+	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: "c"})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(res) != 2 {
+		t.Error("invalid results: not enough")
+	}
+	if res[0].Path != "ab11c" || res[1].Path != "abc" {
+		t.Errorf("invalid results: %v", res)
+	}
+	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abc"})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(res) != 1 {
+		t.Error("invalid results: not enough")
+	}
+	if res[0].Path != "abc" {
+		t.Errorf("invalid results: %v", res)
+	}
+	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abczzz"})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(res) != 0 {
+		t.Error("invalid results: should be empty")
+	}
+}
+
+func TestEntityDir(t *testing.T) {
+	q := backend.QueryEntity{Path: filepath.Join("abc", "xyz")}
+	if q.Directory() != "abc" {
+		t.Error("invalid query directory")
+	}
+}
