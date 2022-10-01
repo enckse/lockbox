@@ -148,7 +148,7 @@ func run() *programError {
 		entry := getEntry(args, 2)
 		clipboard := platform.Clipboard{}
 		isShow := command == "show"
-		if isShow {
+		if !isShow {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
 				return newError("unable to get clipboard", err)
