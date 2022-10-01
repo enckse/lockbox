@@ -14,7 +14,7 @@ import (
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/lockbox/internal/subcommands"
+	"github.com/enckse/lockbox/internal/totp"
 )
 
 var (
@@ -40,7 +40,7 @@ func getEntry(args []string, idx int) string {
 func internalCallback(name string) callbackFunction {
 	switch name {
 	case "totp":
-		return subcommands.TOTP
+		return totp.Call
 	case "hash":
 		return hashText
 	case "clear":

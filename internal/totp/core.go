@@ -1,5 +1,5 @@
-// Package subcommands handles TOTP tokens.
-package subcommands
+// Package totp handles TOTP tokens.
+package totp
 
 import (
 	"errors"
@@ -182,8 +182,8 @@ func display(token string, args cli.Arguments) error {
 	}
 }
 
-// TOTP handles UI for TOTP tokens.
-func TOTP(args []string) error {
+// Call handles UI for TOTP tokens.
+func Call(args []string) error {
 	if len(args) > 2 || len(args) < 1 {
 		return errors.New("invalid arguments, subkey and entry required")
 	}
