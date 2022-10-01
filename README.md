@@ -91,7 +91,7 @@ To manage the `.lb` files in a git repository and see _actual_ text diffs add th
 
 Setup the `.gitattributes` for the repository to include
 ```
-*.lb diff=lb
+*.kdbx diff=lb
 ```
 
 ## build
