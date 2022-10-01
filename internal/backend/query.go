@@ -76,7 +76,8 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	var keys []string
 	entities := make(map[string]QueryEntity)
 	isSort := args.Mode == ListMode || args.Mode == FindMode || args.Mode == SuffixMode
-	err := t.Act(func(ctx Context) error {
+	decrypt := args.Values != BlankValue
+	err := t.act(func(ctx Context) error {
 		for idx, entry := range ctx.db.Content.Root.Groups[0].Entries {
 			path := getPathName(entry)
 			if isSort {
@@ -101,6 +102,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			keys = append(keys, path)
 			entities[path] = QueryEntity{backing: entry, Index: idx}
 		}
+		if decrypt {
+			return ctx.db.UnlockProtectedEntries()
+		}
 		return nil
 	})
 	if err != nil {
@@ -110,12 +114,6 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 		sort.Strings(keys)
 	}
 	var results []QueryEntity
-	decrypt := args.Values != BlankValue
-	if decrypt {
-		if err := t.db.UnlockProtectedEntries(); err != nil {
-			return nil, err
-		}
-	}
 	for _, k := range keys {
 		entity := QueryEntity{Path: k}
 		if args.Values != BlankValue {
@@ -129,7 +127,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			case SecretValue:
 				entity.Value = val
 			case HashedValue:
-				entity.Value = fmt.Sprintf("%x", sha512.New().Sum([]byte(val)))
+				entity.Value = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 			}
 		}
 		results = append(results, entity)

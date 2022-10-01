@@ -14,6 +14,7 @@ mkdir -p $TESTS
 _run() {
     echo "test" | "$BIN/lb" insert keys/one
     echo "test2" | "$BIN/lb" insert keys/one2
+    echo "test" | "$BIN/lb" insert keys/one
     echo -e "test3\ntest4" | "$BIN/lb" insert keys2/three
     "$BIN/lb" ls
     yes 2>/dev/null | "$BIN/lb" rm keys/one
@@ -29,6 +30,7 @@ _run() {
     yes 2>/dev/null | "$BIN/lb" rm keys2/three
     echo
     yes 2>/dev/null | "$BIN/lb" rm test/totp
+    yes 2>/dev/null | "$BIN/lb" rm test/one
 }
 
 _run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $TESTS/actual.log

@@ -20,19 +20,22 @@ const (
 )
 
 type (
-	Action      func(t Context) error
+	// action are transcation operations that more or less CRUD the kdbx file
+	action func(t Context) error
+	// Transaction handles the overall operation of the transaction
 	Transaction struct {
 		valid  bool
 		file   string
 		exists bool
-		db     *gokeepasslib.Database
 		write  bool
 	}
+	// Context handles operating on the underlying database
 	Context struct {
 		db *gokeepasslib.Database
 	}
 )
 
+// Load will load a kdbx file for transactions
 func Load(file string) (*Transaction, error) {
 	return loadFile(file, true)
 }
@@ -50,6 +53,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 	return &Transaction{valid: true, file: file, exists: exists}, nil
 }
 
+// NewTransaction will use the underlying environment data store location
 func NewTransaction() (*Transaction, error) {
 	return loadFile(os.Getenv(inputs.StoreEnv), false)
 }
@@ -75,7 +79,7 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 	return gokeepasslib.NewEncoder(f).Encode(db)
 }
 
-func (t *Transaction) Act(cb Action) error {
+func (t *Transaction) act(cb action) error {
 	if !t.valid {
 		return errors.New("invalid transaction")
 	}
@@ -102,10 +106,9 @@ func (t *Transaction) Act(cb Action) error {
 	if len(db.Content.Root.Groups) != 1 {
 		return errors.New("kdbx must only have ONE root group")
 	}
-	t.db = db
-	cErr := cb(Context{db: t.db})
+	cErr := cb(Context{db: db})
 	if t.write {
-		if err := t.db.LockProtectedEntries(); err != nil {
+		if err := db.LockProtectedEntries(); err != nil {
 			return err
 		}
 		if err := f.Close(); err != nil {
@@ -116,13 +119,13 @@ func (t *Transaction) Act(cb Action) error {
 			return err
 		}
 		defer f.Close()
-		return encode(f, t.db)
+		return encode(f, db)
 	}
 	return cErr
 }
 
-func (t *Transaction) change(cb Action) error {
-	return t.Act(func(c Context) error {
+func (t *Transaction) change(cb action) error {
+	return t.act(func(c Context) error {
 		if err := c.db.UnlockProtectedEntries(); err != nil {
 			return err
 		}
@@ -131,8 +134,14 @@ func (t *Transaction) change(cb Action) error {
 	})
 }
 
-func (t *Transaction) Insert(path, val string, multi bool) error {
+// Insert handles inserting a new element
+func (t *Transaction) Insert(path, val string, entity *QueryEntity, multi bool) error {
 	return t.change(func(c Context) error {
+		if entity != nil {
+			if err := remove(entity, c); err != nil {
+				return err
+			}
+		}
 		e := gokeepasslib.NewEntry()
 		e.Values = append(e.Values, value(titleKey, filepath.Dir(path)))
 		e.Values = append(e.Values, value(userNameKey, filepath.Base(path)))
@@ -147,22 +156,27 @@ func (t *Transaction) Insert(path, val string, multi bool) error {
 	})
 }
 
+func remove(entity *QueryEntity, c Context) error {
+	entries := c.db.Content.Root.Groups[0].Entries
+	if entity.Index >= len(entries) {
+		return errors.New("index out of bounds")
+	}
+	e := entries[entity.Index]
+	n := getPathName(e)
+	if n != entity.Path {
+		return errors.New("validation failed, index/name mismatch")
+	}
+	c.db.Content.Root.Groups[0].Entries = append(entries[:entity.Index], entries[entity.Index+1:]...)
+	return nil
+}
+
+// Remove handles remove an element
 func (t *Transaction) Remove(entity *QueryEntity) error {
 	if entity == nil {
 		return errors.New("entity is empty/invalid")
 	}
 	return t.change(func(c Context) error {
-		entries := c.db.Content.Root.Groups[0].Entries
-		if entity.Index >= len(entries) {
-			return errors.New("index out of bounds")
-		}
-		e := entries[entity.Index]
-		n := getPathName(e)
-		if n != entity.Path {
-			return errors.New("validation failed, index/name mismatch")
-		}
-		c.db.Content.Root.Groups[0].Entries = append(entries[:entity.Index], entries[entity.Index+1:]...)
-		return nil
+		return remove(entity, c)
 	})
 }
 

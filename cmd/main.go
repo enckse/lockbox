@@ -128,7 +128,7 @@ func run() *programError {
 			return newError("invalid input", err)
 		}
 		p := strings.TrimSpace(string(password))
-		if err := t.Insert(entry, p, len(strings.Split(p, "\n")) > 1); err != nil {
+		if err := t.Insert(entry, p, existing, len(strings.Split(p, "\n")) > 1); err != nil {
 			return newError("failed to insert", err)
 		}
 		fmt.Println("")
