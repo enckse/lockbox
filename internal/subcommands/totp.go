@@ -95,7 +95,7 @@ func display(token string, args cli.Arguments) error {
 	f := store.NewFileSystemStore()
 	tok := filepath.Join(strings.TrimSpace(token), totpEnv())
 	pathing := f.NewPath(tok)
-	if !store.PathExists(pathing) {
+	if !f.Exists(pathing) {
 		return errors.New("object does not exist")
 	}
 	val, err := encrypt.FromFile(pathing)

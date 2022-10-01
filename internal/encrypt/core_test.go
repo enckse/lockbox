@@ -14,7 +14,7 @@ import (
 func setupData(t *testing.T) string {
 	os.Setenv("LOCKBOX_KEYMODE", "")
 	os.Setenv("LOCKBOX_KEY", "")
-	if store.PathExists("bin") {
+	if store.NewFileSystemStore().Exists("bin") {
 		if err := os.RemoveAll("bin"); err != nil {
 			t.Errorf("unable to cleanup dir: %v", err)
 		}

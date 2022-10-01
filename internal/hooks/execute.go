@@ -30,7 +30,7 @@ const (
 // Run executes any configured hooks.
 func Run(action Action, step Step) error {
 	hookDir := os.Getenv(inputs.HooksDirEnv)
-	if !store.PathExists(hookDir) {
+	if !store.NewFileSystemStore().Exists(hookDir) {
 		return nil
 	}
 	dirs, err := os.ReadDir(hookDir)

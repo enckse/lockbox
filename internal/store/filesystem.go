@@ -46,7 +46,7 @@ func (s FileSystem) Globs(inputPath string) ([]string, error) {
 // List will get all lockbox files in a store.
 func (s FileSystem) List(options ViewOptions) ([]string, error) {
 	var results []string
-	if !PathExists(s.path) {
+	if !pathExists(s.path) {
 		return nil, errors.New("store does not exist")
 	}
 	err := filepath.Walk(s.path, func(path string, info fs.FileInfo, err error) error {
@@ -105,8 +105,13 @@ func (s FileSystem) trim(path string) string {
 	return strings.TrimSuffix(f, extension)
 }
 
-// PathExists indicates if a path exists.
-func PathExists(path string) bool {
+// Exists will check if a path exists
+func (s FileSystem) Exists(path string) bool {
+	return pathExists(path)
+}
+
+// pathExists indicates if a path exists.
+func pathExists(path string) bool {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -133,7 +138,7 @@ func (s FileSystem) gitAction(action string, entries []string) error {
 	if !ok {
 		return nil
 	}
-	if !PathExists(filepath.Join(s.path, ".git")) {
+	if !pathExists(filepath.Join(s.path, ".git")) {
 		return nil
 	}
 	var message []string

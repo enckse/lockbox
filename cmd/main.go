@@ -117,7 +117,7 @@ func run() *programError {
 		isPipe := inputs.IsInputFromPipe()
 		s := store.NewFileSystemStore()
 		entry := getEntry(s, args, idx)
-		if store.PathExists(entry) {
+		if s.Exists(entry) {
 			if !isPipe {
 				if !confirm("overwrite existing") {
 					return nil
@@ -125,7 +125,7 @@ func run() *programError {
 			}
 		} else {
 			dir := filepath.Dir(entry)
-			if !store.PathExists(dir) {
+			if !s.Exists(dir) {
 				if err := os.MkdirAll(dir, 0755); err != nil {
 					return newError("failed to create directory structure", err)
 				}
@@ -165,7 +165,7 @@ func run() *programError {
 		}
 		if confirm(fmt.Sprintf("remove %s", confirmText)) {
 			for _, entry := range deletes {
-				if !store.PathExists(entry) {
+				if !s.Exists(entry) {
 					return newError("does not exists", errors.New("can not delete unknown entry"))
 				}
 			}

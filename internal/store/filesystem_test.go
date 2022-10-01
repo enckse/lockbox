@@ -21,7 +21,7 @@ func TestListErrors(t *testing.T) {
 
 func TestList(t *testing.T) {
 	testStore := "bin"
-	if store.PathExists(testStore) {
+	if store.NewFileSystemStore().Exists(testStore) {
 		if err := os.RemoveAll(testStore); err != nil {
 			t.Errorf("invalid error on remove: %v", err)
 		}

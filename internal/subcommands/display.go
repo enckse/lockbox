@@ -57,7 +57,7 @@ func DisplayCallback(args DisplayOptions) ([]dump.ExportEntity, error) {
 	}
 	dumpData := []dump.ExportEntity{}
 	for _, entry := range entries {
-		if !store.PathExists(entry) {
+		if !args.Store.Exists(entry) {
 			return nil, errors.New("entry not found")
 		}
 		decrypt, err := encrypt.FromFile(entry)
