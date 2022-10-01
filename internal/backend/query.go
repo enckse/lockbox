@@ -34,7 +34,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	}
 	var keys []string
 	entities := make(map[string]QueryEntity)
-	isSort := args.Mode == ListMode || args.Mode == FindMode || args.Mode == SuffixMode
+	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
 		for _, entry := range ctx.db.Content.Root.Groups[0].Entries {

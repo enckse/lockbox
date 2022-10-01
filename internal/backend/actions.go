@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/tobischo/gokeepasslib/v3"
@@ -38,7 +39,10 @@ func (t *Transaction) act(cb action) error {
 	if len(db.Content.Root.Groups) != 1 {
 		return errors.New("kdbx must only have ONE root group")
 	}
-	cErr := cb(Context{db: db})
+	err = cb(Context{db: db})
+	if err != nil {
+		return err
+	}
 	if t.write {
 		if err := db.LockProtectedEntries(); err != nil {
 			return err
@@ -53,7 +57,7 @@ func (t *Transaction) act(cb action) error {
 		defer f.Close()
 		return encode(f, db)
 	}
-	return cErr
+	return err
 }
 
 func (t *Transaction) change(cb action) error {
@@ -68,10 +72,21 @@ func (t *Transaction) change(cb action) error {
 
 // Insert handles inserting a new element
 func (t *Transaction) Insert(path, val string, entity *QueryEntity, multi bool) error {
+	if strings.TrimSpace(path) == "" {
+		return errors.New("empty path not allowed")
+	}
+	if strings.TrimSpace(val) == "" {
+		return errors.New("empty secret not allowed")
+	}
 	return t.change(func(c Context) error {
 		if entity != nil {
-			if err := remove(entity, c); err != nil {
+			if _, err := remove(entity, c, false); err != nil {
 				return err
+			}
+		} else {
+			idx, _ := remove(&QueryEntity{Path: path}, c, true)
+			if idx >= 0 {
+				return errors.New("trying to insert over existing entity")
 			}
 		}
 		e := gokeepasslib.NewEntry()
@@ -88,7 +103,7 @@ func (t *Transaction) Insert(path, val string, entity *QueryEntity, multi bool) 
 	})
 }
 
-func remove(entity *QueryEntity, c Context) error {
+func remove(entity *QueryEntity, c Context, dryRun bool) (int, error) {
 	entries := c.db.Content.Root.Groups[0].Entries
 	idx := -1
 	for i, e := range entries {
@@ -97,10 +112,18 @@ func remove(entity *QueryEntity, c Context) error {
 		}
 	}
 	if idx < 0 {
-		return errors.New("unable to select entity for deletion")
+		return idx, errors.New("unable to select entity for deletion")
 	}
-	c.db.Content.Root.Groups[0].Entries = append(entries[:idx], entries[idx+1:]...)
-	return nil
+	if dryRun {
+		return idx, nil
+	}
+	switch len(entries) {
+	case 1:
+		c.db.Content.Root.Groups[0].Entries = []gokeepasslib.Entry{}
+	default:
+		c.db.Content.Root.Groups[0].Entries = append(entries[:idx], entries[idx+1:]...)
+	}
+	return idx, nil
 }
 
 // Remove handles remove an element
@@ -109,7 +132,8 @@ func (t *Transaction) Remove(entity *QueryEntity) error {
 		return errors.New("entity is empty/invalid")
 	}
 	return t.change(func(c Context) error {
-		return remove(entity, c)
+		_, err := remove(entity, c, false)
+		return err
 	})
 }
 
