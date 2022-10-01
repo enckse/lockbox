@@ -158,15 +158,16 @@ func (t *Transaction) Insert(path, val string, entity *QueryEntity, multi bool) 
 
 func remove(entity *QueryEntity, c Context) error {
 	entries := c.db.Content.Root.Groups[0].Entries
-	if entity.Index >= len(entries) {
-		return errors.New("index out of bounds")
+	idx := -1
+	for i, e := range entries {
+		if entity.Path == getPathName(e) {
+			idx = i
+		}
 	}
-	e := entries[entity.Index]
-	n := getPathName(e)
-	if n != entity.Path {
-		return errors.New("validation failed, index/name mismatch")
+	if idx < 0 {
+		return errors.New("unable to select entity for deletion")
 	}
-	c.db.Content.Root.Groups[0].Entries = append(entries[:entity.Index], entries[entity.Index+1:]...)
+	c.db.Content.Root.Groups[0].Entries = append(entries[:idx], entries[idx+1:]...)
 	return nil
 }
 

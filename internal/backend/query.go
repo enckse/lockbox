@@ -26,7 +26,6 @@ type (
 	QueryEntity struct {
 		Path    string
 		Value   string
-		Index   int
 		backing gokeepasslib.Entry
 	}
 )
@@ -78,7 +77,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	isSort := args.Mode == ListMode || args.Mode == FindMode || args.Mode == SuffixMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
-		for idx, entry := range ctx.db.Content.Root.Groups[0].Entries {
+		for _, entry := range ctx.db.Content.Root.Groups[0].Entries {
 			path := getPathName(entry)
 			if isSort {
 				switch args.Mode {
@@ -100,7 +99,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 				}
 			}
 			keys = append(keys, path)
-			entities[path] = QueryEntity{backing: entry, Index: idx}
+			entities[path] = QueryEntity{backing: entry}
 		}
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()
@@ -118,7 +117,6 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 		entity := QueryEntity{Path: k}
 		if args.Values != BlankValue {
 			e := entities[k]
-			entity.Index = e.Index
 			val := getValue(e.backing, notesKey)
 			if strings.TrimSpace(val) == "" {
 				val = e.backing.GetPassword()
