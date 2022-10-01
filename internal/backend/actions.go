@@ -16,7 +16,7 @@ func (t *Transaction) act(cb action) error {
 	if !t.valid {
 		return errors.New("invalid transaction")
 	}
-	key, err := inputs.GetKey("", "")
+	key, err := inputs.GetKey()
 	if err != nil {
 		return err
 	}

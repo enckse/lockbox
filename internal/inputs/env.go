@@ -46,18 +46,12 @@ func EnvOrDefault(envKey, defaultValue string) string {
 }
 
 // GetKey will get the encryption key setup for lb
-func GetKey(key, keyMode string) ([]byte, error) {
-	useKeyMode := keyMode
-	if useKeyMode == "" {
-		useKeyMode = os.Getenv(KeyModeEnv)
-	}
+func GetKey() ([]byte, error) {
+	useKeyMode := os.Getenv(KeyModeEnv)
 	if useKeyMode == "" {
 		useKeyMode = CommandKeyMode
 	}
-	useKey := key
-	if useKey == "" {
-		useKey = os.Getenv(KeyEnv)
-	}
+	useKey := os.Getenv(KeyEnv)
 	if useKey == "" {
 		return nil, errors.New("no key given")
 	}
