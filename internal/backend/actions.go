@@ -3,12 +3,12 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	otp "github.com/pquerna/otp/totp"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
@@ -190,11 +190,8 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			field = notesKey
 		}
 		if NewSuffix(dTitle) == NewSuffix(inputs.TOTPToken()) {
-			token, err := otp.Generate(otp.GenerateOpts{Issuer: titleKey, AccountName: dTitle})
-			if err != nil {
-				return err
-			}
-			e.Values = append(e.Values, protectedValue("otp", token.URL()))
+			url := fmt.Sprintf("otpauth://totp/totp:none?secret=%s&period=30&digits=6&issuer=lb", src.Value)
+			e.Values = append(e.Values, protectedValue("otp", url))
 		}
 
 		e.Values = append(e.Values, protectedValue(field, src.Value))
