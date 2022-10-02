@@ -29,5 +29,8 @@ hash:132ab0244293c495a027cec12d0050598616daca888449920fc652719be0987830827d069ef
 test/k/totp:
 hash:7ef183065ba70aaa417b87ea0a96b7e550a938a52440c640a07537f7794d8a89e50078eca6a7cbcfacabd97a2db06d11e82ddf7556ca909c4df9fc0d006013b1
 delete entry? (y/N) 
-delete entry? (y/N) delete entry? (y/N) unable to remove entry (entity is empty/invalid)
-delete entry? (y/N) keys/k/one2
+delete entry? (y/N) 
+delete entry? (y/N) unable to remove entry (entity is empty/invalid)
+
+delete entry? (y/N) 
+keys/k/one2

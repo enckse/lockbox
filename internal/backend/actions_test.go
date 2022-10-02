@@ -29,31 +29,57 @@ func setup(t *testing.T) *backend.Transaction {
 
 func TestBadAction(t *testing.T) {
 	tr := &backend.Transaction{}
-	if err := tr.Insert("a/a/a", "a", false); err.Error() != "invalid transaction" {
+	if err := tr.Insert("a/a/a", "a"); err.Error() != "invalid transaction" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
 
-func TestInserts(t *testing.T) {
-	if err := setup(t).Insert("", "", false); err.Error() != "empty path not allowed" {
-		t.Errorf("wrong error: %v", err)
-	}
-	if err := setup(t).Insert(filepath.Join("test", "offset"), "test", false); err.Error() != "invalid component path" {
-		t.Errorf("wrong error: %v", err)
-	}
-	if err := setup(t).Insert("test", "test", false); err.Error() != "invalid component path" {
-		t.Errorf("wrong error: %v", err)
-	}
-	if err := setup(t).Insert("a", "", false); err.Error() != "empty secret not allowed" {
-		t.Errorf("wrong error: %v", err)
-	}
-	if err := setup(t).Insert(filepath.Join("test", "offset", "value"), "pass", false); err != nil {
+func TestMove(t *testing.T) {
+	setup(t)
+	fullSetup(t, true).Insert(filepath.Join("test", "test2", "test1"), "pass")
+	fullSetup(t, true).Insert(filepath.Join("test", "test2", "test3"), "pass")
+	if err := fullSetup(t, true).Move(backend.QueryEntity{Path: filepath.Join("test", "test2", "test3"), Value: "abc"}, filepath.Join("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "value"), "pass2", false); err != nil {
+	q, err := fullSetup(t, true).Get(filepath.Join("test1", "test2", "test3"), backend.SecretValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "abc" {
+		t.Errorf("invalid retrieval")
+	}
+	if err := fullSetup(t, true).Move(backend.QueryEntity{Path: filepath.Join("test", "test2", "test1"), Value: "test"}, filepath.Join("test1", "test2", "test3")); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	q, err = fullSetup(t, true).Get(filepath.Join("test1", "test2", "test3"), backend.SecretValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "test" {
+		t.Errorf("invalid retrieval")
+	}
+}
+
+func TestInserts(t *testing.T) {
+	if err := setup(t).Insert("", ""); err.Error() != "empty path not allowed" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "value2"), "pass", true); err != nil {
+	if err := setup(t).Insert(filepath.Join("test", "offset"), "test"); err.Error() != "invalid component path" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert("test", "test"); err.Error() != "invalid component path" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert("a", ""); err.Error() != "empty secret not allowed" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert(filepath.Join("test", "offset", "value"), "pass"); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "value"), "pass2"); err != nil {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "value2"), "pass\npass"); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err := fullSetup(t, true).Get(filepath.Join("test", "offset", "value"), backend.SecretValue)
@@ -67,7 +93,7 @@ func TestInserts(t *testing.T) {
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "pass" {
+	if q.Value != "pass\npass" {
 		t.Errorf("invalid retrieval")
 	}
 }
@@ -84,7 +110,7 @@ func TestRemoves(t *testing.T) {
 	}
 	setup(t)
 	for _, i := range []string{"test1", "test2"} {
-		fullSetup(t, true).Insert(filepath.Join(i, i, i), "pass", false)
+		fullSetup(t, true).Insert(filepath.Join(i, i, i), "pass")
 	}
 	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: filepath.Join("test1", "test1", "test1")}); err != nil {
 		t.Errorf("wrong error: %v", err)
@@ -97,7 +123,7 @@ func TestRemoves(t *testing.T) {
 	}
 	setup(t)
 	for _, i := range []string{filepath.Join("test", "test", "test1"), filepath.Join("test", "test", "test2"), filepath.Join("test", "test", "test3"), filepath.Join("test", "test1", "test2"), filepath.Join("test", "test1", "test5")} {
-		fullSetup(t, true).Insert(i, "pass", false)
+		fullSetup(t, true).Insert(i, "pass")
 	}
 	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test/test/test3"}); err != nil {
 		t.Errorf("wrong error: %v", err)

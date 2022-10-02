@@ -18,7 +18,7 @@ _lb() {
     fi
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version ls show insert rm totp find$clip_enabled"
+        opts="version ls show insert rm totp mv find$clip_enabled"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
@@ -26,6 +26,9 @@ _lb() {
             case ${COMP_WORDS[1]} in
                 "insert")
                     opts="-multi $(lb ls)"
+                    ;;
+                "mv")
+                    opts=$(lb ls)
                     ;;
                 "totp")
                     opts="-once -short "$(lb totp -list)
@@ -51,6 +54,9 @@ _lb() {
                     else
                         opts="-multi"
                     fi
+                    ;;
+                "mv")
+                    opts=$(lb ls)
                     ;;
                 "totp")
                     needs=0

@@ -31,8 +31,11 @@ _run() {
     yes 2>/dev/null | "$BIN/lb" rm keys2/k/three
     echo
     yes 2>/dev/null | "$BIN/lb" rm test/k/totp
+    echo
     yes 2>/dev/null | "$BIN/lb" rm test/k/one
+    echo
     yes 2>/dev/null | "$BIN/lb" rm key/a/one
+    echo
     "$BIN/lb" ls
 }
 

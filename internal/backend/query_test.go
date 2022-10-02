@@ -9,10 +9,10 @@ import (
 
 func setupInserts(t *testing.T) {
 	setup(t)
-	fullSetup(t, true).Insert("test/test/abc", "tedst", false)
-	fullSetup(t, true).Insert("test/test/abcx", "tedst", false)
-	fullSetup(t, true).Insert("test/test/ab11c", "tdest", true)
-	fullSetup(t, true).Insert("test/test/abc1ak", "atest", false)
+	fullSetup(t, true).Insert("test/test/abc", "tedst")
+	fullSetup(t, true).Insert("test/test/abcx", "tedst")
+	fullSetup(t, true).Insert("test/test/ab11c", "tdest\ntest")
+	fullSetup(t, true).Insert("test/test/abc1ak", "atest")
 }
 
 func TestGet(t *testing.T) {
@@ -50,7 +50,7 @@ func TestValueModes(t *testing.T) {
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "tdest" {
+	if q.Value != "tdest\ntest" {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
 }

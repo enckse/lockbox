@@ -98,6 +98,28 @@ func run() *programError {
 		}
 	case "version":
 		fmt.Printf("version: %s\n", strings.TrimSpace(version))
+	case "mv":
+		if len(args) != 4 {
+			return newError("mv requires src and dst", errors.New("src/dst required"))
+		}
+		src := getEntry(args, 2)
+		dst := getEntry(args, 3)
+		srcExists, err := t.Get(src, backend.SecretValue)
+		if err != nil {
+			return newError("unable to get source object", errors.New("failed to get source"))
+		}
+		if srcExists == nil {
+			return newError("no source object found", errors.New("source object required"))
+		}
+		dstExists, err := t.Get(dst, backend.BlankValue)
+		if err != nil {
+			return newError("unable to get destination object", errors.New("failed to get destination"))
+		}
+		if dstExists != nil {
+			if !confirm("overwrite destination") {
+				return nil
+			}
+		}
 	case "insert":
 		options := cli.Arguments{}
 		idx := 2
@@ -132,7 +154,7 @@ func run() *programError {
 			return newError("invalid input", err)
 		}
 		p := strings.TrimSpace(string(password))
-		if err := t.Insert(entry, p, len(strings.Split(p, "\n")) > 1); err != nil {
+		if err := t.Insert(entry, p); err != nil {
 			return newError("failed to insert", err)
 		}
 		fmt.Println("")

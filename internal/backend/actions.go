@@ -156,31 +156,45 @@ func splitComponents(path string) ([]string, string, error) {
 	return parts, title, nil
 }
 
-// Insert handles inserting a new element
-func (t *Transaction) Insert(path, val string, multi bool) error {
-	if strings.TrimSpace(path) == "" {
+// Move will move a src object to a dst location
+func (t *Transaction) Move(src QueryEntity, dst string) error {
+	if strings.TrimSpace(src.Path) == "" {
 		return errors.New("empty path not allowed")
 	}
-	if strings.TrimSpace(val) == "" {
+	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	offset, title, err := splitComponents(path)
+	dOffset, dTitle, err := splitComponents(dst)
 	if err != nil {
 		return err
 	}
+	sOffset, sTitle, err := splitComponents(src.Path)
+	if err != nil {
+		return err
+	}
+	isMove := dst != src.Path
+	multi := len(strings.Split(strings.TrimSpace(src.Value), "\n")) > 1
 	return t.change(func(c Context) error {
-		c.removeEntity(offset, title)
+		c.removeEntity(sOffset, sTitle)
+		if isMove {
+			c.removeEntity(dOffset, dTitle)
+		}
 		e := gokeepasslib.NewEntry()
-		e.Values = append(e.Values, value(titleKey, title))
+		e.Values = append(e.Values, value(titleKey, dTitle))
 		field := passKey
 		if multi {
 			field = notesKey
 		}
 
-		e.Values = append(e.Values, protectedValue(field, val))
-		c.insertEntity(offset, title, e)
+		e.Values = append(e.Values, protectedValue(field, src.Value))
+		c.insertEntity(dOffset, dTitle, e)
 		return nil
 	})
+}
+
+// Insert is a move to the same location
+func (t *Transaction) Insert(path, val string) error {
+	return t.Move(QueryEntity{Path: path, Value: val}, path)
 }
 
 // Remove handles remove an element
