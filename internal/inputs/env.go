@@ -17,8 +17,8 @@ const (
 	noColorEnv     = prefixKey + "NOCOLOR"
 	interactiveEnv = prefixKey + "INTERACTIVE"
 	readOnlyEnv    = prefixKey + "READONLY"
-	// TotpEnv allows for overriding of the special name for totp entries.
-	TotpEnv = prefixKey + "TOTP"
+	fieldTOTPEnv   = prefixKey + "TOTP"
+	formatTOTPEnv  = fieldTOTPEnv + "_FORMAT"
 	// KeyModeEnv indicates what the KEY value is (e.g. command, plaintext).
 	KeyModeEnv = prefixKey + "KEYMODE"
 	// KeyEnv is the key value used by the lockbox store.
@@ -124,5 +124,11 @@ func IsInteractive() (bool, error) {
 
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
-	return EnvOrDefault(TotpEnv, "totp")
+	return EnvOrDefault(fieldTOTPEnv, "totp")
+}
+
+// FormatTOTP will format a totp otpauth url
+func FormatTOTP(value string) string {
+	v := EnvOrDefault(formatTOTPEnv, "otpauth://totp/totp:none?secret=%s&period=30&digits=6&issuer=lb")
+	return fmt.Sprintf(v, value)
 }

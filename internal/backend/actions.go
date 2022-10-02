@@ -3,7 +3,6 @@ package backend
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -190,7 +189,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			field = notesKey
 		}
 		if NewSuffix(dTitle) == NewSuffix(inputs.TOTPToken()) {
-			url := fmt.Sprintf("otpauth://totp/totp:none?secret=%s&period=30&digits=6&issuer=lb", src.Value)
+			url := inputs.FormatTOTP(src.Value)
 			e.Values = append(e.Values, protectedValue("otp", url))
 		}
 
