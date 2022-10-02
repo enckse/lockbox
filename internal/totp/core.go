@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
@@ -22,6 +21,12 @@ type (
 	colorWhen struct {
 		start int
 		end   int
+	}
+	arguments struct {
+		Clip  bool
+		Once  bool
+		Short bool
+		List  bool
 	}
 )
 
@@ -70,7 +75,7 @@ func colorWhenRules() ([]colorWhen, error) {
 	return rules, nil
 }
 
-func display(token string, args cli.Arguments) error {
+func display(token string, args arguments) error {
 	interactive, err := inputs.IsInteractive()
 	if err != nil {
 		return err
@@ -184,7 +189,7 @@ func Call(args []string) error {
 		return errors.New("invalid arguments, subkey and entry required")
 	}
 	cmd := args[0]
-	options := cli.ParseArgs(cmd)
+	options := parseArgs(cmd)
 	if options.List {
 		t, err := backend.NewTransaction()
 		if err != nil {
@@ -209,4 +214,13 @@ func Call(args []string) error {
 		return err
 	}
 	return nil
+}
+
+func parseArgs(arg string) arguments {
+	args := arguments{}
+	args.Clip = arg == "-clip"
+	args.Once = arg == "-once"
+	args.Short = arg == "-short"
+	args.List = arg == "-list"
+	return args
 }

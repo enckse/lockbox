@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/totp"
@@ -117,17 +116,17 @@ func run() *programError {
 			return newError("unable to move object", err)
 		}
 	case "insert":
-		options := cli.Arguments{}
+		multi := false
 		idx := 2
 		switch len(args) {
 		case 2:
 			return newError("insert missing required arguments", errors.New("entry required"))
 		case 3:
 		case 4:
-			options = cli.ParseArgs(args[2])
-			if !options.Multi {
+			if args[2] != "-multi" {
 				return newError("multi-line insert must be after 'insert'", errors.New("invalid command"))
 			}
+			multi = true
 			idx = 3
 		default:
 			return newError("too many arguments", errors.New("insert can only perform one operation"))
@@ -145,7 +144,7 @@ func run() *programError {
 				}
 			}
 		}
-		password, err := inputs.GetUserInputPassword(isPipe, options.Multi)
+		password, err := inputs.GetUserInputPassword(isPipe, multi)
 		if err != nil {
 			return newError("invalid input", err)
 		}
