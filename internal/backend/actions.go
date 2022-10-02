@@ -188,12 +188,13 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 		if multi {
 			field = notesKey
 		}
+		v := src.Value
 		if NewSuffix(dTitle) == NewSuffix(inputs.TOTPToken()) {
-			url := inputs.FormatTOTP(src.Value)
-			e.Values = append(e.Values, protectedValue("otp", url))
+			v = inputs.FormatTOTP(v)
+			e.Values = append(e.Values, protectedValue("otp", v))
 		}
 
-		e.Values = append(e.Values, protectedValue(field, src.Value))
+		e.Values = append(e.Values, protectedValue(field, v))
 		c.insertEntity(dOffset, dTitle, e)
 		return nil
 	})

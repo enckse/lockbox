@@ -14,6 +14,7 @@ import (
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
+	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
 )
 
@@ -27,6 +28,10 @@ type (
 		Once  bool
 		Short bool
 		List  bool
+	}
+	totpWrapper struct {
+		opts otp.ValidateOpts
+		code string
 	}
 )
 
@@ -75,6 +80,10 @@ func colorWhenRules() ([]colorWhen, error) {
 	return rules, nil
 }
 
+func (w totpWrapper) generateCode() (string, error) {
+	return otp.GenerateCodeCustom(w.code, time.Now(), w.opts)
+}
+
 func display(token string, args arguments) error {
 	interactive, err := inputs.IsInteractive()
 	if err != nil {
@@ -102,8 +111,18 @@ func display(token string, args arguments) error {
 		return errors.New("object does not exist")
 	}
 	totpToken := string(entity.Value)
+	k, err := coreotp.NewKeyFromURL(totpToken)
+	if err != nil {
+		return err
+	}
+	wrapper := totpWrapper{}
+	wrapper.code = k.Secret()
+	wrapper.opts = otp.ValidateOpts{}
+	wrapper.opts.Digits = k.Digits()
+	wrapper.opts.Algorithm = k.Algorithm()
+	wrapper.opts.Period = uint(k.Period())
 	if !interactive {
-		code, err := otp.GenerateCode(totpToken, time.Now())
+		code, err := wrapper.generateCode()
 		if err != nil {
 			return err
 		}
@@ -146,7 +165,7 @@ func display(token string, args arguments) error {
 		}
 		lastSecond = last
 		left := 60 - last
-		code, err := otp.GenerateCode(totpToken, now)
+		code, err := wrapper.generateCode()
 		if err != nil {
 			return err
 		}
