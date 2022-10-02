@@ -4,6 +4,7 @@ package inputs
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,6 +13,8 @@ import (
 )
 
 const (
+	otpAuth        = "otpauth"
+	otpIssuer      = "lbissuer"
 	prefixKey      = "LOCKBOX_"
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
@@ -129,6 +132,24 @@ func TOTPToken() string {
 
 // FormatTOTP will format a totp otpauth url
 func FormatTOTP(value string) string {
-	v := EnvOrDefault(formatTOTPEnv, "otpauth://totp/totp:none?secret=%s&period=30&digits=6&issuer=lb")
-	return fmt.Sprintf(v, value)
+	if strings.HasPrefix(value, otpAuth) {
+		return value
+	}
+	override := EnvOrDefault(formatTOTPEnv, "")
+	if override != "" {
+		return fmt.Sprintf(override, value)
+	}
+	v := url.Values{}
+	v.Set("secret", value)
+	v.Set("issuer", otpIssuer)
+	v.Set("period", "30")
+	v.Set("algorithm", "SHA1")
+	v.Set("digits", "6")
+	u := url.URL{
+		Scheme:   "otpauth",
+		Host:     "totp",
+		Path:     "/" + otpIssuer + ":" + "lbaccount",
+		RawQuery: v.Encode(),
+	}
+	return u.String()
 }
