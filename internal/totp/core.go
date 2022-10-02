@@ -33,10 +33,6 @@ func clear() {
 	}
 }
 
-func totpEnv() string {
-	return inputs.EnvOrDefault(inputs.TotpEnv, "totp")
-}
-
 func colorWhenRules() ([]colorWhen, error) {
 	envTime := os.Getenv(inputs.ColorBetweenEnv)
 	if envTime == "" {
@@ -93,7 +89,7 @@ func display(token string, args cli.Arguments) error {
 	if err != nil {
 		return err
 	}
-	entity, err := t.Get(backend.NewPath(token, totpEnv()), backend.SecretValue)
+	entity, err := t.Get(backend.NewPath(token, inputs.TOTPToken()), backend.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -194,7 +190,7 @@ func Call(args []string) error {
 		if err != nil {
 			return err
 		}
-		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(totpEnv())})
+		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(inputs.TOTPToken())})
 		if err != nil {
 			return err
 		}

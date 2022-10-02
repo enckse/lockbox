@@ -121,3 +121,8 @@ func IsNoColorEnabled() (bool, error) {
 func IsInteractive() (bool, error) {
 	return isYesNoEnv(true, interactiveEnv)
 }
+
+// TOTPToken gets the name of the totp special case tokens
+func TOTPToken() string {
+	return EnvOrDefault(TotpEnv, "totp")
+}

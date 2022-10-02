@@ -106,6 +106,9 @@ func TestInserts(t *testing.T) {
 	if q.Value != "pass\npass" {
 		t.Errorf("invalid retrieval")
 	}
+	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n"); err != nil {
+		t.Errorf("no error: %v", err)
+	}
 }
 
 func TestRemoves(t *testing.T) {
