@@ -30,13 +30,6 @@ type (
 	}
 )
 
-func getEntry(args []string, idx int) string {
-	if len(args) != idx+1 {
-		exit("invalid entry given", errors.New("specific entry required"))
-	}
-	return args[idx]
-}
-
 func internalCallback(name string) callbackFunction {
 	switch name {
 	case "totp":
@@ -102,8 +95,8 @@ func run() *programError {
 		if len(args) != 4 {
 			return newError("mv requires src and dst", errors.New("src/dst required"))
 		}
-		src := getEntry(args, 2)
-		dst := getEntry(args, 3)
+		src := args[2]
+		dst := args[3]
 		srcExists, err := t.Get(src, backend.SecretValue)
 		if err != nil {
 			return newError("unable to get source object", errors.New("failed to get source"))
@@ -119,6 +112,9 @@ func run() *programError {
 			if !confirm("overwrite destination") {
 				return nil
 			}
+		}
+		if err := t.Move(*srcExists, dst); err != nil {
+			return newError("unable to move object", err)
 		}
 	case "insert":
 		options := cli.Arguments{}
@@ -137,7 +133,7 @@ func run() *programError {
 			return newError("too many arguments", errors.New("insert can only perform one operation"))
 		}
 		isPipe := inputs.IsInputFromPipe()
-		entry := getEntry(args, idx)
+		entry := args[idx]
 		existing, err := t.Get(entry, backend.BlankValue)
 		if err != nil {
 			return newError("unable to find an exact, existing match", err)
@@ -159,7 +155,7 @@ func run() *programError {
 		}
 		fmt.Println("")
 	case "rm":
-		deleting := getEntry(args, 2)
+		deleting := args[2]
 		existing, err := t.Get(deleting, backend.BlankValue)
 		if err != nil {
 			return newError("unable to get entity to delete", err)
@@ -171,7 +167,7 @@ func run() *programError {
 
 		}
 	case "show", "clip":
-		entry := getEntry(args, 2)
+		entry := args[2]
 		clipboard := platform.Clipboard{}
 		isShow := command == "show"
 		if !isShow {

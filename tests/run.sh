@@ -34,7 +34,9 @@ _run() {
     echo
     yes 2>/dev/null | "$BIN/lb" rm test/k/one
     echo
-    yes 2>/dev/null | "$BIN/lb" rm key/a/one
+    "$BIN/lb" mv key/a/one keyx/d/e
+    "$BIN/lb" ls
+    yes 2>/dev/null | "$BIN/lb" rm keyx/d/e
     echo
     "$BIN/lb" ls
 }
