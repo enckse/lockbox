@@ -70,19 +70,19 @@ func (t *Transaction) change(cb action) error {
 	})
 }
 
-func (c Context) insertEntity(offset []string, title, name string, entity gokeepasslib.Entry) bool {
-	return c.alterEntities(true, offset, title, name, &entity)
+func (c Context) insertEntity(offset []string, title string, entity gokeepasslib.Entry) bool {
+	return c.alterEntities(true, offset, title, &entity)
 }
 
-func (c Context) alterEntities(isAdd bool, offset []string, title, name string, entity *gokeepasslib.Entry) bool {
-	g, e, ok := findAndDo(isAdd, NewPath(title, name), offset, entity, c.db.Content.Root.Groups[0].Groups, c.db.Content.Root.Groups[0].Entries)
+func (c Context) alterEntities(isAdd bool, offset []string, title string, entity *gokeepasslib.Entry) bool {
+	g, e, ok := findAndDo(isAdd, title, offset, entity, c.db.Content.Root.Groups[0].Groups, c.db.Content.Root.Groups[0].Entries)
 	c.db.Content.Root.Groups[0].Groups = g
 	c.db.Content.Root.Groups[0].Entries = e
 	return ok
 }
 
-func (c Context) removeEntity(offset []string, title, name string) bool {
-	return c.alterEntities(false, offset, title, name, nil)
+func (c Context) removeEntity(offset []string, title string) bool {
+	return c.alterEntities(false, offset, title, nil)
 }
 
 func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepasslib.Entry, g []gokeepasslib.Group, e []gokeepasslib.Entry) ([]gokeepasslib.Group, []gokeepasslib.Entry, bool) {
@@ -147,14 +147,13 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 	return g, e, done
 }
 
-func splitComponents(path string) ([]string, string, string, error) {
-	name := filepath.Base(path)
-	dir := filepath.Dir(path)
-	parts := strings.Split(dir, string(os.PathSeparator))
+func splitComponents(path string) ([]string, string, error) {
+	title := filepath.Base(path)
+	parts := strings.Split(filepath.Dir(path), string(os.PathSeparator))
 	if len(parts) < 2 {
-		return nil, "", "", errors.New("invalid component path")
+		return nil, "", errors.New("invalid component path")
 	}
-	return parts[:len(parts)-1], parts[len(parts)-1], name, nil
+	return parts, title, nil
 }
 
 // Insert handles inserting a new element
@@ -165,22 +164,21 @@ func (t *Transaction) Insert(path, val string, multi bool) error {
 	if strings.TrimSpace(val) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	offset, title, name, err := splitComponents(path)
+	offset, title, err := splitComponents(path)
 	if err != nil {
 		return err
 	}
 	return t.change(func(c Context) error {
-		c.removeEntity(offset, title, name)
+		c.removeEntity(offset, title)
 		e := gokeepasslib.NewEntry()
 		e.Values = append(e.Values, value(titleKey, title))
-		e.Values = append(e.Values, value(userNameKey, name))
 		field := passKey
 		if multi {
 			field = notesKey
 		}
 
 		e.Values = append(e.Values, protectedValue(field, val))
-		c.insertEntity(offset, title, name, e)
+		c.insertEntity(offset, title, e)
 		return nil
 	})
 }
@@ -190,12 +188,12 @@ func (t *Transaction) Remove(entity *QueryEntity) error {
 	if entity == nil {
 		return errors.New("entity is empty/invalid")
 	}
-	offset, title, name, err := splitComponents(entity.Path)
+	offset, title, err := splitComponents(entity.Path)
 	if err != nil {
 		return err
 	}
 	return t.change(func(c Context) error {
-		if ok := c.removeEntity(offset, title, name); !ok {
+		if ok := c.removeEntity(offset, title); !ok {
 			return errors.New("failed to remove entity")
 		}
 		return nil
@@ -215,7 +213,7 @@ func value(key string, value string) gokeepasslib.ValueData {
 }
 
 func getPathName(entry gokeepasslib.Entry) string {
-	return filepath.Join(entry.GetTitle(), getValue(entry, userNameKey))
+	return entry.GetTitle()
 }
 
 func protectedValue(key string, value string) gokeepasslib.ValueData {

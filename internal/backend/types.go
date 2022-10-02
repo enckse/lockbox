@@ -58,8 +58,7 @@ const (
 )
 
 const (
-	userNameKey = "UserName"
-	notesKey    = "Notes"
-	titleKey    = "Title"
-	passKey     = "Password"
+	notesKey = "Notes"
+	titleKey = "Title"
+	passKey  = "Password"
 )
