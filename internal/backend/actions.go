@@ -90,7 +90,6 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 	if len(offset) == 0 {
 		if isAdd {
 			e = append(e, *opEntity)
-
 		} else {
 			var entries []gokeepasslib.Entry
 			for _, entry := range e {
@@ -124,7 +123,6 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 		var updateGroups []gokeepasslib.Group
 		for _, group := range g {
 			if !done && group.Name == name {
-
 				groups, entries, ok := findAndDo(isAdd, entityName, remaining, opEntity, group.Groups, group.Entries)
 				group.Entries = entries
 				group.Groups = groups
@@ -138,10 +136,8 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 		if !isAdd {
 			var groups []gokeepasslib.Group
 			for _, group := range g {
-				if group.Name == name {
-					if len(group.Entries) == 0 {
-						continue
-					}
+				if group.Name == name && len(group.Entries) == 0 && len(group.Groups) == 0 {
+					continue
 				}
 				groups = append(groups, group)
 			}
