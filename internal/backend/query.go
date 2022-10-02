@@ -15,6 +15,10 @@ import (
 
 // Get will request a singular entity
 func (t *Transaction) Get(path string, mode ValueMode) (*QueryEntity, error) {
+	_, _, err := splitComponents(path)
+	if err != nil {
+		return nil, err
+	}
 	e, err := t.QueryCallback(QueryOptions{Mode: ExactMode, Criteria: path, Values: mode})
 	if err != nil {
 		return nil, err

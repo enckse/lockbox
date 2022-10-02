@@ -136,7 +136,7 @@ func run() *programError {
 		entry := args[idx]
 		existing, err := t.Get(entry, backend.BlankValue)
 		if err != nil {
-			return newError("unable to find an exact, existing match", err)
+			return newError("unable to insert entry", err)
 		}
 		if existing != nil {
 			if !isPipe {
@@ -155,6 +155,9 @@ func run() *programError {
 		}
 		fmt.Println("")
 	case "rm":
+		if len(args) != 3 {
+			return newError("rm requires a single entry", errors.New("missing argument"))
+		}
 		deleting := args[2]
 		existing, err := t.Get(deleting, backend.BlankValue)
 		if err != nil {
@@ -167,6 +170,9 @@ func run() *programError {
 
 		}
 	case "show", "clip":
+		if len(args) != 3 {
+			return newError("requires a single entry", fmt.Errorf("%s missing argument", command))
+		}
 		entry := args[2]
 		clipboard := platform.Clipboard{}
 		isShow := command == "show"
@@ -191,6 +197,9 @@ func run() *programError {
 			return newError("clipboard failed", err)
 		}
 	default:
+		if len(args) < 2 {
+			return newError("command missing required arguments", fmt.Errorf("%s missing argument", command))
+		}
 		a := args[2:]
 		callback := internalCallback(command)
 		if callback != nil {
