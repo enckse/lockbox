@@ -30,7 +30,7 @@ const (
 	// ClipMaxEnv is the max time a value should be stored in the clipboard.
 	ClipMaxEnv = prefixKey + "CLIPMAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
-	ColorBetweenEnv = prefixKey + "TOTPBETWEEN"
+	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
 	// PlainKeyMode is plaintext based key resolution.
 	PlainKeyMode = "plaintext"
 	// CommandKeyMode will run an external command to get the key (from stdout).
