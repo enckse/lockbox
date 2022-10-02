@@ -2,6 +2,9 @@
 package backend
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -62,4 +65,9 @@ const (
 	notesKey = "Notes"
 	titleKey = "Title"
 	passKey  = "Password"
+	pathSep  = string(os.PathSeparator)
+)
+
+var (
+	errPath = fmt.Errorf("input paths must contain at LEAST 3 components (e.g. abc%c123%cxyz)", os.PathSeparator, os.PathSeparator)
 )

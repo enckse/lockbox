@@ -3,7 +3,6 @@ package backend
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -153,9 +152,9 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 
 func splitComponents(path string) ([]string, string, error) {
 	title := filepath.Base(path)
-	parts := strings.Split(filepath.Dir(path), string(os.PathSeparator))
+	parts := strings.Split(filepath.Dir(path), pathSep)
 	if len(parts) < 2 {
-		return nil, "", fmt.Errorf("input paths must contain at LEAST 3 components (e.g. abc%c123%cxyz)", os.PathSeparator, os.PathSeparator)
+		return nil, "", errPath
 	}
 	return parts, title, nil
 }
