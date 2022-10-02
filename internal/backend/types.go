@@ -25,10 +25,11 @@ type (
 	action func(t Context) error
 	// Transaction handles the overall operation of the transaction
 	Transaction struct {
-		valid  bool
-		file   string
-		exists bool
-		write  bool
+		valid    bool
+		file     string
+		exists   bool
+		write    bool
+		readonly bool
 	}
 	// Context handles operating on the underlying database
 	Context struct {

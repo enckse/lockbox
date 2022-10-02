@@ -9,16 +9,22 @@ _is_clip() {
 }
 
 _lb() {
-    local cur opts clip_enabled needs
+    local cur opts clip_enabled needs readwrite
     clip_enabled=" clip"
     if [ -n "$LOCKBOX_NOCLIP" ]; then
         if [ "$LOCKBOX_NOCLIP" == "yes" ]; then
             clip_enabled=""
         fi
     fi
+    readwrite=" insert rm mv"
+    if [ -n "$LOCKBOX_READONLY" ]; then
+        if [ "$LOCKBOX_READONLY" == "yes" ]; then
+            readwrite=""
+        fi
+    fi
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version ls show insert rm totp mv find$clip_enabled"
+        opts="version ls show totp$readwrite find$clip_enabled"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else

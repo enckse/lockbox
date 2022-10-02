@@ -16,6 +16,7 @@ const (
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
 	interactiveEnv = prefixKey + "INTERACTIVE"
+	readOnlyEnv    = prefixKey + "READONLY"
 	// TotpEnv allows for overriding of the special name for totp entries.
 	TotpEnv = prefixKey + "TOTP"
 	// KeyModeEnv indicates what the KEY value is (e.g. command, plaintext).
@@ -99,6 +100,11 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 		return true, nil
 	}
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
+}
+
+// IsReadOnly indicates to operate in readonly, no writing to file allowed
+func IsReadOnly() (bool, error) {
+	return isYesNoEnv(false, readOnlyEnv)
 }
 
 // IsNoClipEnabled indicates if clipboard mode is enabled.

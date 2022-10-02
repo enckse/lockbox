@@ -7,6 +7,7 @@ export LOCKBOX_KEYMODE="plaintext"
 export LOCKBOX_KEY="plaintextkey"
 export LOCKBOX_TOTP="totp"
 export LOCKBOX_INTERACTIVE="no"
+export LOCKBOX_READONLY="no"
 
 rm -rf $TESTS
 mkdir -p $TESTS

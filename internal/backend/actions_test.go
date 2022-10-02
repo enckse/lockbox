@@ -13,6 +13,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	if !keep {
 		os.Remove("test.kdbx")
 	}
+	os.Setenv("LOCKBOX_READONLY", "no")
 	os.Setenv("LOCKBOX_STORE", "test.kdbx")
 	os.Setenv("LOCKBOX_KEY", "test")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
@@ -25,6 +26,15 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 
 func setup(t *testing.T) *backend.Transaction {
 	return fullSetup(t, false)
+}
+
+func TestNoWriteOnRO(t *testing.T) {
+	setup(t)
+	os.Setenv("LOCKBOX_READONLY", "yes")
+	tr, _ := backend.NewTransaction()
+	if err := tr.Insert("a/a/a", "a"); err.Error() != "unable to alter database in readonly mode" {
+		t.Errorf("wrong error: %v", err)
+	}
 }
 
 func TestBadAction(t *testing.T) {

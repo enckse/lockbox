@@ -25,7 +25,11 @@ func loadFile(file string, must bool) (*Transaction, error) {
 			return nil, errors.New("invalid file, does not exists")
 		}
 	}
-	return &Transaction{valid: true, file: file, exists: exists}, nil
+	ro, err := inputs.IsReadOnly()
+	if err != nil {
+		return nil, err
+	}
+	return &Transaction{valid: true, file: file, exists: exists, readonly: ro}, nil
 }
 
 // NewTransaction will use the underlying environment data store location

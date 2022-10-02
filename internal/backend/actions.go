@@ -61,6 +61,9 @@ func (t *Transaction) act(cb action) error {
 }
 
 func (t *Transaction) change(cb action) error {
+	if t.readonly {
+		return errors.New("unable to alter database in readonly mode")
+	}
 	return t.act(func(c Context) error {
 		if err := c.db.UnlockProtectedEntries(); err != nil {
 			return err
