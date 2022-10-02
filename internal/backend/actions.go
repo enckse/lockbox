@@ -151,11 +151,11 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 }
 
 func splitComponents(path string) ([]string, string, error) {
-	title := filepath.Base(path)
-	parts := strings.Split(filepath.Dir(path), pathSep)
-	if len(parts) < 2 {
+	if len(strings.Split(path, pathSep)) < 2 {
 		return nil, "", errPath
 	}
+	title := filepath.Base(path)
+	parts := strings.Split(filepath.Dir(path), pathSep)
 	return parts, title, nil
 }
 

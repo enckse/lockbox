@@ -2,7 +2,7 @@
 package backend
 
 import (
-	"fmt"
+	"errors"
 	"os"
 
 	"github.com/tobischo/gokeepasslib/v3"
@@ -69,5 +69,5 @@ const (
 )
 
 var (
-	errPath = fmt.Errorf("input paths must contain at LEAST 3 components (e.g. abc%c123%cxyz)", os.PathSeparator, os.PathSeparator)
+	errPath = errors.New("input paths must contain at LEAST 2 components")
 )

@@ -28,7 +28,7 @@ func TestGet(t *testing.T) {
 	if err != nil || q != nil {
 		t.Error("invalid result, should be empty")
 	}
-	if _, err := fullSetup(t, true).Get("aaaa", backend.BlankValue); err.Error() != "input paths must contain at LEAST 3 components (e.g. abc/123/xyz)" {
+	if _, err := fullSetup(t, true).Get("aaaa", backend.BlankValue); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

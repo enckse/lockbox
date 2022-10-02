@@ -74,10 +74,10 @@ func TestInserts(t *testing.T) {
 	if err := setup(t).Insert("", ""); err.Error() != "empty path not allowed" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert(filepath.Join("test", "offset"), "test"); err.Error() != "input paths must contain at LEAST 3 components (e.g. abc/123/xyz)" {
+	if err := setup(t).Insert("tests", "test"); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("test", "test"); err.Error() != "input paths must contain at LEAST 3 components (e.g. abc/123/xyz)" {
+	if err := setup(t).Insert("test", "test"); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := setup(t).Insert("a", ""); err.Error() != "empty secret not allowed" {
@@ -115,7 +115,7 @@ func TestRemoves(t *testing.T) {
 	if err := setup(t).Remove(nil); err.Error() != "entity is empty/invalid" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Remove(&backend.QueryEntity{}); err.Error() != "input paths must contain at LEAST 3 components (e.g. abc/123/xyz)" {
+	if err := setup(t).Remove(&backend.QueryEntity{}); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := setup(t).Remove(&backend.QueryEntity{Path: filepath.Join("test1", "test2", "test3")}); err.Error() != "failed to remove entity" {
