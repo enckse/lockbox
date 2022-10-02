@@ -146,7 +146,7 @@ func FormatTOTP(value string) string {
 	v.Set("algorithm", "SHA1")
 	v.Set("digits", "6")
 	u := url.URL{
-		Scheme:   "otpauth",
+		Scheme:   otpAuth,
 		Host:     "totp",
 		Path:     "/" + otpIssuer + ":" + "lbaccount",
 		RawQuery: v.Encode(),
