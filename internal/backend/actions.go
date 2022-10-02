@@ -3,6 +3,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -154,7 +155,7 @@ func splitComponents(path string) ([]string, string, error) {
 	title := filepath.Base(path)
 	parts := strings.Split(filepath.Dir(path), string(os.PathSeparator))
 	if len(parts) < 2 {
-		return nil, "", errors.New("invalid component path")
+		return nil, "", fmt.Errorf("input paths must contain at LEAST 3 components (e.g. abc%c123%cxyz)", os.PathSeparator, os.PathSeparator)
 	}
 	return parts, title, nil
 }
