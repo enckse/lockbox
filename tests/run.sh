@@ -12,25 +12,25 @@ rm -rf $TESTS
 mkdir -p $TESTS
 
 _run() {
-    echo "test" | "$BIN/lb" insert keys/one
-    echo "test2" | "$BIN/lb" insert keys/one2
-    echo "test" | "$BIN/lb" insert keys/one
-    echo -e "test3\ntest4" | "$BIN/lb" insert keys2/three
+    echo "test" | "$BIN/lb" insert keys/k/one
+    echo "test2" | "$BIN/lb" insert keys/k/one2
+    echo "test" | "$BIN/lb" insert keys/k/one
+    echo -e "test3\ntest4" | "$BIN/lb" insert keys2/k/three
     "$BIN/lb" ls
-    yes 2>/dev/null | "$BIN/lb" rm keys/one
+    yes 2>/dev/null | "$BIN/lb" rm keys/k/one
     echo
     "$BIN/lb" ls
     "$BIN/lb" find e
-    "$BIN/lb" show keys/one2
-    "$BIN/lb" show keys2/three
-    echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert test/totp
+    "$BIN/lb" show keys/k/one2
+    "$BIN/lb" show keys2/k/three
+    echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert test/k/totp
     "$BIN/lb" "totp" -list
-    "$BIN/lb" "totp" test | tr '[:digit:]' 'X'
+    "$BIN/lb" "totp" test/k | tr '[:digit:]' 'X'
     "$BIN/lb" "hash" $LOCKBOX_STORE
-    yes 2>/dev/null | "$BIN/lb" rm keys2/three
+    yes 2>/dev/null | "$BIN/lb" rm keys2/k/three
     echo
-    yes 2>/dev/null | "$BIN/lb" rm test/totp
-    yes 2>/dev/null | "$BIN/lb" rm test/one
+    yes 2>/dev/null | "$BIN/lb" rm test/k/totp
+    yes 2>/dev/null | "$BIN/lb" rm test/k/one
 }
 
 _run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $TESTS/actual.log

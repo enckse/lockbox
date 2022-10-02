@@ -1,7 +1,9 @@
 package backend_test
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/backend"
@@ -27,38 +29,41 @@ func setup(t *testing.T) *backend.Transaction {
 
 func TestBadAction(t *testing.T) {
 	tr := &backend.Transaction{}
-	if err := tr.Insert("a", "a", nil, false); err.Error() != "invalid transaction" {
+	if err := tr.Insert("a/a/a", "a", false); err.Error() != "invalid transaction" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
 
 func TestInserts(t *testing.T) {
-	if err := setup(t).Insert("", "", nil, false); err.Error() != "empty path not allowed" {
+	if err := setup(t).Insert("", "", false); err.Error() != "empty path not allowed" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("a", "", nil, false); err.Error() != "empty secret not allowed" {
+	if err := setup(t).Insert(filepath.Join("test", "offset"), "test", false); err.Error() != "invalid component path" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("value", "pass", nil, false); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if err := fullSetup(t, true).Insert("value", "pass", nil, false); err.Error() != "trying to insert over existing entity" {
+	if err := setup(t).Insert("test", "test", false); err.Error() != "invalid component path" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert("value", "pass2", &backend.QueryEntity{Path: "value"}, false); err != nil {
+	if err := setup(t).Insert("a", "", false); err.Error() != "empty secret not allowed" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert(filepath.Join("test", "offset", "value"), "pass", false); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert("value2", "pass", nil, true); err != nil {
+	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "value"), "pass2", false); err != nil {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := fullSetup(t, true).Insert(filepath.Join("test", "offset", "value2"), "pass", true); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	q, err := fullSetup(t, true).Get("value", backend.SecretValue)
+	q, err := fullSetup(t, true).Get(filepath.Join("test", "offset", "value"), backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if q.Value != "pass2" {
 		t.Errorf("invalid retrieval")
 	}
-	q, err = fullSetup(t, true).Get("value2", backend.SecretValue)
+	q, err = fullSetup(t, true).Get(filepath.Join("test", "offset", "value2"), backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
@@ -71,43 +76,68 @@ func TestRemoves(t *testing.T) {
 	if err := setup(t).Remove(nil); err.Error() != "entity is empty/invalid" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Remove(&backend.QueryEntity{}); err.Error() != "unable to select entity for deletion" {
+	if err := setup(t).Remove(&backend.QueryEntity{}); err.Error() != "invalid component path" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Remove(&backend.QueryEntity{Path: filepath.Join("test1", "test2", "test3")}); err.Error() != "failed to remove entity" {
 		t.Errorf("wrong error: %v", err)
 	}
 	setup(t)
-	for _, i := range []string{"test1", "test2", "test3", "test4", "test5"} {
-		fullSetup(t, true).Insert(i, "pass", nil, false)
+	for _, i := range []string{"test1", "test2"} {
+		fullSetup(t, true).Insert(filepath.Join(i, i, i), "pass", false)
 	}
-	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test3"}); err != nil {
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: filepath.Join("test1", "test1", "test1")}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	check(t, []string{"test1", "test2", "test4", "test5"})
-	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test1"}); err != nil {
+	if err := check(t, filepath.Join("test2", "test2", "test2")); err != nil {
+		t.Errorf("invalid check: %v", err)
+	}
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: filepath.Join("test2", "test2", "test2")}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	check(t, []string{"test2", "test4", "test5"})
-	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test5"}); err != nil {
+	setup(t)
+	for _, i := range []string{filepath.Join("test", "test", "test1"), filepath.Join("test", "test", "test2"), filepath.Join("test", "test", "test3"), filepath.Join("test", "test1", "test2"), filepath.Join("test", "test1", "test5")} {
+		fullSetup(t, true).Insert(i, "pass", false)
+	}
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test/test/test3"}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	check(t, []string{"test2", "test4"})
-	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test4"}); err != nil {
+	if err := check(t, filepath.Join("test", "test", "test2"), filepath.Join("test", "test", "test1"), filepath.Join("test", "test1", "test2"), filepath.Join("test", "test1", "test5")); err != nil {
+		t.Errorf("invalid check: %v", err)
+	}
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test/test/test1"}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	check(t, []string{"test2"})
-	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test2"}); err != nil {
+	if err := check(t, filepath.Join("test", "test", "test2"), filepath.Join("test", "test1", "test2"), filepath.Join("test", "test1", "test5")); err != nil {
+		t.Errorf("invalid check: %v", err)
+	}
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test/test1/test5"}); err != nil {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := check(t, filepath.Join("test", "test", "test2"), filepath.Join("test", "test1", "test2")); err != nil {
+		t.Errorf("invalid check: %v", err)
+	}
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test/test1/test2"}); err != nil {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := check(t, filepath.Join("test", "test", "test2")); err != nil {
+		t.Errorf("invalid check: %v", err)
+	}
+	if err := fullSetup(t, true).Remove(&backend.QueryEntity{Path: "test/test/test2"}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 }
 
-func check(t *testing.T, checks []string) {
+func check(t *testing.T, checks ...string) error {
 	tr := fullSetup(t, true)
 	for _, c := range checks {
 		q, err := tr.Get(c, backend.BlankValue)
 		if err != nil {
-			t.Errorf("unexpected error: %v", err)
+			return err
 		}
 		if q == nil {
-			t.Errorf("failed to find entity: %s", c)
+			return fmt.Errorf("failed to find entity: %s", c)
 		}
 	}
+	return nil
 }

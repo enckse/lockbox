@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/tobischo/gokeepasslib/v3"
 )
 
 // Get will request a singular entity
@@ -27,6 +29,21 @@ func (t *Transaction) Get(path string, mode ValueMode) (*QueryEntity, error) {
 	}
 }
 
+func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.Entry, cb func(string, gokeepasslib.Entry)) {
+	for _, g := range groups {
+		o := ""
+		if offset == "" {
+			o = g.Name
+		} else {
+			o = filepath.Join(offset, g.Name)
+		}
+		forEach(o, g.Groups, g.Entries, cb)
+	}
+	for _, e := range entries {
+		cb(offset, e)
+	}
+}
+
 // QueryCallback will retrieve a query based on setting
 func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if args.Mode == noneMode {
@@ -37,30 +54,33 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
-		for _, entry := range ctx.db.Content.Root.Groups[0].Entries {
+		forEach("", ctx.db.Content.Root.Groups[0].Groups, ctx.db.Content.Root.Groups[0].Entries, func(offset string, entry gokeepasslib.Entry) {
 			path := getPathName(entry)
+			if offset != "" {
+				path = filepath.Join(offset, path)
+			}
 			if isSort {
 				switch args.Mode {
 				case FindMode:
 					if !strings.Contains(path, args.Criteria) {
-						continue
+						return
 					}
 				case SuffixMode:
 					if !strings.HasSuffix(path, args.Criteria) {
-						continue
+						return
 					}
 				}
 
 			} else {
 				if args.Mode == ExactMode {
 					if path != args.Criteria {
-						continue
+						return
 					}
 				}
 			}
 			keys = append(keys, path)
 			entities[path] = QueryEntity{backing: entry}
-		}
+		})
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()
 		}

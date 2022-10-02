@@ -9,19 +9,19 @@ import (
 
 func setupInserts(t *testing.T) {
 	setup(t)
-	fullSetup(t, true).Insert("abc", "tedst", nil, false)
-	fullSetup(t, true).Insert("abcx", "tedst", nil, false)
-	fullSetup(t, true).Insert("ab11c", "tdest", nil, true)
-	fullSetup(t, true).Insert("abc1ak", "atest", nil, false)
+	fullSetup(t, true).Insert("test/test/abc", "tedst", false)
+	fullSetup(t, true).Insert("test/test/abcx", "tedst", false)
+	fullSetup(t, true).Insert("test/test/ab11c", "tdest", true)
+	fullSetup(t, true).Insert("test/test/abc1ak", "atest", false)
 }
 
 func TestGet(t *testing.T) {
 	setupInserts(t)
-	q, err := fullSetup(t, true).Get("abc", backend.BlankValue)
+	q, err := fullSetup(t, true).Get("test/test/abc", backend.BlankValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Path != "abc" || q.Value != "" {
+	if q.Path != "test/test/abc" || q.Value != "" {
 		t.Error("invalid query result")
 	}
 	q, err = fullSetup(t, true).Get("aaaa", backend.BlankValue)
@@ -32,21 +32,21 @@ func TestGet(t *testing.T) {
 
 func TestValueModes(t *testing.T) {
 	setupInserts(t)
-	q, err := fullSetup(t, true).Get("abc", backend.BlankValue)
+	q, err := fullSetup(t, true).Get("test/test/abc", backend.BlankValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if q.Value != "" {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
-	q, err = fullSetup(t, true).Get("abc", backend.HashedValue)
+	q, err = fullSetup(t, true).Get("test/test/abc", backend.HashedValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if q.Value != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
-	q, err = fullSetup(t, true).Get("ab11c", backend.SecretValue)
+	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestQueryCallback(t *testing.T) {
 	if len(res) != 4 {
 		t.Error("invalid results: not enough")
 	}
-	if res[0].Path != "ab11c" || res[1].Path != "abc" || res[2].Path != "abc1ak" || res[3].Path != "abcx" {
+	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc" || res[2].Path != "test/test/abc1ak" || res[3].Path != "test/test/abcx" {
 		t.Errorf("invalid results: %v", res)
 	}
 	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.FindMode, Criteria: "1"})
@@ -77,7 +77,7 @@ func TestQueryCallback(t *testing.T) {
 	if len(res) != 2 {
 		t.Error("invalid results: not enough")
 	}
-	if res[0].Path != "ab11c" || res[1].Path != "abc1ak" {
+	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc1ak" {
 		t.Errorf("invalid results: %v", res)
 	}
 	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: "c"})
@@ -87,17 +87,17 @@ func TestQueryCallback(t *testing.T) {
 	if len(res) != 2 {
 		t.Error("invalid results: not enough")
 	}
-	if res[0].Path != "ab11c" || res[1].Path != "abc" {
+	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc" {
 		t.Errorf("invalid results: %v", res)
 	}
-	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abc"})
+	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "test/test/abc"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if len(res) != 1 {
 		t.Error("invalid results: not enough")
 	}
-	if res[0].Path != "abc" {
+	if res[0].Path != "test/test/abc" {
 		t.Errorf("invalid results: %v", res)
 	}
 	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abczzz"})

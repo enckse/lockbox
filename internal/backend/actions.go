@@ -37,7 +37,7 @@ func (t *Transaction) act(cb action) error {
 		return err
 	}
 	if len(db.Content.Root.Groups) != 1 {
-		return errors.New("kdbx must only have ONE root group")
+		return errors.New("kdbx must have ONE root group")
 	}
 	err = cb(Context{db: db})
 	if err != nil {
@@ -70,60 +70,123 @@ func (t *Transaction) change(cb action) error {
 	})
 }
 
+func (c Context) insertEntity(offset []string, title, name string, entity gokeepasslib.Entry) bool {
+	return c.alterEntities(true, offset, title, name, &entity)
+}
+
+func (c Context) alterEntities(isAdd bool, offset []string, title, name string, entity *gokeepasslib.Entry) bool {
+	g, e, ok := findAndDo(isAdd, NewPath(title, name), offset, entity, c.db.Content.Root.Groups[0].Groups, c.db.Content.Root.Groups[0].Entries)
+	c.db.Content.Root.Groups[0].Groups = g
+	c.db.Content.Root.Groups[0].Entries = e
+	return ok
+}
+
+func (c Context) removeEntity(offset []string, title, name string) bool {
+	return c.alterEntities(false, offset, title, name, nil)
+}
+
+func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepasslib.Entry, g []gokeepasslib.Group, e []gokeepasslib.Entry) ([]gokeepasslib.Group, []gokeepasslib.Entry, bool) {
+	done := false
+	if len(offset) == 0 {
+		if isAdd {
+			e = append(e, *opEntity)
+
+		} else {
+			var entries []gokeepasslib.Entry
+			for _, entry := range e {
+				if getPathName(entry) == entityName {
+					continue
+				}
+				entries = append(entries, entry)
+			}
+			e = entries
+		}
+		done = true
+	} else {
+		name := offset[0]
+		remaining := []string{}
+		if len(offset) > 1 {
+			remaining = offset[1:]
+		}
+		if isAdd {
+			match := false
+			for _, group := range g {
+				if group.Name == name {
+					match = true
+				}
+			}
+			if !match {
+				newGroup := gokeepasslib.NewGroup()
+				newGroup.Name = name
+				g = append(g, newGroup)
+			}
+		}
+		var updateGroups []gokeepasslib.Group
+		for _, group := range g {
+			if !done && group.Name == name {
+
+				groups, entries, ok := findAndDo(isAdd, entityName, remaining, opEntity, group.Groups, group.Entries)
+				group.Entries = entries
+				group.Groups = groups
+				if ok {
+					done = true
+				}
+			}
+			updateGroups = append(updateGroups, group)
+		}
+		g = updateGroups
+		if !isAdd {
+			var groups []gokeepasslib.Group
+			for _, group := range g {
+				if group.Name == name {
+					if len(group.Entries) == 0 {
+						continue
+					}
+				}
+				groups = append(groups, group)
+			}
+			g = groups
+		}
+	}
+	return g, e, done
+}
+
+func splitComponents(path string) ([]string, string, string, error) {
+	name := filepath.Base(path)
+	dir := filepath.Dir(path)
+	parts := strings.Split(dir, string(os.PathSeparator))
+	if len(parts) < 2 {
+		return nil, "", "", errors.New("invalid component path")
+	}
+	return parts[:len(parts)-1], parts[len(parts)-1], name, nil
+}
+
 // Insert handles inserting a new element
-func (t *Transaction) Insert(path, val string, entity *QueryEntity, multi bool) error {
+func (t *Transaction) Insert(path, val string, multi bool) error {
 	if strings.TrimSpace(path) == "" {
 		return errors.New("empty path not allowed")
 	}
 	if strings.TrimSpace(val) == "" {
 		return errors.New("empty secret not allowed")
 	}
+	offset, title, name, err := splitComponents(path)
+	if err != nil {
+		return err
+	}
 	return t.change(func(c Context) error {
-		if entity != nil {
-			if _, err := remove(entity, c, false); err != nil {
-				return err
-			}
-		} else {
-			idx, _ := remove(&QueryEntity{Path: path}, c, true)
-			if idx >= 0 {
-				return errors.New("trying to insert over existing entity")
-			}
-		}
+		c.removeEntity(offset, title, name)
 		e := gokeepasslib.NewEntry()
-		e.Values = append(e.Values, value(titleKey, filepath.Dir(path)))
-		e.Values = append(e.Values, value(userNameKey, filepath.Base(path)))
+		e.Values = append(e.Values, value(titleKey, title))
+		e.Values = append(e.Values, value(userNameKey, name))
 		field := passKey
 		if multi {
 			field = notesKey
 		}
 
 		e.Values = append(e.Values, protectedValue(field, val))
-		c.db.Content.Root.Groups[0].Entries = append(c.db.Content.Root.Groups[0].Entries, e)
+		c.insertEntity(offset, title, name, e)
 		return nil
 	})
-}
-
-func remove(entity *QueryEntity, c Context, dryRun bool) (int, error) {
-	entries := c.db.Content.Root.Groups[0].Entries
-	idx := -1
-	for i, e := range entries {
-		if entity.Path == getPathName(e) {
-			idx = i
-		}
-	}
-	if idx < 0 {
-		return idx, errors.New("unable to select entity for deletion")
-	}
-	if dryRun {
-		return idx, nil
-	}
-	switch len(entries) {
-	case 1:
-		c.db.Content.Root.Groups[0].Entries = []gokeepasslib.Entry{}
-	default:
-		c.db.Content.Root.Groups[0].Entries = append(entries[:idx], entries[idx+1:]...)
-	}
-	return idx, nil
 }
 
 // Remove handles remove an element
@@ -131,9 +194,15 @@ func (t *Transaction) Remove(entity *QueryEntity) error {
 	if entity == nil {
 		return errors.New("entity is empty/invalid")
 	}
-	return t.change(func(c Context) error {
-		_, err := remove(entity, c, false)
+	offset, title, name, err := splitComponents(entity.Path)
+	if err != nil {
 		return err
+	}
+	return t.change(func(c Context) error {
+		if ok := c.removeEntity(offset, title, name); !ok {
+			return errors.New("failed to remove entity")
+		}
+		return nil
 	})
 }
 
