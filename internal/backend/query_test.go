@@ -118,3 +118,10 @@ func TestEntityDir(t *testing.T) {
 		t.Error("invalid query directory")
 	}
 }
+
+func TestNewPath(t *testing.T) {
+	p := backend.NewPath("abc", "xyz")
+	if p != filepath.Join("abc", "xyz") {
+		t.Error("invalid new path")
+	}
+}

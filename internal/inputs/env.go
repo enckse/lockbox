@@ -22,10 +22,10 @@ const (
 	readOnlyEnv    = prefixKey + "READONLY"
 	fieldTOTPEnv   = prefixKey + "TOTP"
 	formatTOTPEnv  = fieldTOTPEnv + "_FORMAT"
-	// KeyModeEnv indicates what the KEY value is (e.g. command, plaintext).
-	KeyModeEnv = prefixKey + "KEYMODE"
-	// KeyEnv is the key value used by the lockbox store.
-	KeyEnv = prefixKey + "KEY"
+	keyModeEnv     = prefixKey + "KEYMODE"
+	keyEnv         = prefixKey + "KEY"
+	plainKeyMode   = "plaintext"
+	commandKeyMode = "command"
 	// PlatformEnv is the platform lb is running on.
 	PlatformEnv = prefixKey + "PLATFORM"
 	// StoreEnv is the location of the filesystem store that lb is operating on.
@@ -34,10 +34,6 @@ const (
 	ClipMaxEnv = prefixKey + "CLIPMAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
-	// PlainKeyMode is plaintext based key resolution.
-	PlainKeyMode = "plaintext"
-	// CommandKeyMode will run an external command to get the key (from stdout).
-	CommandKeyMode = "command"
 )
 
 // EnvOrDefault will get the environment value OR default if env is not set.
@@ -51,11 +47,11 @@ func EnvOrDefault(envKey, defaultValue string) string {
 
 // GetKey will get the encryption key setup for lb
 func GetKey() ([]byte, error) {
-	useKeyMode := os.Getenv(KeyModeEnv)
+	useKeyMode := os.Getenv(keyModeEnv)
 	if useKeyMode == "" {
-		useKeyMode = CommandKeyMode
+		useKeyMode = commandKeyMode
 	}
-	useKey := os.Getenv(KeyEnv)
+	useKey := os.Getenv(keyEnv)
 	if useKey == "" {
 		return nil, errors.New("no key given")
 	}
@@ -72,7 +68,7 @@ func GetKey() ([]byte, error) {
 func getKey(keyMode, name string) ([]byte, error) {
 	var data []byte
 	switch keyMode {
-	case CommandKeyMode:
+	case commandKeyMode:
 		parts, err := shlex.Split(name)
 		if err != nil {
 			return nil, err
@@ -83,7 +79,7 @@ func getKey(keyMode, name string) ([]byte, error) {
 			return nil, err
 		}
 		data = b
-	case PlainKeyMode:
+	case plainKeyMode:
 		data = []byte(name)
 	default:
 		return nil, errors.New("unknown keymode")

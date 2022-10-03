@@ -22,7 +22,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 	exists := pathExists(file)
 	if must {
 		if !exists {
-			return nil, errors.New("invalid file, does not exists")
+			return nil, errors.New("invalid file, does not exist")
 		}
 	}
 	ro, err := inputs.IsReadOnly()

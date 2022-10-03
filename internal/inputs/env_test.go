@@ -1,6 +1,7 @@
 package inputs_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -28,66 +29,84 @@ func TestFormatTOTP(t *testing.T) {
 	}
 }
 
-func TestColorSetting(t *testing.T) {
-	os.Setenv("LOCKBOX_NOCOLOR", "yes")
-	c, err := inputs.IsNoColorEnabled()
+func checkYesNo(key string, t *testing.T, cb func() (bool, error), onEmpty bool) {
+	os.Setenv(key, "yes")
+	c, err := cb()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if !c {
 		t.Error("invalid setting")
 	}
-	os.Setenv("LOCKBOX_NOCOLOR", "")
-	c, err = inputs.IsNoColorEnabled()
+	os.Setenv(key, "")
+	c, err = cb()
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if c != onEmpty {
+		t.Error("invalid setting")
+	}
+	os.Setenv(key, "no")
+	c, err = cb()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if c {
 		t.Error("invalid setting")
 	}
-	os.Setenv("LOCKBOX_NOCOLOR", "no")
-	c, err = inputs.IsNoColorEnabled()
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if c {
-		t.Error("invalid setting")
-	}
-	os.Setenv("LOCKBOX_NOCOLOR", "lkaj;f")
-	_, err = inputs.IsNoColorEnabled()
-	if err == nil || err.Error() != "invalid yes/no env value for LOCKBOX_NOCOLOR" {
+	os.Setenv(key, "lkaj;f")
+	_, err = cb()
+	if err == nil || err.Error() != fmt.Sprintf("invalid yes/no env value for %s", key) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
+func TestColorSetting(t *testing.T) {
+	checkYesNo("LOCKBOX_NOCOLOR", t, inputs.IsNoColorEnabled, false)
+}
+
 func TestInteractiveSetting(t *testing.T) {
-	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
-	c, err := inputs.IsInteractive()
-	if err != nil {
+	checkYesNo("LOCKBOX_INTERACTIVE", t, inputs.IsInteractive, true)
+}
+
+func TestIsReadOnly(t *testing.T) {
+	checkYesNo("LOCKBOX_READONLY", t, inputs.IsReadOnly, false)
+}
+
+func TestIsNoClip(t *testing.T) {
+	checkYesNo("LOCKBOX_NOCLIP", t, inputs.IsNoClipEnabled, false)
+}
+
+func TestTOTP(t *testing.T) {
+	os.Setenv("LOCKBOX_TOTP", "abc")
+	if inputs.TOTPToken() != "abc" {
+		t.Error("invalid totp token field")
+	}
+	os.Setenv("LOCKBOX_TOTP", "")
+	if inputs.TOTPToken() != "totp" {
+		t.Error("invalid totp token field")
+	}
+}
+
+func TestGetKey(t *testing.T) {
+	os.Setenv("LOCKBOX_KEY", "aaa")
+	os.Setenv("LOCKBOX_KEYMODE", "lak;jfea")
+	if _, err := inputs.GetKey(); err.Error() != "unknown keymode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if !c {
-		t.Error("invalid setting")
-	}
-	os.Setenv("LOCKBOX_INTERACTIVE", "no")
-	c, err = inputs.IsInteractive()
-	if err != nil {
+	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	os.Setenv("LOCKBOX_KEY", "")
+	if _, err := inputs.GetKey(); err.Error() != "no key given" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if c {
-		t.Error("invalid setting")
+	os.Setenv("LOCKBOX_KEY", "key")
+	k, err := inputs.GetKey()
+	if err != nil || string(k) != "key" {
+		t.Error("invalid key retrieval")
 	}
-	os.Setenv("LOCKBOX_INTERACTIVE", "")
-	c, err = inputs.IsInteractive()
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if !c {
-		t.Error("invalid setting")
-	}
-	os.Setenv("LOCKBOX_INTERACTIVE", "yaojia")
-	_, err = inputs.IsInteractive()
-	if err == nil || err.Error() != "invalid yes/no env value for LOCKBOX_INTERACTIVE" {
-		t.Errorf("unexpected error: %v", err)
+	os.Setenv("LOCKBOX_KEYMODE", "command")
+	os.Setenv("LOCKBOX_KEY", "invalid command text is long and invalid via shlex")
+	if _, err := inputs.GetKey(); err == nil {
+		t.Error("should have failed")
 	}
 }
