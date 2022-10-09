@@ -21,6 +21,7 @@ const (
 	interactiveEnv = prefixKey + "INTERACTIVE"
 	readOnlyEnv    = prefixKey + "READONLY"
 	fieldTOTPEnv   = prefixKey + "TOTP"
+	clipBaseEnv    = prefixKey + "CLIP_"
 	formatTOTPEnv  = fieldTOTPEnv + "_FORMAT"
 	keyModeEnv     = prefixKey + "KEYMODE"
 	keyEnv         = prefixKey + "KEY"
@@ -31,9 +32,13 @@ const (
 	// StoreEnv is the location of the filesystem store that lb is operating on.
 	StoreEnv = prefixKey + "STORE"
 	// ClipMaxEnv is the max time a value should be stored in the clipboard.
-	ClipMaxEnv = prefixKey + "CLIPMAX"
+	ClipMaxEnv = clipBaseEnv + "MAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
+	// ClipPasteEnv allows overriding the clipboard paste command
+	ClipPasteEnv = clipBaseEnv + "PASTE"
+	// ClipCopyEnv allows overriding the clipboard copy command
+	ClipCopyEnv = clipBaseEnv + "COPY"
 )
 
 // EnvOrDefault will get the environment value OR default if env is not set.

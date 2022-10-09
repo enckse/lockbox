@@ -7,8 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/google/shlex"
 )
 
 const (
@@ -24,19 +26,7 @@ type (
 	}
 )
 
-// NewClipboard will retrieve the commands to use for clipboard operations.
-func NewClipboard() (Clipboard, error) {
-	noClip, err := inputs.IsNoClipEnabled()
-	if err != nil {
-		return Clipboard{}, err
-	}
-	if noClip {
-		return Clipboard{}, errors.New("clipboard is off")
-	}
-	sys, err := NewPlatform()
-	if err != nil {
-		return Clipboard{}, err
-	}
+func newClipboard(copying, pasting []string) (Clipboard, error) {
 	max := maxTime
 	useMax := os.Getenv(inputs.ClipMaxEnv)
 	if useMax != "" {
@@ -49,6 +39,42 @@ func NewClipboard() (Clipboard, error) {
 		}
 		max = i
 	}
+	return Clipboard{copying: copying, pasting: pasting, MaxTime: max}, nil
+}
+
+func overrideCommand(v string) ([]string, error) {
+	value := inputs.EnvOrDefault(v, "")
+	if strings.TrimSpace(value) == "" {
+		return nil, nil
+	}
+	return shlex.Split(value)
+}
+
+// NewClipboard will retrieve the commands to use for clipboard operations.
+func NewClipboard() (Clipboard, error) {
+	noClip, err := inputs.IsNoClipEnabled()
+	if err != nil {
+		return Clipboard{}, err
+	}
+	if noClip {
+		return Clipboard{}, errors.New("clipboard is off")
+	}
+	overridePaste, err := overrideCommand(inputs.ClipPasteEnv)
+	if err != nil {
+		return Clipboard{}, err
+	}
+	overrideCopy, err := overrideCommand(inputs.ClipCopyEnv)
+	if err != nil {
+		return Clipboard{}, err
+	}
+	if overrideCopy != nil && overridePaste != nil {
+		return newClipboard(overrideCopy, overridePaste)
+	}
+	sys, err := NewPlatform()
+	if err != nil {
+		return Clipboard{}, err
+	}
+
 	var copying []string
 	var pasting []string
 	switch sys {
@@ -67,7 +93,13 @@ func NewClipboard() (Clipboard, error) {
 	default:
 		return Clipboard{}, errors.New("clipboard is unavailable")
 	}
-	return Clipboard{copying: copying, pasting: pasting, MaxTime: max}, nil
+	if overridePaste != nil {
+		pasting = overridePaste
+	}
+	if overrideCopy != nil {
+		copying = overrideCopy
+	}
+	return newClipboard(copying, pasting)
 }
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
