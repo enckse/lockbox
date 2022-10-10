@@ -17,6 +17,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	os.Setenv("LOCKBOX_STORE", "test.kdbx")
 	os.Setenv("LOCKBOX_KEY", "test")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	os.Setenv("LOCKBOX_TOTP", "totp")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -33,6 +34,14 @@ func TestNoWriteOnRO(t *testing.T) {
 	os.Setenv("LOCKBOX_READONLY", "yes")
 	tr, _ := backend.NewTransaction()
 	if err := tr.Insert("a/a/a", "a"); err.Error() != "unable to alter database in readonly mode" {
+		t.Errorf("wrong error: %v", err)
+	}
+}
+
+func TestBadTOTP(t *testing.T) {
+	tr := setup(t)
+	os.Setenv("LOCKBOX_TOTP", "Title")
+	if err := tr.Insert("a/a/a", "a"); err.Error() != "invalid totp field, uses restricted name" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
