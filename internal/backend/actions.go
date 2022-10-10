@@ -189,7 +189,11 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			field = notesKey
 		}
 		v := src.Value
-		if NewSuffix(dTitle) == NewSuffix(inputs.TOTPToken()) {
+		ok, err := isTOTP(dTitle)
+		if err != nil {
+			return err
+		}
+		if ok {
 			v = inputs.FormatTOTP(v)
 			e.Values = append(e.Values, protectedValue("otp", v))
 		}

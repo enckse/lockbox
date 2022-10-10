@@ -71,3 +71,11 @@ func pathExists(path string) bool {
 	}
 	return true
 }
+
+func isTOTP(title string) (bool, error) {
+	t := inputs.TOTPToken()
+	if t == notesKey || t == passKey || t == titleKey {
+		return false, errors.New("invalid totp field, uses restricted name")
+	}
+	return NewSuffix(title) == NewSuffix(t), nil
+}
