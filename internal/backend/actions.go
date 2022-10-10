@@ -4,7 +4,6 @@ package backend
 import (
 	"errors"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
@@ -154,8 +153,8 @@ func splitComponents(path string) ([]string, string, error) {
 	if len(strings.Split(path, pathSep)) < 2 {
 		return nil, "", errPath
 	}
-	title := filepath.Base(path)
-	parts := strings.Split(filepath.Dir(path), pathSep)
+	title := base(path)
+	parts := strings.Split(directory(path), pathSep)
 	return parts, title, nil
 }
 

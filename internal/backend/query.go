@@ -5,8 +5,6 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -39,7 +37,7 @@ func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.
 		if offset == "" {
 			o = g.Name
 		} else {
-			o = filepath.Join(offset, g.Name)
+			o = NewPath(offset, g.Name)
 		}
 		forEach(o, g.Groups, g.Entries, cb)
 	}
@@ -61,7 +59,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 		forEach("", ctx.db.Content.Root.Groups[0].Groups, ctx.db.Content.Root.Groups[0].Entries, func(offset string, entry gokeepasslib.Entry) {
 			path := getPathName(entry)
 			if offset != "" {
-				path = filepath.Join(offset, path)
+				path = NewPath(offset, path)
 			}
 			if isSort {
 				switch args.Mode {
@@ -119,15 +117,25 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 
 // NewSuffix creates a new user 'name' suffix
 func NewSuffix(name string) string {
-	return fmt.Sprintf("%c%s", os.PathSeparator, name)
+	return fmt.Sprintf("%s%s", pathSep, name)
 }
 
 // NewPath creates a new storage location path.
 func NewPath(segments ...string) string {
-	return filepath.Join(segments...)
+	return strings.Join(segments, pathSep)
 }
 
 // Directory gets the offset location of the entry without the 'name'
 func (e QueryEntity) Directory() string {
-	return filepath.Dir(e.Path)
+	return directory(e.Path)
+}
+
+func base(s string) string {
+	parts := strings.Split(s, pathSep)
+	return parts[len(parts)-1]
+}
+
+func directory(s string) string {
+	parts := strings.Split(s, pathSep)
+	return NewPath(parts[0 : len(parts)-1]...)
 }

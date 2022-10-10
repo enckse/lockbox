@@ -3,7 +3,6 @@ package backend
 
 import (
 	"errors"
-	"os"
 
 	"github.com/tobischo/gokeepasslib/v3"
 )
@@ -65,7 +64,7 @@ const (
 	notesKey = "Notes"
 	titleKey = "Title"
 	passKey  = "Password"
-	pathSep  = string(os.PathSeparator)
+	pathSep  = "/"
 )
 
 var (

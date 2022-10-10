@@ -1,7 +1,6 @@
 package backend_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/backend"
@@ -113,15 +112,27 @@ func TestQueryCallback(t *testing.T) {
 }
 
 func TestEntityDir(t *testing.T) {
-	q := backend.QueryEntity{Path: filepath.Join("abc", "xyz")}
+	q := backend.QueryEntity{Path: backend.NewPath("abc", "xyz")}
 	if q.Directory() != "abc" {
+		t.Error("invalid query directory")
+	}
+	q = backend.QueryEntity{Path: backend.NewPath("abc", "xyz", "111")}
+	if q.Directory() != "abc/xyz" {
+		t.Error("invalid query directory")
+	}
+	q = backend.QueryEntity{Path: ""}
+	if q.Directory() != "" {
+		t.Error("invalid query directory")
+	}
+	q = backend.QueryEntity{Path: backend.NewPath("abc")}
+	if q.Directory() != "" {
 		t.Error("invalid query directory")
 	}
 }
 
 func TestNewPath(t *testing.T) {
 	p := backend.NewPath("abc", "xyz")
-	if p != filepath.Join("abc", "xyz") {
+	if p != backend.NewPath("abc", "xyz") {
 		t.Error("invalid new path")
 	}
 }
