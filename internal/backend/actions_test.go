@@ -85,6 +85,15 @@ func TestInserts(t *testing.T) {
 	if err := setup(t).Insert("tests", "test"); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
+	if err := setup(t).Insert("tests//l", "test"); err.Error() != "unwilling to operate on path with empty segment" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert("tests/", "test"); err.Error() != "path can NOT end with separator" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert("/tests", "test"); err.Error() != "path can NOT be rooted" {
+		t.Errorf("wrong error: %v", err)
+	}
 	if err := setup(t).Insert("test", "test"); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}

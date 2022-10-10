@@ -153,6 +153,15 @@ func splitComponents(path string) ([]string, string, error) {
 	if len(strings.Split(path, pathSep)) < 2 {
 		return nil, "", errPath
 	}
+	if strings.HasPrefix(path, pathSep) {
+		return nil, "", errors.New("path can NOT be rooted")
+	}
+	if strings.HasSuffix(path, pathSep) {
+		return nil, "", errors.New("path can NOT end with separator")
+	}
+	if strings.Contains(path, pathSep+pathSep) {
+		return nil, "", errors.New("unwilling to operate on path with empty segment")
+	}
 	title := base(path)
 	parts := strings.Split(directory(path), pathSep)
 	return parts, title, nil
