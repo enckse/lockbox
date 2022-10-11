@@ -17,6 +17,9 @@ _run() {
     echo "test" | "$BIN/lb" insert keys/k/one
     echo "test" | "$BIN/lb" insert key/a/one
     echo "test" | "$BIN/lb" insert keys/k/one
+    echo "test" | "$BIN/lb" insert keys/k/one/
+    echo "test" | "$BIN/lb" insert /keys/k/one
+    echo "test" | "$BIN/lb" insert keys/aa/b//s///e
     echo -e "test3\ntest4" | "$BIN/lb" insert keys2/k/three
     "$BIN/lb" ls
     yes 2>/dev/null | "$BIN/lb" rm keys/k/one

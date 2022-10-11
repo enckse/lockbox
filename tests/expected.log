@@ -2,6 +2,9 @@
 
 
 
+unable to insert entry (path can NOT end with separator)
+unable to insert entry (path can NOT be rooted)
+unable to insert entry (unwilling to operate on path with empty segment)
 
 key/a/one
 keys/k/one
