@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/google/shlex"
@@ -30,9 +31,8 @@ const (
 	// PlatformEnv is the platform lb is running on.
 	PlatformEnv = prefixKey + "PLATFORM"
 	// StoreEnv is the location of the filesystem store that lb is operating on.
-	StoreEnv = prefixKey + "STORE"
-	// ClipMaxEnv is the max time a value should be stored in the clipboard.
-	ClipMaxEnv = clipBaseEnv + "MAX"
+	StoreEnv   = prefixKey + "STORE"
+	clipMaxEnv = clipBaseEnv + "MAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
 	// ClipPasteEnv allows overriding the clipboard paste command
@@ -53,6 +53,7 @@ const (
 	LinuxXPlatform = "linux-x"
 	// WindowsLinuxPlatform for WSL subsystems
 	WindowsLinuxPlatform = "wsl"
+	defaultMaxClipboard  = 45
 )
 
 var (
@@ -72,6 +73,23 @@ func EnvOrDefault(envKey, defaultValue string) string {
 		return defaultValue
 	}
 	return val
+}
+
+// GetClipboardMax will get max time to keep an entry in the clipboard before clearing
+func GetClipboardMax() (int, error) {
+	max := defaultMaxClipboard
+	useMax := os.Getenv(clipMaxEnv)
+	if useMax != "" {
+		i, err := strconv.Atoi(useMax)
+		if err != nil {
+			return -1, err
+		}
+		if i < 1 {
+			return -1, errors.New("clipboard max time must be greater than 0")
+		}
+		max = i
+	}
+	return max, nil
 }
 
 // GetKey will get the encryption key setup for lb
@@ -214,11 +232,11 @@ func ListEnvironmentVariables(args []string) error {
 	e.printEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs)
 	e.printEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs)
 	e.printEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"})
-	e.printEnvironmentVariable(false, formatTOTPEnv, "", "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", []string{"otpauth//url/%s/args..."})
+	e.printEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", []string{"otpauth//url/%s/args..."})
 	e.printEnvironmentVariable(false, ColorBetweenEnv, "", "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", []string{"start:end,start:end,start:end..."})
 	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform paste command", []string{commandArgsExample})
 	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform copy command", []string{commandArgsExample})
-	e.printEnvironmentVariable(false, ClipMaxEnv, "", "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"})
+	e.printEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"})
 	e.printEnvironmentVariable(false, PlatformEnv, "", "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform})
 	return nil
 }

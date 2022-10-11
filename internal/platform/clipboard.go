@@ -6,15 +6,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/google/shlex"
-)
-
-const (
-	maxTime = 45
 )
 
 type (
@@ -27,17 +22,9 @@ type (
 )
 
 func newClipboard(copying, pasting []string) (Clipboard, error) {
-	max := maxTime
-	useMax := os.Getenv(inputs.ClipMaxEnv)
-	if useMax != "" {
-		i, err := strconv.Atoi(useMax)
-		if err != nil {
-			return Clipboard{}, err
-		}
-		if i < 1 {
-			return Clipboard{}, errors.New("clipboard max time must be greater than 0")
-		}
-		max = i
+	max, err := inputs.GetClipboardMax()
+	if err != nil {
+		return Clipboard{}, err
 	}
 	return Clipboard{copying: copying, pasting: pasting, MaxTime: max}, nil
 }
