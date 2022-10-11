@@ -42,8 +42,32 @@ keys/k/one2
 
 
 
+
+
+
+
 keys/k/one2
 keys/k2/one
 keys/k2/one2
+keys/k2/t1/one
+keys/k2/t1/one2
+keys/k2/t2/one
+keys/k2/t2/one2
+selected entities:
+ keys/k2/t1/one
+ keys/k2/t1/one2
+
+delete entries? (y/N) 
+keys/k/one2
+keys/k2/one
+keys/k2/one2
+keys/k2/t2/one
+keys/k2/t2/one2
+selected entities:
+ keys/k2/one
+ keys/k2/one2
+ keys/k2/t2/one
+ keys/k2/t2/one2
+
 delete entries? (y/N) 
 keys/k/one2

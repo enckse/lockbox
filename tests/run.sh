@@ -45,9 +45,16 @@ _run() {
     "$BIN/lb" ls
     echo "test2" | "$BIN/lb" insert keys/k2/one2
     echo "test" | "$BIN/lb" insert keys/k2/one
+    echo "test2" | "$BIN/lb" insert keys/k2/t1/one2
+    echo "test" | "$BIN/lb" insert keys/k2/t1/one
+    echo "test2" | "$BIN/lb" insert keys/k2/t2/one2
+    echo "test" | "$BIN/lb" insert keys/k2/t2/one
     echo
     "$BIN/lb" ls
-    yes 2>/dev/null | "$BIN/lb" rm keys/k2/*
+    yes 2>/dev/null | "$BIN/lb" rm "keys/k2/t1/*"
+    echo
+    "$BIN/lb" ls
+    yes 2>/dev/null | "$BIN/lb" rm "keys/k2/*"
     echo
     "$BIN/lb" ls
  }

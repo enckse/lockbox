@@ -166,6 +166,11 @@ func run() *programError {
 
 		if len(existings) > 1 {
 			postfixRemove = "ies"
+			fmt.Println("selected entities:")
+			for _, e := range existings {
+				fmt.Printf(" %s\n", e.Path)
+			}
+			fmt.Println("")
 		}
 		if confirm(fmt.Sprintf("delete entr%s", postfixRemove)) {
 			if err := t.RemoveAll(existings); err != nil {
