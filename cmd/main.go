@@ -29,6 +29,7 @@ const (
 	versionCommand = "version"
 	helpCommand    = "help"
 	removeCommand  = "rm"
+	envCommand     = "env"
 )
 
 var (
@@ -45,24 +46,26 @@ type (
 )
 
 func printSubCommand(name, args, desc string) {
-	printCommandText("        ", args, name, desc)
+	printCommandText(args, "            "+name, desc)
 }
 
 func printCommand(name, args, desc string) {
-	printCommandText("  ", args, name, desc)
+	printCommandText(args, name, desc)
 }
 
-func printCommandText(offset, args, name, desc string) {
+func printCommandText(args, name, desc string) {
 	arguments := ""
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
-	fmt.Printf("%s%10s %-10s    %s\n", offset, name, arguments, desc)
+	fmt.Printf("  %10s %-15s    %s\n", name, arguments, desc)
 }
 
 func printUsage() {
 	fmt.Println("lb usage:")
 	printCommand(clipCommand, "entry", "copy the entry's value into the clipboard")
+	printCommand(envCommand, "", "display environment variable information")
+	printSubCommand(inputs.DefaultsCommand, "", "display the default environment values, exclude current settings")
 	printCommand(findCommand, "criteria", "perform a simplistic text search over the entry keys")
 	printCommand(helpCommand, "", "show this usage information")
 	printCommand(insertCommand, "entry", "insert a new entry into the store")
@@ -87,6 +90,8 @@ func internalCallback(name string) callbackFunction {
 		return hashText
 	case clearCommand:
 		return clearClipboard
+	case envCommand:
+		return inputs.ListEnvironmentVariables
 	}
 	return nil
 }

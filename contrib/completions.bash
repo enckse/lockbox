@@ -24,7 +24,7 @@ _lb() {
     fi
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version help ls show totp$readwrite find$clip_enabled"
+        opts="version help ls show env totp$readwrite find$clip_enabled"
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else

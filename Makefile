@@ -2,8 +2,9 @@ DESTDIR :=
 BUILD   := bin/
 TARGET  := $(BUILD)lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
-DOC     := contrib/doc.sections
+DOC     := $(BUILD)doc.text
 MAN     := $(BUILD)lb.man
+DOCTEXT := contrib/doc.sections
 
 .PHONY: $(TESTDIR)
 
@@ -22,8 +23,14 @@ check: $(TARGET) $(TESTDIR)
 clean:
 	rm -rf $(BUILD)
 
+$(DOC): $(TARGET) $(DOCTEXT)
+	@cat $(DOCTEXT) > $(DOC)
+	@echo "[environment variables]" >> $(DOC)
+	@echo >> $(DOC)
+	$(TARGET) env -defaults >> $(DOC)
+
 $(MAN): $(TARGET) $(DOC)
-	help2man --include $(DOC) -h help -v version ./$(TARGET) > $(MAN)
+	help2man --include $(DOC) -h help -v version -o $(MAN) ./$(TARGET)
 
 install:
 	install -Dm755 $(TARGET) $(DESTDIR)bin/lb

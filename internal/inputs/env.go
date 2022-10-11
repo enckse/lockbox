@@ -39,6 +39,21 @@ const (
 	ClipPasteEnv = clipBaseEnv + "PASTE"
 	// ClipCopyEnv allows overriding the clipboard copy command
 	ClipCopyEnv = clipBaseEnv + "COPY"
+	// DefaultsCommand will get the environment values WITHOUT current environment settings
+	DefaultsCommand  = "-defaults"
+	isYes            = "yes"
+	isNo             = "no"
+	defaultTOTPField = "totp"
+)
+
+var (
+	isYesNoArgs = []string{isYes, isNo}
+)
+
+type (
+	environmentOutput struct {
+		showValues bool
+	}
 )
 
 // EnvOrDefault will get the environment value OR default if env is not set.
@@ -98,9 +113,9 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 		return defaultValue, nil
 	}
 	switch value {
-	case "no":
+	case isNo:
 		return false, nil
-	case "yes":
+	case isYes:
 		return true, nil
 	}
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
@@ -128,7 +143,7 @@ func IsInteractive() (bool, error) {
 
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
-	return EnvOrDefault(fieldTOTPEnv, "totp")
+	return EnvOrDefault(fieldTOTPEnv, defaultTOTPField)
 }
 
 // FormatTOTP will format a totp otpauth url
@@ -153,4 +168,48 @@ func FormatTOTP(value string) string {
 		RawQuery: v.Encode(),
 	}
 	return u.String()
+}
+
+func (o environmentOutput) printEnvironmentVariable(required bool, name, val, desc string, allowed []string) {
+	value := val
+	if o.showValues {
+		value = os.Getenv(name)
+	}
+	if len(value) == 0 {
+		value = "(unset)"
+	}
+	fmt.Printf("\n%s\n  %s\n\n  required: %t\n  value: %s\n", name, desc, required, value)
+}
+
+// ListEnvironmentVariables will print information about env variables and potential/set values
+func ListEnvironmentVariables(args []string) error {
+	showValues := true
+	switch len(args) {
+	case 0:
+		break
+	case 1:
+		if args[0] == DefaultsCommand {
+			showValues = false
+		} else {
+			return errors.New("unknown argument")
+		}
+	default:
+		return errors.New("too many arguments")
+	}
+	e := environmentOutput{showValues: showValues}
+	e.printEnvironmentVariable(true, StoreEnv, "", "directory to the database file", nil)
+	e.printEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode})
+	e.printEnvironmentVariable(true, keyEnv, "unset", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), nil)
+	e.printEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs)
+	e.printEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs)
+	e.printEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs)
+	e.printEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs)
+	e.printEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", nil)
+	e.printEnvironmentVariable(false, formatTOTPEnv, "", "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", nil)
+	e.printEnvironmentVariable(false, ColorBetweenEnv, "", "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", nil)
+	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform paste command", nil)
+	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform copy command", nil)
+	e.printEnvironmentVariable(false, ClipMaxEnv, "", "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", nil)
+	e.printEnvironmentVariable(false, PlatformEnv, "", "override the detected platform", nil)
+	return nil
 }
