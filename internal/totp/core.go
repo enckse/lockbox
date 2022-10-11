@@ -18,6 +18,17 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
+const (
+	// ClipCommand is the argument for copying totp codes to clipboard
+	ClipCommand = "-clip"
+	// ShortCommand is the argument for getting the short version of a code
+	ShortCommand = "-short"
+	// ListCommand will list the totp-enabled entries
+	ListCommand = "-list"
+	// OnceCommand will perform like a normal totp request but not refresh
+	OnceCommand = "-once"
+)
+
 type (
 	colorWhen struct {
 		start int
@@ -237,9 +248,9 @@ func Call(args []string) error {
 
 func parseArgs(arg string) arguments {
 	args := arguments{}
-	args.Clip = arg == "-clip"
-	args.Once = arg == "-once"
-	args.Short = arg == "-short"
-	args.List = arg == "-list"
+	args.Clip = arg == ClipCommand
+	args.Once = arg == OnceCommand
+	args.Short = arg == ShortCommand
+	args.List = arg == ListCommand
 	return args
 }

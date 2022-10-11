@@ -16,6 +16,21 @@ import (
 	"github.com/enckse/lockbox/internal/totp"
 )
 
+const (
+	totpCommand    = "totp"
+	hashCommand    = "hash"
+	clearCommand   = "clear"
+	clipCommand    = "clip"
+	findCommand    = "find"
+	insertCommand  = "insert"
+	listCommand    = "ls"
+	moveCommand    = "mv"
+	showCommand    = "show"
+	versionCommand = "version"
+	helpCommand    = "help"
+	removeCommand  = "rm"
+)
+
 var (
 	//go:embed "vers.txt"
 	version string
@@ -29,13 +44,44 @@ type (
 	}
 )
 
+func printSubCommand(name, desc string) {
+	printCommandText("        ", name, desc)
+}
+
+func printCommand(name, desc string) {
+	printCommandText("  ", name, desc)
+}
+
+func printCommandText(offset, name, desc string) {
+	fmt.Printf("%s%10s    %s\n", offset, name, desc)
+}
+
+func printUsage() {
+	fmt.Println("lb usage:")
+	printCommand(clipCommand, "copy the entry's value into the clipboard")
+	printCommand(findCommand, "perform a simplistic text search over the entry keys")
+	printCommand(helpCommand, "show this usage information")
+	printCommand(insertCommand, "insert a new entry into the store")
+	printCommand(listCommand, "list entries")
+	printCommand(moveCommand, "move an entry from one location to another with the store")
+	printCommand(removeCommand, "remove an entry from the store")
+	printCommand(showCommand, "show the entry's value")
+	printCommand(totpCommand, "display an updating totp generated code")
+	printSubCommand(totp.ClipCommand, "copy totp code to clipboard")
+	printSubCommand(totp.ListCommand, "list entries with totp settings")
+	printSubCommand(totp.OnceCommand, "display the first generated code")
+	printSubCommand(totp.ShortCommand, "display the first generated code with no details")
+	printCommand(versionCommand, "display version information")
+	os.Exit(0)
+}
+
 func internalCallback(name string) callbackFunction {
 	switch name {
-	case "totp":
+	case totpCommand:
 		return totp.Call
-	case "hash":
+	case hashCommand:
 		return hashText
-	case "clear":
+	case clearCommand:
 		return clearClipboard
 	}
 	return nil
@@ -71,10 +117,10 @@ func run() *programError {
 	}
 	command := args[1]
 	switch command {
-	case "ls", "find":
+	case listCommand, findCommand:
 		opts := backend.QueryOptions{}
 		opts.Mode = backend.ListMode
-		if command == "find" {
+		if command == findCommand {
 			opts.Mode = backend.FindMode
 			if len(args) < 3 {
 				return newError("find requires an argument to search for", errors.New("search term required"))
@@ -88,9 +134,9 @@ func run() *programError {
 		for _, f := range e {
 			fmt.Println(f.Path)
 		}
-	case "version":
+	case versionCommand:
 		fmt.Printf("version: %s\n", strings.TrimSpace(version))
-	case "mv":
+	case moveCommand:
 		if len(args) != 4 {
 			return newError("mv requires src and dst", errors.New("src/dst required"))
 		}
@@ -115,7 +161,7 @@ func run() *programError {
 		if err := t.Move(*srcExists, dst); err != nil {
 			return newError("unable to move object", err)
 		}
-	case "insert":
+	case insertCommand:
 		multi := false
 		idx := 2
 		switch len(args) {
@@ -153,7 +199,7 @@ func run() *programError {
 			return newError("failed to insert", err)
 		}
 		fmt.Println("")
-	case "rm":
+	case removeCommand:
 		if len(args) != 3 {
 			return newError("rm requires a single entry", errors.New("missing argument"))
 		}
@@ -177,13 +223,13 @@ func run() *programError {
 				return newError("unable to remove entry", err)
 			}
 		}
-	case "show", "clip":
+	case showCommand, clipCommand:
 		if len(args) != 3 {
 			return newError("requires a single entry", fmt.Errorf("%s missing argument", command))
 		}
 		entry := args[2]
 		clipboard := platform.Clipboard{}
-		isShow := command == "show"
+		isShow := command == showCommand
 		if !isShow {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
@@ -204,6 +250,8 @@ func run() *programError {
 		if err := clipboard.CopyTo(existing.Value); err != nil {
 			return newError("clipboard failed", err)
 		}
+	case helpCommand:
+		printUsage()
 	default:
 		if len(args) < 2 {
 			return newError("command missing required arguments", fmt.Errorf("%s missing argument", command))
