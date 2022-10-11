@@ -25,8 +25,8 @@ clean:
 
 $(DOC): $(TARGET) $(DOCTEXT)
 	@cat $(DOCTEXT) > $(DOC)
-	@echo "[environment variables]" >> $(DOC)
 	@echo >> $(DOC)
+	@echo "[environment variables]" >> $(DOC)
 	$(TARGET) env -defaults >> $(DOC)
 
 $(MAN): $(TARGET) $(DOC)

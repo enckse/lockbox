@@ -208,7 +208,7 @@ func ListEnvironmentVariables(args []string) error {
 	e := environmentOutput{showValues: showValues}
 	e.printEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"})
 	e.printEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode})
-	e.printEnvironmentVariable(true, keyEnv, "unset", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"})
+	e.printEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"})
 	e.printEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs)
 	e.printEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs)
 	e.printEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs)
