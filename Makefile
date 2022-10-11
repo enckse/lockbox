@@ -2,6 +2,8 @@ DESTDIR :=
 BUILD   := bin/
 TARGET  := $(BUILD)lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
+DOC     := contrib/doc.sections
+MAN     := $(BUILD)lb.man
 
 .PHONY: $(TESTDIR)
 
@@ -20,8 +22,8 @@ check: $(TARGET) $(TESTDIR)
 clean:
 	rm -rf $(BUILD)
 
-man: $(TARGET)
-	help2man --include contrib/doc.sections -h help -v version ./$(TARGET) > $(BUILD)lb.man
+$(MAN): $(TARGET) $(DOC)
+	help2man --include $(DOC) -h help -v version ./$(TARGET) > $(MAN)
 
 install:
 	install -Dm755 $(TARGET) $(DESTDIR)bin/lb

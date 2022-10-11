@@ -6,3 +6,46 @@ still be required for removal (matching entries will be listed)
 lb rm path/to/leave/dir/*
 
 lb rm path/to/*
+
+[clipboard]
+By default clipboard commands are detected via determing the platform and utilizing default
+commands to interact with (copy to/paste to) the clipboard. These settings can be overriden
+via environment variables
+
+[totp]
+By default lb tries to use some reasonable defaults to setup/manage oauth token inputs and
+displaying of code outputs. Many of these settings can be changed via environment variables
+
+[environment variables]
+Most of lb is managed by using environment variables, the following environment
+variables are REQUIRED for lb to operate:
+
+[required environment variables]
+- LOCKBOX_STORE (unset) directory to the database
+
+- LOCKBOX_KEYMODE (command) how to retrieve the database store password, can be 'plaintext' or 'command'
+
+- LOCKBOX_KEY (unset) the database key (plaintext) or shell command to run (command) to retrieve the database password
+
+[additional environment variables]
+- LOCKBOX_NOCLIP (no) disable clipboard operations, 'yes'/'no'
+
+- LOCKBOX_NOCOLOR (no) disable terminal colors, 'yes/no'
+
+- LOCKBOX_INTERACTIVE (yes) enable interactive mode, 'yes/no'
+
+- LOCKBOX_READONLY (no) operate in readonly mode, 'yes/no'
+
+- LOCKBOX_TOTP (totp) attribute name to store TOTP tokens
+
+- LOCKBOX_TOTP_FORMAT (unset) override the otpauth url used to store totp tokens
+ 
+- LOCKBOX_TOTP_BETWEEN (unset) override when to set totp generated outputs to different colors
+
+- LOCKBOX_CLIP_PASTE (unset) override the detected platform paste command
+
+- LOCKBOX_CLIP_COPY (unset) override the detected platform clip command
+
+- LOCKBOX_CLIP_MAX (unset) override the amount of time before totp clears the clipboard
+
+- LOCKBOX_PLATFORM (unset) override the detected platform
