@@ -36,16 +36,16 @@ variables are REQUIRED for lb to operate:
 
 - LOCKBOX_READONLY (no) operate in readonly mode, 'yes/no'
 
-- LOCKBOX_TOTP (totp) attribute name to store TOTP tokens
+- LOCKBOX_TOTP (totp) attribute name to store TOTP tokens within the database
 
-- LOCKBOX_TOTP_FORMAT (unset) override the otpauth url used to store totp tokens
+- LOCKBOX_TOTP_FORMAT (unset) override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code
  
-- LOCKBOX_TOTP_BETWEEN (unset) override when to set totp generated outputs to different colors
+- LOCKBOX_TOTP_BETWEEN (unset) override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each).
 
 - LOCKBOX_CLIP_PASTE (unset) override the detected platform paste command
 
 - LOCKBOX_CLIP_COPY (unset) override the detected platform clip command
 
-- LOCKBOX_CLIP_MAX (unset) override the amount of time before totp clears the clipboard
+- LOCKBOX_CLIP_MAX (unset) override the amount of time before totp clears the clipboard (e.g. 10), must be an integer
 
 - LOCKBOX_PLATFORM (unset) override the detected platform
