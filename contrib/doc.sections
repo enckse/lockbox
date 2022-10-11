@@ -15,3 +15,7 @@ via environment variables
 [totp]
 By default lb tries to use some reasonable defaults to setup/manage oauth token inputs and
 displaying of code outputs. Many of these settings can be changed via environment variables
+
+[environment variables]
+
+The following environment variables can alter how lb works
