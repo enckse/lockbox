@@ -20,5 +20,8 @@ check: $(TARGET) $(TESTDIR)
 clean:
 	rm -rf $(BUILD)
 
+man: $(TARGET)
+	help2man --include contrib/doc.sections -h help -v version ./$(TARGET) > $(BUILD)lb.man
+
 install:
 	install -Dm755 $(TARGET) $(DESTDIR)bin/lb

@@ -44,34 +44,38 @@ type (
 	}
 )
 
-func printSubCommand(name, desc string) {
-	printCommandText("        ", name, desc)
+func printSubCommand(name, args, desc string) {
+	printCommandText("        ", args, name, desc)
 }
 
-func printCommand(name, desc string) {
-	printCommandText("  ", name, desc)
+func printCommand(name, args, desc string) {
+	printCommandText("  ", args, name, desc)
 }
 
-func printCommandText(offset, name, desc string) {
-	fmt.Printf("%s%10s    %s\n", offset, name, desc)
+func printCommandText(offset, args, name, desc string) {
+	arguments := ""
+	if len(args) > 0 {
+		arguments = fmt.Sprintf("[%s]", args)
+	}
+	fmt.Printf("%s%10s %-10s    %s\n", offset, name, arguments, desc)
 }
 
 func printUsage() {
 	fmt.Println("lb usage:")
-	printCommand(clipCommand, "copy the entry's value into the clipboard")
-	printCommand(findCommand, "perform a simplistic text search over the entry keys")
-	printCommand(helpCommand, "show this usage information")
-	printCommand(insertCommand, "insert a new entry into the store")
-	printCommand(listCommand, "list entries")
-	printCommand(moveCommand, "move an entry from one location to another with the store")
-	printCommand(removeCommand, "remove an entry from the store")
-	printCommand(showCommand, "show the entry's value")
-	printCommand(totpCommand, "display an updating totp generated code")
-	printSubCommand(totp.ClipCommand, "copy totp code to clipboard")
-	printSubCommand(totp.ListCommand, "list entries with totp settings")
-	printSubCommand(totp.OnceCommand, "display the first generated code")
-	printSubCommand(totp.ShortCommand, "display the first generated code with no details")
-	printCommand(versionCommand, "display version information")
+	printCommand(clipCommand, "entry", "copy the entry's value into the clipboard")
+	printCommand(findCommand, "criteria", "perform a simplistic text search over the entry keys")
+	printCommand(helpCommand, "", "show this usage information")
+	printCommand(insertCommand, "entry", "insert a new entry into the store")
+	printCommand(listCommand, "", "list entries")
+	printCommand(moveCommand, "src dst", "move an entry from one location to another with the store")
+	printCommand(removeCommand, "entry", "remove an entry from the store")
+	printCommand(showCommand, "entry", "show the entry's value")
+	printCommand(totpCommand, "entry", "display an updating totp generated code")
+	printSubCommand(totp.ClipCommand, "entry", "copy totp code to clipboard")
+	printSubCommand(totp.ListCommand, "", "list entries with totp settings")
+	printSubCommand(totp.OnceCommand, "entry", "display the first generated code")
+	printSubCommand(totp.ShortCommand, "entry", "display the first generated code with no details")
+	printCommand(versionCommand, "", "display version information")
 	os.Exit(0)
 }
 
