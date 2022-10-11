@@ -17,13 +17,13 @@ type (
 
 const (
 	// MacOS based systems.
-	MacOS System = "macos"
+	MacOS System = inputs.MacOSPlatform
 	// LinuxWayland running Wayland.
-	LinuxWayland System = "linux-wayland"
+	LinuxWayland System = inputs.LinuxWaylandPlatform
 	// LinuxX running X.
-	LinuxX System = "linux-x"
+	LinuxX System = inputs.LinuxXPlatform
 	// WindowsLinux with WSL.
-	WindowsLinux System = "wsl"
+	WindowsLinux System = inputs.WindowsLinuxPlatform
 	// Unknown platform.
 	Unknown = ""
 )

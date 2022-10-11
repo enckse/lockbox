@@ -40,10 +40,19 @@ const (
 	// ClipCopyEnv allows overriding the clipboard copy command
 	ClipCopyEnv = clipBaseEnv + "COPY"
 	// DefaultsCommand will get the environment values WITHOUT current environment settings
-	DefaultsCommand  = "-defaults"
-	isYes            = "yes"
-	isNo             = "no"
-	defaultTOTPField = "totp"
+	DefaultsCommand    = "-defaults"
+	isYes              = "yes"
+	isNo               = "no"
+	defaultTOTPField   = "totp"
+	commandArgsExample = "[cmd args...]"
+	// MacOSPlatform is the macos indicator for platform
+	MacOSPlatform = "macos"
+	// LinuxWaylandPlatform for linux+wayland
+	LinuxWaylandPlatform = "linux-wayland"
+	// LinuxXPlatform for linux+X
+	LinuxXPlatform = "linux-x"
+	// WindowsLinuxPlatform for WSL subsystems
+	WindowsLinuxPlatform = "wsl"
 )
 
 var (
@@ -178,7 +187,7 @@ func (o environmentOutput) printEnvironmentVariable(required bool, name, val, de
 	if len(value) == 0 {
 		value = "(unset)"
 	}
-	fmt.Printf("\n%s\n  %s\n\n  required: %t\n  value: %s\n", name, desc, required, value)
+	fmt.Printf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", name, desc, required, value, strings.Join(allowed, "|"))
 }
 
 // ListEnvironmentVariables will print information about env variables and potential/set values
@@ -197,19 +206,19 @@ func ListEnvironmentVariables(args []string) error {
 		return errors.New("too many arguments")
 	}
 	e := environmentOutput{showValues: showValues}
-	e.printEnvironmentVariable(true, StoreEnv, "", "directory to the database file", nil)
+	e.printEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"})
 	e.printEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode})
-	e.printEnvironmentVariable(true, keyEnv, "unset", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), nil)
+	e.printEnvironmentVariable(true, keyEnv, "unset", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"})
 	e.printEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs)
 	e.printEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs)
 	e.printEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs)
 	e.printEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs)
-	e.printEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", nil)
-	e.printEnvironmentVariable(false, formatTOTPEnv, "", "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", nil)
-	e.printEnvironmentVariable(false, ColorBetweenEnv, "", "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", nil)
-	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform paste command", nil)
-	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform copy command", nil)
-	e.printEnvironmentVariable(false, ClipMaxEnv, "", "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", nil)
-	e.printEnvironmentVariable(false, PlatformEnv, "", "override the detected platform", nil)
+	e.printEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"})
+	e.printEnvironmentVariable(false, formatTOTPEnv, "", "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", []string{"otpauth//url/%s/args..."})
+	e.printEnvironmentVariable(false, ColorBetweenEnv, "", "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", []string{"start:end,start:end,start:end..."})
+	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform paste command", []string{commandArgsExample})
+	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform copy command", []string{commandArgsExample})
+	e.printEnvironmentVariable(false, ClipMaxEnv, "", "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"})
+	e.printEnvironmentVariable(false, PlatformEnv, "", "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform})
 	return nil
 }
