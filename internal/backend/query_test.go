@@ -14,6 +14,44 @@ func setupInserts(t *testing.T) {
 	fullSetup(t, true).Insert("test/test/abc1ak", "atest")
 }
 
+func TestMatchPath(t *testing.T) {
+	setupInserts(t)
+	q, err := fullSetup(t, true).MatchPath("test/test/abc")
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(q) != 1 {
+		t.Error("invalid entity result")
+	}
+	if q[0].Path != "test/test/abc" || q[0].Value != "" {
+		t.Error("invalid query result")
+	}
+	q, err = fullSetup(t, true).MatchPath("test/test/abcxxx")
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(q) != 0 {
+		t.Error("invalid entity result")
+	}
+	q, err = fullSetup(t, true).MatchPath("test/test/*")
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(q) != 4 {
+		t.Error("invalid entity result")
+	}
+	if _, err := fullSetup(t, true).MatchPath("test/test//*"); err.Error() != "invalid match criteria, too many path separators" {
+		t.Errorf("wrong error: %v", err)
+	}
+	q, err = fullSetup(t, true).MatchPath("test/test*")
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(q) != 0 {
+		t.Error("invalid entity result")
+	}
+}
+
 func TestGet(t *testing.T) {
 	setupInserts(t)
 	q, err := fullSetup(t, true).Get("test/test/abc", backend.BlankValue)
