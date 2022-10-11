@@ -158,15 +158,19 @@ func run() *programError {
 			return newError("rm requires a single entry", errors.New("missing argument"))
 		}
 		deleting := args[2]
-		existing, err := t.Get(deleting, backend.BlankValue)
+		postfixRemove := "y"
+		existings, err := t.MatchPath(deleting)
 		if err != nil {
 			return newError("unable to get entity to delete", err)
 		}
-		if confirm("delete entry") {
-			if err := t.Remove(existing); err != nil {
+
+		if len(existings) > 1 {
+			postfixRemove = "ies"
+		}
+		if confirm(fmt.Sprintf("delete entr%s", postfixRemove)) {
+			if err := t.RemoveAll(existings); err != nil {
 				return newError("unable to remove entry", err)
 			}
-
 		}
 	case "show", "clip":
 		if len(args) != 3 {

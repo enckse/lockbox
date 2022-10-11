@@ -43,6 +43,13 @@ _run() {
     yes 2>/dev/null | "$BIN/lb" rm keyx/d/e
     echo
     "$BIN/lb" ls
-}
+    echo "test2" | "$BIN/lb" insert keys/k2/one2
+    echo "test" | "$BIN/lb" insert keys/k2/one
+    echo
+    "$BIN/lb" ls
+    yes 2>/dev/null | "$BIN/lb" rm keys/k2/*
+    echo
+    "$BIN/lb" ls
+ }
 
 _run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $TESTS/actual.log

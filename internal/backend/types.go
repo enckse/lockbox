@@ -49,6 +49,8 @@ const (
 	ExactMode
 	// SuffixMode will look for an entity ending in a specific value
 	SuffixMode
+	// PrefixMode allows for entities starting with a specific value
+	PrefixMode
 )
 
 const (
@@ -65,6 +67,7 @@ const (
 	titleKey = "Title"
 	passKey  = "Password"
 	pathSep  = "/"
+	isGlob   = pathSep + "*"
 )
 
 var (

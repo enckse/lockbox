@@ -217,18 +217,28 @@ func (t *Transaction) Insert(path, val string) error {
 	return t.Move(QueryEntity{Path: path, Value: val}, path)
 }
 
-// Remove handles remove an element
+// Remove will remove a single entity
 func (t *Transaction) Remove(entity *QueryEntity) error {
 	if entity == nil {
 		return errors.New("entity is empty/invalid")
 	}
-	offset, title, err := splitComponents(entity.Path)
-	if err != nil {
-		return err
+	return t.RemoveAll([]QueryEntity{*entity})
+}
+
+// RemoveAll handles removing elements
+func (t *Transaction) RemoveAll(entities []QueryEntity) error {
+	if len(entities) == 0 {
+		return errors.New("no entities given")
 	}
 	return t.change(func(c Context) error {
-		if ok := c.removeEntity(offset, title); !ok {
-			return errors.New("failed to remove entity")
+		for _, entity := range entities {
+			offset, title, err := splitComponents(entity.Path)
+			if err != nil {
+				return err
+			}
+			if ok := c.removeEntity(offset, title); !ok {
+				return errors.New("failed to remove entity")
+			}
 		}
 		return nil
 	})

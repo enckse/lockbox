@@ -184,6 +184,25 @@ func TestRemoves(t *testing.T) {
 	}
 }
 
+func TestRemoveAlls(t *testing.T) {
+	if err := setup(t).RemoveAll(nil); err.Error() != "no entities given" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).RemoveAll([]backend.QueryEntity{}); err.Error() != "no entities given" {
+		t.Errorf("wrong error: %v", err)
+	}
+	setup(t)
+	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
+		fullSetup(t, true).Insert(i, "pass")
+	}
+	if err := fullSetup(t, true).RemoveAll([]backend.QueryEntity{{Path: "test/test/test3"}, {Path: "test/test/test1"}}); err != nil {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {
+		t.Errorf("invalid check: %v", err)
+	}
+}
+
 func check(t *testing.T, checks ...string) error {
 	tr := fullSetup(t, true)
 	for _, c := range checks {

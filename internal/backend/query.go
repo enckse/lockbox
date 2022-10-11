@@ -11,6 +11,25 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
+// MatchPath will try to match 1 or more elements (more elements when globbing)
+func (t *Transaction) MatchPath(path string) ([]QueryEntity, error) {
+	if !strings.HasSuffix(path, isGlob) {
+		e, err := t.Get(path, BlankValue)
+		if err != nil {
+			return nil, err
+		}
+		if e == nil {
+			return nil, nil
+		}
+		return []QueryEntity{*e}, nil
+	}
+	prefix := strings.TrimSuffix(path, isGlob)
+	if strings.HasSuffix(prefix, pathSep) {
+		return nil, errors.New("invalid match criteria, too many path separators")
+	}
+	return t.QueryCallback(QueryOptions{Mode: PrefixMode, Criteria: prefix + pathSep, Values: BlankValue})
+}
+
 // Get will request a singular entity
 func (t *Transaction) Get(path string, mode ValueMode) (*QueryEntity, error) {
 	_, _, err := splitComponents(path)
@@ -69,6 +88,10 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 					}
 				case SuffixMode:
 					if !strings.HasSuffix(path, args.Criteria) {
+						return
+					}
+				case PrefixMode:
+					if !strings.HasPrefix(path, args.Criteria) {
 						return
 					}
 				}

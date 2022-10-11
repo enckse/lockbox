@@ -33,9 +33,17 @@ test/k/totp:
 hash:b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54b70c0acb0428d6db7205101e332f950ffb6b6d643aa37287c6aa5
 delete entry? (y/N) 
 delete entry? (y/N) 
-delete entry? (y/N) unable to remove entry (entity is empty/invalid)
+delete entry? (y/N) unable to remove entry (no entities given)
 
 keys/k/one2
 keyx/d/e
 delete entry? (y/N) 
+keys/k/one2
+
+
+
+keys/k/one2
+keys/k2/one
+keys/k2/one2
+delete entries? (y/N) 
 keys/k/one2
