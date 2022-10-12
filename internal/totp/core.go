@@ -55,8 +55,8 @@ func clear() {
 }
 
 func colorWhenRules() ([]colorWhen, error) {
-	envTime := os.Getenv(inputs.ColorBetweenEnv)
-	if envTime == "" {
+	envTime := inputs.EnvOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
+	if envTime == "" || envTime == inputs.TOTPDefaultBetween {
 		return []colorWhen{
 			{start: 0, end: 5},
 			{start: 30, end: 35},
