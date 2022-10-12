@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -30,10 +29,6 @@ const (
 )
 
 type (
-	colorWhen struct {
-		start int
-		end   int
-	}
 	arguments struct {
 		Clip  bool
 		Once  bool
@@ -54,41 +49,12 @@ func clear() {
 	}
 }
 
-func colorWhenRules() ([]colorWhen, error) {
+func colorWhenRules() ([]inputs.ColorWindow, error) {
 	envTime := inputs.EnvOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
-	if envTime == "" || envTime == inputs.TOTPDefaultBetween {
-		return []colorWhen{
-			{start: 0, end: 5},
-			{start: 30, end: 35},
-		}, nil
+	if envTime == inputs.TOTPDefaultBetween {
+		return inputs.TOTPDefaultColorWindow, nil
 	}
-	var rules []colorWhen
-	for _, item := range strings.Split(envTime, ",") {
-		line := strings.TrimSpace(item)
-		if line == "" {
-			continue
-		}
-		parts := strings.Split(line, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid colorization rule found: %s", line)
-		}
-		s, err := strconv.Atoi(parts[0])
-		if err != nil {
-			return nil, err
-		}
-		e, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return nil, err
-		}
-		if s < 0 || e < 0 || e < s || s > 59 || e > 59 {
-			return nil, fmt.Errorf("invalid time found for colorization rule: %s", line)
-		}
-		rules = append(rules, colorWhen{start: s, end: e})
-	}
-	if len(rules) == 0 {
-		return nil, errors.New("invalid colorization rules for totp, none found")
-	}
-	return rules, nil
+	return inputs.ParseColorWindow(envTime)
 }
 
 func (w totpWrapper) generateCode() (string, error) {
@@ -183,7 +149,7 @@ func display(token string, args arguments) error {
 		startColor := ""
 		endColor := ""
 		for _, when := range colorRules {
-			if left < when.end && left >= when.start {
+			if left < when.End && left >= when.Start {
 				startColor = coloring.Start
 				endColor = coloring.End
 			}
