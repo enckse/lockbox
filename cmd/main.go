@@ -116,6 +116,8 @@ func processInfoCommands(command string, args []string) (bool, error) {
 	switch command {
 	case helpCommand:
 		printUsage()
+	case versionCommand:
+		fmt.Printf("version: %s\n", strings.TrimSpace(version))
 	case envCommand:
 		printValues := true
 		invalid := false
@@ -176,8 +178,6 @@ func run() *programError {
 		for _, f := range e {
 			fmt.Println(f.Path)
 		}
-	case versionCommand:
-		fmt.Printf("version: %s\n", strings.TrimSpace(version))
 	case moveCommand:
 		if len(args) != 4 {
 			return newError("mv requires src and dst", errors.New("src/dst required"))
