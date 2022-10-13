@@ -10,9 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "deps"
-        run: apk add go make bash git
+        run: apk add go make bash git help2man
       - name: "build"
-        run: make
+        run: make build
       - name: "check"
         run: make check
 

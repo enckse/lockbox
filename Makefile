@@ -10,6 +10,8 @@ DOCTEXT := contrib/doc.sections
 
 all: $(TARGET)
 
+build: $(TARGET) $(MAN)
+
 $(TARGET): cmd/main.go internal/**/*.go  go.*
 	./contrib/version
 	go build -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/main.go
