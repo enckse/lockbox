@@ -19,7 +19,6 @@ via other tooling if needed.
 
 The following variables must be set to use `lb`
 
-For example set:
 ```
 # the keying object to use to ACTUALLY unlock the passwords (e.g. using a gpg encrypted file with the password inside of it)
 LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
@@ -27,15 +26,7 @@ LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 LOCKBOX_STORE=/Users/alice/.passwords/secrets.kdbx
 ```
 
-In cases where `lb` outputs colored terminal output, this coloring behavior can be disabled:
-```
-LOCKBOX_NOCOLOR="yes"
-```
-
-To disable clipboard _completions_ for bash
-```
-LOCKBOX_NOCLIP="yes"
-```
+The manpage for `lb` includes additional information about options and environment variables
 
 ## usage
 
