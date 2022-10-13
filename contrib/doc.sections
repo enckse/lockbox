@@ -3,7 +3,7 @@ The 'rm' command can handle a simplistic glob if it is at the END of the path.
 This allows for bulk-removal of entries at multiple levels. Confirmation will
 still be required for removal (matching entries will be listed)
 
-lb rm path/to/leave/dir/*
+lb rm path/to/leaf/dir/*
 
 lb rm path/to/*
 
