@@ -54,6 +54,7 @@ const (
 	defaultMaxClipboard  = 45
 	colorWindowDelimiter = ","
 	colorWindowSpan      = ":"
+	detectedValue        = "(detected)"
 )
 
 var (
@@ -269,8 +270,8 @@ func ListEnvironmentVariables(showValues bool) {
 	e.printEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"})
 	e.printEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", []string{"otpauth//url/%s/args..."})
 	e.printEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", []string{"start:end,start:end,start:end..."})
-	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform paste command", []string{commandArgsExample})
-	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform copy command", []string{commandArgsExample})
+	e.printEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample})
+	e.printEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample})
 	e.printEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"})
-	e.printEnvironmentVariable(false, PlatformEnv, "", "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform})
+	e.printEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform})
 }
