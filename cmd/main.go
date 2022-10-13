@@ -65,7 +65,6 @@ func printUsage() {
 	fmt.Println("lb usage:")
 	printCommand(clipCommand, "entry", "copy the entry's value into the clipboard")
 	printCommand(envCommand, "", "display environment variable information")
-	printSubCommand(inputs.DefaultsCommand, "", "display the default environment values, exclude current settings")
 	printCommand(findCommand, "criteria", "perform a simplistic text search over the entry keys")
 	printCommand(helpCommand, "", "show this usage information")
 	printCommand(insertCommand, "entry", "insert a new entry into the store")
@@ -90,8 +89,6 @@ func internalCallback(name string) callbackFunction {
 		return hashText
 	case clearCommand:
 		return clearClipboard
-	case envCommand:
-		return inputs.ListEnvironmentVariables
 	}
 	return nil
 }
@@ -115,16 +112,52 @@ func main() {
 	}
 }
 
+func processInfoCommands(command string, args []string) (bool, error) {
+	switch command {
+	case helpCommand:
+		printUsage()
+	case envCommand:
+		printValues := true
+		invalid := false
+		switch len(args) {
+		case 2:
+			break
+		case 3:
+			if args[2] == "-defaults" {
+				printValues = false
+			} else {
+				invalid = true
+			}
+		default:
+			invalid = true
+		}
+		if invalid {
+			return false, errors.New("invalid argument")
+		}
+		inputs.ListEnvironmentVariables(printValues)
+	default:
+		return false, nil
+	}
+	return true, nil
+}
+
 func run() *programError {
 	args := os.Args
 	if len(args) < 2 {
 		return newError("missing arguments", errors.New("requires subcommand"))
 	}
+	command := args[1]
+	ok, err := processInfoCommands(command, args)
+	if err != nil {
+		return newError("invalid command", err)
+	}
+	if ok {
+		return nil
+	}
 	t, err := backend.NewTransaction()
 	if err != nil {
 		return newError("unable to build transaction model", err)
 	}
-	command := args[1]
 	switch command {
 	case listCommand, findCommand:
 		opts := backend.QueryOptions{}
@@ -259,8 +292,6 @@ func run() *programError {
 		if err := clipboard.CopyTo(existing.Value); err != nil {
 			return newError("clipboard failed", err)
 		}
-	case helpCommand:
-		printUsage()
 	default:
 		if len(args) < 2 {
 			return newError("command missing required arguments", fmt.Errorf("%s missing argument", command))

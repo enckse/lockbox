@@ -38,9 +38,7 @@ const (
 	// ClipPasteEnv allows overriding the clipboard paste command
 	ClipPasteEnv = clipBaseEnv + "PASTE"
 	// ClipCopyEnv allows overriding the clipboard copy command
-	ClipCopyEnv = clipBaseEnv + "COPY"
-	// DefaultsCommand will get the environment values WITHOUT current environment settings
-	DefaultsCommand    = "-defaults"
+	ClipCopyEnv        = clipBaseEnv + "COPY"
 	isYes              = "yes"
 	isNo               = "no"
 	defaultTOTPField   = "totp"
@@ -259,20 +257,7 @@ func (o environmentOutput) printEnvironmentVariable(required bool, name, val, de
 }
 
 // ListEnvironmentVariables will print information about env variables and potential/set values
-func ListEnvironmentVariables(args []string) error {
-	showValues := true
-	switch len(args) {
-	case 0:
-		break
-	case 1:
-		if args[0] == DefaultsCommand {
-			showValues = false
-		} else {
-			return errors.New("unknown argument")
-		}
-	default:
-		return errors.New("too many arguments")
-	}
+func ListEnvironmentVariables(showValues bool) {
 	e := environmentOutput{showValues: showValues}
 	e.printEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"})
 	e.printEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode})
@@ -288,5 +273,4 @@ func ListEnvironmentVariables(args []string) error {
 	e.printEnvironmentVariable(false, ClipPasteEnv, "", "override the detected platform copy command", []string{commandArgsExample})
 	e.printEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"})
 	e.printEnvironmentVariable(false, PlatformEnv, "", "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform})
-	return nil
 }
