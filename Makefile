@@ -33,4 +33,5 @@ $(MAN): $(TARGET) $(DOC)
 	help2man --include $(DOC) -h help -v version -o $(MAN) ./$(TARGET)
 
 install:
+	install -Dm644 $(MAN) $(DESTDIR)share/man/man1/lb.1
 	install -Dm755 $(TARGET) $(DESTDIR)bin/lb
