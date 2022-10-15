@@ -5,6 +5,7 @@ TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 DOC     := $(BUILD)doc.text
 MAN     := $(BUILD)lb.man
 DOCTEXT := scripts/doc.sections
+ACTUAL  := $(BUILD)actual.log
 
 .PHONY: $(TESTDIR)
 
@@ -20,7 +21,8 @@ $(TESTDIR):
 	cd $@ && go test
 
 check: $(TARGET) $(TESTDIR)
-	cd tests && make BUILD=../$(BUILD)
+	LB_BUILD=$(TARGET) TEST_DATA=$(BUILD) go run scripts/check.go 2>&1 | sed "s#$(PWD)/$(DATA)##g" | sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$$/XXXXXX/g' > $(ACTUAL)
+	diff -u $(ACTUAL) scripts/tests.expected.log
 
 clean:
 	rm -rf $(BUILD)
@@ -35,3 +37,4 @@ $(MAN): $(TARGET) $(DOC)
 install:
 	install -Dm644 $(MAN) $(DESTDIR)share/man/man1/lb.1
 	install -Dm755 $(TARGET) $(DESTDIR)bin/lb
+

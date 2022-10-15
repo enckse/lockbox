@@ -11,9 +11,7 @@ import (
 )
 
 const (
-	testDir = "bin"
 	testKey = "plaintextkey"
-	binary  = "../bin/lb"
 )
 
 func die(message string, err error) {
@@ -22,7 +20,7 @@ func die(message string, err error) {
 }
 
 func runCommand(args []string, data []string) {
-	p := exec.Command(binary, args...)
+	p := exec.Command(os.Getenv("LB_BUILD"), args...)
 	var buf bytes.Buffer
 	for _, d := range data {
 		if _, err := buf.WriteString(fmt.Sprintf("%s\n", d)); err != nil {
@@ -58,7 +56,7 @@ func totpList() {
 }
 
 func main() {
-	store := filepath.Join(testDir, fmt.Sprintf("%s.kdbx", time.Now().Format("20060102150405")))
+	store := filepath.Join(os.Getenv("TEST_DATA"), fmt.Sprintf("%s.kdbx", time.Now().Format("20060102150405")))
 	os.Setenv("LOCKBOX_STORE", store)
 	os.Setenv("LOCKBOX_KEY", testKey)
 	os.Setenv("LOCKBOX_TOTP", "totp")
