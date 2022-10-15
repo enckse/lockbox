@@ -173,6 +173,13 @@ func run() error {
 			case cli.InsertMultiCommand:
 				multi = true
 			case cli.InsertTOTPCommand:
+				off, err := inputs.IsNoTOTP()
+				if err != nil {
+					return err
+				}
+				if off {
+					return totp.ErrNoTOTP
+				}
 				isTOTP = true
 			default:
 				return errors.New("unknown argument")

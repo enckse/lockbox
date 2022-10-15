@@ -70,6 +70,7 @@ type (
 	Completions struct {
 		Options            []string
 		CanClip            bool
+		CanTOTP            bool
 		ReadOnly           bool
 		InsertCommand      string
 		TOTPShortCommand   string
@@ -136,6 +137,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 	}
 	isReadOnly := false
 	isClip := true
+	isTOTP := true
 	if !defaults {
 		ro, err := inputs.IsReadOnly()
 		if err != nil {
@@ -149,9 +151,17 @@ func BashCompletions(defaults bool) ([]string, error) {
 		if noClip {
 			isClip = false
 		}
+		noTOTP, err := inputs.IsNoTOTP()
+		if err != nil {
+			return nil, err
+		}
+		if noTOTP {
+			isTOTP = false
+		}
 	}
 	c.CanClip = isClip
 	c.ReadOnly = isReadOnly
+	c.CanTOTP = isTOTP
 	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, TOTPCommand, VersionCommand}
 	if c.CanClip {
 		options = append(options, ClipCommand)

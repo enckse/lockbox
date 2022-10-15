@@ -13,18 +13,20 @@ _{{ $.Executable }}() {
             case ${COMP_WORDS[1]} in
 {{ if not $.ReadOnly }}
                 "{{ $.InsertCommand }}")
-                    opts="{{ $.InsertMultiCommand }} {{ $.InsertTOTPCommand }} $({{ $.DoList }})"
+                    opts="{{ $.InsertMultiCommand }}{{ if $.CanTOTP }} {{ $.InsertTOTPCommand }}{{end}} $({{ $.DoList }})"
                     ;;
                 "{{ $.MoveCommand }}")
                     opts=$({{ $.DoList }})
                     ;;
 {{end}}
+{{ if $.CanTOTP }}
                 "{{ $.TOTPCommand }}")
                     opts="{{ $.TOTPShortCommand }} {{ $.TOTPOnceCommand }} "$({{ $.DoTOTPList }})
 {{ if $.CanClip }}
                     opts="$opts {{ $.TOTPClipCommand }}"
 {{end}}
                     ;;
+{{end}}
                 "{{ $.ShowCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
                     opts=$({{ $.DoList }})
                     ;;
@@ -34,7 +36,7 @@ _{{ $.Executable }}() {
             case "${COMP_WORDS[1]}" in
 {{ if not $.ReadOnly }}
                 "{{ $.InsertCommand }}")
-                    if [ "${COMP_WORDS[2]}" == "{{ $.InsertMultiCommand }}" ] || [ "${COMP_WORDS[2]}" == "{{ $.InsertTOTPCommand }}" ]; then
+                    if [ "${COMP_WORDS[2]}" == "{{ $.InsertMultiCommand }}" ] {{ if $.CanTOTP }}|| [ "${COMP_WORDS[2]}" == "{{ $.InsertTOTPCommand }}" ] {{end}}; then
                         opts=$({{ $.DoList }})
                     fi
                     ;;
@@ -42,6 +44,7 @@ _{{ $.Executable }}() {
                     opts=$({{ $.DoList }})
                     ;;
 {{end}}
+{{ if $.CanTOTP }}
                 "{{ $.TOTPCommand }}")
                     needs=0
                     if [ "${COMP_WORDS[2]}" == "{{ $.TOTPOnceCommand }}" ] || [ "${COMP_WORDS[2]}" == "{{ $.TOTPShortCommand }}" ]; then
@@ -57,6 +60,7 @@ _{{ $.Executable }}() {
                         opts=$({{ $.DoTOTPList }})
                     fi
                     ;;
+{{end}}
             esac
         fi
         if [ -n "$opts" ]; then

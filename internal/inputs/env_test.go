@@ -106,6 +106,10 @@ func TestIsReadOnly(t *testing.T) {
 	checkYesNo("LOCKBOX_READONLY", t, inputs.IsReadOnly, false)
 }
 
+func TestIsNoTOTP(t *testing.T) {
+	checkYesNo("LOCKBOX_NOTOTP", t, inputs.IsNoTOTP, false)
+}
+
 func TestIsNoClip(t *testing.T) {
 	checkYesNo("LOCKBOX_NOCLIP", t, inputs.IsNoClipEnabled, false)
 }
@@ -146,7 +150,7 @@ func TestGetKey(t *testing.T) {
 
 func TestListVariables(t *testing.T) {
 	vars := inputs.ListEnvironmentVariables(false)
-	if len(vars) != 14 {
+	if len(vars) != 15 {
 		t.Errorf("invalid env count, outdated? %d", len(vars))
 	}
 }

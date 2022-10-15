@@ -18,6 +18,11 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
+var (
+	// ErrNoTOTP is used when TOTP is requested BUT is disabled
+	ErrNoTOTP = errors.New("TOTP is disabled")
+)
+
 type (
 	arguments struct {
 		Clip  bool
@@ -171,6 +176,13 @@ func display(token string, args arguments) error {
 
 // Call handles UI for TOTP tokens.
 func Call(args []string) error {
+	off, err := inputs.IsNoTOTP()
+	if err != nil {
+		return err
+	}
+	if off {
+		return ErrNoTOTP
+	}
 	if len(args) > 2 || len(args) < 1 {
 		return errors.New("invalid arguments, subkey and entry required")
 	}

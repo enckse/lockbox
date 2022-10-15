@@ -55,6 +55,7 @@ const (
 	colorWindowDelimiter = ","
 	colorWindowSpan      = ":"
 	detectedValue        = "(detected)"
+	noTOTPEnv            = prefixKey + "NOTOTP"
 )
 
 var (
@@ -197,6 +198,11 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
 }
 
+// IsNoTOTP indicates if TOTP is disabled
+func IsNoTOTP() (bool, error) {
+	return isYesNoEnv(false, noTOTPEnv)
+}
+
 // IsReadOnly indicates to operate in readonly, no writing to file allowed
 func IsReadOnly() (bool, error) {
 	return isYesNoEnv(false, readOnlyEnv)
@@ -275,5 +281,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform}))
+	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, isNo, "disable TOTP integrations", isYesNoArgs))
 	return results
 }
