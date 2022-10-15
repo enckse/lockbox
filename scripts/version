@@ -1,15 +1,14 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 if [ ! -d .git ]; then
     echo "not git controlled"
     exit 0
 fi
 
 _version() {
-    local curr tag minor
     curr=v$(date +%g.%m.)
     tag=$(git describe --tags --abbrev=0)
     minor=00
-    if [[ "$tag" == $curr* ]]; then
+    if echo "$tag" | grep -q "$curr*"; then
         minor=$(echo "$tag" | cut -d '.' -f 3 | sed 's/^0//g')
         minor=$((minor+1))
         if [ $minor -lt 10 ]; then
