@@ -10,22 +10,12 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/backend"
+	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
-)
-
-const (
-	// ClipCommand is the argument for copying totp codes to clipboard
-	ClipCommand = "-clip"
-	// ShortCommand is the argument for getting the short version of a code
-	ShortCommand = "-short"
-	// ListCommand will list the totp-enabled entries
-	ListCommand = "-list"
-	// OnceCommand will perform like a normal totp request but not refresh
-	OnceCommand = "-once"
 )
 
 type (
@@ -214,9 +204,9 @@ func Call(args []string) error {
 
 func parseArgs(arg string) arguments {
 	args := arguments{}
-	args.Clip = arg == ClipCommand
-	args.Once = arg == OnceCommand
-	args.Short = arg == ShortCommand
-	args.List = arg == ListCommand
+	args.Clip = arg == cli.TOTPClipCommand
+	args.Once = arg == cli.TOTPOnceCommand
+	args.Short = arg == cli.TOTPShortCommand
+	args.List = arg == cli.TOTPListCommand
 	return args
 }

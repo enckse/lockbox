@@ -11,26 +11,10 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/backend"
+	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/totp"
-)
-
-const (
-	totpCommand        = "totp"
-	hashCommand        = "hash"
-	clearCommand       = "clear"
-	clipCommand        = "clip"
-	findCommand        = "find"
-	insertCommand      = "insert"
-	listCommand        = "ls"
-	moveCommand        = "mv"
-	showCommand        = "show"
-	versionCommand     = "version"
-	helpCommand        = "help"
-	removeCommand      = "rm"
-	envCommand         = "env"
-	insertMultiCommand = "-multi"
 )
 
 var (
@@ -42,49 +26,13 @@ type (
 	callbackFunction func([]string) error
 )
 
-func printSubCommand(parent, name, args, desc string) {
-	printCommandText(args, fmt.Sprintf("%s %s", parent, name), desc)
-}
-
-func printCommand(name, args, desc string) {
-	printCommandText(args, name, desc)
-}
-
-func printCommandText(args, name, desc string) {
-	arguments := ""
-	if len(args) > 0 {
-		arguments = fmt.Sprintf("[%s]", args)
-	}
-	fmt.Printf("  %-15s %-10s    %s\n", name, arguments, desc)
-}
-
-func printUsage() {
-	fmt.Println("lb usage:")
-	printCommand(clipCommand, "entry", "copy the entry's value into the clipboard")
-	printCommand(envCommand, "", "display environment variable information")
-	printCommand(findCommand, "criteria", "perform a simplistic text search over the entry keys")
-	printCommand(helpCommand, "", "show this usage information")
-	printCommand(insertCommand, "entry", "insert a new entry into the store")
-	printSubCommand(insertCommand, insertMultiCommand, "entry", "insert a multi-line entry")
-	printCommand(listCommand, "", "list entries")
-	printCommand(moveCommand, "src dst", "move an entry from one location to another with the store")
-	printCommand(removeCommand, "entry", "remove an entry from the store")
-	printCommand(showCommand, "entry", "show the entry's value")
-	printCommand(totpCommand, "entry", "display an updating totp generated code")
-	printSubCommand(totpCommand, totp.ClipCommand, "entry", "copy totp code to clipboard")
-	printSubCommand(totpCommand, totp.ListCommand, "", "list entries with totp settings")
-	printSubCommand(totpCommand, totp.OnceCommand, "entry", "display the first generated code")
-	printSubCommand(totpCommand, totp.ShortCommand, "entry", "display the first generated code with no details")
-	printCommand(versionCommand, "", "display version information")
-}
-
 func internalCallback(name string) callbackFunction {
 	switch name {
-	case totpCommand:
+	case cli.TOTPCommand:
 		return totp.Call
-	case hashCommand:
+	case cli.HashCommand:
 		return hashText
-	case clearCommand:
+	case cli.ClearCommand:
 		return clearClipboard
 	}
 	return nil
@@ -103,18 +51,18 @@ func main() {
 
 func processInfoCommands(command string, args []string) (bool, error) {
 	switch command {
-	case helpCommand:
-		printUsage()
-	case versionCommand:
+	case cli.HelpCommand:
+		cli.Usage()
+	case cli.VersionCommand:
 		fmt.Printf("version: %s\n", strings.TrimSpace(version))
-	case envCommand:
+	case cli.EnvCommand:
 		printValues := true
 		invalid := false
 		switch len(args) {
 		case 2:
 			break
 		case 3:
-			if args[2] == "-defaults" {
+			if args[2] == cli.EnvDefaultsCommand {
 				printValues = false
 			} else {
 				invalid = true
@@ -154,10 +102,10 @@ func run() error {
 		return wrapped("unable to build transaction model", err)
 	}
 	switch command {
-	case listCommand, findCommand:
+	case cli.ListCommand, cli.FindCommand:
 		opts := backend.QueryOptions{}
 		opts.Mode = backend.ListMode
-		if command == findCommand {
+		if command == cli.FindCommand {
 			opts.Mode = backend.FindMode
 			if len(args) < 3 {
 				return errors.New("find requires search term")
@@ -171,7 +119,7 @@ func run() error {
 		for _, f := range e {
 			fmt.Println(f.Path)
 		}
-	case moveCommand:
+	case cli.MoveCommand:
 		if len(args) != 4 {
 			return errors.New("src/dst required for move")
 		}
@@ -196,7 +144,7 @@ func run() error {
 		if err := t.Move(*srcExists, dst); err != nil {
 			return wrapped("unable to move object", err)
 		}
-	case insertCommand:
+	case cli.InsertCommand:
 		multi := false
 		idx := 2
 		switch len(args) {
@@ -204,7 +152,7 @@ func run() error {
 			return errors.New("insert requires an entry")
 		case 3:
 		case 4:
-			if args[2] != insertMultiCommand {
+			if args[2] != cli.InsertMultiCommand {
 				return errors.New("unknown argument")
 			}
 			multi = true
@@ -234,7 +182,7 @@ func run() error {
 			return wrapped("failed to insert", err)
 		}
 		fmt.Println("")
-	case removeCommand:
+	case cli.RemoveCommand:
 		if len(args) != 3 {
 			return errors.New("remove requires an entry")
 		}
@@ -258,13 +206,13 @@ func run() error {
 				return wrapped("unable to remove entry", err)
 			}
 		}
-	case showCommand, clipCommand:
+	case cli.ShowCommand, cli.ClipCommand:
 		if len(args) != 3 {
 			return errors.New("entry required")
 		}
 		entry := args[2]
 		clipboard := platform.Clipboard{}
-		isShow := command == showCommand
+		isShow := command == cli.ShowCommand
 		if !isShow {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
