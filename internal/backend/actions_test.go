@@ -126,6 +126,9 @@ func TestInserts(t *testing.T) {
 	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n"); err != nil {
 		t.Errorf("no error: %v", err)
 	}
+	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "totp"), "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"); err.Error() != "totp tokens can NOT be multi-line" {
+		t.Errorf("wrong error: %v", err)
+	}
 }
 
 func TestRemoves(t *testing.T) {
