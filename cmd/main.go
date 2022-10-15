@@ -40,9 +40,8 @@ var (
 
 type (
 	callbackFunction func([]string) error
-	programError     struct {
+	wrappedError     struct {
 		message string
-		err     error
 	}
 )
 
@@ -94,22 +93,14 @@ func internalCallback(name string) callbackFunction {
 	return nil
 }
 
-func exit(message string, err error) {
-	msg := message
-	if err != nil {
-		msg = fmt.Sprintf("%s (%v)", msg, err)
-	}
-	fmt.Fprintln(os.Stderr, msg)
+func exit(err error) {
+	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
-}
-
-func newError(message string, err error) *programError {
-	return &programError{message: message, err: err}
 }
 
 func main() {
 	if err := run(); err != nil {
-		exit(err.message, err.err)
+		exit(err)
 	}
 }
 
@@ -144,22 +135,30 @@ func processInfoCommands(command string, args []string) (bool, error) {
 	return true, nil
 }
 
-func run() *programError {
+func wrapped(message string, err error) wrappedError {
+	return wrappedError{message: fmt.Sprintf("%s (%v)", message, err)}
+}
+
+func (w wrappedError) Error() string {
+	return w.message
+}
+
+func run() error {
 	args := os.Args
 	if len(args) < 2 {
-		return newError("missing arguments", errors.New("requires subcommand"))
+		return errors.New("requires subcommand")
 	}
 	command := args[1]
 	ok, err := processInfoCommands(command, args)
 	if err != nil {
-		return newError("invalid command", err)
+		return err
 	}
 	if ok {
 		return nil
 	}
 	t, err := backend.NewTransaction()
 	if err != nil {
-		return newError("unable to build transaction model", err)
+		return wrapped("unable to build transaction model", err)
 	}
 	switch command {
 	case listCommand, findCommand:
@@ -168,33 +167,33 @@ func run() *programError {
 		if command == findCommand {
 			opts.Mode = backend.FindMode
 			if len(args) < 3 {
-				return newError("find requires an argument to search for", errors.New("search term required"))
+				return errors.New("find requires search term")
 			}
 			opts.Criteria = args[2]
 		}
 		e, err := t.QueryCallback(opts)
 		if err != nil {
-			return newError("unable to list files", err)
+			return wrapped("unable to list files", err)
 		}
 		for _, f := range e {
 			fmt.Println(f.Path)
 		}
 	case moveCommand:
 		if len(args) != 4 {
-			return newError("mv requires src and dst", errors.New("src/dst required"))
+			return errors.New("src/dst required for move")
 		}
 		src := args[2]
 		dst := args[3]
 		srcExists, err := t.Get(src, backend.SecretValue)
 		if err != nil {
-			return newError("unable to get source object", errors.New("failed to get source"))
+			return errors.New("unable to get source entry")
 		}
 		if srcExists == nil {
-			return newError("no source object found", errors.New("source object required"))
+			return errors.New("no source object found")
 		}
 		dstExists, err := t.Get(dst, backend.BlankValue)
 		if err != nil {
-			return newError("unable to get destination object", errors.New("failed to get destination"))
+			return errors.New("unable to get destination object")
 		}
 		if dstExists != nil {
 			if !confirm("overwrite destination") {
@@ -202,29 +201,29 @@ func run() *programError {
 			}
 		}
 		if err := t.Move(*srcExists, dst); err != nil {
-			return newError("unable to move object", err)
+			return wrapped("unable to move object", err)
 		}
 	case insertCommand:
 		multi := false
 		idx := 2
 		switch len(args) {
 		case 2:
-			return newError("insert missing required arguments", errors.New("entry required"))
+			return errors.New("insert requires an entry")
 		case 3:
 		case 4:
 			if args[2] != insertMultiCommand {
-				return newError("unknown argument", errors.New("invalid command"))
+				return errors.New("unknown argument")
 			}
 			multi = true
 			idx = 3
 		default:
-			return newError("too many arguments", errors.New("insert can only perform one operation"))
+			return errors.New("too many arguments")
 		}
 		isPipe := inputs.IsInputFromPipe()
 		entry := args[idx]
 		existing, err := t.Get(entry, backend.BlankValue)
 		if err != nil {
-			return newError("unable to insert entry", err)
+			return wrapped("unable to check for existing entry", err)
 		}
 		if existing != nil {
 			if !isPipe {
@@ -235,22 +234,22 @@ func run() *programError {
 		}
 		password, err := inputs.GetUserInputPassword(isPipe, multi)
 		if err != nil {
-			return newError("invalid input", err)
+			return wrapped("invalid input", err)
 		}
 		p := strings.TrimSpace(string(password))
 		if err := t.Insert(entry, p); err != nil {
-			return newError("failed to insert", err)
+			return wrapped("failed to insert", err)
 		}
 		fmt.Println("")
 	case removeCommand:
 		if len(args) != 3 {
-			return newError("rm requires a single entry", errors.New("missing argument"))
+			return errors.New("remove requires an entry")
 		}
 		deleting := args[2]
 		postfixRemove := "y"
 		existings, err := t.MatchPath(deleting)
 		if err != nil {
-			return newError("unable to get entity to delete", err)
+			return wrapped("unable to get entry", err)
 		}
 
 		if len(existings) > 1 {
@@ -263,12 +262,12 @@ func run() *programError {
 		}
 		if confirm(fmt.Sprintf("delete entr%s", postfixRemove)) {
 			if err := t.RemoveAll(existings); err != nil {
-				return newError("unable to remove entry", err)
+				return wrapped("unable to remove entry", err)
 			}
 		}
 	case showCommand, clipCommand:
 		if len(args) != 3 {
-			return newError("requires a single entry", fmt.Errorf("%s missing argument", command))
+			return errors.New("entry required")
 		}
 		entry := args[2]
 		clipboard := platform.Clipboard{}
@@ -276,36 +275,36 @@ func run() *programError {
 		if !isShow {
 			clipboard, err = platform.NewClipboard()
 			if err != nil {
-				return newError("unable to get clipboard", err)
+				return wrapped("unable to get clipboard", err)
 			}
 		}
 		existing, err := t.Get(entry, backend.SecretValue)
 		if err != nil {
-			return newError("unable to get entity", err)
+			return wrapped("unable to get entry", err)
 		}
 		if existing == nil {
-			return newError("entity not found", errors.New("can not find entry"))
+			return errors.New("entry not found")
 		}
 		if isShow {
 			fmt.Println(existing.Value)
 			return nil
 		}
 		if err := clipboard.CopyTo(existing.Value); err != nil {
-			return newError("clipboard failed", err)
+			return wrapped("clipboard operation failed", err)
 		}
 	default:
 		if len(args) < 2 {
-			return newError("command missing required arguments", fmt.Errorf("%s missing argument", command))
+			return errors.New("missing required arguments")
 		}
 		a := args[2:]
 		callback := internalCallback(command)
 		if callback != nil {
 			if err := callback(a); err != nil {
-				return newError(fmt.Sprintf("%s command failure", command), err)
+				return wrapped(fmt.Sprintf("%s command failure", command), err)
 			}
 			return nil
 		}
-		return newError("unknown command", errors.New(command))
+		return fmt.Errorf("unknown command: %s", command)
 	}
 	return nil
 }
@@ -357,7 +356,7 @@ func clearClipboard(args []string) error {
 func confirm(prompt string) bool {
 	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		exit("failed to get response", err)
+		exit(wrapped("failed to get response", err))
 	}
 	return yesNo
 }
