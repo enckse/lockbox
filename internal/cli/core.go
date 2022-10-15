@@ -3,6 +3,7 @@ package cli
 
 import (
 	"fmt"
+	"sort"
 )
 
 const (
@@ -64,7 +65,7 @@ func commandText(args, name, desc string) string {
 
 // Usage return usage information
 func Usage() []string {
-	results := []string{"lb usage"}
+	var results []string
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(FindCommand, "criteria", "perform a simplistic text search over the entry keys"))
@@ -81,5 +82,7 @@ func Usage() []string {
 	results = append(results, subCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code"))
 	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code with no details"))
 	results = append(results, command(VersionCommand, "", "display version information"))
-	return results
+	sort.Strings(results)
+	usage := []string{"lb usage:"}
+	return append(usage, results...)
 }
