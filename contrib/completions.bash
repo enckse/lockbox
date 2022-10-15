@@ -57,8 +57,6 @@ _lb() {
                 "insert")
                     if [ "${COMP_WORDS[2]}" == "-multi" ]; then
                         opts=$(lb ls)
-                    else
-                        opts="-multi"
                     fi
                     ;;
                 "mv")
