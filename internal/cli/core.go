@@ -162,12 +162,15 @@ func BashCompletions(defaults bool) ([]string, error) {
 	c.CanClip = isClip
 	c.ReadOnly = isReadOnly
 	c.CanTOTP = isTOTP
-	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, TOTPCommand, VersionCommand}
+	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand}
 	if c.CanClip {
 		options = append(options, ClipCommand)
 	}
 	if !c.ReadOnly {
 		options = append(options, MoveCommand, RemoveCommand, InsertCommand)
+	}
+	if c.CanTOTP {
+		options = append(options, TOTPCommand)
 	}
 	c.Options = options
 	t, err := template.New("t").Parse(bashCompletions)
