@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		exit(err)
 	}
-	if err := p.Run(os.Args); err != nil {
+	if err := p.Run(os.Args[1:]); err != nil {
 		exit(err)
 	}
 }
