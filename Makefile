@@ -4,7 +4,7 @@ TARGET  := $(BUILD)lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 DOC     := $(BUILD)doc.text
 MAN     := $(BUILD)lb.man
-DOCTEXT := contrib/doc.sections
+DOCTEXT := scripts/doc.sections
 
 .PHONY: $(TESTDIR)
 
@@ -13,7 +13,7 @@ all: $(TARGET)
 build: $(TARGET) $(MAN)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.*
-	./contrib/version
+	./scripts/version
 	go build -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/main.go
 
 $(TESTDIR):
