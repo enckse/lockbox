@@ -12,7 +12,7 @@ all: $(TARGET)
 
 build: $(TARGET) $(MAN)
 
-$(TARGET): cmd/main.go internal/**/*.go  go.*
+$(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 	./scripts/version
 	go build -trimpath -buildmode=pie -mod=readonly -modcacherw -o $@ cmd/main.go
 

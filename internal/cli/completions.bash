@@ -46,8 +46,8 @@ _lb() {
                     needs=0
                     if [ "${COMP_WORDS[2]}" == "{{ $.TOTPOnceCommand }}" ] || [ "${COMP_WORDS[2]}" == "{{ $.TOTPShortCommand }}" ]; then
                         needs=1
-                    else
 {{ if $.CanClip }}
+                    else
                         if [ "${COMP_WORDS[2]}" == "{{ $.TOTPClipCommand }}" ]; then
                             needs=1
                         fi
