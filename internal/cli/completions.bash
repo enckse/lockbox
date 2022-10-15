@@ -1,6 +1,6 @@
-# bash completion for lb                        -*- shell-script -*-
+# {{ $.Executable }} completion
 
-_lb() {
+_{{ $.Executable }}() {
     local cur opts needs
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
@@ -66,4 +66,4 @@ _lb() {
     fi
 }
 
-complete -F _lb -o bashdefault -o default lb
+complete -F _{{ $.Executable }} -o bashdefault -o default {{ $.Executable }}

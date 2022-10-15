@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"text/template"
 
@@ -80,6 +81,7 @@ type (
 		TOTPCommand        string
 		DoTOTPList         string
 		DoList             string
+		Executable         string
 	}
 )
 
@@ -99,13 +101,22 @@ func commandText(args, name, desc string) string {
 	return fmt.Sprintf("  %-15s %-10s    %s", name, arguments, desc)
 }
 
+func exeName() (string, error) {
+	n, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Base(n), nil
+}
+
 // BashCompletions handles creating bash completion outputs
 func BashCompletions(defaults bool) ([]string, error) {
-	exeName, err := os.Executable()
+	name, err := exeName()
 	if err != nil {
 		return nil, err
 	}
 	c := Completions{
+		Executable:         name,
 		InsertCommand:      InsertCommand,
 		RemoveCommand:      RemoveCommand,
 		TOTPShortCommand:   TOTPShortCommand,
@@ -116,8 +127,8 @@ func BashCompletions(defaults bool) ([]string, error) {
 		InsertMultiCommand: InsertMultiCommand,
 		TOTPCommand:        TOTPCommand,
 		MoveCommand:        MoveCommand,
-		DoList:             fmt.Sprintf("%s %s", exeName, ListCommand),
-		DoTOTPList:         fmt.Sprintf("%s %s %s", exeName, TOTPCommand, TOTPListCommand),
+		DoList:             fmt.Sprintf("%s %s", name, ListCommand),
+		DoTOTPList:         fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
 	}
 	isReadOnly := false
 	isClip := true
@@ -158,7 +169,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 
 // Usage return usage information
 func Usage() ([]string, error) {
-	exeName, err := os.Executable()
+	name, err := exeName()
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +193,6 @@ func Usage() ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code with no details"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)
-	usage := []string{fmt.Sprintf("%s usage:", exeName)}
+	usage := []string{fmt.Sprintf("%s usage:", name)}
 	return append(usage, results...), nil
 }
