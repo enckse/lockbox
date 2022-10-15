@@ -60,6 +60,6 @@ _run() {
     yes 2>/dev/null | "$BIN/lb" rm "keys/k2/*"
     echo
     "$BIN/lb" ls
- }
+}
 
 _run 2>&1 | sed "s#$LOCKBOX_STORE##g" > $TESTS/actual.log
