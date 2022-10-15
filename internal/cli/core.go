@@ -5,6 +5,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"os"
 	"sort"
 	"text/template"
 
@@ -100,6 +101,10 @@ func commandText(args, name, desc string) string {
 
 // BashCompletions handles creating bash completion outputs
 func BashCompletions(defaults bool) ([]string, error) {
+	exeName, err := os.Executable()
+	if err != nil {
+		return nil, err
+	}
 	c := Completions{
 		InsertCommand:      InsertCommand,
 		RemoveCommand:      RemoveCommand,
@@ -111,8 +116,8 @@ func BashCompletions(defaults bool) ([]string, error) {
 		InsertMultiCommand: InsertMultiCommand,
 		TOTPCommand:        TOTPCommand,
 		MoveCommand:        MoveCommand,
-		DoList:             fmt.Sprintf("lb %s", ListCommand),
-		DoTOTPList:         fmt.Sprintf("lb %s %s", TOTPCommand, TOTPListCommand),
+		DoList:             fmt.Sprintf("%s %s", exeName, ListCommand),
+		DoTOTPList:         fmt.Sprintf("%s %s %s", exeName, TOTPCommand, TOTPListCommand),
 	}
 	isReadOnly := false
 	isClip := true
@@ -152,7 +157,11 @@ func BashCompletions(defaults bool) ([]string, error) {
 }
 
 // Usage return usage information
-func Usage() []string {
+func Usage() ([]string, error) {
+	exeName, err := os.Executable()
+	if err != nil {
+		return nil, err
+	}
 	var results []string
 	results = append(results, command(BashCommand, "", "generate bash completions"))
 	results = append(results, subCommand(BashCommand, BashDefaultsCommand, "", "generate default bash completion, not user environment specific"))
@@ -173,6 +182,6 @@ func Usage() []string {
 	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code with no details"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)
-	usage := []string{"lb usage:"}
-	return append(usage, results...)
+	usage := []string{fmt.Sprintf("%s usage:", exeName)}
+	return append(usage, results...), nil
 }

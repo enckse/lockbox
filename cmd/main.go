@@ -73,7 +73,7 @@ func getInfoDefault(args []string, possibleArg string) (bool, error) {
 func processInfoCommands(command string, args []string) ([]string, error) {
 	switch command {
 	case cli.HelpCommand:
-		return cli.Usage(), nil
+		return cli.Usage()
 	case cli.VersionCommand:
 		return []string{fmt.Sprintf("version: %s", strings.TrimSpace(version))}, nil
 	case cli.EnvCommand, cli.BashCommand:
