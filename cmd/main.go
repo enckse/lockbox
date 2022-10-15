@@ -40,9 +40,6 @@ var (
 
 type (
 	callbackFunction func([]string) error
-	wrappedError     struct {
-		message string
-	}
 )
 
 func printSubCommand(parent, name, args, desc string) {
@@ -135,12 +132,8 @@ func processInfoCommands(command string, args []string) (bool, error) {
 	return true, nil
 }
 
-func wrapped(message string, err error) wrappedError {
-	return wrappedError{message: fmt.Sprintf("%s (%v)", message, err)}
-}
-
-func (w wrappedError) Error() string {
-	return w.message
+func wrapped(message string, err error) error {
+	return fmt.Errorf("%s (%v)", message, err)
 }
 
 func run() error {
