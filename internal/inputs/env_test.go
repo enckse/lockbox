@@ -143,3 +143,10 @@ func TestGetKey(t *testing.T) {
 		t.Error("should have failed")
 	}
 }
+
+func TestListVariables(t *testing.T) {
+	vars := inputs.ListEnvironmentVariables(false)
+	if len(vars) != 14 {
+		t.Errorf("invalid env count, outdated? %d", len(vars))
+	}
+}

@@ -246,7 +246,7 @@ func FormatTOTP(value string) string {
 	return u.String()
 }
 
-func (o environmentOutput) printEnvironmentVariable(required bool, name, val, desc string, allowed []string) {
+func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, desc string, allowed []string) string {
 	value := val
 	if o.showValues {
 		value = os.Getenv(name)
@@ -254,24 +254,26 @@ func (o environmentOutput) printEnvironmentVariable(required bool, name, val, de
 	if len(value) == 0 {
 		value = "(unset)"
 	}
-	fmt.Printf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", name, desc, required, value, strings.Join(allowed, "|"))
+	return fmt.Sprintf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", name, desc, required, value, strings.Join(allowed, "|"))
 }
 
 // ListEnvironmentVariables will print information about env variables and potential/set values
-func ListEnvironmentVariables(showValues bool) {
+func ListEnvironmentVariables(showValues bool) []string {
 	e := environmentOutput{showValues: showValues}
-	e.printEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"})
-	e.printEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode})
-	e.printEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"})
-	e.printEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs)
-	e.printEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs)
-	e.printEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs)
-	e.printEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs)
-	e.printEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"})
-	e.printEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", []string{"otpauth//url/%s/args..."})
-	e.printEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", []string{"start:end,start:end,start:end..."})
-	e.printEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample})
-	e.printEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample})
-	e.printEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"})
-	e.printEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform})
+	var results []string
+	results = append(results, e.formatEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"}))
+	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
+	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key (%s) or shell command to run (%s) to retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
+	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
+	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "override the otpauth url used to store totp tokens (e.g. otpauth://totp/%s/rest/of/string), must have ONE format '%s' to insert the totp base code", []string{"otpauth//url/%s/args..."}))
+	results = append(results, e.formatEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors (e.g. 0:5,30:35), must be a list of one (or more) rules where a semicolon delimits the start and end second (0-60 for each)", []string{"start:end,start:end,start:end..."}))
+	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
+	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
+	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"}))
+	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform}))
+	return results
 }

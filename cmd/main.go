@@ -73,7 +73,7 @@ func processInfoCommands(command string, args []string) (bool, error) {
 		if invalid {
 			return false, errors.New("invalid argument")
 		}
-		inputs.ListEnvironmentVariables(printValues)
+		fmt.Println(strings.Join(inputs.ListEnvironmentVariables(printValues), "\n"))
 	default:
 		return false, nil
 	}
