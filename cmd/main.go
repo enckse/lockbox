@@ -46,8 +46,8 @@ type (
 	}
 )
 
-func printSubCommand(name, args, desc string) {
-	printCommandText(args, " "+name, desc)
+func printSubCommand(parent, name, args, desc string) {
+	printCommandText(args, fmt.Sprintf("%s %s", parent, name), desc)
 }
 
 func printCommand(name, args, desc string) {
@@ -59,7 +59,7 @@ func printCommandText(args, name, desc string) {
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
-	fmt.Printf("  %-8s %-10s    %s\n", name, arguments, desc)
+	fmt.Printf("  %-15s %-10s    %s\n", name, arguments, desc)
 }
 
 func printUsage() {
@@ -69,16 +69,16 @@ func printUsage() {
 	printCommand(findCommand, "criteria", "perform a simplistic text search over the entry keys")
 	printCommand(helpCommand, "", "show this usage information")
 	printCommand(insertCommand, "entry", "insert a new entry into the store")
-	printSubCommand(insertMultiCommand, "entry", "insert a multi-line entry")
+	printSubCommand(insertCommand, insertMultiCommand, "entry", "insert a multi-line entry")
 	printCommand(listCommand, "", "list entries")
 	printCommand(moveCommand, "src dst", "move an entry from one location to another with the store")
 	printCommand(removeCommand, "entry", "remove an entry from the store")
 	printCommand(showCommand, "entry", "show the entry's value")
 	printCommand(totpCommand, "entry", "display an updating totp generated code")
-	printSubCommand(totp.ClipCommand, "entry", "copy totp code to clipboard")
-	printSubCommand(totp.ListCommand, "", "list entries with totp settings")
-	printSubCommand(totp.OnceCommand, "entry", "display the first generated code")
-	printSubCommand(totp.ShortCommand, "entry", "display the first generated code with no details")
+	printSubCommand(totpCommand, totp.ClipCommand, "entry", "copy totp code to clipboard")
+	printSubCommand(totpCommand, totp.ListCommand, "", "list entries with totp settings")
+	printSubCommand(totpCommand, totp.OnceCommand, "entry", "display the first generated code")
+	printSubCommand(totpCommand, totp.ShortCommand, "entry", "display the first generated code with no details")
 	printCommand(versionCommand, "", "display version information")
 	os.Exit(0)
 }
