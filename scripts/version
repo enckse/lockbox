@@ -19,4 +19,4 @@ _version() {
     echo "$curr$minor"
 }
 
-_version > cmd/vers.txt
+_version > internal/program/vers.txt
