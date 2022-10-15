@@ -212,7 +212,7 @@ func run() *programError {
 		case 3:
 		case 4:
 			if args[2] != "-multi" {
-				return newError("multi-line insert must be after 'insert'", errors.New("invalid command"))
+				return newError("unknown argument", errors.New("invalid command"))
 			}
 			multi = true
 			idx = 3
