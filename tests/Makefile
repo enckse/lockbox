@@ -1,6 +1,7 @@
-BUILD := 
-DATA  := bin
+DATA   := bin
+ACTUAL := $(DATA)/actual.log
 
 all:
-	./run.sh $(BUILD) $(DATA)
-	diff -u $(DATA)/actual.log expected.log
+	mkdir -p $(DATA)
+	go run run.go 2>&1 | sed "s#$(PWD)/$(DATA)##g" | sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$$/XXXXXX/g' > $(ACTUAL)
+	diff -u $(ACTUAL) expected.log

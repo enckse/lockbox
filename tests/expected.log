@@ -3,8 +3,11 @@
 
 
 unable to check for existing entry (path can NOT end with separator)
+exit status 1
 unable to check for existing entry (path can NOT be rooted)
+exit status 1
 unable to check for existing entry (unwilling to operate on path with empty segment)
+exit status 1
 
 key/a/one
 keys/k/one
@@ -37,6 +40,8 @@ hash:b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54
 delete entry? (y/N) 
 delete entry? (y/N) 
 delete entry? (y/N) unable to remove entry (no entities given)
+exit status 1
+
 
 keys/k/one2
 keyx/d/e
