@@ -49,31 +49,47 @@ func main() {
 	}
 }
 
+func getInfoDefault(args []string, possibleArg string) (bool, error) {
+	defaults := false
+	invalid := false
+	switch len(args) {
+	case 2:
+		break
+	case 3:
+		if args[2] == possibleArg {
+			defaults = true
+		} else {
+			invalid = true
+		}
+	default:
+		invalid = true
+	}
+	if invalid {
+		return false, errors.New("invalid argument")
+	}
+	return defaults, nil
+}
+
 func processInfoCommands(command string, args []string) ([]string, error) {
 	switch command {
 	case cli.HelpCommand:
 		return cli.Usage(), nil
 	case cli.VersionCommand:
 		return []string{fmt.Sprintf("version: %s", strings.TrimSpace(version))}, nil
-	case cli.EnvCommand:
-		printValues := true
-		invalid := false
-		switch len(args) {
-		case 2:
-			break
-		case 3:
-			if args[2] == cli.EnvDefaultsCommand {
-				printValues = false
-			} else {
-				invalid = true
-			}
-		default:
-			invalid = true
+	case cli.EnvCommand, cli.BashCommand:
+		defaultFlag := cli.BashDefaultsCommand
+		isEnv := command == cli.EnvCommand
+		if isEnv {
+			defaultFlag = cli.EnvDefaultsCommand
 		}
-		if invalid {
-			return nil, errors.New("invalid argument")
+		defaults, err := getInfoDefault(args, defaultFlag)
+		if err != nil {
+			return nil, err
 		}
-		return inputs.ListEnvironmentVariables(printValues), nil
+		if isEnv {
+			return inputs.ListEnvironmentVariables(!defaults), nil
+		}
+		return cli.BashCompletions(defaults)
 	}
 	return nil, nil
 }

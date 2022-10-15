@@ -2,8 +2,13 @@
 package cli
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
 	"sort"
+	"text/template"
+
+	"github.com/enckse/lockbox/internal/inputs"
 )
 
 const (
@@ -45,6 +50,36 @@ const (
 	TOTPOnceCommand = "-once"
 	// EnvDefaultsCommand will display the default env variables, not those set
 	EnvDefaultsCommand = "-defaults"
+	// BashCommand is the command to generate bash completions
+	BashCommand = "bash"
+	// BashDefaultsCommand will generate environment agnostic completions
+	BashDefaultsCommand = "-defaults"
+)
+
+var (
+	//go:embed "completions.bash"
+	bashCompletions string
+)
+
+type (
+	// Completions handles the inputs to completions for templating
+	Completions struct {
+		Options            []string
+		CanClip            bool
+		ReadOnly           bool
+		InsertCommand      string
+		TOTPShortCommand   string
+		TOTPOnceCommand    string
+		TOTPClipCommand    string
+		InsertMultiCommand string
+		RemoveCommand      string
+		ClipCommand        string
+		ShowCommand        string
+		MoveCommand        string
+		TOTPCommand        string
+		DoTOTPList         string
+		DoList             string
+	}
 )
 
 func subCommand(parent, name, args, desc string) string {
@@ -63,9 +98,64 @@ func commandText(args, name, desc string) string {
 	return fmt.Sprintf("  %-15s %-10s    %s", name, arguments, desc)
 }
 
+// BashCompletions handles creating bash completion outputs
+func BashCompletions(defaults bool) ([]string, error) {
+	c := Completions{
+		InsertCommand:      InsertCommand,
+		RemoveCommand:      RemoveCommand,
+		TOTPShortCommand:   TOTPShortCommand,
+		TOTPClipCommand:    TOTPClipCommand,
+		TOTPOnceCommand:    TOTPOnceCommand,
+		ClipCommand:        ClipCommand,
+		ShowCommand:        ShowCommand,
+		InsertMultiCommand: InsertMultiCommand,
+		TOTPCommand:        TOTPCommand,
+		MoveCommand:        MoveCommand,
+		DoList:             fmt.Sprintf("lb %s", ListCommand),
+		DoTOTPList:         fmt.Sprintf("lb %s %s", TOTPCommand, TOTPListCommand),
+	}
+	isReadOnly := false
+	isClip := true
+	if !defaults {
+		ro, err := inputs.IsReadOnly()
+		if err != nil {
+			return nil, err
+		}
+		isReadOnly = ro
+		noClip, err := inputs.IsNoClipEnabled()
+		if err != nil {
+			return nil, err
+		}
+		if noClip {
+			isClip = false
+		}
+	}
+	c.CanClip = isClip
+	c.ReadOnly = isReadOnly
+	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, TOTPCommand, VersionCommand}
+	if c.CanClip {
+		options = append(options, ClipCommand)
+	}
+	if !c.ReadOnly {
+		options = append(options, MoveCommand, RemoveCommand, InsertCommand)
+	}
+	c.Options = options
+	t, err := template.New("t").Parse(bashCompletions)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, c); err != nil {
+		return nil, err
+	}
+	return []string{buf.String()}, nil
+}
+
 // Usage return usage information
 func Usage() []string {
 	var results []string
+	results = append(results, command(BashCommand, "", "generate bash completions"))
+	results = append(results, subCommand(BashCommand, BashDefaultsCommand, "", "generate default bash completion, not user environment specific"))
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(FindCommand, "criteria", "perform a simplistic text search over the entry keys"))

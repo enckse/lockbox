@@ -1,6 +1,7 @@
 package cli_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/cli"
@@ -8,7 +9,40 @@ import (
 
 func TestUsage(t *testing.T) {
 	u := cli.Usage()
-	if len(u) != 17 {
+	if len(u) != 19 {
 		t.Errorf("invalid usage, out of date? %d", len(u))
+	}
+}
+
+func TestCompletionsBash(t *testing.T) {
+	os.Setenv("LOCKBOX_READONLY", "yes")
+	os.Setenv("LOCKBOX_NOCLIP", "yes")
+	defaults, _ := cli.BashCompletions(true)
+	roNoClip, _ := cli.BashCompletions(false)
+	if roNoClip[0] == defaults[0] {
+		t.Error("should not equal defaults")
+	}
+	os.Setenv("LOCKBOX_READONLY", "")
+	os.Setenv("LOCKBOX_NOCLIP", "yes")
+	noClip, _ := cli.BashCompletions(false)
+	if roNoClip[0] == noClip[0] || noClip[0] == defaults[0] {
+		t.Error("readonly/noclip != noclip (nor defaults)")
+	}
+	os.Setenv("LOCKBOX_READONLY", "yes")
+	os.Setenv("LOCKBOX_NOCLIP", "")
+	ro, _ := cli.BashCompletions(false)
+	if roNoClip[0] == ro[0] || noClip[0] == ro[0] || ro[0] == defaults[0] {
+		t.Error("readonly/noclip != ro (nor ro == noclip, nor ro == defaults)")
+	}
+	os.Setenv("LOCKBOX_READONLY", "")
+	os.Setenv("LOCKBOX_NOCLIP", "")
+	isDefaultsToo, _ := cli.BashCompletions(false)
+	if isDefaultsToo[0] != defaults[0] {
+		t.Error("defaults should match env defaults")
+	}
+	for _, confirm := range [][]string{defaults, roNoClip, noClip, ro, isDefaultsToo} {
+		if len(confirm) != 1 {
+			t.Error("completions returned an invalid array")
+		}
 	}
 }

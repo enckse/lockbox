@@ -1,80 +1,60 @@
 # bash completion for lb                        -*- shell-script -*-
 
-_is_clip() {
-    if [ "$1" == "${2}clip" ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
-
 _lb() {
-    local cur opts clip_enabled needs readwrite
-    clip_enabled=" clip"
-    if [ -n "$LOCKBOX_NOCLIP" ]; then
-        if [ "$LOCKBOX_NOCLIP" == "yes" ]; then
-            clip_enabled=""
-        fi
-    fi
-    readwrite=" insert rm mv"
-    if [ -n "$LOCKBOX_READONLY" ]; then
-        if [ "$LOCKBOX_READONLY" == "yes" ]; then
-            readwrite=""
-        fi
-    fi
+    local cur opts needs
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
-        opts="version help ls show env totp$readwrite find$clip_enabled"
+        {{range $idx, $value := $.Options }}
+        opts="${opts}{{ $value }} "{{end}}
         # shellcheck disable=SC2207
         COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
     else
         if [ "$COMP_CWORD" -eq 2 ]; then
             case ${COMP_WORDS[1]} in
-                "insert")
-                    opts="-multi $(lb ls)"
+{{ if not $.ReadOnly }}
+                "{{ $.InsertCommand }}")
+                    opts="{{ $.InsertMultiCommand }} $({{ $.DoList }})"
                     ;;
-                "mv")
-                    opts=$(lb ls)
+                "{{ $.MoveCommand }}")
+                    opts=$({{ $.DoList }})
                     ;;
-                "totp")
-                    opts="-once -short "$(lb totp -list)
-                    if [ -n "$clip_enabled" ]; then
-                        opts="$opts -clip"
-                    fi
+{{end}}
+                "{{ $.TOTPCommand }}")
+                    opts="{{ $.TOTPShortCommand }} {{ $.TOTPOnceCommand }} "$({{ $.DoTOTPList }})
+{{ if $.CanClip }}
+                    opts="$opts {{ $.TOTPClipCommand }}"
+{{end}}
                     ;;
-                "show" | "rm" | "clip")
-                    opts=$(lb ls)
-                    if [ $(_is_clip "${COMP_WORDS[1]}" "") == 1 ]; then 
-                        if [ -z "$clip_enabled" ]; then
-                            opts=""
-                        fi
-                    fi
+                "{{ $.ShowCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+                    opts=$({{ $.DoList }})
                     ;;
             esac
         fi
         if [ "$COMP_CWORD" -eq 3 ]; then
             case "${COMP_WORDS[1]}" in
-                "insert")
-                    if [ "${COMP_WORDS[2]}" == "-multi" ]; then
-                        opts=$(lb ls)
+{{ if not $.ReadOnly }}
+                "{{ $.InsertCommand }}")
+                    if [ "${COMP_WORDS[2]}" == "{{ $.InsertMultiCommand }}" ]; then
+                        opts=$({{ $.DoList }})
                     fi
                     ;;
-                "mv")
-                    opts=$(lb ls)
+                "{{ $.MoveCommand }}")
+                    opts=$({{ $.DoList }})
                     ;;
-                "totp")
+{{end}}
+                "{{ $.TOTPCommand }}")
                     needs=0
-                    if [ "${COMP_WORDS[2]}" == "-once" ] || [ "${COMP_WORDS[2]}" == "-short" ]; then
+                    if [ "${COMP_WORDS[2]}" == "{{ $.TOTPOnceCommand }}" ] || [ "${COMP_WORDS[2]}" == "{{ $.TOTPShortCommand }}" ]; then
                         needs=1
                     else
-                        if [ -n "$clip_enabled" ]; then
-                            if [ $(_is_clip "${COMP_WORDS[2]}" "-") == 1 ]; then 
-                                needs=1
-                            fi
+{{ if $.CanClip }}
+                        if [ "${COMP_WORDS[2]}" == "{{ $.TOTPClipCommand }}" ]; then
+                            needs=1
                         fi
+{{end}}
                     fi
                     if [ $needs -eq 1 ]; then
-                        opts=$(lb totp -list)
+                        opts=$({{ $.DoTOTPList }})
                     fi
                     ;;
             esac
