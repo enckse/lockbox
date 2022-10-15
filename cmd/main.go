@@ -49,12 +49,12 @@ func main() {
 	}
 }
 
-func processInfoCommands(command string, args []string) (bool, error) {
+func processInfoCommands(command string, args []string) ([]string, error) {
 	switch command {
 	case cli.HelpCommand:
-		fmt.Println(strings.Join(cli.Usage(), "\n"))
+		return cli.Usage(), nil
 	case cli.VersionCommand:
-		fmt.Printf("version: %s\n", strings.TrimSpace(version))
+		return []string{fmt.Sprintf("version: %s", strings.TrimSpace(version))}, nil
 	case cli.EnvCommand:
 		printValues := true
 		invalid := false
@@ -71,13 +71,11 @@ func processInfoCommands(command string, args []string) (bool, error) {
 			invalid = true
 		}
 		if invalid {
-			return false, errors.New("invalid argument")
+			return nil, errors.New("invalid argument")
 		}
-		fmt.Println(strings.Join(inputs.ListEnvironmentVariables(printValues), "\n"))
-	default:
-		return false, nil
+		return inputs.ListEnvironmentVariables(printValues), nil
 	}
-	return true, nil
+	return nil, nil
 }
 
 func wrapped(message string, err error) error {
@@ -90,11 +88,12 @@ func run() error {
 		return errors.New("requires subcommand")
 	}
 	command := args[1]
-	ok, err := processInfoCommands(command, args)
+	info, err := processInfoCommands(command, args)
 	if err != nil {
 		return err
 	}
-	if ok {
+	if info != nil {
+		fmt.Println(strings.Join(info, "\n"))
 		return nil
 	}
 	t, err := backend.NewTransaction()
