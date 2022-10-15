@@ -80,7 +80,6 @@ func printUsage() {
 	printSubCommand(totpCommand, totp.OnceCommand, "entry", "display the first generated code")
 	printSubCommand(totpCommand, totp.ShortCommand, "entry", "display the first generated code with no details")
 	printCommand(versionCommand, "", "display version information")
-	os.Exit(0)
 }
 
 func internalCallback(name string) callbackFunction {
@@ -313,7 +312,7 @@ func run() *programError {
 
 func hashText(args []string) error {
 	if len(args) == 0 {
-		return errors.New("git diff requires a file")
+		return errors.New("hash requires a file")
 	}
 	t, err := backend.Load(args[len(args)-1])
 	if err != nil {
