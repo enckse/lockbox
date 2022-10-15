@@ -1,4 +1,3 @@
-// Package program is the underlying full CLI representation to run lb
 package program
 
 import (
@@ -22,18 +21,14 @@ var (
 )
 
 type (
-	// ConfirmFunction is used to confirm the UI selections
-	ConfirmFunction func(string) (bool, error)
-	// ExitFunction is used to exit (unexpectedly)
+	ConfirmFunction  func(string) (bool, error)
 	ExitFunction     func(error)
 	callbackFunction func([]string) error
-	// Program wraps calling/running the underlying core functionality
-	Program struct {
+	Program          struct {
 		confirm func(string) bool
 	}
 )
 
-// NewProgram creates a new runnable program
 func NewProgram(confirmation ConfirmFunction, exit ExitFunction) (*Program, error) {
 	if confirmation == nil {
 		return nil, errors.New("confirmation function must be set")
@@ -66,10 +61,10 @@ func getInfoDefault(args []string, possibleArg string) (bool, error) {
 	defaults := false
 	invalid := false
 	switch len(args) {
-	case 1:
-		break
 	case 2:
-		if args[1] == possibleArg {
+		break
+	case 3:
+		if args[2] == possibleArg {
 			defaults = true
 		} else {
 			invalid = true
@@ -111,16 +106,15 @@ func wrapped(message string, err error) error {
 	return fmt.Errorf("%s (%v)", message, err)
 }
 
-// Run will run the program
 func (p *Program) Run(inArgs []string) error {
 	if p.confirm == nil {
 		return errors.New("invalid program, not setup properly")
 	}
 	args := inArgs
-	if len(args) < 1 {
+	if len(args) < 2 {
 		return errors.New("requires subcommand")
 	}
-	command := args[0]
+	command := args[1]
 	info, err := processInfoCommands(command, args)
 	if err != nil {
 		return err
@@ -139,10 +133,10 @@ func (p *Program) Run(inArgs []string) error {
 		opts.Mode = backend.ListMode
 		if command == cli.FindCommand {
 			opts.Mode = backend.FindMode
-			if len(args) < 2 {
+			if len(args) < 3 {
 				return errors.New("find requires search term")
 			}
-			opts.Criteria = args[1]
+			opts.Criteria = args[2]
 		}
 		e, err := t.QueryCallback(opts)
 		if err != nil {
@@ -152,11 +146,11 @@ func (p *Program) Run(inArgs []string) error {
 			fmt.Println(f.Path)
 		}
 	case cli.MoveCommand:
-		if len(args) != 3 {
+		if len(args) != 4 {
 			return errors.New("src/dst required for move")
 		}
-		src := args[1]
-		dst := args[2]
+		src := args[2]
+		dst := args[3]
 		srcExists, err := t.Get(src, backend.SecretValue)
 		if err != nil {
 			return errors.New("unable to get source entry")
@@ -179,13 +173,13 @@ func (p *Program) Run(inArgs []string) error {
 	case cli.InsertCommand:
 		multi := false
 		isTOTP := false
-		idx := 1
+		idx := 2
 		switch len(args) {
-		case 1:
-			return errors.New("insert requires an entry")
 		case 2:
+			return errors.New("insert requires an entry")
 		case 3:
-			opt := args[1]
+		case 4:
+			opt := args[2]
 			switch opt {
 			case cli.InsertMultiCommand:
 				multi = true
@@ -202,7 +196,7 @@ func (p *Program) Run(inArgs []string) error {
 				return errors.New("unknown argument")
 			}
 			multi = true
-			idx = 2
+			idx = 3
 		default:
 			return errors.New("too many arguments")
 		}
@@ -235,10 +229,10 @@ func (p *Program) Run(inArgs []string) error {
 		}
 		fmt.Println("")
 	case cli.RemoveCommand:
-		if len(args) != 2 {
+		if len(args) != 3 {
 			return errors.New("remove requires an entry")
 		}
-		deleting := args[1]
+		deleting := args[2]
 		postfixRemove := "y"
 		existings, err := t.MatchPath(deleting)
 		if err != nil {
@@ -259,10 +253,10 @@ func (p *Program) Run(inArgs []string) error {
 			}
 		}
 	case cli.ShowCommand, cli.ClipCommand:
-		if len(args) != 2 {
+		if len(args) != 3 {
 			return errors.New("entry required")
 		}
-		entry := args[1]
+		entry := args[2]
 		clipboard := platform.Clipboard{}
 		isShow := command == cli.ShowCommand
 		if !isShow {
@@ -286,10 +280,10 @@ func (p *Program) Run(inArgs []string) error {
 			return wrapped("clipboard operation failed", err)
 		}
 	default:
-		if len(args) < 1 {
+		if len(args) < 2 {
 			return errors.New("missing required arguments")
 		}
-		a := args[1:]
+		a := args[2:]
 		callback := internalCallback(command)
 		if callback != nil {
 			if err := callback(a); err != nil {
