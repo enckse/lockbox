@@ -17,19 +17,20 @@ import (
 )
 
 const (
-	totpCommand    = "totp"
-	hashCommand    = "hash"
-	clearCommand   = "clear"
-	clipCommand    = "clip"
-	findCommand    = "find"
-	insertCommand  = "insert"
-	listCommand    = "ls"
-	moveCommand    = "mv"
-	showCommand    = "show"
-	versionCommand = "version"
-	helpCommand    = "help"
-	removeCommand  = "rm"
-	envCommand     = "env"
+	totpCommand        = "totp"
+	hashCommand        = "hash"
+	clearCommand       = "clear"
+	clipCommand        = "clip"
+	findCommand        = "find"
+	insertCommand      = "insert"
+	listCommand        = "ls"
+	moveCommand        = "mv"
+	showCommand        = "show"
+	versionCommand     = "version"
+	helpCommand        = "help"
+	removeCommand      = "rm"
+	envCommand         = "env"
+	insertMultiCommand = "-multi"
 )
 
 var (
@@ -68,6 +69,7 @@ func printUsage() {
 	printCommand(findCommand, "criteria", "perform a simplistic text search over the entry keys")
 	printCommand(helpCommand, "", "show this usage information")
 	printCommand(insertCommand, "entry", "insert a new entry into the store")
+	printSubCommand(insertMultiCommand, "entry", "insert a multi-line entry")
 	printCommand(listCommand, "", "list entries")
 	printCommand(moveCommand, "src dst", "move an entry from one location to another with the store")
 	printCommand(removeCommand, "entry", "remove an entry from the store")
@@ -211,7 +213,7 @@ func run() *programError {
 			return newError("insert missing required arguments", errors.New("entry required"))
 		case 3:
 		case 4:
-			if args[2] != "-multi" {
+			if args[2] != insertMultiCommand {
 				return newError("unknown argument", errors.New("invalid command"))
 			}
 			multi = true
