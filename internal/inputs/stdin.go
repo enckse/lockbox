@@ -44,7 +44,7 @@ func termEcho(on bool) {
 func GetUserInputPassword(piping, multiLine bool) ([]byte, error) {
 	var password string
 	if !multiLine && !piping {
-		input, err := confirmInputsMatch("password")
+		input, err := confirmInputsMatch()
 		if err != nil {
 			return nil, err
 		}
@@ -62,23 +62,23 @@ func GetUserInputPassword(piping, multiLine bool) ([]byte, error) {
 	return []byte(password), nil
 }
 
-func confirmInputsMatch(object string) (string, error) {
+func confirmInputsMatch() (string, error) {
 	termEcho(false)
 	defer func() {
 		termEcho(true)
 	}()
-	fmt.Printf("please enter %s: ", object)
+	fmt.Print("please enter password: ")
 	first, err := Stdin(true)
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("\nplease re-enter %s: ", object)
+	fmt.Print("\nplease re-enter password: ")
 	second, err := Stdin(true)
 	if err != nil {
 		return "", err
 	}
 	if first != second {
-		return "", fmt.Errorf("%s(s) do NOT match", object)
+		return "", errors.New("passwords do NOT match")
 	}
 	return first, nil
 }
@@ -106,11 +106,6 @@ func ConfirmYesNoPrompt(prompt string) (bool, error) {
 		return false, err
 	}
 	return resp == "Y" || resp == "y", nil
-}
-
-// RawStdin will get raw stdin data.
-func RawStdin() ([]byte, error) {
-	return getStdin(false)
 }
 
 func getStdin(one bool) ([]byte, error) {
