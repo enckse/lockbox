@@ -47,7 +47,7 @@ type (
 )
 
 func printSubCommand(name, args, desc string) {
-	printCommandText(args, "            "+name, desc)
+	printCommandText(args, " "+name, desc)
 }
 
 func printCommand(name, args, desc string) {
@@ -59,7 +59,7 @@ func printCommandText(args, name, desc string) {
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
-	fmt.Printf("  %10s %-15s    %s\n", name, arguments, desc)
+	fmt.Printf("  %-8s %-10s    %s\n", name, arguments, desc)
 }
 
 func printUsage() {
