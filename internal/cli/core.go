@@ -59,26 +59,27 @@ func commandText(args, name, desc string) string {
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
-	return fmt.Sprintf("  %-15s %-10s    %s\n", name, arguments, desc)
+	return fmt.Sprintf("  %-15s %-10s    %s", name, arguments, desc)
 }
 
 // Usage return usage information
 func Usage() []string {
-	fmt.Println("lb usage:")
-	printCommand(ClipCommand, "entry", "copy the entry's value into the clipboard")
-	printCommand(EnvCommand, "", "display environment variable information")
-	printCommand(FindCommand, "criteria", "perform a simplistic text search over the entry keys")
-	printCommand(HelpCommand, "", "show this usage information")
-	printCommand(InsertCommand, "entry", "insert a new entry into the store")
-	printSubCommand(InsertCommand, InsertMultiCommand, "entry", "insert a multi-line entry")
-	printCommand(ListCommand, "", "list entries")
-	printCommand(MoveCommand, "src dst", "move an entry from one location to another with the store")
-	printCommand(RemoveCommand, "entry", "remove an entry from the store")
-	printCommand(ShowCommand, "entry", "show the entry's value")
-	printCommand(TOTPCommand, "entry", "display an updating totp generated code")
-	printSubCommand(TOTPCommand, TOTPClipCommand, "entry", "copy totp code to clipboard")
-	printSubCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings")
-	printSubCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code")
-	printSubCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code with no details")
-	printCommand(VersionCommand, "", "display version information")
+	results := []string{"lb usage"}
+	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
+	results = append(results, command(EnvCommand, "", "display environment variable information"))
+	results = append(results, command(FindCommand, "criteria", "perform a simplistic text search over the entry keys"))
+	results = append(results, command(HelpCommand, "", "show this usage information"))
+	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
+	results = append(results, subCommand(InsertCommand, InsertMultiCommand, "entry", "insert a multi-line entry"))
+	results = append(results, command(ListCommand, "", "list entries"))
+	results = append(results, command(MoveCommand, "src dst", "move an entry from one location to another with the store"))
+	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
+	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
+	results = append(results, command(TOTPCommand, "entry", "display an updating totp generated code"))
+	results = append(results, subCommand(TOTPCommand, TOTPClipCommand, "entry", "copy totp code to clipboard"))
+	results = append(results, subCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings"))
+	results = append(results, subCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code"))
+	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code with no details"))
+	results = append(results, command(VersionCommand, "", "display version information"))
+	return results
 }

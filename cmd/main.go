@@ -52,7 +52,7 @@ func main() {
 func processInfoCommands(command string, args []string) (bool, error) {
 	switch command {
 	case cli.HelpCommand:
-		cli.Usage()
+		fmt.Println(strings.Join(cli.Usage(), "\n"))
 	case cli.VersionCommand:
 		fmt.Printf("version: %s\n", strings.TrimSpace(version))
 	case cli.EnvCommand:
