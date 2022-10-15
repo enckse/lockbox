@@ -161,13 +161,20 @@ func run() error {
 		}
 	case cli.InsertCommand:
 		multi := false
+		isTOTP := false
 		idx := 2
 		switch len(args) {
 		case 2:
 			return errors.New("insert requires an entry")
 		case 3:
 		case 4:
-			if args[2] != cli.InsertMultiCommand {
+			opt := args[2]
+			switch opt {
+			case cli.InsertMultiCommand:
+				multi = true
+			case cli.InsertTOTPCommand:
+				isTOTP = true
+			default:
 				return errors.New("unknown argument")
 			}
 			multi = true
@@ -177,6 +184,12 @@ func run() error {
 		}
 		isPipe := inputs.IsInputFromPipe()
 		entry := args[idx]
+		if isTOTP {
+			totpToken := inputs.TOTPToken()
+			if !strings.HasSuffix(entry, backend.NewSuffix(totpToken)) {
+				entry = backend.NewPath(entry, totpToken)
+			}
+		}
 		existing, err := t.Get(entry, backend.BlankValue)
 		if err != nil {
 			return wrapped("unable to check for existing entry", err)

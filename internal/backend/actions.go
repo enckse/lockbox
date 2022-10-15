@@ -202,6 +202,9 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			return err
 		}
 		if ok {
+			if multi {
+				return errors.New("totp tokens can NOT be multi-line")
+			}
 			v = inputs.FormatTOTP(v)
 			e.Values = append(e.Values, protectedValue("otp", v))
 		}

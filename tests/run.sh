@@ -28,6 +28,9 @@ _run() {
     "$BIN/lb" find e
     "$BIN/lb" show keys/k/one2
     "$BIN/lb" show keys2/k/three
+    echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert -totp test/k
+    echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert -totp test/k/totp
+    "$BIN/lb" "totp" -list
     echo "5ae472abqdekjqykoyxk7hvc2leklq5n" | "$BIN/lb" insert test/k/totp
     "$BIN/lb" "totp" -list
     "$BIN/lb" "totp" test/k | tr '[:digit:]' 'X'
