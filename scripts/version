@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+IS_CARGO="test -e Cargo.toml"
+
 if [ ! -d .git ]; then
     echo "not git controlled"
     exit 0
@@ -15,7 +17,21 @@ _version() {
             minor="0$minor"
         fi
     fi
-    echo "$curr$minor"
+    vers="$curr$minor"
+    if $IS_CARGO; then
+        vers=$(echo "$vers" | sed 's/^v//g;s/\.0/./g')
+        sed -i 's/^version =.*/version = "'"$vers"'"/' Cargo.toml
+    else
+        echo "$vers"
+    fi
 }
 
-_version > cmd/vers.txt
+_main() {
+    if $IS_CARGO; then
+        _version
+    else
+        _version > cmd/vers.txt
+    fi
+}
+
+_main
