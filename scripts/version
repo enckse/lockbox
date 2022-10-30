@@ -22,7 +22,7 @@ _version() {
         vers=$(echo "$vers" | sed 's/^v//g;s/\.0/./g')
         sed -i 's/^version =.*/version = "'"$vers"'"/' Cargo.toml
     else
-        echo "$vers"
+        printf "%s" "$vers"
     fi
 }
 
