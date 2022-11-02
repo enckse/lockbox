@@ -21,6 +21,7 @@ $(TESTDIR):
 	cd $@ && go test
 
 check: $(TARGET) $(TESTDIR)
+	rm -f $(BUILD)*.kdbx
 	LB_BUILD=$(TARGET) TEST_DATA=$(BUILD) SCRIPTS=$(PWD)/scripts/ go run scripts/check.go 2>&1 | sed "s#$(PWD)/$(DATA)##g" | sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$$/XXXXXX/g' > $(ACTUAL)
 	diff -u $(ACTUAL) scripts/tests.expected.log
 
