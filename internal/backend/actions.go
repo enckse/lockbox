@@ -235,11 +235,11 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if err != nil {
 		return err
 	}
+	if err := hook.Run(HookPre); err != nil {
+		return err
+	}
 	multi := len(strings.Split(strings.TrimSpace(src.Value), "\n")) > 1
-	return t.change(func(c Context) error {
-		if err := hook.Run(HookPre); err != nil {
-			return err
-		}
+	err = t.change(func(c Context) error {
 		c.removeEntity(sOffset, sTitle)
 		if action == MoveAction {
 			c.removeEntity(dOffset, dTitle)
@@ -265,8 +265,12 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 
 		e.Values = append(e.Values, protectedValue(field, v))
 		c.insertEntity(dOffset, dTitle, e)
-		return hook.Run(HookPost)
+		return nil
 	})
+	if err != nil {
+		return err
+	}
+	return hook.Run(HookPost)
 }
 
 // Insert is a move to the same location
@@ -287,28 +291,44 @@ func (t *Transaction) RemoveAll(entities []QueryEntity) error {
 	if len(entities) == 0 {
 		return errors.New("no entities given")
 	}
-	return t.change(func(c Context) error {
-		for _, entity := range entities {
-			offset, title, err := splitComponents(entity.Path)
-			if err != nil {
-				return err
-			}
-			hook, err := NewHook(entity.Path, RemoveAction)
-			if err != nil {
-				return err
-			}
-			if err := hook.Run(HookPre); err != nil {
-				return err
-			}
-			if ok := c.removeEntity(offset, title); !ok {
+	removals := []removal{}
+	hasHooks := false
+	for _, entity := range entities {
+		offset, title, err := splitComponents(entity.Path)
+		if err != nil {
+			return err
+		}
+		hook, err := NewHook(entity.Path, RemoveAction)
+		if err != nil {
+			return err
+		}
+		if err := hook.Run(HookPre); err != nil {
+			return err
+		}
+		if hook.enabled {
+			hasHooks = true
+		}
+		removals = append(removals, removal{parts: offset, title: title, hook: hook})
+	}
+	err := t.change(func(c Context) error {
+		for _, entity := range removals {
+			if ok := c.removeEntity(entity.parts, entity.title); !ok {
 				return errors.New("failed to remove entity")
-			}
-			if err := hook.Run(HookPost); err != nil {
-				return err
 			}
 		}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+	if hasHooks {
+		for _, entity := range removals {
+			if err := entity.hook.Run(HookPost); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func getValue(e gokeepasslib.Entry, key string) string {

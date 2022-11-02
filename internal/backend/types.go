@@ -48,6 +48,11 @@ type (
 		enabled bool
 		scripts []string
 	}
+	removal struct {
+		parts []string
+		title string
+		hook  Hook
+	}
 )
 
 const (

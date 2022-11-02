@@ -79,17 +79,17 @@ selected entities:
 
 delete entries? (y/N) pre rm keys/k2/one
 CALLED
-post rm keys/k2/one
-CALLED
 pre rm keys/k2/one2
-CALLED
-post rm keys/k2/one2
 CALLED
 pre rm keys/k2/t2/one
 CALLED
-post rm keys/k2/t2/one
-CALLED
 pre rm keys/k2/t2/one2
+CALLED
+post rm keys/k2/one
+CALLED
+post rm keys/k2/one2
+CALLED
+post rm keys/k2/t2/one
 CALLED
 post rm keys/k2/t2/one2
 CALLED
