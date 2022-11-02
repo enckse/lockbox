@@ -56,7 +56,9 @@ func totpList() {
 }
 
 func main() {
-	store := filepath.Join(os.Getenv("TEST_DATA"), fmt.Sprintf("%s.kdbx", time.Now().Format("20060102150405")))
+	path := os.Getenv("TEST_DATA")
+	store := filepath.Join(path, fmt.Sprintf("%s.kdbx", time.Now().Format("20060102150405")))
+	os.Setenv("LOCKBOX_HOOKDIR", "")
 	os.Setenv("LOCKBOX_STORE", store)
 	os.Setenv("LOCKBOX_KEY", testKey)
 	os.Setenv("LOCKBOX_TOTP", "totp")
@@ -106,6 +108,7 @@ func main() {
 	rm("keys/k2/t1/*")
 	fmt.Println()
 	ls()
+	os.Setenv("LOCKBOX_HOOKDIR", filepath.Join(os.Getenv("SCRIPTS"), "hooks"))
 	rm("keys/k2/*")
 	fmt.Println()
 	ls()

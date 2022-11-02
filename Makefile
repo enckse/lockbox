@@ -21,7 +21,7 @@ $(TESTDIR):
 	cd $@ && go test
 
 check: $(TARGET) $(TESTDIR)
-	LB_BUILD=$(TARGET) TEST_DATA=$(BUILD) go run scripts/check.go 2>&1 | sed "s#$(PWD)/$(DATA)##g" | sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$$/XXXXXX/g' > $(ACTUAL)
+	LB_BUILD=$(TARGET) TEST_DATA=$(BUILD) SCRIPTS=$(PWD)/scripts/ go run scripts/check.go 2>&1 | sed "s#$(PWD)/$(DATA)##g" | sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$$/XXXXXX/g' > $(ACTUAL)
 	diff -u $(ACTUAL) scripts/tests.expected.log
 
 clean:

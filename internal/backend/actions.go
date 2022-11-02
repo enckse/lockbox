@@ -4,12 +4,56 @@ package backend
 import (
 	"errors"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
+
+// NewHook will create a new hook type
+func NewHook(path string, a ActionMode) (Hook, error) {
+	if strings.TrimSpace(path) == "" {
+		return Hook{}, errors.New("empty path is not allowed for hooks")
+	}
+	dir := inputs.EnvOrDefault(inputs.HookDirEnv, "")
+	if dir == "" {
+		return Hook{enabled: false}, nil
+	}
+	if !pathExists(dir) {
+		return Hook{}, errors.New("hook directory does NOT exist")
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return Hook{}, err
+	}
+	scripts := []string{}
+	for _, e := range entries {
+		if e.IsDir() {
+			return Hook{}, errors.New("found subdirectory in hookdir")
+		}
+		scripts = append(scripts, filepath.Join(dir, e.Name()))
+	}
+	return Hook{path: path, mode: a, enabled: len(scripts) > 0, scripts: scripts}, nil
+}
+
+// Run will execute any scripts configured as hooks
+func (h Hook) Run(mode HookMode) error {
+	if !h.enabled {
+		return nil
+	}
+	for _, s := range h.scripts {
+		c := exec.Command(s, string(mode), string(h.mode), h.path)
+		c.Stdout = os.Stdout
+		c.Stderr = os.Stderr
+		if err := c.Run(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func (t *Transaction) act(cb action) error {
 	if !t.valid {
@@ -183,11 +227,21 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if err != nil {
 		return err
 	}
-	isMove := dst != src.Path
+	action := MoveAction
+	if dst == src.Path {
+		action = InsertAction
+	}
+	hook, err := NewHook(src.Path, action)
+	if err != nil {
+		return err
+	}
 	multi := len(strings.Split(strings.TrimSpace(src.Value), "\n")) > 1
 	return t.change(func(c Context) error {
+		if err := hook.Run(HookPre); err != nil {
+			return err
+		}
 		c.removeEntity(sOffset, sTitle)
-		if isMove {
+		if action == MoveAction {
 			c.removeEntity(dOffset, dTitle)
 		}
 		e := gokeepasslib.NewEntry()
@@ -211,7 +265,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 
 		e.Values = append(e.Values, protectedValue(field, v))
 		c.insertEntity(dOffset, dTitle, e)
-		return nil
+		return hook.Run(HookPost)
 	})
 }
 
@@ -239,8 +293,18 @@ func (t *Transaction) RemoveAll(entities []QueryEntity) error {
 			if err != nil {
 				return err
 			}
+			hook, err := NewHook(entity.Path, RemoveAction)
+			if err != nil {
+				return err
+			}
+			if err := hook.Run(HookPre); err != nil {
+				return err
+			}
 			if ok := c.removeEntity(offset, title); !ok {
 				return errors.New("failed to remove entity")
+			}
+			if err := hook.Run(HookPost); err != nil {
+				return err
 			}
 		}
 		return nil

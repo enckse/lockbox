@@ -12,6 +12,10 @@ type (
 	QueryMode int
 	// ValueMode indicates what to do with the store value of the entity
 	ValueMode int
+	// ActionMode represents activities performed via transactions
+	ActionMode string
+	// HookMode are hook operations the user can tie to
+	HookMode string
 	// QueryOptions indicates how to find entities
 	QueryOptions struct {
 		Mode     QueryMode
@@ -37,6 +41,13 @@ type (
 	Context struct {
 		db *gokeepasslib.Database
 	}
+	// Hook represents a runnable user-defined hook
+	Hook struct {
+		path    string
+		mode    ActionMode
+		enabled bool
+		scripts []string
+	}
 )
 
 const (
@@ -51,6 +62,19 @@ const (
 	SuffixMode
 	// PrefixMode allows for entities starting with a specific value
 	PrefixMode
+)
+
+const (
+	// MoveAction represents changes via moves, like the Move command
+	MoveAction ActionMode = "mv"
+	// InsertAction represents changes via inserts, like the Insert command
+	InsertAction ActionMode = "insert"
+	// RemoveAction represents changes via deletions, like Remove or globbed remove commands
+	RemoveAction ActionMode = "rm"
+	// HookPre are triggers BEFORE an action is performed on an entity
+	HookPre HookMode = "pre"
+	// HookPost are triggers AFTER an action is performed on an entity
+	HookPost HookMode = "post"
 )
 
 const (

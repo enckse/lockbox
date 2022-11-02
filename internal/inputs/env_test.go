@@ -150,7 +150,7 @@ func TestGetKey(t *testing.T) {
 
 func TestListVariables(t *testing.T) {
 	vars := inputs.ListEnvironmentVariables(false)
-	if len(vars) != 15 {
+	if len(vars) != 16 {
 		t.Errorf("invalid env count, outdated? %d", len(vars))
 	}
 }

@@ -56,6 +56,8 @@ const (
 	colorWindowSpan      = ":"
 	detectedValue        = "(detected)"
 	noTOTPEnv            = prefixKey + "NOTOTP"
+	// HookDirEnv represents a stored location for user hooks
+	HookDirEnv = prefixKey + "HOOKDIR"
 )
 
 var (
@@ -282,5 +284,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform}))
 	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, isNo, "disable TOTP integrations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	return results
 }
