@@ -3,6 +3,7 @@ package inputs_test
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/inputs"
@@ -149,8 +150,19 @@ func TestGetKey(t *testing.T) {
 }
 
 func TestListVariables(t *testing.T) {
-	vars := inputs.ListEnvironmentVariables(false)
-	if len(vars) != 16 {
-		t.Errorf("invalid env count, outdated? %d", len(vars))
+	known := make(map[string]struct{})
+	for _, v := range inputs.ListEnvironmentVariables(false) {
+		trim := strings.Split(strings.TrimSpace(v), " ")[0]
+		if !strings.HasPrefix(trim, "LOCKBOX_") {
+			t.Errorf("invalid env: %s", v)
+		}
+		if _, ok := known[trim]; ok {
+			t.Errorf("invalid re-used env: %s", trim)
+		}
+		known[trim] = struct{}{}
+	}
+	l := len(known)
+	if l != 16 {
+		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
