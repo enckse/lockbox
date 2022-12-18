@@ -16,10 +16,10 @@ import (
 type (
 	// Clipboard represent system clipboard operations.
 	Clipboard struct {
-		copying    []string
-		pasting    []string
-		MaxTime    int
-		isInternal bool
+		copying []string
+		pasting []string
+		MaxTime int
+		isOSC52 bool
 	}
 )
 
@@ -28,7 +28,7 @@ func newClipboard(copying, pasting []string) (Clipboard, error) {
 	if err != nil {
 		return Clipboard{}, err
 	}
-	return Clipboard{copying: copying, pasting: pasting, MaxTime: max, isInternal: false}, nil
+	return Clipboard{copying: copying, pasting: pasting, MaxTime: max, isOSC52: false}, nil
 }
 
 func overrideCommand(v string) ([]string, error) {
@@ -64,7 +64,7 @@ func NewClipboard() (Clipboard, error) {
 		return Clipboard{}, err
 	}
 	if isOSC {
-		c := Clipboard{isInternal: true}
+		c := Clipboard{isOSC52: true}
 		return c, nil
 	}
 	sys, err := NewPlatform()
@@ -101,7 +101,7 @@ func NewClipboard() (Clipboard, error) {
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
 func (c Clipboard) CopyTo(value string) error {
-	if c.isInternal {
+	if c.isOSC52 {
 		osc.Copy(value)
 		return nil
 	}
@@ -120,7 +120,7 @@ func (c Clipboard) CopyTo(value string) error {
 
 // Args returns clipboard args for execution.
 func (c Clipboard) Args(copying bool) (string, []string, bool) {
-	if c.isInternal {
+	if c.isOSC52 {
 		return "", []string{}, false
 	}
 	var using []string
