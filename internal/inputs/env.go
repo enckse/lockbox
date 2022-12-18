@@ -39,7 +39,7 @@ const (
 	ClipPasteEnv = clipBaseEnv + "PASTE"
 	// ClipCopyEnv allows overriding the clipboard copy command
 	ClipCopyEnv        = clipBaseEnv + "COPY"
-	clipOSCEnv         = clipBaseEnv + "OSC"
+	clipOSC52Env       = clipBaseEnv + "OSC52"
 	isYes              = "yes"
 	isNo               = "no"
 	defaultTOTPField   = "totp"
@@ -201,8 +201,9 @@ func isYesNoEnv(defaultValue bool, env string) (bool, error) {
 	return false, fmt.Errorf("invalid yes/no env value for %s", env)
 }
 
-func IsClipOSC() (bool, error) {
-	return isYesNoEnv(false, clipOSCEnv)
+// IsClipOSC52 indicates if OSC52 mode is enabled
+func IsClipOSC52() (bool, error) {
+	return isYesNoEnv(false, clipOSC52Env)
 }
 
 // IsNoTOTP indicates if TOTP is disabled
@@ -290,6 +291,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform}))
 	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, isNo, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
-	results = append(results, e.formatEnvironmentVariable(false, clipOSCEnv, isNo, "enable OSC52 clipboard mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, isNo, "enable OSC52 clipboard mode", isYesNoArgs))
 	return results
 }

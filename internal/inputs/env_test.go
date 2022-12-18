@@ -107,6 +107,10 @@ func TestIsReadOnly(t *testing.T) {
 	checkYesNo("LOCKBOX_READONLY", t, inputs.IsReadOnly, false)
 }
 
+func TestIsOSC52(t *testing.T) {
+	checkYesNo("LOCKBOX_CLIP_OSC52", t, inputs.IsClipOSC52, false)
+}
+
 func TestIsNoTOTP(t *testing.T) {
 	checkYesNo("LOCKBOX_NOTOTP", t, inputs.IsNoTOTP, false)
 }

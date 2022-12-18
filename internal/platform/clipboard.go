@@ -23,10 +23,6 @@ type (
 	}
 )
 
-func (c Clipboard) IsInternal() bool {
-	return c.isInternal
-}
-
 func newClipboard(copying, pasting []string) (Clipboard, error) {
 	max, err := inputs.GetClipboardMax()
 	if err != nil {
@@ -63,7 +59,7 @@ func NewClipboard() (Clipboard, error) {
 	if overrideCopy != nil && overridePaste != nil {
 		return newClipboard(overrideCopy, overridePaste)
 	}
-	isOSC, err := inputs.IsClipOSC()
+	isOSC, err := inputs.IsClipOSC52()
 	if err != nil {
 		return Clipboard{}, err
 	}
@@ -109,21 +105,24 @@ func (c Clipboard) CopyTo(value string) error {
 		osc.Copy(value)
 		return nil
 	}
-	exe, err := os.Executable()
-	if err != nil {
-		return err
-	}
-	cmd, args := c.Args(true)
+	cmd, args, _ := c.Args(true)
 	pipeTo(cmd, value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
+		exe, err := os.Executable()
+		if err != nil {
+			return err
+		}
 		pipeTo(exe, value, false, "clear")
 	}
 	return nil
 }
 
 // Args returns clipboard args for execution.
-func (c Clipboard) Args(copying bool) (string, []string) {
+func (c Clipboard) Args(copying bool) (string, []string, bool) {
+	if c.isInternal {
+		return "", []string{}, false
+	}
 	var using []string
 	if copying {
 		using = c.copying
@@ -134,7 +133,7 @@ func (c Clipboard) Args(copying bool) (string, []string) {
 	if len(using) > 1 {
 		args = using[1:]
 	}
-	return using[0], args
+	return using[0], args, true
 }
 
 func pipeTo(command, value string, wait bool, args ...string) error {
