@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	osc "github.com/aymanbagabas/go-osc52"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/google/shlex"
 )
@@ -15,18 +16,23 @@ import (
 type (
 	// Clipboard represent system clipboard operations.
 	Clipboard struct {
-		copying []string
-		pasting []string
-		MaxTime int
+		copying    []string
+		pasting    []string
+		MaxTime    int
+		isInternal bool
 	}
 )
+
+func (c Clipboard) IsInternal() bool {
+	return c.isInternal
+}
 
 func newClipboard(copying, pasting []string) (Clipboard, error) {
 	max, err := inputs.GetClipboardMax()
 	if err != nil {
 		return Clipboard{}, err
 	}
-	return Clipboard{copying: copying, pasting: pasting, MaxTime: max}, nil
+	return Clipboard{copying: copying, pasting: pasting, MaxTime: max, isInternal: false}, nil
 }
 
 func overrideCommand(v string) ([]string, error) {
@@ -56,6 +62,14 @@ func NewClipboard() (Clipboard, error) {
 	}
 	if overrideCopy != nil && overridePaste != nil {
 		return newClipboard(overrideCopy, overridePaste)
+	}
+	isOSC, err := inputs.IsClipOSC()
+	if err != nil {
+		return Clipboard{}, err
+	}
+	if isOSC {
+		c := Clipboard{isInternal: true}
+		return c, nil
 	}
 	sys, err := NewPlatform()
 	if err != nil {
@@ -91,6 +105,10 @@ func NewClipboard() (Clipboard, error) {
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
 func (c Clipboard) CopyTo(value string) error {
+	if c.isInternal {
+		osc.Copy(value)
+		return nil
+	}
 	exe, err := os.Executable()
 	if err != nil {
 		return err

@@ -162,7 +162,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 16 {
+	if l != 17 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
