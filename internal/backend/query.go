@@ -129,9 +129,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			switch args.Values {
 			case SecretValue:
 				entity.Value = val
-			case HashedValue, TimeValue:
+			case HashedValue, StatsValue:
 				t := getValue(e.backing, modTimeKey)
-				if args.Values == TimeValue {
+				if args.Values == StatsValue {
 					entity.Value = t
 				} else {
 					if t != "" {

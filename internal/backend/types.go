@@ -89,8 +89,8 @@ const (
 	HashedValue
 	// SecretValue will have the raw secret onboard
 	SecretValue
-	// TimeValue will show the last modification time
-	TimeValue
+	// StatsValue will show the last modification time
+	StatsValue
 )
 
 const (

@@ -247,7 +247,7 @@ func run() error {
 		}
 		entry := args[2]
 		if command == cli.StatsCommand {
-			v, err := t.Get(entry, backend.TimeValue)
+			v, err := t.Get(entry, backend.StatsValue)
 			if err != nil {
 				return wrapped("unable to get stats", err)
 			}
