@@ -131,14 +131,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 				entity.Value = val
 			case HashedValue, StatsValue:
 				t := getValue(e.backing, modTimeKey)
-				if args.Values == StatsValue {
-					entity.Value = t
-				} else {
-					if t != "" {
-						t = fmt.Sprintf(" (%s)", t)
-					}
-					entity.Value = fmt.Sprintf("%x%s", sha512.Sum512([]byte(val)), t)
+				res := fmt.Sprintf("modtime: %s", t)
+				if args.Values == HashedValue {
+					res = fmt.Sprintf("%s\nhash: %x", res, sha512.Sum512([]byte(val)))
 				}
+				entity.Value = res
 			}
 		}
 		results = append(results, entity)

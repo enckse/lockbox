@@ -252,7 +252,7 @@ func run() error {
 				return wrapped("unable to get stats", err)
 			}
 			if v != nil {
-				fmt.Printf("modtime: %s\n", v.Value)
+				fmt.Println(v.Value)
 			}
 			return nil
 		}
@@ -308,7 +308,7 @@ func hashText(args []string) error {
 		return err
 	}
 	for _, item := range e {
-		fmt.Printf("%s:\nhash:%s\n", item.Path, item.Value)
+		fmt.Printf("%s:\n%s\n", item.Path, item.Value)
 	}
 	return nil
 }
