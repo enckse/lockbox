@@ -27,7 +27,7 @@ _{{ $.Executable }}() {
 {{end}}
                     ;;
 {{end}}
-                "{{ $.ShowCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+                "{{ $.ShowCommand }}" | "{{ $.StatsCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
                     opts=$({{ $.DoList }})
                     ;;
             esac

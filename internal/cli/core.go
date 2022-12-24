@@ -88,6 +88,7 @@ type (
 		DoTOTPList         string
 		DoList             string
 		Executable         string
+		StatsCommand       string
 	}
 )
 
@@ -130,6 +131,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 		TOTPOnceCommand:    TOTPOnceCommand,
 		ClipCommand:        ClipCommand,
 		ShowCommand:        ShowCommand,
+		StatsCommand:       StatsCommand,
 		InsertMultiCommand: InsertMultiCommand,
 		InsertTOTPCommand:  InsertTOTPCommand,
 		TOTPCommand:        TOTPCommand,
