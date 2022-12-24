@@ -308,7 +308,7 @@ func hashText(args []string) error {
 		return err
 	}
 	for _, item := range e {
-		fmt.Printf("%s:\n%s\n", item.Path, item.Value)
+		fmt.Printf("%s:\n  %s\n\n", item.Path, strings.ReplaceAll(item.Value, "\n", "\n  "))
 	}
 	return nil
 }
