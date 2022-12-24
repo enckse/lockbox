@@ -241,11 +241,21 @@ func run() error {
 				return wrapped("unable to remove entry", err)
 			}
 		}
-	case cli.ShowCommand, cli.ClipCommand:
+	case cli.ShowCommand, cli.ClipCommand, cli.StatsCommand:
 		if len(args) != 3 {
 			return errors.New("entry required")
 		}
 		entry := args[2]
+		if command == cli.StatsCommand {
+			v, err := t.Get(entry, backend.TimeValue)
+			if err != nil {
+				return wrapped("unable to get stats", err)
+			}
+			if v != nil {
+				fmt.Printf("modtime: %s\n", v.Value)
+			}
+			return nil
+		}
 		clipboard := platform.Clipboard{}
 		isShow := command == cli.ShowCommand
 		if !isShow {

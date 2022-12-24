@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	// StatsCommand will display additional entry stat information
+	StatsCommand = "stats"
 	// TOTPCommand is the parent of totp and by defaults generates a rotating token
 	TOTPCommand = "totp"
 	// HashCommand handles hashing the data store

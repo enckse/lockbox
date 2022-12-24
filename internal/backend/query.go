@@ -129,8 +129,16 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			switch args.Values {
 			case SecretValue:
 				entity.Value = val
-			case HashedValue:
-				entity.Value = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+			case HashedValue, TimeValue:
+				t := getValue(e.backing, modTimeKey)
+				if args.Values == TimeValue {
+					entity.Value = t
+				} else {
+					if t != "" {
+						t = fmt.Sprintf(" (%s)", t)
+					}
+					entity.Value = fmt.Sprintf("%x%s", sha512.Sum512([]byte(val)), t)
+				}
 			}
 		}
 		results = append(results, entity)

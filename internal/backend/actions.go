@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/tobischo/gokeepasslib/v3"
@@ -262,8 +263,8 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			v = inputs.FormatTOTP(v)
 			e.Values = append(e.Values, protectedValue("otp", v))
 		}
-
 		e.Values = append(e.Values, protectedValue(field, v))
+		e.Values = append(e.Values, value(modTimeKey, time.Now().Format(time.RFC3339)))
 		c.insertEntity(dOffset, dTitle, e)
 		return nil
 	})

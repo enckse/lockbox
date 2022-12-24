@@ -1,6 +1,7 @@
 package backend_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/backend"
@@ -83,8 +84,17 @@ func TestValueModes(t *testing.T) {
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
+	hash := q.Value
+	parts := strings.Split(hash, " ")
+	if len(parts) != 2 {
+		t.Errorf("invalid hash output: %v", parts)
+	}
+	if parts[0] != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
 		t.Errorf("invalid result value: %s", q.Value)
+	}
+	dt := parts[1]
+	if !strings.HasPrefix(dt, "(") || !strings.HasSuffix(dt, ")") || len(dt) != 27 {
+		t.Errorf("invalid date/time: %s", dt)
 	}
 	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
 	if err != nil {

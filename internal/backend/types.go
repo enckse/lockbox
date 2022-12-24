@@ -89,14 +89,17 @@ const (
 	HashedValue
 	// SecretValue will have the raw secret onboard
 	SecretValue
+	// TimeValue will show the last modification time
+	TimeValue
 )
 
 const (
-	notesKey = "Notes"
-	titleKey = "Title"
-	passKey  = "Password"
-	pathSep  = "/"
-	isGlob   = pathSep + "*"
+	notesKey   = "Notes"
+	titleKey   = "Title"
+	passKey    = "Password"
+	pathSep    = "/"
+	isGlob     = pathSep + "*"
+	modTimeKey = "ModTime"
 )
 
 var (
