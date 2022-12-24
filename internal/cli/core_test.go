@@ -9,7 +9,7 @@ import (
 
 func TestUsage(t *testing.T) {
 	u, _ := cli.Usage()
-	if len(u) != 20 {
+	if len(u) != 21 {
 		t.Errorf("invalid usage, out of date? %d", len(u))
 	}
 }

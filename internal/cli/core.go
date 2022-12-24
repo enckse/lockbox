@@ -166,7 +166,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 	c.CanClip = isClip
 	c.ReadOnly = isReadOnly
 	c.CanTOTP = isTOTP
-	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand}
+	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand}
 	if c.CanClip {
 		options = append(options, ClipCommand)
 	}
@@ -208,6 +208,7 @@ func Usage() ([]string, error) {
 	results = append(results, command(MoveCommand, "src dst", "move an entry from one location to another with the store"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
 	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
+	results = append(results, command(StatsCommand, "entry", "display entry detail information"))
 	results = append(results, command(TOTPCommand, "entry", "display an updating totp generated code"))
 	results = append(results, subCommand(TOTPCommand, TOTPClipCommand, "entry", "copy totp code to clipboard"))
 	results = append(results, subCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings"))
