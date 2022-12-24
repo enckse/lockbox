@@ -93,7 +93,7 @@ func TestValueModes(t *testing.T) {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
 	dt := parts[1]
-	if !strings.HasPrefix(dt, "(") || !strings.HasSuffix(dt, ")") || len(dt) != 27 {
+	if !strings.HasPrefix(dt, "(") || !strings.HasSuffix(dt, ")") || len(dt) <= 20 {
 		t.Errorf("invalid date/time: %s", dt)
 	}
 	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
