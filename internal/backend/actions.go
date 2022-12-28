@@ -65,8 +65,9 @@ func (t *Transaction) act(cb action) error {
 		return err
 	}
 	k := string(key)
+	file := inputs.EnvOrDefault(inputs.KeyFileEnv, "")
 	if !t.exists {
-		if err := create(t.file, k); err != nil {
+		if err := create(t.file, k, file); err != nil {
 			return err
 		}
 	}
@@ -76,7 +77,11 @@ func (t *Transaction) act(cb action) error {
 	}
 	defer f.Close()
 	db := gokeepasslib.NewDatabase()
-	db.Credentials = gokeepasslib.NewPasswordCredentials(k)
+	creds, err := getCredentials(k, file)
+	if err != nil {
+		return err
+	}
+	db.Credentials = creds
 	if err := gokeepasslib.NewDecoder(f).Decode(db); err != nil {
 		return err
 	}

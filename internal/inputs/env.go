@@ -26,6 +26,8 @@ const (
 	formatTOTPEnv  = fieldTOTPEnv + "_FORMAT"
 	keyModeEnv     = prefixKey + "KEYMODE"
 	keyEnv         = prefixKey + "KEY"
+	// KeyFileEnv is an OPTIONAL keyfile for the database
+	KeyFileEnv     = prefixKey + "KEYFILE"
 	plainKeyMode   = "plaintext"
 	commandKeyMode = "command"
 	// PlatformEnv is the platform lb is running on.
@@ -292,5 +294,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, isNo, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, isNo, "enable OSC52 clipboard mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	return results
 }

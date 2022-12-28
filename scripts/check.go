@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -56,7 +57,16 @@ func totpList() {
 }
 
 func main() {
+	keyFile := flag.Bool("keyfile", false, "enable keyfile")
+	flag.Parse()
 	path := os.Getenv("TEST_DATA")
+	useKeyFile := ""
+	if *keyFile {
+		useKeyFile = filepath.Join(path, "test.key")
+		if err := os.WriteFile(useKeyFile, []byte("thisisatest"), 0644); err != nil {
+			die("unable to write keyfile", err)
+		}
+	}
 	store := filepath.Join(path, fmt.Sprintf("%s.kdbx", time.Now().Format("20060102150405")))
 	os.Setenv("LOCKBOX_HOOKDIR", "")
 	os.Setenv("LOCKBOX_STORE", store)
@@ -65,6 +75,7 @@ func main() {
 	os.Setenv("LOCKBOX_INTERACTIVE", "no")
 	os.Setenv("LOCKBOX_READONLY", "no")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	os.Setenv("LOCKBOX_KEYFILE", useKeyFile)
 	insert("keys/k/one2", []string{"test2"})
 	for _, k := range []string{"keys/k/one", "key/a/one", "keys/k/one", "keys/k/one/", "/keys/k/one", "keys/aa/b//s///e"} {
 		insert(k, []string{"test"})

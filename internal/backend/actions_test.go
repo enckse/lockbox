@@ -17,6 +17,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	os.Setenv("LOCKBOX_READONLY", "no")
 	os.Setenv("LOCKBOX_STORE", "test.kdbx")
 	os.Setenv("LOCKBOX_KEY", "test")
+	os.Setenv("LOCKBOX_KEYFILE", "")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_TOTP", "totp")
 	os.Setenv("LOCKBOX_HOOKDIR", "")
@@ -25,6 +26,26 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 		t.Errorf("failed: %v", err)
 	}
 	return tr
+}
+
+func TestKeyFile(t *testing.T) {
+	os.Remove("file.key")
+	os.Remove("keyfile_test.kdbx")
+	os.Setenv("LOCKBOX_READONLY", "no")
+	os.Setenv("LOCKBOX_STORE", "keyfile_test.kdbx")
+	os.Setenv("LOCKBOX_KEY", "test")
+	os.Setenv("LOCKBOX_KEYFILE", "file.key.kdbx")
+	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	os.Setenv("LOCKBOX_TOTP", "totp")
+	os.Setenv("LOCKBOX_HOOKDIR", "")
+	os.WriteFile("file.key.kdbx", []byte("test"), 0644)
+	tr, err := backend.NewTransaction()
+	if err != nil {
+		t.Errorf("failed: %v", err)
+	}
+	if err := tr.Insert(backend.NewPath("a", "b"), "t"); err != nil {
+		t.Errorf("no error: %v", err)
+	}
 }
 
 func setup(t *testing.T) *backend.Transaction {

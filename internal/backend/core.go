@@ -37,11 +37,25 @@ func NewTransaction() (*Transaction, error) {
 	return loadFile(os.Getenv(inputs.StoreEnv), false)
 }
 
-func create(file, key string) error {
+func getCredentials(key, keyFile string) (*gokeepasslib.DBCredentials, error) {
+	if len(keyFile) > 0 {
+		if !pathExists(keyFile) {
+			return nil, errors.New("no keyfile found on disk")
+		}
+		return gokeepasslib.NewPasswordAndKeyCredentials(key, keyFile)
+	}
+	return gokeepasslib.NewPasswordCredentials(key), nil
+}
+
+func create(file, key, keyFile string) error {
 	root := gokeepasslib.NewGroup()
 	root.Name = "root"
 	db := gokeepasslib.NewDatabase(gokeepasslib.WithDatabaseKDBXVersion4())
-	db.Credentials = gokeepasslib.NewPasswordCredentials(key)
+	creds, err := getCredentials(key, keyFile)
+	if err != nil {
+		return err
+	}
+	db.Credentials = creds
 	db.Content.Root =
 		&gokeepasslib.RootData{
 			Groups: []gokeepasslib.Group{root},
