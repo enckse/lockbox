@@ -21,6 +21,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_TOTP", "totp")
 	os.Setenv("LOCKBOX_HOOKDIR", "")
+	os.Setenv("LOCKBOX_SET_MODTIME", "")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -38,6 +39,7 @@ func TestKeyFile(t *testing.T) {
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_TOTP", "totp")
 	os.Setenv("LOCKBOX_HOOKDIR", "")
+	os.Setenv("LOCKBOX_SET_MODTIME", "")
 	os.WriteFile("file.key.kdbx", []byte("test"), 0644)
 	tr, err := backend.NewTransaction()
 	if err != nil {

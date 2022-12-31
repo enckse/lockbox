@@ -225,6 +225,15 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
+	mod := inputs.EnvOrDefault(inputs.ModTimeEnv, "")
+	modTime := time.Now()
+	if mod != "" {
+		p, err := time.Parse(inputs.ModTimeFormat, mod)
+		if err != nil {
+			return err
+		}
+		modTime = p
+	}
 	dOffset, dTitle, err := splitComponents(dst)
 	if err != nil {
 		return err
@@ -269,7 +278,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			e.Values = append(e.Values, protectedValue("otp", v))
 		}
 		e.Values = append(e.Values, protectedValue(field, v))
-		e.Values = append(e.Values, value(modTimeKey, time.Now().Format(time.RFC3339)))
+		e.Values = append(e.Values, value(modTimeKey, modTime.Format(time.RFC3339)))
 		c.insertEntity(dOffset, dTitle, e)
 		return nil
 	})

@@ -1,6 +1,8 @@
 package backend_test
 
 import (
+	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -187,4 +189,49 @@ func TestNewPath(t *testing.T) {
 	if p != backend.NewPath("abc", "xyz") {
 		t.Error("invalid new path")
 	}
+}
+
+func TestSetModTime(t *testing.T) {
+	testDateTime := "2022-12-30T12:34:56-05:00"
+	tr := fullSetup(t, false)
+	os.Setenv("LOCKBOX_SET_MODTIME", testDateTime)
+	tr.Insert("test/xyz", "test")
+	q, err := fullSetup(t, true).Get("test/xyz", backend.HashedValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	hash := strings.TrimSpace(q.Value)
+	parts := strings.Split(hash, "\n")
+	if len(parts) != 2 {
+		t.Errorf("invalid hash output: %v", parts)
+	}
+	dt := parts[0]
+	if dt != fmt.Sprintf("modtime: %s", testDateTime) {
+		t.Errorf("invalid date/time: %s", dt)
+	}
+
+	tr = fullSetup(t, false)
+	os.Setenv("LOCKBOX_SET_MODTIME", "")
+	tr.Insert("test/xyz", "test")
+	q, err = fullSetup(t, true).Get("test/xyz", backend.HashedValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	hash = strings.TrimSpace(q.Value)
+	parts = strings.Split(hash, "\n")
+	if len(parts) != 2 {
+		t.Errorf("invalid hash output: %v", parts)
+	}
+	dt = parts[0]
+	if dt == fmt.Sprintf("modtime: %s", testDateTime) {
+		t.Errorf("invalid date/time: %s", dt)
+	}
+
+	tr = fullSetup(t, false)
+	os.Setenv("LOCKBOX_SET_MODTIME", "garbage")
+	err = tr.Insert("test/xyz", "test")
+	if err == nil || !strings.Contains(err.Error(), "parsing time") {
+		t.Errorf("invalid error: %v", err)
+	}
+
 }
