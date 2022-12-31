@@ -300,6 +300,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, isNo, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
-	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, "input mod time to set for the entry", []string{"modtime"}))
+	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input mod time to set for the entry (expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	return results
 }
