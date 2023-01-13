@@ -17,7 +17,8 @@ func termEcho(on bool) {
 		Dir:   "",
 		Env:   []string{},
 		Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
-		Sys:   nil}
+		Sys:   nil,
+	}
 	var ws syscall.WaitStatus
 	cmd := "echo"
 	if !on {

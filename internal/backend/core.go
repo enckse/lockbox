@@ -56,10 +56,9 @@ func create(file, key, keyFile string) error {
 		return err
 	}
 	db.Credentials = creds
-	db.Content.Root =
-		&gokeepasslib.RootData{
-			Groups: []gokeepasslib.Group{root},
-		}
+	db.Content.Root = &gokeepasslib.RootData{
+		Groups: []gokeepasslib.Group{root},
+	}
 	if err := db.LockProtectedEntries(); err != nil {
 		return err
 	}

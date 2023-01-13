@@ -17,10 +17,8 @@ import (
 	"github.com/enckse/lockbox/internal/totp"
 )
 
-var (
-	//go:embed "vers.txt"
-	version string
-)
+//go:embed "vers.txt"
+var version string
 
 type (
 	callbackFunction func([]string) error

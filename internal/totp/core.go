@@ -18,10 +18,8 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
-var (
-	// ErrNoTOTP is used when TOTP is requested BUT is disabled
-	ErrNoTOTP = errors.New("TOTP is disabled")
-)
+// ErrNoTOTP is used when TOTP is requested BUT is disabled
+var ErrNoTOTP = errors.New("TOTP is disabled")
 
 type (
 	arguments struct {

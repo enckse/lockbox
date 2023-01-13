@@ -40,7 +40,7 @@ func TestKeyFile(t *testing.T) {
 	os.Setenv("LOCKBOX_TOTP", "totp")
 	os.Setenv("LOCKBOX_HOOKDIR", "")
 	os.Setenv("LOCKBOX_SET_MODTIME", "")
-	os.WriteFile("file.key.kdbx", []byte("test"), 0644)
+	os.WriteFile("file.key.kdbx", []byte("test"), 0o644)
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -264,7 +264,7 @@ func TestHooks(t *testing.T) {
 	}
 	testPath := "hooks.kdbx"
 	os.RemoveAll(testPath)
-	if err := os.MkdirAll(testPath, 0755); err != nil {
+	if err := os.MkdirAll(testPath, 0o755); err != nil {
 		t.Errorf("failed, mkdir: %v", err)
 	}
 	os.Setenv("LOCKBOX_HOOKDIR", testPath)
@@ -276,7 +276,7 @@ func TestHooks(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	sub := filepath.Join(testPath, "subdir")
-	if err := os.MkdirAll(sub, 0755); err != nil {
+	if err := os.MkdirAll(sub, 0o755); err != nil {
 		t.Errorf("failed, mkdir sub: %v", err)
 	}
 	if _, err := backend.NewHook("b", backend.InsertAction); err.Error() != "found subdirectory in hookdir" {
@@ -286,7 +286,7 @@ func TestHooks(t *testing.T) {
 		t.Errorf("failed rmdir: %v", err)
 	}
 	script := filepath.Join(testPath, "testscript")
-	if err := os.WriteFile(script, []byte{}, 0644); err != nil {
+	if err := os.WriteFile(script, []byte{}, 0o644); err != nil {
 		t.Errorf("unable to write script: %v", err)
 	}
 	h, err = backend.NewHook("a", backend.InsertAction)

@@ -62,10 +62,8 @@ const (
 	BashDefaultsCommand = "-defaults"
 )
 
-var (
-	//go:embed "completions.bash"
-	bashCompletions string
-)
+//go:embed "completions.bash"
+var bashCompletions string
 
 type (
 	// Completions handles the inputs to completions for templating

@@ -102,6 +102,4 @@ const (
 	modTimeKey = "ModTime"
 )
 
-var (
-	errPath = errors.New("input paths must contain at LEAST 2 components")
-)
+var errPath = errors.New("input paths must contain at LEAST 2 components")

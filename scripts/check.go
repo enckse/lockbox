@@ -63,7 +63,7 @@ func main() {
 	useKeyFile := ""
 	if *keyFile {
 		useKeyFile = filepath.Join(path, "test.key")
-		if err := os.WriteFile(useKeyFile, []byte("thisisatest"), 0644); err != nil {
+		if err := os.WriteFile(useKeyFile, []byte("thisisatest"), 0o644); err != nil {
 			die("unable to write keyfile", err)
 		}
 	}

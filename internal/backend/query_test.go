@@ -233,5 +233,4 @@ func TestSetModTime(t *testing.T) {
 	if err == nil || !strings.Contains(err.Error(), "parsing time") {
 		t.Errorf("invalid error: %v", err)
 	}
-
 }

@@ -95,7 +95,6 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 						return
 					}
 				}
-
 			} else {
 				if args.Mode == ExactMode {
 					if path != args.Criteria {
