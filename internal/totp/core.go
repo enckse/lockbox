@@ -81,7 +81,7 @@ func display(token string, args arguments) error {
 		return errors.New("object does not exist")
 	}
 	totpToken := string(entity.Value)
-	k, err := coreotp.NewKeyFromURL(totpToken)
+	k, err := coreotp.NewKeyFromURL(inputs.FormatTOTP(totpToken))
 	if err != nil {
 		return err
 	}
