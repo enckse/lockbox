@@ -44,7 +44,7 @@ keys2/k/three:
 
 test/k/totp:
   modtime: XXXX-XX-XX
-  hash: b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54b70c0acb0428d6db7205101e332f950ffb6b6d643aa37287c6aa5
+  hash: 7ef183065ba70aaa417b87ea0a96b7e550a938a52440c640a07537f7794d8a89e50078eca6a7cbcfacabd97a2db06d11e82ddf7556ca909c4df9fc0d006013b1
 
 delete entry? (y/N) 
 delete entry? (y/N) 

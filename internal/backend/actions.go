@@ -274,8 +274,8 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			if multi {
 				return errors.New("totp tokens can NOT be multi-line")
 			}
-			v = inputs.FormatTOTP(v)
-			e.Values = append(e.Values, protectedValue("otp", v))
+			otp := inputs.FormatTOTP(v)
+			e.Values = append(e.Values, protectedValue("otp", otp))
 		}
 		e.Values = append(e.Values, protectedValue(field, v))
 		e.Values = append(e.Values, value(modTimeKey, modTime.Format(time.RFC3339)))
