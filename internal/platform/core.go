@@ -49,13 +49,13 @@ func NewPlatform() (System, error) {
 	if err != nil {
 		return Unknown, err
 	}
-	raw := strings.TrimSpace(string(b))
+	raw := strings.ToLower(strings.TrimSpace(string(b)))
 	parts := strings.Split(raw, " ")
 	switch parts[0] {
-	case "Darwin":
+	case "darwin":
 		return MacOS, nil
-	case "Linux":
-		if strings.Contains(raw, "microsoft-standard-WSL2") {
+	case "linux":
+		if strings.Contains(raw, "microsoft-standard-wsl") {
 			return WindowsLinux, nil
 		}
 		if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
