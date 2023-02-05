@@ -85,6 +85,8 @@ type (
 		Start int
 		End   int
 	}
+	// SystemPlatform represents the platform lockbox is running on.
+	SystemPlatform string
 )
 
 func toString(windows []ColorWindow) string {

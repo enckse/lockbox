@@ -4,11 +4,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 )
 
 func TestNewPlatform(t *testing.T) {
-	for _, item := range []platform.System{platform.MacOS, platform.LinuxWayland, platform.LinuxX, platform.WindowsLinux} {
+	for _, item := range []inputs.SystemPlatform{inputs.MacOSPlatform, inputs.LinuxWaylandPlatform, inputs.LinuxXPlatform, inputs.WindowsLinuxPlatform} {
 		os.Setenv("LOCKBOX_PLATFORM", string(item))
 		s, err := platform.NewPlatform()
 		if err != nil {
