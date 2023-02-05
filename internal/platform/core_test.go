@@ -9,13 +9,13 @@ import (
 )
 
 func TestNewPlatform(t *testing.T) {
-	for _, item := range []inputs.SystemPlatform{inputs.MacOSPlatform, inputs.LinuxWaylandPlatform, inputs.LinuxXPlatform, inputs.WindowsLinuxPlatform} {
-		os.Setenv("LOCKBOX_PLATFORM", string(item))
+	for _, item := range inputs.PlatformSet() {
+		os.Setenv("LOCKBOX_PLATFORM", item)
 		s, err := platform.NewPlatform()
 		if err != nil {
 			t.Errorf("invalid clipboard: %v", err)
 		}
-		if s != item {
+		if s != inputs.SystemPlatform(item) {
 			t.Error("mismatch on input and resulting detection")
 		}
 	}

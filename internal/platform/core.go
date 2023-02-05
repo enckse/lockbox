@@ -18,18 +18,12 @@ const (
 func NewPlatform() (inputs.SystemPlatform, error) {
 	env := os.Getenv(inputs.PlatformEnv)
 	if env != "" {
-		switch env {
-		case inputs.MacOSPlatform:
-			return inputs.MacOSPlatform, nil
-		case inputs.LinuxWaylandPlatform:
-			return inputs.LinuxWaylandPlatform, nil
-		case inputs.WindowsLinuxPlatform:
-			return inputs.WindowsLinuxPlatform, nil
-		case inputs.LinuxXPlatform:
-			return inputs.LinuxXPlatform, nil
-		default:
-			return unknownPlatform, errors.New("unknown platform mode")
+		for _, p := range inputs.PlatformSet() {
+			if p == env {
+				return inputs.SystemPlatform(p), nil
+			}
 		}
+		return unknownPlatform, errors.New("unknown platform mode")
 	}
 	b, err := exec.Command("uname", "-a").Output()
 	if err != nil {

@@ -55,8 +55,8 @@ func TestClipboardInstances(t *testing.T) {
 	os.Setenv("LOCKBOX_NOCLIP", "no")
 	os.Setenv("LOCKBOX_CLIP_MAX", "")
 	os.Setenv("LOCKBOX_CLIP_OSC52", "no")
-	for _, item := range []inputs.SystemPlatform{inputs.MacOSPlatform, inputs.LinuxWaylandPlatform, inputs.LinuxXPlatform, inputs.WindowsLinuxPlatform} {
-		os.Setenv("LOCKBOX_PLATFORM", string(item))
+	for _, item := range inputs.PlatformSet() {
+		os.Setenv("LOCKBOX_PLATFORM", item)
 		_, err := platform.NewClipboard()
 		if err != nil {
 			t.Errorf("invalid clipboard: %v", err)

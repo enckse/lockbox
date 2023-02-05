@@ -280,6 +280,15 @@ func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, d
 	return fmt.Sprintf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", name, desc, required, value, strings.Join(allowed, "|"))
 }
 
+func PlatformSet() []string {
+	return []string{
+		MacOSPlatform,
+		LinuxWaylandPlatform,
+		LinuxXPlatform,
+		WindowsLinuxPlatform,
+	}
+}
+
 // ListEnvironmentVariables will print information about env variables and potential/set values
 func ListEnvironmentVariables(showValues bool) []string {
 	e := environmentOutput{showValues: showValues}
@@ -297,7 +306,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10), must be an integer", []string{"integer"}))
-	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", []string{MacOSPlatform, LinuxWaylandPlatform, LinuxXPlatform, WindowsLinuxPlatform}))
+	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
 	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, isNo, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, isNo, "enable OSC52 clipboard mode", isYesNoArgs))
