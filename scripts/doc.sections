@@ -28,7 +28,7 @@ displaying of code outputs. Many of these settings can be changed via environmen
 [rekey]
 The password store can have the key (and file) changed via the 'key' subcommand. This
 will require setting additional environment variables for the new key, key mode, key file,
-and store (as specified as environment variables) but with '_NEW" added as a suffix
+and store (as specified as environment variables) but with '_NEW' added as a suffix
 
 [environment variables]
 
