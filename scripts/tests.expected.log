@@ -116,4 +116,6 @@ post rm keys/k2/t2/one2
 CALLED
 
 keys/k/one2
+
+proceed with rekey? (y/N) 
 keys/k/one2

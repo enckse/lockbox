@@ -116,8 +116,10 @@ func run() error {
 	}
 	switch command {
 	case cli.ReKeyCommand:
-		if err := t.ReKey(); err != nil {
-			return wrapped("unable to rekey", err)
+		if confirm("proceed with rekey") {
+			if err := t.ReKey(); err != nil {
+				return wrapped("unable to rekey", err)
+			}
 		}
 	case cli.ListCommand, cli.FindCommand:
 		opts := backend.QueryOptions{}
