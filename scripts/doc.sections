@@ -22,7 +22,7 @@ commands to interact with (copy to/paste to) the clipboard. These settings can b
 via environment variables
 
 [totp]
-By default lb tries to use some reasonable defaults to setup/manage oauth token inputs and
+By default 'lb' tries to use some reasonable defaults to setup/manage oauth token inputs and
 displaying of code outputs. Many of these settings can be changed via environment variables
 
 [rekey]
@@ -32,4 +32,4 @@ and store (as specified as environment variables) but with '_NEW' added as a suf
 
 [environment variables]
 
-The following environment variables can alter how lb works
+The following environment variables can alter how 'lb' works

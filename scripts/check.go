@@ -133,7 +133,7 @@ func main() {
 	os.Setenv("LOCKBOX_KEY_NEW", reKey)
 	os.Setenv("LOCKBOX_KEYMODE_NEW", "plaintext")
 	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
-	runCommand([]string{"key"}, yes)
+	runCommand([]string{"rekey"}, yes)
 	os.Setenv("LOCKBOX_STORE", reKeyStore)
 	os.Setenv("LOCKBOX_KEYFILE", "")
 	os.Setenv("LOCKBOX_KEY", reKey)
