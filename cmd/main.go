@@ -115,6 +115,10 @@ func run() error {
 		return wrapped("unable to build transaction model", err)
 	}
 	switch command {
+	case cli.ReKeyCommand:
+		if err := t.ReKey(); err != nil {
+			return wrapped("unable to rekey", err)
+		}
 	case cli.ListCommand, cli.FindCommand:
 		opts := backend.QueryOptions{}
 		opts.Mode = backend.ListMode

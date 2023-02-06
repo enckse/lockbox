@@ -60,6 +60,7 @@ const (
 	BashCommand = "bash"
 	// BashDefaultsCommand will generate environment agnostic completions
 	BashDefaultsCommand = "-defaults"
+	ReKeyCommand        = "key"
 )
 
 //go:embed "completions.bash"
@@ -164,7 +165,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 	c.CanClip = isClip
 	c.ReadOnly = isReadOnly
 	c.CanTOTP = isTOTP
-	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand}
+	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand, ReKeyCommand}
 	if c.CanClip {
 		options = append(options, ClipCommand)
 	}
@@ -205,6 +206,7 @@ func Usage() ([]string, error) {
 	results = append(results, command(ListCommand, "", "list entries"))
 	results = append(results, command(MoveCommand, "src dst", "move an entry from one location to another with the store"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
+	results = append(results, command(ReKeyCommand, "", "rekey the database"))
 	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
 	results = append(results, command(StatsCommand, "entry", "display entry detail information"))
 	results = append(results, command(TOTPCommand, "entry", "display an updating totp generated code"))

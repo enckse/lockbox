@@ -124,4 +124,15 @@ func main() {
 	rm("keys/k2/*")
 	fmt.Println()
 	ls()
+	reKeyStore := fmt.Sprintf("%s.rekey.kdbx", store)
+	reKey := "rekey"
+	os.Setenv("LOCKBOX_STORE_NEW", reKeyStore)
+	os.Setenv("LOCKBOX_KEY_NEW", reKey)
+	os.Setenv("LOCKBOX_KEYMODE_NEW", "plaintext")
+	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
+	runCommand([]string{"key"}, nil)
+	os.Setenv("LOCKBOX_STORE", reKeyStore)
+	os.Setenv("LOCKBOX_KEYFILE", "")
+	os.Setenv("LOCKBOX_KEY", reKey)
+	ls()
 }

@@ -14,6 +14,16 @@ import (
 	"github.com/google/shlex"
 )
 
+func SetReKey() error {
+	for _, k := range []string{keyModeEnv, keyEnv, KeyFileEnv, StoreEnv} {
+		val := os.Getenv(fmt.Sprintf("%s_NEW", k))
+		if err := os.Setenv(k, val); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 const (
 	otpAuth        = "otpauth"
 	otpIssuer      = "lbissuer"
