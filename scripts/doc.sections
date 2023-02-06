@@ -25,6 +25,11 @@ via environment variables
 By default lb tries to use some reasonable defaults to setup/manage oauth token inputs and
 displaying of code outputs. Many of these settings can be changed via environment variables
 
+[rekey]
+The password store can have the key (and file) changed via the 'key' subcommand. This
+will require setting additional environment variables for the new key, key mode, key file,
+and store (as specified as environment variables) but with '_NEW" added as a suffix
+
 [environment variables]
 
 The following environment variables can alter how lb works
