@@ -170,3 +170,42 @@ func TestListVariables(t *testing.T) {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
+
+func TestReKey(t *testing.T) {
+	os.Setenv("LOCKBOX_STORE_NEW", "")
+	os.Setenv("LOCKBOX_KEY_NEW", "")
+	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
+	err := inputs.SetReKey()
+	if err == nil || err.Error() != "missing required environment variables for rekey" {
+		t.Errorf("failed: %v", err)
+	}
+	os.Setenv("LOCKBOX_STORE_NEW", "abc")
+	err = inputs.SetReKey()
+	if err == nil || err.Error() != "missing required environment variables for rekey" {
+		t.Errorf("failed: %v", err)
+	}
+	if os.Getenv("LOCKBOX_STORE") != "abc" {
+		t.Error("not set")
+	}
+	os.Setenv("LOCKBOX_KEY_NEW", "aaa")
+	err = inputs.SetReKey()
+	if err != nil {
+		t.Errorf("failed: %v", err)
+	}
+	if os.Getenv("LOCKBOX_KEY") != "aaa" && os.Getenv("LOCKBOX_KEYFILE") == "" {
+		t.Error("not set")
+	}
+	os.Setenv("LOCKBOX_KEY_NEW", "")
+	os.Setenv("LOCKBOX_KEYFILE_NEW", "xxx")
+	err = inputs.SetReKey()
+	if err != nil {
+		t.Errorf("failed: %v", err)
+	}
+	if os.Getenv("LOCKBOX_KEYFILE") != "xxx" && os.Getenv("LOCKBOX_KEY") == "" {
+		t.Error("not set")
+	}
+	os.Setenv("LOCKBOX_KEY_NEW", "")
+	os.Setenv("LOCKBOX_STORE_NEW", "")
+	os.Setenv("LOCKBOX_KEY_NEW", "")
+	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
+}

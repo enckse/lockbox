@@ -14,16 +14,6 @@ import (
 	"github.com/google/shlex"
 )
 
-func SetReKey() error {
-	for _, k := range []string{keyModeEnv, keyEnv, KeyFileEnv, StoreEnv} {
-		val := os.Getenv(fmt.Sprintf("%s_NEW", k))
-		if err := os.Setenv(k, val); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 const (
 	otpAuth        = "otpauth"
 	otpIssuer      = "lbissuer"
@@ -76,6 +66,7 @@ const (
 	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
+	reKeySuffix   = "_NEW"
 )
 
 var (
@@ -98,6 +89,33 @@ type (
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform string
 )
+
+// SetReKey will enable the rekeying mode for the environment
+func SetReKey() error {
+	hasStore := false
+	hasKey := false
+	hasKeyFile := false
+	for _, k := range []string{keyModeEnv, keyEnv, KeyFileEnv, StoreEnv} {
+		val := os.Getenv(fmt.Sprintf("%s%s", k, reKeySuffix))
+		if val != "" {
+			switch k {
+			case StoreEnv:
+				hasStore = true
+			case keyEnv:
+				hasKey = true
+			case KeyFileEnv:
+				hasKeyFile = true
+			}
+		}
+		if err := os.Setenv(k, val); err != nil {
+			return err
+		}
+	}
+	if !hasStore || (!hasKey && !hasKeyFile) {
+		return errors.New("missing required environment variables for rekey")
+	}
+	return nil
+}
 
 func toString(windows []ColorWindow) string {
 	var results []string
