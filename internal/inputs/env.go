@@ -308,6 +308,7 @@ func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, d
 	return fmt.Sprintf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", name, desc, required, value, strings.Join(allowed, "|"))
 }
 
+// PlatformSet returns the list of possible platforms
 func PlatformSet() []string {
 	return []string{
 		MacOSPlatform,

@@ -217,6 +217,7 @@ func splitComponents(path string) ([]string, string, error) {
 	return parts, title, nil
 }
 
+// ReKey will rekey the database to a new store output
 func (t *Transaction) ReKey() error {
 	return t.act(func(c Context) error {
 		t.write = false
