@@ -93,7 +93,7 @@ func processInfoCommands(command string, args []string) ([]string, error) {
 }
 
 func wrapped(message string, err error) error {
-	return fmt.Errorf("%s (%v)", message, err)
+	return fmt.Errorf("%s (%w)", message, err)
 }
 
 func run() error {
