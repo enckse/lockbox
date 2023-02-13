@@ -38,6 +38,8 @@ const (
 	VersionCommand = "version"
 	// HelpCommand shows usage
 	HelpCommand = "help"
+	// HelpAdvancedCommand shows advanced help
+	HelpAdvancedCommand = "-verbose"
 	// RemoveCommand removes an entry
 	RemoveCommand = "rm"
 	// EnvCommand shows environment information used by lockbox
@@ -70,25 +72,27 @@ var bashCompletions string
 type (
 	// Completions handles the inputs to completions for templating
 	Completions struct {
-		Options            []string
-		CanClip            bool
-		CanTOTP            bool
-		ReadOnly           bool
-		InsertCommand      string
-		TOTPShortCommand   string
-		TOTPOnceCommand    string
-		TOTPClipCommand    string
-		InsertMultiCommand string
-		InsertTOTPCommand  string
-		RemoveCommand      string
-		ClipCommand        string
-		ShowCommand        string
-		MoveCommand        string
-		TOTPCommand        string
-		DoTOTPList         string
-		DoList             string
-		Executable         string
-		StatsCommand       string
+		Options             []string
+		CanClip             bool
+		CanTOTP             bool
+		ReadOnly            bool
+		InsertCommand       string
+		TOTPShortCommand    string
+		TOTPOnceCommand     string
+		TOTPClipCommand     string
+		InsertMultiCommand  string
+		InsertTOTPCommand   string
+		RemoveCommand       string
+		ClipCommand         string
+		ShowCommand         string
+		MoveCommand         string
+		TOTPCommand         string
+		DoTOTPList          string
+		DoList              string
+		Executable          string
+		StatsCommand        string
+		HelpCommand         string
+		HelpAdvancedCommand string
 	}
 )
 
@@ -123,21 +127,23 @@ func BashCompletions(defaults bool) ([]string, error) {
 		return nil, err
 	}
 	c := Completions{
-		Executable:         name,
-		InsertCommand:      InsertCommand,
-		RemoveCommand:      RemoveCommand,
-		TOTPShortCommand:   TOTPShortCommand,
-		TOTPClipCommand:    TOTPClipCommand,
-		TOTPOnceCommand:    TOTPOnceCommand,
-		ClipCommand:        ClipCommand,
-		ShowCommand:        ShowCommand,
-		StatsCommand:       StatsCommand,
-		InsertMultiCommand: InsertMultiCommand,
-		InsertTOTPCommand:  InsertTOTPCommand,
-		TOTPCommand:        TOTPCommand,
-		MoveCommand:        MoveCommand,
-		DoList:             fmt.Sprintf("%s %s", name, ListCommand),
-		DoTOTPList:         fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
+		Executable:          name,
+		InsertCommand:       InsertCommand,
+		RemoveCommand:       RemoveCommand,
+		TOTPShortCommand:    TOTPShortCommand,
+		TOTPClipCommand:     TOTPClipCommand,
+		TOTPOnceCommand:     TOTPOnceCommand,
+		ClipCommand:         ClipCommand,
+		ShowCommand:         ShowCommand,
+		StatsCommand:        StatsCommand,
+		InsertMultiCommand:  InsertMultiCommand,
+		HelpCommand:         HelpCommand,
+		HelpAdvancedCommand: HelpAdvancedCommand,
+		InsertTOTPCommand:   InsertTOTPCommand,
+		TOTPCommand:         TOTPCommand,
+		MoveCommand:         MoveCommand,
+		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
+		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
 	}
 	isReadOnly := false
 	isClip := true
@@ -201,6 +207,7 @@ func Usage() ([]string, error) {
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(FindCommand, "criteria", "perform a simplistic text search over the entry keys"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
+	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
 	results = append(results, subCommand(InsertCommand, InsertMultiCommand, "entry", "insert a multi-line entry"))
 	results = append(results, subCommand(InsertCommand, InsertTOTPCommand, "entry", "insert a new totp entry"))

@@ -4,7 +4,6 @@ TARGET  := $(BUILD)lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 DOC     := $(BUILD)doc.text
 MAN     := $(BUILD)lb.man
-DOCTEXT := scripts/doc.sections
 ACTUAL  := $(BUILD)actual.log
 DATE    := $(shell date +%Y-%m-%d)
 RUNS    := -keyfile=true -keyfile=false
@@ -22,7 +21,7 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 $(TESTDIR):
 	cd $@ && go test
 
-check: $(TARGET) $(TESTDIR) $(RUNS)
+check: $(TARGET) $(TESTDIR) $(DOC) $(RUNS)
 
 $(RUNS):
 	rm -f $(BUILD)*.kdbx
@@ -32,9 +31,8 @@ $(RUNS):
 clean:
 	rm -rf $(BUILD)
 
-$(DOC): $(TARGET) $(DOCTEXT)
-	@cat $(DOCTEXT) > $(DOC)
-	$(TARGET) env -defaults >> $(DOC)
+$(DOC): $(TARGET)
+	$(TARGET) help -verbose > $(DOC)
 
 $(MAN): $(TARGET) $(DOC)
 	help2man --include $(DOC) -h help -v version -o $(MAN) ./$(TARGET)

@@ -15,6 +15,9 @@ _{{ $.Executable }}() {
                 "{{ $.InsertCommand }}")
                     opts="{{ $.InsertMultiCommand }}{{ if $.CanTOTP }} {{ $.InsertTOTPCommand }}{{end}} $({{ $.DoList }})"
                     ;;
+                "{{ $.HelpCommand }}")
+                    opts="{{ $.HelpAdvancedCommand }}"
+                    ;;
                 "{{ $.MoveCommand }}")
                     opts=$({{ $.DoList }})
                     ;;

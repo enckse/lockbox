@@ -17,8 +17,12 @@ import (
 	"github.com/enckse/lockbox/internal/totp"
 )
 
-//go:embed "vers.txt"
-var version string
+var (
+	//go:embed "vers.txt"
+	version string
+	//go:embed "doc.sections"
+	docSection string
+)
 
 type (
 	callbackFunction func([]string) error
@@ -71,7 +75,28 @@ func getInfoDefault(args []string, possibleArg string) (bool, error) {
 func processInfoCommands(command string, args []string) ([]string, error) {
 	switch command {
 	case cli.HelpCommand:
-		return cli.Usage()
+		if len(args) > 3 {
+			return nil, errors.New("invalid help command")
+		}
+		isAdvanced := false
+		if len(args) == 3 {
+			if args[2] == cli.HelpAdvancedCommand {
+				isAdvanced = true
+			} else {
+				return nil, errors.New("invalid help option")
+			}
+		}
+		results, err := cli.Usage()
+		if err != nil {
+			return nil, err
+		}
+		if isAdvanced {
+			results = append(results, "")
+			results = append(results, strings.Split(strings.TrimSpace(docSection), "\n")...)
+			results = append(results, "")
+			results = append(results, inputs.ListEnvironmentVariables(false)...)
+		}
+		return results, nil
 	case cli.VersionCommand:
 		return []string{fmt.Sprintf("version: %s", version)}, nil
 	case cli.EnvCommand, cli.BashCommand:
