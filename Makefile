@@ -33,6 +33,7 @@ clean:
 
 $(DOC): $(TARGET)
 	$(TARGET) help -verbose > $(DOC)
+	test -s $(DOC)
 
 $(MAN): $(TARGET) $(DOC)
 	help2man --include $(DOC) -h help -v version -o $(MAN) ./$(TARGET)
