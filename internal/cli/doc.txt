@@ -1,0 +1,38 @@
+[database]
+While 'lb' uses a kdbx file (version 4), it is opinionated about how to store
+data within the file. This means 'lb' should be the only way a user normally
+interacts with or changes the underlying database. However as the file is a 
+normal kdbx file format (e.g. can be opened in tools supporting the format) it
+is possible to use the database in those applications, just take caution when
+changing it outside of 'lb' usage. If a database not normally used by 'lb' is
+to be used by 'lb', try using the various readonly settings to control
+interactions.
+
+[remove]
+The 'rm' command can handle a simplistic glob if it is at the END of the path.
+This allows for bulk-removal of entries at multiple levels. Confirmation will
+still be required for removal (matching entries will be listed)
+
+lb rm path/to/leaf/dir/*
+
+lb rm path/to/*
+
+[clipboard]
+By default clipboard commands are detected via determing the platform and 
+utilizing default commands to interact with (copy to/paste to) the clipboard.
+These settings can be overriden via environment variables
+
+[totp]
+By default 'lb' tries to use some reasonable defaults to setup/manage oauth
+token inputs and displaying of code outputs. Many of these settings can be
+changed via environment variables
+
+[rekey]
+The password store can have the key (and file) changed via the 'key'
+subcommand. This will require setting additional environment variables for the
+new key, key mode, key file, and store (as specified as environment variables)
+but with '_NEW' added as a suffix
+
+[environment variables]
+
+The following environment variables can alter how 'lb' works
