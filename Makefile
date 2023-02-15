@@ -22,6 +22,7 @@ $(TESTDIR):
 	cd $@ && go test
 
 check: $(TARGET) $(TESTDIR) $(DOC) $(RUNS)
+	sed -n '/\(.\)\{79\}/p' $(DOC) | wc -l | grep -q '^exit 0$$'
 
 $(RUNS):
 	rm -f $(BUILD)*.kdbx

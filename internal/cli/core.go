@@ -201,18 +201,18 @@ func Usage() ([]string, error) {
 		return nil, err
 	}
 	var results []string
-	results = append(results, command(BashCommand, "", "generate bash completions"))
-	results = append(results, subCommand(BashCommand, BashDefaultsCommand, "", "generate default bash completion, not user environment specific"))
+	results = append(results, command(BashCommand, "", "generate user environment bash completion"))
+	results = append(results, subCommand(BashCommand, BashDefaultsCommand, "", "generate default bash completion"))
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
-	results = append(results, command(FindCommand, "criteria", "perform a simplistic text search over the entry keys"))
+	results = append(results, command(FindCommand, "criteria", "perform a text search over the entry keys"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
 	results = append(results, subCommand(InsertCommand, InsertMultiCommand, "entry", "insert a multi-line entry"))
 	results = append(results, subCommand(InsertCommand, InsertTOTPCommand, "entry", "insert a new totp entry"))
 	results = append(results, command(ListCommand, "", "list entries"))
-	results = append(results, command(MoveCommand, "src dst", "move an entry from one location to another with the store"))
+	results = append(results, command(MoveCommand, "src dst", "move an entry from source to destination"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
 	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
 	results = append(results, command(StatsCommand, "entry", "display entry detail information"))
@@ -220,7 +220,7 @@ func Usage() ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPClipCommand, "entry", "copy totp code to clipboard"))
 	results = append(results, subCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings"))
 	results = append(results, subCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code"))
-	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code with no details"))
+	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code (no details)"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", name)}
