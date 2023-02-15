@@ -305,7 +305,7 @@ func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, d
 	if len(value) == 0 {
 		value = "(unset)"
 	}
-    description := strings.ReplaceAll(desc, "\n", "\n  ")
+	description := strings.ReplaceAll(desc, "\n", "\n  ")
 	return fmt.Sprintf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", name, description, required, value, strings.Join(allowed, "|"))
 }
 

@@ -17,12 +17,8 @@ import (
 	"github.com/enckse/lockbox/internal/totp"
 )
 
-var (
-	//go:embed "vers.txt"
-	version string
-	//go:embed "doc.sections"
-	docSection string
-)
+//go:embed "vers.txt"
+var version string
 
 type (
 	callbackFunction func([]string) error
@@ -86,15 +82,9 @@ func processInfoCommands(command string, args []string) ([]string, error) {
 				return nil, errors.New("invalid help option")
 			}
 		}
-		results, err := cli.Usage()
+		results, err := cli.Usage(isAdvanced)
 		if err != nil {
 			return nil, err
-		}
-		if isAdvanced {
-			results = append(results, "")
-			results = append(results, strings.Split(strings.TrimSpace(docSection), "\n")...)
-			results = append(results, "")
-			results = append(results, inputs.ListEnvironmentVariables(false)...)
 		}
 		return results, nil
 	case cli.VersionCommand:

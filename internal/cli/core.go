@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/enckse/lockbox/internal/inputs"
@@ -66,8 +67,13 @@ const (
 	ReKeyCommand = "rekey"
 )
 
-//go:embed "completions.bash"
-var bashCompletions string
+var (
+	//go:embed "completions.bash"
+	bashCompletions string
+
+	//go:embed "doc.txt"
+	docSection string
+)
 
 type (
 	// Completions handles the inputs to completions for templating
@@ -195,7 +201,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 }
 
 // Usage return usage information
-func Usage() ([]string, error) {
+func Usage(verbose bool) ([]string, error) {
 	name, err := exeName()
 	if err != nil {
 		return nil, err
@@ -224,5 +230,11 @@ func Usage() ([]string, error) {
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", name)}
+	if verbose {
+		results = append(results, "")
+		results = append(results, strings.Split(strings.TrimSpace(docSection), "\n")...)
+		results = append(results, "")
+		results = append(results, inputs.ListEnvironmentVariables(false)...)
+	}
 	return append(usage, results...), nil
 }
