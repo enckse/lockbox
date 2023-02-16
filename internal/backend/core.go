@@ -77,10 +77,8 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 
 // pathExists indicates if a path exists.
 func pathExists(path string) bool {
-	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		return false
 	}
 	return true
 }
