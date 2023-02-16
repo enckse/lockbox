@@ -2,13 +2,13 @@
 package inputs
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"syscall"
+
+	"github.com/enckse/lockbox/internal/util"
 )
 
 func termEcho(on bool) {
@@ -86,7 +86,7 @@ func confirmInputsMatch() (string, error) {
 
 // Stdin will get one (or more) lines of stdin as string.
 func Stdin(one bool) (string, error) {
-	b, err := getStdin(one)
+	b, err := util.ReadStdin(one)
 	if err != nil {
 		return "", err
 	}
@@ -107,20 +107,4 @@ func ConfirmYesNoPrompt(prompt string) (bool, error) {
 		return false, err
 	}
 	return resp == "Y" || resp == "y", nil
-}
-
-func getStdin(one bool) ([]byte, error) {
-	scanner := bufio.NewScanner(os.Stdin)
-	var b bytes.Buffer
-	for scanner.Scan() {
-		b.WriteString(scanner.Text())
-		b.WriteString("\n")
-		if one {
-			break
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
 }

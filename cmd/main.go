@@ -15,6 +15,7 @@ import (
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/totp"
+	"github.com/enckse/lockbox/internal/util"
 )
 
 //go:embed "vers.txt"
@@ -36,14 +37,9 @@ func internalCallback(name string) callbackFunction {
 	return nil
 }
 
-func exit(err error) {
-	fmt.Fprintln(os.Stderr, err)
-	os.Exit(1)
-}
-
 func main() {
 	if err := run(); err != nil {
-		exit(err)
+		util.Fatal(err)
 	}
 }
 
@@ -364,7 +360,7 @@ func clearClipboard(args []string) error {
 func confirm(prompt string) bool {
 	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		exit(wrapped("failed to get response", err))
+		util.Die("failed to read stdin for confirmation", err)
 	}
 	return yesNo
 }
