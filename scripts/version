@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 if [ ! -d .git ]; then
-  echo "not git controlled"
+  2>&1 echo "not git controlled"
   exit 0
 fi
 
