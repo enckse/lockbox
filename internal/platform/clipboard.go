@@ -10,7 +10,6 @@ import (
 
 	osc "github.com/aymanbagabas/go-osc52"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/google/shlex"
 )
 
 type (
@@ -36,7 +35,7 @@ func overrideCommand(v string) ([]string, error) {
 	if strings.TrimSpace(value) == "" {
 		return nil, nil
 	}
-	return shlex.Split(value)
+	return inputs.Shlex(value)
 }
 
 // NewClipboard will retrieve the commands to use for clipboard operations.

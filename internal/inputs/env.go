@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/shlex"
+	"mvdan.cc/sh/v3/shell"
 )
 
 const (
@@ -202,11 +202,16 @@ func GetKey() ([]byte, error) {
 	return b, nil
 }
 
+// Shlex will do simple shell command lex-ing
+func Shlex(in string) ([]string, error) {
+	return shell.Fields(in, os.Getenv)
+}
+
 func getKey(keyMode, name string) ([]byte, error) {
 	var data []byte
 	switch keyMode {
 	case commandKeyMode:
-		parts, err := shlex.Split(name)
+		parts, err := Shlex(name)
 		if err != nil {
 			return nil, err
 		}
