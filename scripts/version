@@ -19,8 +19,4 @@ _version() {
   printf "%s" "$vers"
 }
 
-_main() {
-  _version > cmd/vers.txt
-}
-
-_main
+_version
