@@ -1,0 +1,16 @@
+name: "build"
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: "deps"
+        run: apt-get install -y make git golang
+      - name: "build"
+        run: make build
+      - name: "check"
+        run: make check
+
