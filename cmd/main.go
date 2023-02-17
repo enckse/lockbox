@@ -231,7 +231,9 @@ func run() error {
 		if err := t.Insert(entry, p); err != nil {
 			return wrapped("failed to insert", err)
 		}
-		fmt.Println("")
+		if !isPipe {
+			fmt.Println()
+		}
 	case cli.RemoveCommand:
 		if len(args) != 3 {
 			return errors.New("remove requires an entry")
