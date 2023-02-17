@@ -20,7 +20,9 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 $(TESTDIR):
 	cd $@ && go test
 
-check: $(TARGET) $(TESTDIR) $(DOC) $(RUNS)
+check: $(TARGET) $(TESTDIR) $(RUNS)
+	$(TARGET) help -verbose > $(DOC)
+	test -s $(DOC)
 
 $(RUNS):
 	rm -f $(BUILD)*.kdbx
@@ -29,11 +31,3 @@ $(RUNS):
 
 clean:
 	rm -rf $(BUILD)
-
-$(DOC): $(TARGET)
-	$(TARGET) help -verbose > $(DOC)
-
-install:
-	install -Dm644 $(MAN) $(DESTDIR)share/man/man1/lb.1
-	install -Dm755 $(TARGET) $(DESTDIR)bin/lb
-
