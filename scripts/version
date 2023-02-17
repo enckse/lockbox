@@ -19,4 +19,4 @@ _version() {
   printf "%s" "$vers"
 }
 
-_version
+_version > "$1"
