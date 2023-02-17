@@ -3,7 +3,6 @@ BUILD   := bin/
 TARGET  := $(BUILD)lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 DOC     := $(BUILD)doc.text
-MAN     := $(BUILD)lb.man
 ACTUAL  := $(BUILD)actual.log
 DATE    := $(shell date +%Y-%m-%d)
 RUNS    := -keyfile=true -keyfile=false
@@ -33,10 +32,6 @@ clean:
 
 $(DOC): $(TARGET)
 	$(TARGET) help -verbose > $(DOC)
-	test -s $(DOC)
-
-$(MAN): $(TARGET) $(DOC)
-	help2man --include $(DOC) -h help -v version -o $(MAN) ./$(TARGET)
 
 install:
 	install -Dm644 $(MAN) $(DESTDIR)share/man/man1/lb.1

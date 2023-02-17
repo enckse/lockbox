@@ -26,7 +26,7 @@ LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 LOCKBOX_STORE=/Users/alice/.passwords/secrets.kdbx
 ```
 
-The manpage for `lb` includes additional information about options and environment variables
+Use `lb help -verbose` for additional information about options and environment variables
 
 ## usage
 
