@@ -29,6 +29,6 @@ jobs:
       - name: "deps"
         run: brew install go
       - name: "build"
-        run: make build
+        run: make -f Makefile build
       - name: "check"
-        run: make check
+        run: make -f Makefile check
