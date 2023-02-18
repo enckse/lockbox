@@ -1,13 +1,10 @@
 DESTDIR :=
 BUILD   := bin/
 TARGET  := $(BUILD)lb
-TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 DOC     := $(BUILD)doc.text
 ACTUAL  := $(BUILD)actual.log
 DATE    := $(date +%Y-%m-%d)
 RUNS    := -keyfile=true -keyfile=false
-
-.PHONY: $(TESTDIR)
 
 all: $(TARGET)
 
@@ -17,10 +14,10 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 	./scripts/version cmd/vers.txt
 	go build $(GOFLAGS) -o $@ cmd/main.go
 
-$(TESTDIR):
-	cd $@ && go test
+unittest:
+	go test -v ./...
 
-check: $(TARGET) $(TESTDIR) $(RUNS)
+check: $(TARGET) unittest $(RUNS)
 	$(TARGET) help -verbose > $(DOC)
 	test -s $(DOC)
 
