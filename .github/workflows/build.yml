@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: "deps"
         run: apk add go make git
-      - uses: enckse/lockbox/scripts/ci@master
+      - uses: ./.github/actions/ci
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
