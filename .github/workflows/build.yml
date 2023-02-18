@@ -25,7 +25,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "deps rm"
-        run: brew uninstall --force go
+        run: rm -f /usr/local/bin/go /usr/local/bin/gofmt
       - name: "deps"
         run: brew install go
       - name: "build"
