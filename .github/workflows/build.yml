@@ -10,13 +10,16 @@ jobs:
     steps:
       - name: "deps"
         run: apk add go make git
-      - uses: enckse/lockbox/scripts/ci@master
+      - name: "build"
+        run: ./scripts/ci/build.sh
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: "deps"
         run: sudo apt-get install -y make git golang
+      - name: "build"
+        run: ./scripts/ci/build.sh
   macos-build:
     runs-on: macos-latest
     steps:
@@ -26,6 +29,4 @@ jobs:
       - name: "deps"
         run: brew install go
       - name: "build"
-        run: make build
-      - name: "check"
-        run: make check
+        run: ./scripts/ci/build.sh
