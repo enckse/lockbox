@@ -4,7 +4,7 @@ TARGET  := $(BUILD)lb
 TESTDIR := $(sort $(dir $(wildcard internal/**/*_test.go)))
 DOC     := $(BUILD)doc.text
 ACTUAL  := $(BUILD)actual.log
-DATE    := $(shell date +%Y-%m-%d)
+DATE    := $(date +%Y-%m-%d)
 RUNS    := -keyfile=true -keyfile=false
 
 .PHONY: $(TESTDIR)
