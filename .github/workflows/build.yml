@@ -24,8 +24,6 @@ jobs:
   macos-build:
     runs-on: macos-latest
     steps:
-      - name: "deps rm"
-        run: brew remove go
       - name: "deps"
         run: brew install make go
       - name: "build"
