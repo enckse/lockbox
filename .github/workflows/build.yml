@@ -24,13 +24,12 @@ jobs:
   macos-build:
     runs-on: macos-latest
     steps:
+      - uses: actions/checkout@v3
       - name: "deps rm"
         run: rm -f /usr/local/bin/go /usr/local/bin/gofmt
       - name: "deps"
         run: brew install go
-      - name: "ls"
-        run : ls
       - name: "build"
-        run: make -f Makefile build
+        run: make build
       - name: "check"
-        run: make -f Makefile check
+        run: make check
