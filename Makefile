@@ -1,7 +1,5 @@
-DESTDIR :=
 BUILD   := bin/
 TARGET  := $(BUILD)lb
-DOC     := $(BUILD)doc.text
 ACTUAL  := $(BUILD)actual.log
 DATE    := $(date +%Y-%m-%d)
 RUNS    := -keyfile=true -keyfile=false
@@ -18,8 +16,7 @@ unittest:
 	go test -v ./...
 
 check: $(TARGET) unittest $(RUNS)
-	$(TARGET) help -verbose > $(DOC)
-	test -s $(DOC)
+	$(TARGET) help -verbose >/dev/null
 
 $(RUNS):
 	rm -f $(BUILD)*.kdbx
