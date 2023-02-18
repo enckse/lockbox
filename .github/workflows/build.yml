@@ -25,10 +25,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: "deps rm"
-        run: brew remove go@1.17
+        run: brew uninstall --force go
       - name: "deps"
-        run: brew install make go
+        run: brew install go
       - name: "build"
-        run: gmake build
+        run: make build
       - name: "check"
-        run: gmake check
+        run: make check
