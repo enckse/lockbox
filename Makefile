@@ -11,7 +11,7 @@ RUNS    := -keyfile=true -keyfile=false
 
 all: $(TARGET)
 
-build: $(TARGET) $(MAN)
+build: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 	./scripts/version cmd/vers.txt
