@@ -1,11 +1,12 @@
 name: "build steps"
 
 runs:
-    steps:
-      - uses: actions/checkout@v3
-      - name: "build"
-        shell: sh
-        run: make build
-      - name: "check"
-        shell: sh
-        run: make check
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - name: "build"
+      shell: sh
+      run: make build
+    - name: "check"
+      shell: sh
+      run: make check
