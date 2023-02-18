@@ -4,6 +4,12 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+    - name: "remove .git"
+      shell: sh
+      run: rm -rf .git
+    - name: "uname"
+      shell: sh
+      run: uname -a
     - name: "build"
       shell: sh
       run: make build
