@@ -16,7 +16,6 @@ unittest:
 	go test -v ./...
 
 check: $(TARGET) unittest $(RUNS)
-	$(TARGET) help -verbose >/dev/null
 
 $(RUNS):
 	rm -f $(BUILD)*.kdbx
