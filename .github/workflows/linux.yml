@@ -3,7 +3,7 @@ name: "build"
 on: [push, pull_request]
 
 jobs:
-  build:
+  alpine-build:
     runs-on: ubuntu-latest
     container:
       image: alpine:latest
@@ -11,6 +11,16 @@ jobs:
       - uses: actions/checkout@v3
       - name: "deps"
         run: apk add go make git
+      - name: "build"
+        run: make build
+      - name: "check"
+        run: make check
+  ubuntu-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: "deps"
+        run: sudo apt-get install -y make git golang
       - name: "build"
         run: make build
       - name: "check"
