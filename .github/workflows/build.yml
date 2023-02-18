@@ -24,6 +24,10 @@ jobs:
   macos-build:
     runs-on: macos-latest
     steps:
+      - name: "brew update"
+        run: brew update
+      - name: "brew upgrade"
+        run: brew upgrade
       - name: "deps"
         run: brew install make go
       - name: "build"
