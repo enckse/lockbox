@@ -12,7 +12,7 @@ jobs:
       - name: "deps"
         run: apk add go make git
       - name: "build"
-        run: make ci
+        run: ./scripts/ci/build.sh
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
@@ -20,7 +20,7 @@ jobs:
       - name: "deps"
         run: sudo apt-get install -y make git golang
       - name: "build"
-        run: make ci
+        run: ./scripts/ci/build.sh
   macos-build:
     runs-on: macos-latest
     steps:
@@ -30,4 +30,4 @@ jobs:
       - name: "deps"
         run: brew install go
       - name: "build"
-        run: make ci
+        run: ./scripts/ci/build.sh
