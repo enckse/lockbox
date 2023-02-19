@@ -100,3 +100,5 @@ Clone this repository and:
 ```
 make
 ```
+
+_run `make check` to run tests_
