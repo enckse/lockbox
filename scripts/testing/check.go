@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -59,19 +61,66 @@ func totpList() {
 }
 
 func main() {
+	if err := execute(); err != nil {
+		die("execution failed", err)
+	}
+}
+
+func replace(input string, re *regexp.Regexp, to string) string {
+	matches := re.FindAllStringSubmatch(input, -1)
+	res := input
+	for _, match := range matches {
+		for _, m := range match {
+			res = strings.ReplaceAll(res, m, to)
+		}
+	}
+	return res
+}
+
+func cleanup(dataFile, workDir string) error {
+	data, err := os.ReadFile(dataFile)
+	if err != nil {
+		return err
+	}
+	totp, err := regexp.Compile("^[0-9][0-9][0-9][0-9][0-9][0-9]$")
+	if err != nil {
+		return err
+	}
+	date := fmt.Sprintf("modtime: %s", time.Now().Format("2006-01-02"))
+	var results []string
+	for _, l := range strings.Split(string(data), "\n") {
+		payload := l
+		payload = replace(payload, totp, "XXXXXX")
+		if strings.Contains(payload, date) {
+			prefix := ""
+			if strings.HasPrefix(payload, "  ") {
+				prefix = "  "
+			}
+			payload = fmt.Sprintf("%s%s", prefix, "modtime: XXXX-XX-XX")
+		}
+		results = append(results, payload)
+	}
+	return os.WriteFile(dataFile, []byte(strings.Join(results, "\n")), 0o644)
+}
+
+func execute() error {
 	keyFile := flag.Bool("keyfile", false, "enable keyfile")
 	dataPath := flag.String("data", "", "data area")
+	runMode := flag.Bool("run", true, "execute tests")
 	flag.Parse()
 	path := *dataPath
 	cwd, err := os.Getwd()
 	if err != nil {
-		die("failed to get workdir", err)
+		return err
+	}
+	if !*runMode {
+		return cleanup(path, cwd)
 	}
 	useKeyFile := ""
 	if *keyFile {
 		useKeyFile = filepath.Join(path, "test.key")
 		if err := os.WriteFile(useKeyFile, []byte("thisisatest"), 0o644); err != nil {
-			die("unable to write keyfile", err)
+			return err
 		}
 	}
 	store := filepath.Join(path, fmt.Sprintf("%s.kdbx", time.Now().Format("20060102150405")))
@@ -144,4 +193,5 @@ func main() {
 	os.Setenv("LOCKBOX_KEY", reKey)
 	fmt.Println()
 	ls()
+	return nil
 }
