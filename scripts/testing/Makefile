@@ -1,7 +1,7 @@
 BIN     := bin
 ACTUAL  := $(BIN)/actual.log
 RUNS    := -keyfile=true -keyfile=false
-DATE    := $(date +%Y-%m-%d)
+DATE    := $(shell date +%Y-%m-%d)
 
 all: $(RUNS)
 
