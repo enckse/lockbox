@@ -1,26 +1,19 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
-ACTUAL  := $(BUILD)actual.log
-DATE    := $(date +%Y-%m-%d)
-RUNS    := -keyfile=true -keyfile=false
 
 all: $(TARGET)
 
 build: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
-	./scripts/version cmd/vers.txt
+	./scripts/version/configure cmd/vers.txt
 	go build $(GOFLAGS) -o $@ cmd/main.go
 
 unittest:
 	go test -v ./...
 
-check: $(TARGET) unittest $(RUNS)
-
-$(RUNS):
-	rm -f $(BUILD)*.kdbx
-	LB_BUILD=$(TARGET) TEST_DATA=$(BUILD) SCRIPTS=$(PWD)/scripts/ go run scripts/check.go $@ 2>&1 | sed "s#$(PWD)/$(DATA)##g" | sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$$/XXXXXX/g' | sed 's/modtime: $(DATE).*/modtime: XXXX-XX-XX/g' > $(ACTUAL)
-	diff -u $(ACTUAL) scripts/tests.expected.log
+check: $(TARGET) unittest
+	make -C scripts/testing LB_BUILD=$(PWD)/$(TARGET) TEST_DATA=$(PWD)/$(BUILD) SCRIPTS=$(PWD)/scripts/testing/
 
 clean:
 	rm -rf $(BUILD)
