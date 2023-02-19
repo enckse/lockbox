@@ -60,8 +60,13 @@ func totpList() {
 
 func main() {
 	keyFile := flag.Bool("keyfile", false, "enable keyfile")
+	dataPath := flag.String("data", "", "data area")
 	flag.Parse()
-	path := os.Getenv("TEST_DATA")
+	path := *dataPath
+	cwd, err := os.Getwd()
+	if err != nil {
+		die("failed to get workdir", err)
+	}
 	useKeyFile := ""
 	if *keyFile {
 		useKeyFile = filepath.Join(path, "test.key")
@@ -116,7 +121,7 @@ func main() {
 	insert("keys/k2/t1/one2", []string{"test2"})
 	insert("keys/k2/t1/one", []string{"test"})
 	insert("keys/k2/t2/one2", []string{"test2"})
-	os.Setenv("LOCKBOX_HOOKDIR", filepath.Join(os.Getenv("SCRIPTS"), "hooks"))
+	os.Setenv("LOCKBOX_HOOKDIR", filepath.Join(cwd, "hooks"))
 	insert("keys/k2/t2/one", []string{"test"})
 	fmt.Println()
 	ls()

@@ -1,5 +1,6 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
+TESTS   := scripts/testing
 
 all: $(TARGET)
 
@@ -13,7 +14,8 @@ unittest:
 	go test -v ./...
 
 check: $(TARGET) unittest
-	make -C scripts/testing LB_BUILD=$(PWD)/$(TARGET) TEST_DATA=$(PWD)/$(BUILD) SCRIPTS=$(PWD)/scripts/testing/
+	LB_BUILD=$(PWD)/$(TARGET) make -C $(TESTS)
 
 clean:
 	rm -rf $(BUILD)
+	make -C $(TESTS) clean
