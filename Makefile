@@ -27,3 +27,8 @@ $(RUNS):
 
 clean:
 	rm -rf $(BUILD)
+
+ci:
+	rm -rf .git
+	make build
+	make check
