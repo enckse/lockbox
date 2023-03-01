@@ -362,7 +362,7 @@ func clearClipboard(args []string) error {
 func confirm(prompt string) bool {
 	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		util.Die("failed to read stdin for confirmation", err)
+		util.Dief("failed to read stdin for confirmation: %v", err)
 	}
 	return yesNo
 }

@@ -20,21 +20,18 @@ func PathExists(file string) bool {
 
 // Fatal will call Die but without a message
 func Fatal(err error) {
-	Die("", err)
+	Die(err)
+}
+
+// Dief will for a message and die
+func Dief(format string, a ...any) {
+	Die(fmt.Sprintf(format, a...))
 }
 
 // Die will write to stderr and exit (1)
-func Die(message string, err error) {
-	msg := message
-	if err != nil {
-		if msg == "" {
-			msg = err.Error()
-		} else {
-			msg = fmt.Sprintf("%s (%v)", msg, err)
-		}
-	}
-	if msg != "" {
-		fmt.Fprintf(os.Stderr, "%s\n", msg)
+func Die(a any) {
+	if a != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", a)
 	}
 	os.Exit(1)
 }
