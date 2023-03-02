@@ -18,11 +18,6 @@ func PathExists(file string) bool {
 	return true
 }
 
-// Fatal will call Die but without a message
-func Fatal(err error) {
-	Die(err)
-}
-
 // Dief will for a message and die
 func Dief(format string, a ...any) {
 	Die(fmt.Sprintf(format, a...))
