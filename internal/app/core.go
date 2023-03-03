@@ -141,32 +141,7 @@ func Run() error {
 	case cli.StatsCommand:
 		return commands.Stats(os.Stdout, t, sub)
 	case cli.ShowCommand, cli.ClipCommand:
-		if len(args) != 3 {
-			return errors.New("entry required")
-		}
-		entry := args[2]
-		clipboard := platform.Clipboard{}
-		isShow := command == cli.ShowCommand
-		if !isShow {
-			clipboard, err = platform.NewClipboard()
-			if err != nil {
-				return wrapped("unable to get clipboard", err)
-			}
-		}
-		existing, err := t.Get(entry, backend.SecretValue)
-		if err != nil {
-			return wrapped("unable to get entry", err)
-		}
-		if existing == nil {
-			return errors.New("entry not found")
-		}
-		if isShow {
-			fmt.Println(existing.Value)
-			return nil
-		}
-		if err := clipboard.CopyTo(existing.Value); err != nil {
-			return wrapped("clipboard operation failed", err)
-		}
+		return commands.ShowClip(os.Stdout, t, command == cli.ShowCommand, sub)
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
