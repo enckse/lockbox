@@ -6,14 +6,13 @@ import (
 	"io"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/cli"
 )
 
 // ListFind will list/find entries
-func ListFind(t *backend.Transaction, w io.Writer, command string, args []string) error {
+func ListFind(t *backend.Transaction, w io.Writer, isFind bool, args []string) error {
 	opts := backend.QueryOptions{}
 	opts.Mode = backend.ListMode
-	if command == cli.FindCommand {
+	if isFind {
 		opts.Mode = backend.FindMode
 		if len(args) < 1 {
 			return errors.New("find requires search term")

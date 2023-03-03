@@ -37,7 +37,7 @@ func handleEarly(command string, args []string) (bool, error) {
 	case cli.TOTPCommand:
 		return true, totp.Call(args)
 	case cli.HashCommand:
-		return true, hashText(args)
+		return true, commands.Hash(os.Stdout, args)
 	case cli.ClearCommand:
 		return true, clearClipboard(args)
 	}
@@ -73,7 +73,7 @@ func Run() error {
 			return t.ReKey()
 		}
 	case cli.ListCommand, cli.FindCommand:
-		return commands.ListFind(t, os.Stdout, command, sub)
+		return commands.ListFind(t, os.Stdout, command == cli.FindCommand, sub)
 	case cli.MoveCommand:
 		return commands.Move(t, sub, confirm)
 	case cli.InsertCommand:
@@ -199,24 +199,6 @@ func Run() error {
 		}
 	default:
 		return fmt.Errorf("unknown command: %s", command)
-	}
-	return nil
-}
-
-func hashText(args []string) error {
-	if len(args) == 0 {
-		return errors.New("hash requires a file")
-	}
-	t, err := backend.Load(args[len(args)-1])
-	if err != nil {
-		return err
-	}
-	e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.HashedValue})
-	if err != nil {
-		return err
-	}
-	for _, item := range e {
-		fmt.Printf("%s:\n  %s\n\n", item.Path, strings.ReplaceAll(item.Value, "\n", "\n  "))
 	}
 	return nil
 }

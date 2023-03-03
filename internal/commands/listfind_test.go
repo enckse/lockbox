@@ -39,13 +39,13 @@ func TestList(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	tx := fullSetup(t, true)
 	var buf bytes.Buffer
-	if err := commands.ListFind(tx, &buf, "list", []string{}); err != nil {
+	if err := commands.ListFind(tx, &buf, false, []string{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" {
 		t.Error("nothing listed")
 	}
-	if err := commands.ListFind(tx, &buf, "list", []string{"test"}); err.Error() != "list does not support any arguments" {
+	if err := commands.ListFind(tx, &buf, false, []string{"test"}); err.Error() != "list does not support any arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -56,10 +56,10 @@ func TestFind(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	tx := fullSetup(t, true)
 	var buf bytes.Buffer
-	if err := commands.ListFind(tx, &buf, "find", []string{}); err.Error() != "find requires search term" {
+	if err := commands.ListFind(tx, &buf, true, []string{}); err.Error() != "find requires search term" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := commands.ListFind(tx, &buf, "find", []string{"test1"}); err != nil {
+	if err := commands.ListFind(tx, &buf, true, []string{"test1"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" || strings.Contains(buf.String(), "test3") {
