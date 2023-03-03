@@ -7,7 +7,7 @@ import (
 )
 
 // Move is the CLI command to move entries
-func Move(t *backend.Transaction, args []string, confirm func(string) bool) error {
+func Move(t *backend.Transaction, args []string, confirm Confirm) error {
 	if len(args) != 2 {
 		return errors.New("src/dst required for move")
 	}

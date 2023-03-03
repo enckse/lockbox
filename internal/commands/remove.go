@@ -10,7 +10,7 @@ import (
 )
 
 // Remove will remove an entry
-func Remove(w io.Writer, t *backend.Transaction, args []string, confirm func(string) bool) error {
+func Remove(w io.Writer, t *backend.Transaction, args []string, confirm Confirm) error {
 	if len(args) != 1 {
 		return errors.New("remove requires an entry")
 	}

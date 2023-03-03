@@ -19,7 +19,7 @@ func insertError(message string, err error) error {
 
 // Insert will insert new entries
 // NOTE: almost entirely tested via regresssion due to complexities around piping/inputs
-func Insert(w io.Writer, t *backend.Transaction, args []string, confirm func(string) bool) error {
+func Insert(w io.Writer, t *backend.Transaction, args []string, confirm Confirm) error {
 	multi := false
 	isTOTP := false
 	idx := 0
