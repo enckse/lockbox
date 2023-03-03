@@ -44,10 +44,6 @@ func handleEarly(command string, args []string) (bool, error) {
 	return false, nil
 }
 
-func wrapped(message string, err error) error {
-	return fmt.Errorf("%s (%w)", message, err)
-}
-
 // Run invokes the app
 func Run() error {
 	args := os.Args
@@ -65,7 +61,7 @@ func Run() error {
 	}
 	t, err := backend.NewTransaction()
 	if err != nil {
-		return wrapped("unable to build transaction model", err)
+		return fmt.Errorf("unable to build transaction model: %w", err)
 	}
 	switch command {
 	case cli.ReKeyCommand:
@@ -77,65 +73,7 @@ func Run() error {
 	case cli.MoveCommand:
 		return commands.Move(t, sub, confirm)
 	case cli.InsertCommand:
-		multi := false
-		isTOTP := false
-		idx := 2
-		switch len(args) {
-		case 2:
-			return errors.New("insert requires an entry")
-		case 3:
-		case 4:
-			opt := args[2]
-			switch opt {
-			case cli.InsertMultiCommand:
-				multi = true
-			case cli.InsertTOTPCommand:
-				off, err := inputs.IsNoTOTP()
-				if err != nil {
-					return err
-				}
-				if off {
-					return totp.ErrNoTOTP
-				}
-				isTOTP = true
-			default:
-				return errors.New("unknown argument")
-			}
-			multi = true
-			idx = 3
-		default:
-			return errors.New("too many arguments")
-		}
-		isPipe := inputs.IsInputFromPipe()
-		entry := args[idx]
-		if isTOTP {
-			totpToken := inputs.TOTPToken()
-			if !strings.HasSuffix(entry, backend.NewSuffix(totpToken)) {
-				entry = backend.NewPath(entry, totpToken)
-			}
-		}
-		existing, err := t.Get(entry, backend.BlankValue)
-		if err != nil {
-			return wrapped("unable to check for existing entry", err)
-		}
-		if existing != nil {
-			if !isPipe {
-				if !confirm("overwrite existing") {
-					return nil
-				}
-			}
-		}
-		password, err := inputs.GetUserInputPassword(isPipe, multi)
-		if err != nil {
-			return wrapped("invalid input", err)
-		}
-		p := strings.TrimSpace(string(password))
-		if err := t.Insert(entry, p); err != nil {
-			return wrapped("failed to insert", err)
-		}
-		if !isPipe {
-			fmt.Println()
-		}
+		return commands.Insert(os.Stdout, t, sub, confirm)
 	case cli.RemoveCommand:
 		return commands.Remove(os.Stdout, t, sub, confirm)
 	case cli.StatsCommand:
