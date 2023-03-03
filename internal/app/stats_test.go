@@ -1,11 +1,11 @@
-package commands_test
+package app_test
 
 import (
 	"bytes"
 	"testing"
 
+	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/commands"
 )
 
 func TestStats(t *testing.T) {
@@ -14,17 +14,17 @@ func TestStats(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	tx := fullSetup(t, true)
 	var b bytes.Buffer
-	if err := commands.Stats(&b, tx, []string{}); err.Error() != "entry required" {
+	if err := app.Stats(&b, tx, []string{}); err.Error() != "entry required" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := commands.Stats(&b, tx, []string{"test/test2/test1"}); err != nil {
+	if err := app.Stats(&b, tx, []string{"test/test2/test1"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if b.String() == "" {
 		t.Error("no stats")
 	}
 	b = bytes.Buffer{}
-	if err := commands.Stats(&b, tx, []string{"tsest/test2/test1"}); err != nil {
+	if err := app.Stats(&b, tx, []string{"tsest/test2/test1"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if b.String() != "" {

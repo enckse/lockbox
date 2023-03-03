@@ -1,12 +1,12 @@
-package commands_test
+package app_test
 
 import (
 	"bytes"
 	"os"
 	"testing"
 
+	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/commands"
 )
 
 func TestShowClip(t *testing.T) {
@@ -15,24 +15,24 @@ func TestShowClip(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	tx := fullSetup(t, true)
 	var b bytes.Buffer
-	if err := commands.ShowClip(&b, tx, true, []string{}); err.Error() != "entry required" {
+	if err := app.ShowClip(&b, tx, true, []string{}); err.Error() != "entry required" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := commands.ShowClip(&b, tx, true, []string{"test/test2/test1"}); err != nil {
+	if err := app.ShowClip(&b, tx, true, []string{"test/test2/test1"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if b.String() == "" {
 		t.Error("no show")
 	}
 	b = bytes.Buffer{}
-	if err := commands.ShowClip(&b, tx, true, []string{"tsest/test2/test1"}); err != nil {
+	if err := app.ShowClip(&b, tx, true, []string{"tsest/test2/test1"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if b.String() != "" {
 		t.Error("no show")
 	}
 	os.Clearenv()
-	if err := commands.ShowClip(&b, tx, false, []string{"tsest/test2/test1"}); err == nil {
+	if err := app.ShowClip(&b, tx, false, []string{"tsest/test2/test1"}); err == nil {
 		t.Errorf("invalid error: %v", err)
 	}
 }

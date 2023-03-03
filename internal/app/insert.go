@@ -1,5 +1,5 @@
-// Package commands can insert
-package commands
+// Package app can insert
+package app
 
 import (
 	"errors"

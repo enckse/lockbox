@@ -1,5 +1,5 @@
-// Package commands can get stats
-package commands
+// Package app can get stats
+package app
 
 import (
 	"errors"

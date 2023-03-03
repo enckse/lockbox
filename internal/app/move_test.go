@@ -1,10 +1,10 @@
-package commands_test
+package app_test
 
 import (
 	"testing"
 
+	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/commands"
 )
 
 type (
@@ -23,14 +23,14 @@ func TestMove(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	m := mockConfirm{}
-	if err := commands.Move(fullSetup(t, true), []string{}, m.prompt); err.Error() != "src/dst required for move" {
+	if err := app.Move(fullSetup(t, true), []string{}, m.prompt); err.Error() != "src/dst required for move" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := commands.Move(fullSetup(t, true), []string{"a", "b"}, m.prompt); err.Error() != "unable to get source entry" {
+	if err := app.Move(fullSetup(t, true), []string{"a", "b"}, m.prompt); err.Error() != "unable to get source entry" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.called = false
-	if err := commands.Move(fullSetup(t, true), []string{"test/test2/test1", "test/test2/test3"}, m.prompt); err != nil {
+	if err := app.Move(fullSetup(t, true), []string{"test/test2/test1", "test/test2/test3"}, m.prompt); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if !m.called {

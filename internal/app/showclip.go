@@ -1,5 +1,5 @@
-// Package commands can show/clip an entry
-package commands
+// Package app can show/clip an entry
+package app
 
 import (
 	"errors"

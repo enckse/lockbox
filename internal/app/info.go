@@ -1,5 +1,5 @@
-// Package commands handles informational requests
-package commands
+// Package app handles informational requests
+package app
 
 import (
 	"errors"

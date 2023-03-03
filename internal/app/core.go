@@ -1,5 +1,5 @@
-// Package commands common objects
-package commands
+// Package app common objects
+package app
 
 type (
 	// Confirm user inputs

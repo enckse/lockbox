@@ -1,4 +1,4 @@
-// provides the binary runs or calls lockbox commands.
+// provides the binary runs or calls lockbox app.
 package main
 
 import (
@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/commands"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/totp"
@@ -29,7 +29,7 @@ func main() {
 }
 
 func handleEarly(command string, args []string) (bool, error) {
-	ok, err := commands.Info(os.Stdout, command, args)
+	ok, err := app.Info(os.Stdout, command, args)
 	if err != nil {
 		return false, err
 	}
@@ -43,7 +43,7 @@ func handleEarly(command string, args []string) (bool, error) {
 	case cli.TOTPCommand:
 		return true, totp.Call(args)
 	case cli.HashCommand:
-		return true, commands.Hash(os.Stdout, args)
+		return true, app.Hash(os.Stdout, args)
 	case cli.ClearCommand:
 		return true, clearClipboard(args)
 	}
@@ -74,17 +74,17 @@ func run() error {
 			return t.ReKey()
 		}
 	case cli.ListCommand, cli.FindCommand:
-		return commands.ListFind(t, os.Stdout, command == cli.FindCommand, sub)
+		return app.ListFind(t, os.Stdout, command == cli.FindCommand, sub)
 	case cli.MoveCommand:
-		return commands.Move(t, sub, confirm)
+		return app.Move(t, sub, confirm)
 	case cli.InsertCommand:
-		return commands.Insert(os.Stdout, t, sub, confirm)
+		return app.Insert(os.Stdout, t, sub, confirm)
 	case cli.RemoveCommand:
-		return commands.Remove(os.Stdout, t, sub, confirm)
+		return app.Remove(os.Stdout, t, sub, confirm)
 	case cli.StatsCommand:
-		return commands.Stats(os.Stdout, t, sub)
+		return app.Stats(os.Stdout, t, sub)
 	case cli.ShowCommand, cli.ClipCommand:
-		return commands.ShowClip(os.Stdout, t, command == cli.ShowCommand, sub)
+		return app.ShowClip(os.Stdout, t, command == cli.ShowCommand, sub)
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}

@@ -1,5 +1,5 @@
-// Package commands can remove an entry
-package commands
+// Package app can remove an entry
+package app
 
 import (
 	"errors"

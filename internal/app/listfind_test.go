@@ -1,4 +1,4 @@
-package commands_test
+package app_test
 
 import (
 	"bytes"
@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/commands"
 )
 
 func fullSetup(t *testing.T, keep bool) *backend.Transaction {
@@ -39,13 +39,13 @@ func TestList(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	tx := fullSetup(t, true)
 	var buf bytes.Buffer
-	if err := commands.ListFind(tx, &buf, false, []string{}); err != nil {
+	if err := app.ListFind(tx, &buf, false, []string{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" {
 		t.Error("nothing listed")
 	}
-	if err := commands.ListFind(tx, &buf, false, []string{"test"}); err.Error() != "list does not support any arguments" {
+	if err := app.ListFind(tx, &buf, false, []string{"test"}); err.Error() != "list does not support any arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -56,10 +56,10 @@ func TestFind(t *testing.T) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
 	tx := fullSetup(t, true)
 	var buf bytes.Buffer
-	if err := commands.ListFind(tx, &buf, true, []string{}); err.Error() != "find requires search term" {
+	if err := app.ListFind(tx, &buf, true, []string{}); err.Error() != "find requires search term" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := commands.ListFind(tx, &buf, true, []string{"test1"}); err != nil {
+	if err := app.ListFind(tx, &buf, true, []string{"test1"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" || strings.Contains(buf.String(), "test3") {
