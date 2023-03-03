@@ -138,21 +138,13 @@ func Run() error {
 		}
 	case cli.RemoveCommand:
 		return commands.Remove(os.Stdout, t, sub, confirm)
-	case cli.ShowCommand, cli.ClipCommand, cli.StatsCommand:
+	case cli.StatsCommand:
+		return commands.Stats(os.Stdout, t, sub)
+	case cli.ShowCommand, cli.ClipCommand:
 		if len(args) != 3 {
 			return errors.New("entry required")
 		}
 		entry := args[2]
-		if command == cli.StatsCommand {
-			v, err := t.Get(entry, backend.StatsValue)
-			if err != nil {
-				return wrapped("unable to get stats", err)
-			}
-			if v != nil {
-				fmt.Println(v.Value)
-			}
-			return nil
-		}
 		clipboard := platform.Clipboard{}
 		isShow := command == cli.ShowCommand
 		if !isShow {
