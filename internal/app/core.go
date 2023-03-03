@@ -75,30 +75,7 @@ func Run() error {
 	case cli.ListCommand, cli.FindCommand:
 		return commands.ListFind(t, os.Stdout, command, sub)
 	case cli.MoveCommand:
-		if len(args) != 4 {
-			return errors.New("src/dst required for move")
-		}
-		src := args[2]
-		dst := args[3]
-		srcExists, err := t.Get(src, backend.SecretValue)
-		if err != nil {
-			return errors.New("unable to get source entry")
-		}
-		if srcExists == nil {
-			return errors.New("no source object found")
-		}
-		dstExists, err := t.Get(dst, backend.BlankValue)
-		if err != nil {
-			return errors.New("unable to get destination object")
-		}
-		if dstExists != nil {
-			if !confirm("overwrite destination") {
-				return nil
-			}
-		}
-		if err := t.Move(*srcExists, dst); err != nil {
-			return wrapped("unable to move object", err)
-		}
+		return commands.Move(t, sub, confirm)
 	case cli.InsertCommand:
 		multi := false
 		isTOTP := false
