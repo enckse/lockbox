@@ -12,6 +12,7 @@ import (
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
+	"github.com/enckse/lockbox/internal/commands"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/totp"
@@ -21,80 +22,26 @@ import (
 //go:embed "vers.txt"
 var version string
 
-type (
-	callbackFunction func([]string) error
-)
-
-func internalCallback(name string) callbackFunction {
-	switch name {
-	case cli.TOTPCommand:
-		return totp.Call
-	case cli.HashCommand:
-		return hashText
-	case cli.ClearCommand:
-		return clearClipboard
+func handleEarly(command string, args []string) (bool, error) {
+	ok, err := commands.Info(os.Stdout, command, args)
+	if err != nil {
+		return false, err
 	}
-	return nil
-}
-
-func getInfoDefault(args []string, possibleArg string) (bool, error) {
-	defaults := false
-	invalid := false
-	switch len(args) {
-	case 2:
-		break
-	case 3:
-		if args[2] == possibleArg {
-			defaults = true
-		} else {
-			invalid = true
-		}
-	default:
-		invalid = true
+	if ok {
+		return true, nil
 	}
-	if invalid {
-		return false, errors.New("invalid argument")
-	}
-	return defaults, nil
-}
-
-func processInfoCommands(command string, args []string) ([]string, error) {
 	switch command {
-	case cli.HelpCommand:
-		if len(args) > 3 {
-			return nil, errors.New("invalid help command")
-		}
-		isAdvanced := false
-		if len(args) == 3 {
-			if args[2] == cli.HelpAdvancedCommand {
-				isAdvanced = true
-			} else {
-				return nil, errors.New("invalid help option")
-			}
-		}
-		results, err := cli.Usage(isAdvanced)
-		if err != nil {
-			return nil, err
-		}
-		return results, nil
 	case cli.VersionCommand:
-		return []string{fmt.Sprintf("version: %s", version)}, nil
-	case cli.EnvCommand, cli.BashCommand:
-		defaultFlag := cli.BashDefaultsCommand
-		isEnv := command == cli.EnvCommand
-		if isEnv {
-			defaultFlag = cli.EnvDefaultsCommand
-		}
-		defaults, err := getInfoDefault(args, defaultFlag)
-		if err != nil {
-			return nil, err
-		}
-		if isEnv {
-			return inputs.ListEnvironmentVariables(!defaults), nil
-		}
-		return cli.BashCompletions(defaults)
+		fmt.Printf("version: %s\n", version)
+		return true, nil
+	case cli.TOTPCommand:
+		return true, totp.Call(args)
+	case cli.HashCommand:
+		return true, hashText(args)
+	case cli.ClearCommand:
+		return true, clearClipboard(args)
 	}
-	return nil, nil
+	return false, nil
 }
 
 func wrapped(message string, err error) error {
@@ -108,12 +55,11 @@ func Run() error {
 		return errors.New("requires subcommand")
 	}
 	command := args[1]
-	info, err := processInfoCommands(command, args)
+	ok, err := handleEarly(command, args[2:])
 	if err != nil {
 		return err
 	}
-	if info != nil {
-		fmt.Println(strings.Join(info, "\n"))
+	if ok {
 		return nil
 	}
 	t, err := backend.NewTransaction()
@@ -291,17 +237,6 @@ func Run() error {
 			return wrapped("clipboard operation failed", err)
 		}
 	default:
-		if len(args) < 2 {
-			return errors.New("missing required arguments")
-		}
-		a := args[2:]
-		callback := internalCallback(command)
-		if callback != nil {
-			if err := callback(a); err != nil {
-				return wrapped(fmt.Sprintf("%s command failure", command), err)
-			}
-			return nil
-		}
 		return fmt.Errorf("unknown command: %s", command)
 	}
 	return nil
