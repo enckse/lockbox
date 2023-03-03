@@ -55,7 +55,8 @@ func Run() error {
 		return errors.New("requires subcommand")
 	}
 	command := args[1]
-	ok, err := handleEarly(command, args[2:])
+	sub := args[2:]
+	ok, err := handleEarly(command, sub)
 	if err != nil {
 		return err
 	}
@@ -69,27 +70,10 @@ func Run() error {
 	switch command {
 	case cli.ReKeyCommand:
 		if confirm("proceed with rekey") {
-			if err := t.ReKey(); err != nil {
-				return wrapped("unable to rekey", err)
-			}
+			return t.ReKey()
 		}
 	case cli.ListCommand, cli.FindCommand:
-		opts := backend.QueryOptions{}
-		opts.Mode = backend.ListMode
-		if command == cli.FindCommand {
-			opts.Mode = backend.FindMode
-			if len(args) < 3 {
-				return errors.New("find requires search term")
-			}
-			opts.Criteria = args[2]
-		}
-		e, err := t.QueryCallback(opts)
-		if err != nil {
-			return wrapped("unable to list files", err)
-		}
-		for _, f := range e {
-			fmt.Println(f.Path)
-		}
+		return commands.ListFind(t, os.Stdout, command, sub)
 	case cli.MoveCommand:
 		if len(args) != 4 {
 			return errors.New("src/dst required for move")
