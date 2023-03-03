@@ -9,7 +9,6 @@ import (
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/totp"
 )
 
@@ -19,7 +18,7 @@ func insertError(message string, err error) error {
 
 // Insert will insert new entries
 // NOTE: almost entirely tested via regresssion due to complexities around piping/inputs
-func Insert(w io.Writer, t *backend.Transaction, args []string, confirm Confirm) error {
+func Insert(w io.Writer, t *backend.Transaction, args []string, cmd InsertOptions) error {
 	multi := false
 	isTOTP := false
 	idx := 0
@@ -33,7 +32,7 @@ func Insert(w io.Writer, t *backend.Transaction, args []string, confirm Confirm)
 		case cli.InsertMultiCommand:
 			multi = true
 		case cli.InsertTOTPCommand:
-			off, err := inputs.IsNoTOTP()
+			off, err := cmd.IsNoTOTP()
 			if err != nil {
 				return err
 			}
@@ -49,10 +48,10 @@ func Insert(w io.Writer, t *backend.Transaction, args []string, confirm Confirm)
 	default:
 		return errors.New("too many arguments")
 	}
-	isPipe := inputs.IsInputFromPipe()
+	isPipe := cmd.IsPipe()
 	entry := args[idx]
 	if isTOTP {
-		totpToken := inputs.TOTPToken()
+		totpToken := cmd.TOTPToken()
 		if !strings.HasSuffix(entry, backend.NewSuffix(totpToken)) {
 			entry = backend.NewPath(entry, totpToken)
 		}
@@ -63,12 +62,12 @@ func Insert(w io.Writer, t *backend.Transaction, args []string, confirm Confirm)
 	}
 	if existing != nil {
 		if !isPipe {
-			if !confirm("overwrite existing") {
+			if !cmd.Confirm("overwrite existing") {
 				return nil
 			}
 		}
 	}
-	password, err := inputs.GetUserInputPassword(isPipe, multi)
+	password, err := cmd.Input(isPipe, multi)
 	if err != nil {
 		return insertError("invalid input", err)
 	}
@@ -77,7 +76,7 @@ func Insert(w io.Writer, t *backend.Transaction, args []string, confirm Confirm)
 		return insertError("failed to insert", err)
 	}
 	if !isPipe {
-		fmt.Println()
+		fmt.Fprintln(w)
 	}
 	return nil
 }

@@ -78,7 +78,13 @@ func run() error {
 	case cli.MoveCommand:
 		return app.Move(t, sub, confirm)
 	case cli.InsertCommand:
-		return app.Insert(os.Stdout, t, sub, confirm)
+		insert := app.InsertOptions{}
+		insert.Confirm = confirm
+		insert.IsPipe = inputs.IsInputFromPipe
+		insert.IsNoTOTP = inputs.IsNoTOTP
+		insert.TOTPToken = inputs.TOTPToken
+		insert.Input = inputs.GetUserInputPassword
+		return app.Insert(os.Stdout, t, sub, insert)
 	case cli.RemoveCommand:
 		return app.Remove(os.Stdout, t, sub, confirm)
 	case cli.StatsCommand:
