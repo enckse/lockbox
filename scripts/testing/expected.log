@@ -40,7 +40,7 @@ test/k/totp:
 
 delete entry? (y/N) 
 delete entry? (y/N) 
-delete entry? (y/N) unable to remove entry (no entities given)
+delete entry? (y/N) unable to remove: no entities given
 exit status 1
 
 

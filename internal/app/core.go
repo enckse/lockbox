@@ -137,29 +137,7 @@ func Run() error {
 			fmt.Println()
 		}
 	case cli.RemoveCommand:
-		if len(args) != 3 {
-			return errors.New("remove requires an entry")
-		}
-		deleting := args[2]
-		postfixRemove := "y"
-		existings, err := t.MatchPath(deleting)
-		if err != nil {
-			return wrapped("unable to get entry", err)
-		}
-
-		if len(existings) > 1 {
-			postfixRemove = "ies"
-			fmt.Println("selected entities:")
-			for _, e := range existings {
-				fmt.Printf(" %s\n", e.Path)
-			}
-			fmt.Println("")
-		}
-		if confirm(fmt.Sprintf("delete entr%s", postfixRemove)) {
-			if err := t.RemoveAll(existings); err != nil {
-				return wrapped("unable to remove entry", err)
-			}
-		}
+		return commands.Remove(os.Stdout, t, sub, confirm)
 	case cli.ShowCommand, cli.ClipCommand, cli.StatsCommand:
 		if len(args) != 3 {
 			return errors.New("entry required")
