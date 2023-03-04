@@ -9,8 +9,8 @@ github.com/boombuler/barcode v1.0.1 h1:NDBbPmhS+EqABEs5Kg3n/5ZNjy73Pz7SIV+KCeqyX
 github.com/boombuler/barcode v1.0.1/go.mod h1:paBWMcWSl3LHKBqUq+rly7CNSldXjb2rDl3JlRe0mD8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
-github.com/enckse/pgl v0.0.0-20230304205932-b43af79e9244 h1:VqBkM9eBABWwHkiBdyafBDwH+vhHDU1OPb4zUkrXiGk=
-github.com/enckse/pgl v0.0.0-20230304205932-b43af79e9244/go.mod h1:r5bqGzwqnJIeY6UbGT5u38keJ5+ZySlsWeaYYzdBhMg=
+github.com/enckse/pgl v0.0.0-20230304211614-6a4d061229b0 h1:dAFFmvOlaNVh0OsdqBEKLAEybijhmtu3TEAgvagx02w=
+github.com/enckse/pgl v0.0.0-20230304211614-6a4d061229b0/go.mod h1:r5bqGzwqnJIeY6UbGT5u38keJ5+ZySlsWeaYYzdBhMg=
 github.com/frankban/quicktest v1.14.4 h1:g2rn0vABPOOXmZUj+vbmUp0lPoXEMuhTpIluN0XL9UY=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
