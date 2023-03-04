@@ -11,27 +11,61 @@ import (
 
 func TestInsertArgs(t *testing.T) {
 	obj := app.InsertOptions{}
-	if _, err := app.ParseInsertArgs(obj, []string{}); err == nil || err.Error() != "insert requires an entry" {
+	p := app.InsertArgsOptions{}
+	p.IsNoTOTP = func() (bool, error) {
+		return true, nil
+	}
+	if _, err := p.ReadArgs(obj, []string{}); err == nil || err.Error() != "insert requires an entry" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := app.ParseInsertArgs(obj, []string{"test", "test", "test"}); err == nil || err.Error() != "too many arguments" {
+	if _, err := p.ReadArgs(obj, []string{"test", "test", "test"}); err == nil || err.Error() != "too many arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
-	r, err := app.ParseInsertArgs(obj, []string{"test"})
+	r, err := p.ReadArgs(obj, []string{"test"})
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if r.Multi || r.Entry != "test" {
 		t.Error("invalid parse")
 	}
-	if _, err := app.ParseInsertArgs(obj, []string{"-t", "b"}); err == nil || err.Error() != "unknown argument" {
+	if _, err := p.ReadArgs(obj, []string{"-t", "b"}); err == nil || err.Error() != "unknown argument" {
 		t.Errorf("invalid error: %v", err)
 	}
-	r, err = app.ParseInsertArgs(obj, []string{"-multi", "test3"})
+	r, err = p.ReadArgs(obj, []string{"-multi", "test3"})
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if !r.Multi || r.Entry != "test3" {
+		t.Error("invalid parse")
+	}
+	p.TOTPToken = func() string {
+		return "test3"
+	}
+	r, err = p.ReadArgs(obj, []string{"-multi", "test/test3"})
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	p.IsNoTOTP = func() (bool, error) {
+		return false, nil
+	}
+	if _, err := p.ReadArgs(obj, []string{"-multi", "test/test3"}); err == nil || err.Error() != "can not insert totp entry without totp flag" {
+		t.Errorf("invalid error: %v", err)
+	}
+	if _, err := p.ReadArgs(obj, []string{"test/test3"}); err == nil || err.Error() != "can not insert totp entry without totp flag" {
+		t.Errorf("invalid error: %v", err)
+	}
+	r, err = p.ReadArgs(obj, []string{"-totp", "test/test3"})
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if r.Entry != "test/test3" {
+		t.Error("invalid parse")
+	}
+	r, err = p.ReadArgs(obj, []string{"-totp", "test"})
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if r.Entry != "test/test3" {
 		t.Error("invalid parse")
 	}
 }

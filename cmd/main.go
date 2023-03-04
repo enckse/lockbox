@@ -79,12 +79,13 @@ func run() error {
 		return app.Move(t, sub, confirm)
 	case cli.InsertCommand:
 		insert := app.InsertOptions{}
+		parser := app.InsertArgsOptions{}
+		parser.IsNoTOTP = inputs.IsNoTOTP
+		parser.TOTPToken = inputs.TOTPToken
 		insert.Confirm = confirm
 		insert.IsPipe = inputs.IsInputFromPipe
-		insert.IsNoTOTP = inputs.IsNoTOTP
-		insert.TOTPToken = inputs.TOTPToken
 		insert.Input = inputs.GetUserInputPassword
-		insertArgs, err := app.ParseInsertArgs(insert, sub)
+		insertArgs, err := parser.ReadArgs(insert, sub)
 		if err != nil {
 			return err
 		}

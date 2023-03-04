@@ -153,8 +153,6 @@ func execute() error {
 		runCommand([]string{"insert", "-totp", k}, []string{"5ae472abqdekjqykoyxk7hvc2leklq5n"})
 	}
 	totpList()
-	insert("test/k/totp", []string{"5ae472abqdekjqykoyxk7hvc2leklq5n"})
-	totpList()
 	runCommand([]string{"totp", "test/k"}, nil)
 	runCommand([]string{"hash", store}, nil)
 	rm("keys2/k/three")
