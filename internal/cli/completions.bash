@@ -13,7 +13,7 @@ _{{ $.Executable }}() {
             case ${COMP_WORDS[1]} in
 {{ if not $.ReadOnly }}
                 "{{ $.InsertCommand }}")
-                    opts="{{ $.InsertMultiCommand }} $({{ $.DoList }})"
+                    opts="{{ $.InsertMultiCommand }}{{ if $.CanTOTP }} {{ $.InsertTOTPCommand }}{{end}} $({{ $.DoList }})"
                     ;;
                 "{{ $.HelpCommand }}")
                     opts="{{ $.HelpAdvancedCommand }}"
@@ -39,7 +39,7 @@ _{{ $.Executable }}() {
             case "${COMP_WORDS[1]}" in
 {{ if not $.ReadOnly }}
                 "{{ $.InsertCommand }}")
-                    if [ "${COMP_WORDS[2]}" == "{{ $.InsertMultiCommand }}" ]; then
+                    if [ "${COMP_WORDS[2]}" == "{{ $.InsertMultiCommand }}" ] {{ if $.CanTOTP }}|| [ "${COMP_WORDS[2]}" == "{{ $.InsertTOTPCommand }}" ] {{end}}; then
                         opts=$({{ $.DoList }})
                     fi
                     ;;

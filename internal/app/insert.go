@@ -9,6 +9,7 @@ import (
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
+	"github.com/enckse/lockbox/internal/totp"
 )
 
 func insertError(message string, err error) error {
@@ -18,6 +19,7 @@ func insertError(message string, err error) error {
 // ParseInsertArgs will parse the input args for insert commands
 func ParseInsertArgs(cmd InsertOptions, args []string) (InsertArgs, error) {
 	multi := false
+	isTOTP := false
 	idx := 0
 	switch len(args) {
 	case 0:
@@ -28,6 +30,15 @@ func ParseInsertArgs(cmd InsertOptions, args []string) (InsertArgs, error) {
 		switch opt {
 		case cli.InsertMultiCommand:
 			multi = true
+		case cli.InsertTOTPCommand:
+			off, err := cmd.IsNoTOTP()
+			if err != nil {
+				return InsertArgs{}, err
+			}
+			if off {
+				return InsertArgs{}, totp.ErrNoTOTP
+			}
+			isTOTP = true
 		default:
 			return InsertArgs{}, errors.New("unknown argument")
 		}
@@ -36,11 +47,17 @@ func ParseInsertArgs(cmd InsertOptions, args []string) (InsertArgs, error) {
 	default:
 		return InsertArgs{}, errors.New("too many arguments")
 	}
-	return InsertArgs{Opts: cmd, Multi: multi, Entry: args[idx]}, nil
+	return InsertArgs{Opts: cmd, Multi: multi, TOTP: isTOTP, Entry: args[idx]}, nil
 }
 
 // Do will execute an insert
 func (args InsertArgs) Do(w io.Writer, t *backend.Transaction) error {
+	if args.TOTP {
+		totpToken := args.Opts.TOTPToken()
+		if !strings.HasSuffix(args.Entry, backend.NewSuffix(totpToken)) {
+			args.Entry = backend.NewPath(args.Entry, totpToken)
+		}
+	}
 	existing, err := t.Get(args.Entry, backend.BlankValue)
 	if err != nil {
 		return insertError("unable to check for existing entry", err)
