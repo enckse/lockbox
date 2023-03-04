@@ -32,10 +32,6 @@ type (
 	}
 )
 
-func insertError(message string, err error) error {
-	return fmt.Errorf("%s (%w)", message, err)
-}
-
 // ReadArgs will read and check insert args
 func (p InsertArgsOptions) ReadArgs(cmd InsertOptions, args []string) (InsertArgs, error) {
 	multi := false
@@ -88,7 +84,7 @@ func (p InsertArgsOptions) ReadArgs(cmd InsertOptions, args []string) (InsertArg
 func (args InsertArgs) Do(w io.Writer, t *backend.Transaction) error {
 	existing, err := t.Get(args.Entry, backend.BlankValue)
 	if err != nil {
-		return insertError("unable to check for existing entry", err)
+		return err
 	}
 	isPipe := args.Opts.IsPipe()
 	if existing != nil {
@@ -100,11 +96,11 @@ func (args InsertArgs) Do(w io.Writer, t *backend.Transaction) error {
 	}
 	password, err := args.Opts.Input(isPipe, args.Multi)
 	if err != nil {
-		return insertError("invalid input", err)
+		return fmt.Errorf("invalid input: %w", err)
 	}
 	p := strings.TrimSpace(string(password))
 	if err := t.Insert(args.Entry, p); err != nil {
-		return insertError("failed to insert", err)
+		return err
 	}
 	if !isPipe {
 		fmt.Fprintln(w)

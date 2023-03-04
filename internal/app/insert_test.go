@@ -87,7 +87,7 @@ func TestInsertDo(t *testing.T) {
 	args.Opts.Input = func(bool, bool) ([]byte, error) {
 		return nil, errors.New("failure")
 	}
-	if err := args.Do(&buf, tx); err == nil || err.Error() != "invalid input (failure)" {
+	if err := args.Do(&buf, tx); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
 	args.Opts.Confirm = func(string) bool {
@@ -96,7 +96,7 @@ func TestInsertDo(t *testing.T) {
 	args.Opts.IsPipe = func() bool {
 		return true
 	}
-	if err := args.Do(&buf, tx); err == nil || err.Error() != "invalid input (failure)" {
+	if err := args.Do(&buf, tx); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
 	args.Opts.Input = func(bool, bool) ([]byte, error) {
