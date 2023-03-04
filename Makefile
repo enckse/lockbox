@@ -7,7 +7,7 @@ all: $(TARGET)
 build: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
-	./scripts/version/configure cmd/vers.txt
+	go run scripts/version/main.go cmd/vers.txt
 	go build $(GOFLAGS) -o $@ cmd/main.go
 
 unittest:
