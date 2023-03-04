@@ -12,7 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/lockbox/internal/util"
+	fp "github.com/enckse/pgl/filepath"
+	o "github.com/enckse/pgl/os"
 )
 
 var yes = []string{"y"}
@@ -21,17 +22,12 @@ const (
 	testKey = "plaintextkey"
 )
 
-func die(message string, err error) {
-	fmt.Fprintf(os.Stderr, "%s (%v)", message, err)
-	os.Exit(1)
-}
-
 func runCommand(args []string, data []string) {
 	p := exec.Command(os.Getenv("LB_BUILD"), args...)
 	var buf bytes.Buffer
 	for _, d := range data {
 		if _, err := buf.WriteString(fmt.Sprintf("%s\n", d)); err != nil {
-			die("failed to write stdin", err)
+			o.Dief("failed to write stdin: %v", err)
 		}
 	}
 	p.Stdout = os.Stdout
@@ -64,7 +60,7 @@ func totpList() {
 
 func main() {
 	if err := execute(); err != nil {
-		die("execution failed", err)
+		o.Die(err)
 	}
 }
 
@@ -215,7 +211,7 @@ func testClipboard(dataPath string, tries uint, wait uint) {
 		}
 		foundClipCount := 0
 		for _, f := range clipFiles {
-			if util.PathExists(f) {
+			if fp.PathExists(f) {
 				foundClipCount++
 			}
 		}
