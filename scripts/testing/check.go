@@ -197,7 +197,6 @@ func execute() error {
 	os.Setenv("LOCKBOX_CLIP_PASTE", fmt.Sprintf("touch %s", clipPasteFile))
 	os.Setenv("LOCKBOX_CLIP_MAX", "5")
 	runCommand([]string{"clip", "keys/k/one2"}, nil)
-	runCommand([]string{"clear"}, []string{"test"})
 	for _, f := range []string{clipCopyFile, clipPasteFile} {
 		if !util.PathExists(f) {
 			fmt.Printf("missing clipboard file: %s\n", f)
