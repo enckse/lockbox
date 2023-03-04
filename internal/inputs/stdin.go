@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/enckse/pgl/io"
+	"github.com/enckse/pgl/stdin"
 )
 
 func termEcho(on bool) {
@@ -89,9 +89,9 @@ func Stdin(one bool) (string, error) {
 	var b []byte
 	var err error
 	if one {
-		b, err = io.ReadStdinLine()
+		b, err = stdin.ReadLine()
 	} else {
-		b, err = io.ReadAllStdin()
+		b, err = stdin.ReadAll()
 	}
 	if err != nil {
 		return "", err

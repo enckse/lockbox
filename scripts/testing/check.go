@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	fp "github.com/enckse/pgl/filepath"
-	o "github.com/enckse/pgl/os"
+	"github.com/enckse/pgl/exit"
+	"github.com/enckse/pgl/paths"
 )
 
 var yes = []string{"y"}
@@ -27,7 +27,7 @@ func runCommand(args []string, data []string) {
 	var buf bytes.Buffer
 	for _, d := range data {
 		if _, err := buf.WriteString(fmt.Sprintf("%s\n", d)); err != nil {
-			o.Dief("failed to write stdin: %v", err)
+			exit.Dief("failed to write stdin: %v", err)
 		}
 	}
 	p.Stdout = os.Stdout
@@ -60,7 +60,7 @@ func totpList() {
 
 func main() {
 	if err := execute(); err != nil {
-		o.Die(err)
+		exit.Die(err)
 	}
 }
 
@@ -211,7 +211,7 @@ func testClipboard(dataPath string, tries uint, wait uint) {
 		}
 		foundClipCount := 0
 		for _, f := range clipFiles {
-			if fp.PathExists(f) {
+			if paths.Exists(f) {
 				foundClipCount++
 			}
 		}
