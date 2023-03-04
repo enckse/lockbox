@@ -7,10 +7,12 @@ import (
 )
 
 // Move is the CLI command to move entries
-func Move(t *backend.Transaction, args []string, confirm Confirm) error {
+func Move(cmd CommandOptions) error {
+	args := cmd.Args()
 	if len(args) != 2 {
 		return errors.New("src/dst required for move")
 	}
+	t := cmd.Transaction()
 	src := args[0]
 	dst := args[1]
 	srcExists, err := t.Get(src, backend.SecretValue)
@@ -25,7 +27,7 @@ func Move(t *backend.Transaction, args []string, confirm Confirm) error {
 		return errors.New("unable to get destination object")
 	}
 	if dstExists != nil {
-		if !confirm("overwrite destination") {
+		if !cmd.Confirm("overwrite destination") {
 			return nil
 		}
 	}

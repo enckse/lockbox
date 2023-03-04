@@ -1,8 +1,8 @@
-unable to check for existing entry (path can NOT end with separator)
+path can NOT end with separator
 exit status 1
-unable to check for existing entry (path can NOT be rooted)
+path can NOT be rooted
 exit status 1
-unable to check for existing entry (unwilling to operate on path with empty segment)
+unwilling to operate on path with empty segment
 exit status 1
 key/a/one
 keys/k/one

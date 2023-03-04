@@ -3,13 +3,13 @@ package app
 import (
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/enckse/lockbox/internal/backend"
 )
 
 // ListFind will list/find entries
-func ListFind(t *backend.Transaction, w io.Writer, isFind bool, args []string) error {
+func ListFind(cmd CommandOptions, isFind bool) error {
+	args := cmd.Args()
 	opts := backend.QueryOptions{}
 	opts.Mode = backend.ListMode
 	if isFind {
@@ -23,10 +23,11 @@ func ListFind(t *backend.Transaction, w io.Writer, isFind bool, args []string) e
 			return errors.New("list does not support any arguments")
 		}
 	}
-	e, err := t.QueryCallback(opts)
+	e, err := cmd.Transaction().QueryCallback(opts)
 	if err != nil {
 		return err
 	}
+	w := cmd.Writer()
 	for _, f := range e {
 		fmt.Fprintf(w, "%s\n", f.Path)
 	}

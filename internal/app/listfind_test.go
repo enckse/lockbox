@@ -1,7 +1,6 @@
 package app_test
 
 import (
-	"bytes"
 	"os"
 	"strings"
 	"testing"
@@ -34,35 +33,29 @@ func setup(t *testing.T) *backend.Transaction {
 }
 
 func TestList(t *testing.T) {
-	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
-	tx := fullSetup(t, true)
-	var buf bytes.Buffer
-	if err := app.ListFind(tx, &buf, false, []string{}); err != nil {
+	m := newMockCommand(t)
+	if err := app.ListFind(m, false); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
+	if m.buf.String() == "" {
 		t.Error("nothing listed")
 	}
-	if err := app.ListFind(tx, &buf, false, []string{"test"}); err.Error() != "list does not support any arguments" {
+	m.args = []string{"test"}
+	if err := app.ListFind(m, false); err.Error() != "list does not support any arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestFind(t *testing.T) {
-	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
-	tx := fullSetup(t, true)
-	var buf bytes.Buffer
-	if err := app.ListFind(tx, &buf, true, []string{}); err.Error() != "find requires search term" {
+	m := newMockCommand(t)
+	if err := app.ListFind(m, true); err.Error() != "find requires search term" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := app.ListFind(tx, &buf, true, []string{"test1"}); err != nil {
+	m.args = []string{"test1"}
+	if err := app.ListFind(m, true); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" || strings.Contains(buf.String(), "test3") {
+	if m.buf.String() == "" || strings.Contains(m.buf.String(), "test3") {
 		t.Error("wrong find")
 	}
 }

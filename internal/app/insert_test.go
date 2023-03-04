@@ -3,65 +3,121 @@ package app_test
 import (
 	"bytes"
 	"errors"
+	"io"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
 )
 
+type (
+	mockInsert struct {
+		command *mockCommand
+		noTOTP  func() (bool, error)
+		input   func(bool, bool) ([]byte, error)
+		pipe    func() bool
+		token   func() string
+	}
+)
+
+func newMockInsert(t *testing.T) *mockInsert {
+	m := &mockInsert{}
+	m.command = newMockCommand(t)
+	return m
+}
+
+func (m *mockInsert) TOTPToken() string {
+	return m.token()
+}
+
+func (m *mockInsert) IsPipe() bool {
+	return m.pipe()
+}
+
+func (m *mockInsert) Input(pipe, multi bool) ([]byte, error) {
+	return m.input(pipe, multi)
+}
+
+func (m *mockInsert) Args() []string {
+	return m.command.Args()
+}
+
+func (m *mockInsert) Writer() io.Writer {
+	return &m.command.buf
+}
+
+func (m *mockInsert) Confirm(p string) bool {
+	return m.command.Confirm(p)
+}
+
+func (m *mockInsert) IsNoTOTP() (bool, error) {
+	return m.noTOTP()
+}
+
+func (m *mockInsert) Transaction() *backend.Transaction {
+	return m.command.Transaction()
+}
+
 func TestInsertArgs(t *testing.T) {
-	obj := app.InsertOptions{}
-	p := app.InsertArgsOptions{}
-	p.IsNoTOTP = func() (bool, error) {
+	m := newMockInsert(t)
+	m.noTOTP = func() (bool, error) {
 		return true, nil
 	}
-	if _, err := p.ReadArgs(obj, []string{}); err == nil || err.Error() != "insert requires an entry" {
+	if _, err := app.ReadArgs(m); err == nil || err.Error() != "insert requires an entry" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := p.ReadArgs(obj, []string{"test", "test", "test"}); err == nil || err.Error() != "too many arguments" {
+	m.command.args = []string{"test", "test", "test"}
+	if _, err := app.ReadArgs(m); err == nil || err.Error() != "too many arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
-	r, err := p.ReadArgs(obj, []string{"test"})
+	m.command.args = []string{"test"}
+	r, err := app.ReadArgs(m)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if r.Multi || r.Entry != "test" {
 		t.Error("invalid parse")
 	}
-	if _, err := p.ReadArgs(obj, []string{"-t", "b"}); err == nil || err.Error() != "unknown argument" {
+	m.command.args = []string{"-t", "b"}
+	if _, err := app.ReadArgs(m); err == nil || err.Error() != "unknown argument" {
 		t.Errorf("invalid error: %v", err)
 	}
-	r, err = p.ReadArgs(obj, []string{"-multi", "test3"})
+	m.command.args = []string{"-multi", "test3"}
+	r, err = app.ReadArgs(m)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if !r.Multi || r.Entry != "test3" {
 		t.Error("invalid parse")
 	}
-	p.TOTPToken = func() string {
+	m.token = func() string {
 		return "test3"
 	}
-	r, err = p.ReadArgs(obj, []string{"-multi", "test/test3"})
+	m.command.args = []string{"-multi", "test/test3"}
+	r, err = app.ReadArgs(m)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	p.IsNoTOTP = func() (bool, error) {
+	m.noTOTP = func() (bool, error) {
 		return false, nil
 	}
-	if _, err := p.ReadArgs(obj, []string{"-multi", "test/test3"}); err == nil || err.Error() != "can not insert totp entry without totp flag" {
+	if _, err := app.ReadArgs(m); err == nil || err.Error() != "can not insert totp entry without totp flag" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := p.ReadArgs(obj, []string{"test/test3"}); err == nil || err.Error() != "can not insert totp entry without totp flag" {
+	m.command.args = []string{"test/test3"}
+	if _, err := app.ReadArgs(m); err == nil || err.Error() != "can not insert totp entry without totp flag" {
 		t.Errorf("invalid error: %v", err)
 	}
-	r, err = p.ReadArgs(obj, []string{"-totp", "test/test3"})
+	m.command.args = []string{"-totp", "test/test3"}
+	r, err = app.ReadArgs(m)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if r.Entry != "test/test3" {
 		t.Error("invalid parse")
 	}
-	r, err = p.ReadArgs(obj, []string{"-totp", "test"})
+	m.command.args = []string{"-totp", "test"}
+	r, err = app.ReadArgs(m)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -71,74 +127,63 @@ func TestInsertArgs(t *testing.T) {
 }
 
 func TestInsertDo(t *testing.T) {
-	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
+	m := newMockInsert(t)
 	args := app.InsertArgs{}
-	var buf bytes.Buffer
-	args.Opts.IsPipe = func() bool {
+	m.pipe = func() bool {
 		return false
 	}
 	args.Entry = "test/test2"
-	tx := fullSetup(t, true)
-	args.Opts.Confirm = func(string) bool {
-		return true
-	}
-	args.Opts.Input = func(bool, bool) ([]byte, error) {
+	m.command.confirm = false
+	m.input = func(bool, bool) ([]byte, error) {
 		return nil, errors.New("failure")
 	}
-	if err := args.Do(&buf, tx); err == nil || err.Error() != "invalid input: failure" {
+	m.command.buf = bytes.Buffer{}
+	if err := args.Do(m); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
-	args.Opts.Confirm = func(string) bool {
-		return false
-	}
-	args.Opts.IsPipe = func() bool {
+	m.command.confirm = false
+	m.pipe = func() bool {
 		return true
 	}
-	if err := args.Do(&buf, tx); err == nil || err.Error() != "invalid input: failure" {
+	if err := args.Do(m); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
-	args.Opts.Input = func(bool, bool) ([]byte, error) {
+	m.input = func(bool, bool) ([]byte, error) {
 		return []byte("TEST"), nil
 	}
-	args.Opts.Confirm = func(string) bool {
-		return true
-	}
+	m.command.confirm = true
 	args.Entry = "a/b/c"
-	if err := args.Do(&buf, tx); err != nil {
+	if err := args.Do(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() != "" {
+	if m.command.buf.String() != "" {
 		t.Error("invalid insert")
 	}
-	args.Opts.IsPipe = func() bool {
+	m.pipe = func() bool {
 		return false
 	}
-	buf = bytes.Buffer{}
-	if err := args.Do(&buf, tx); err != nil {
+	m.command.buf = bytes.Buffer{}
+	if err := args.Do(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
+	if m.command.buf.String() == "" {
 		t.Error("invalid insert")
 	}
-	buf = bytes.Buffer{}
+	m.command.buf = bytes.Buffer{}
 	args.Entry = "test/test2/test1"
-	if err := args.Do(&buf, tx); err != nil {
+	if err := args.Do(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
+	if m.command.buf.String() == "" {
 		t.Error("invalid insert")
 	}
-	args.Opts.Confirm = func(string) bool {
-		return false
-	}
-	buf = bytes.Buffer{}
+	m.command.confirm = false
+	m.command.buf = bytes.Buffer{}
 	args.Entry = "test/test2/test1"
-	if err := args.Do(&buf, tx); err != nil {
+	if err := args.Do(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() != "" {
+	if m.command.buf.String() != "" {
 		t.Error("invalid insert")
 	}
 }

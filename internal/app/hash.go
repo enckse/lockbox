@@ -3,17 +3,18 @@ package app
 import (
 	"errors"
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/backend"
 )
 
 // Hash will hash 1-N files
-func Hash(w io.Writer, args []string) error {
+func Hash(cmd CommandOptions) error {
+	args := cmd.Args()
 	if len(args) == 0 {
 		return errors.New("hash requires a file")
 	}
+	w := cmd.Writer()
 	for _, a := range args {
 		t, err := backend.Load(a)
 		if err != nil {

@@ -5,29 +5,26 @@ import (
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
-	"github.com/enckse/lockbox/internal/backend"
 )
 
 func TestStats(t *testing.T) {
-	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
-	tx := fullSetup(t, true)
-	var b bytes.Buffer
-	if err := app.Stats(&b, tx, []string{}); err.Error() != "entry required" {
+	m := newMockCommand(t)
+	if err := app.Stats(m); err.Error() != "entry required" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if err := app.Stats(&b, tx, []string{"test/test2/test1"}); err != nil {
+	m.args = []string{"test/test2/test1"}
+	if err := app.Stats(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if b.String() == "" {
+	if m.buf.String() == "" {
 		t.Error("no stats")
 	}
-	b = bytes.Buffer{}
-	if err := app.Stats(&b, tx, []string{"tsest/test2/test1"}); err != nil {
+	m.buf = bytes.Buffer{}
+	m.args = []string{"tsest/test2/test1"}
+	if err := app.Stats(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if b.String() != "" {
+	if m.buf.String() != "" {
 		t.Error("no stats")
 	}
 }

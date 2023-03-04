@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/app"
-	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
@@ -42,8 +41,6 @@ func handleEarly(command string, args []string) (bool, error) {
 		return true, nil
 	case cli.TOTPCommand:
 		return true, totp.Call(args)
-	case cli.HashCommand:
-		return true, app.Hash(os.Stdout, args)
 	case cli.ClearCommand:
 		return true, clearClipboard(args)
 	}
@@ -64,38 +61,33 @@ func run() error {
 	if ok {
 		return nil
 	}
-	t, err := backend.NewTransaction()
+	p, err := app.NewDefaultCommand(sub)
 	if err != nil {
-		return fmt.Errorf("unable to build transaction model: %w", err)
+		return err
 	}
 	switch command {
 	case cli.ReKeyCommand:
-		if confirm("proceed with rekey") {
-			return t.ReKey()
+		if p.Confirm("proceed with rekey") {
+			return p.Transaction().ReKey()
 		}
 	case cli.ListCommand, cli.FindCommand:
-		return app.ListFind(t, os.Stdout, command == cli.FindCommand, sub)
+		return app.ListFind(p, command == cli.FindCommand)
 	case cli.MoveCommand:
-		return app.Move(t, sub, confirm)
+		return app.Move(p)
 	case cli.InsertCommand:
-		insert := app.InsertOptions{}
-		parser := app.InsertArgsOptions{}
-		parser.IsNoTOTP = inputs.IsNoTOTP
-		parser.TOTPToken = inputs.TOTPToken
-		insert.Confirm = confirm
-		insert.IsPipe = inputs.IsInputFromPipe
-		insert.Input = inputs.GetUserInputPassword
-		insertArgs, err := parser.ReadArgs(insert, sub)
+		insertArgs, err := app.ReadArgs(p)
 		if err != nil {
 			return err
 		}
-		return insertArgs.Do(os.Stdout, t)
+		return insertArgs.Do(p)
 	case cli.RemoveCommand:
-		return app.Remove(os.Stdout, t, sub, confirm)
+		return app.Remove(p)
 	case cli.StatsCommand:
-		return app.Stats(os.Stdout, t, sub)
+		return app.Stats(p)
 	case cli.ShowCommand, cli.ClipCommand:
-		return app.ShowClip(os.Stdout, t, command == cli.ShowCommand, sub)
+		return app.ShowClip(p, command == cli.ShowCommand)
+	case cli.HashCommand:
+		return app.Hash(p)
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
@@ -129,12 +121,4 @@ func clearClipboard(args []string) error {
 		}
 	}
 	return clipboard.CopyTo("")
-}
-
-func confirm(prompt string) bool {
-	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
-	if err != nil {
-		util.Dief("failed to read stdin for confirmation: %v", err)
-	}
-	return yesNo
 }
