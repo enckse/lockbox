@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/enckse/pgl/io"
+	"github.com/enckse/lockbox/internal/util"
 )
 
 func termEcho(on bool) {
@@ -86,13 +86,7 @@ func confirmInputsMatch() (string, error) {
 
 // Stdin will get one (or more) lines of stdin as string.
 func Stdin(one bool) (string, error) {
-	var b []byte
-	var err error
-	if one {
-		b, err = io.ReadStdinLine()
-	} else {
-		b, err = io.ReadAllStdin()
-	}
+	b, err := util.ReadStdin(one)
 	if err != nil {
 		return "", err
 	}

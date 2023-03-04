@@ -15,7 +15,7 @@ import (
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/totp"
-	format "github.com/enckse/pgl/fmt"
+	"github.com/enckse/lockbox/internal/util"
 )
 
 //go:embed "vers.txt"
@@ -23,7 +23,7 @@ var version string
 
 func main() {
 	if err := run(); err != nil {
-		format.Die(err)
+		util.Die(err)
 	}
 }
 

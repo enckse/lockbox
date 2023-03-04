@@ -7,7 +7,7 @@ import (
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/pgl/fmt"
+	"github.com/enckse/lockbox/internal/util"
 )
 
 type (
@@ -54,7 +54,7 @@ func (a *DefaultCommand) Transaction() *backend.Transaction {
 func (a *DefaultCommand) Confirm(prompt string) bool {
 	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		fmt.Dief("failed to read stdin for confirmation: %v", err)
+		util.Dief("failed to read stdin for confirmation: %v", err)
 	}
 	return yesNo
 }
