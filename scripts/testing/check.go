@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/enckse/lockbox/internal/util"
 )
 
 var yes = []string{"y"}
@@ -189,5 +191,17 @@ func execute() error {
 	os.Setenv("LOCKBOX_KEY", reKey)
 	fmt.Println()
 	ls()
+	clipCopyFile := filepath.Join(path, "clipboard")
+	clipPasteFile := clipCopyFile + ".paste"
+	os.Setenv("LOCKBOX_CLIP_COPY", fmt.Sprintf("touch %s", clipCopyFile))
+	os.Setenv("LOCKBOX_CLIP_PASTE", fmt.Sprintf("touch %s", clipPasteFile))
+	os.Setenv("LOCKBOX_CLIP_MAX", "5")
+	runCommand([]string{"clip", "keys/k/one2"}, nil)
+	runCommand([]string{"clear"}, []string{"test"})
+	for _, f := range []string{clipCopyFile, clipPasteFile} {
+		if !util.PathExists(f) {
+			fmt.Printf("missing clipboard file: %s\n", f)
+		}
+	}
 	return nil
 }
