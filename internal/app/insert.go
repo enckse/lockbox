@@ -16,15 +16,14 @@ func insertError(message string, err error) error {
 	return fmt.Errorf("%s (%w)", message, err)
 }
 
-// Insert will insert new entries
-// NOTE: almost entirely tested via regresssion due to complexities around piping/inputs
-func Insert(w io.Writer, t *backend.Transaction, args []string, cmd InsertOptions) error {
+// ParseInsertArgs will parse the input args for insert commands
+func ParseInsertArgs(cmd InsertOptions, args []string) (InsertArgs, error) {
 	multi := false
 	isTOTP := false
 	idx := 0
 	switch len(args) {
 	case 0:
-		return errors.New("insert requires an entry")
+		return InsertArgs{}, errors.New("insert requires an entry")
 	case 1:
 	case 2:
 		opt := args[0]
@@ -34,45 +33,49 @@ func Insert(w io.Writer, t *backend.Transaction, args []string, cmd InsertOption
 		case cli.InsertTOTPCommand:
 			off, err := cmd.IsNoTOTP()
 			if err != nil {
-				return err
+				return InsertArgs{}, err
 			}
 			if off {
-				return totp.ErrNoTOTP
+				return InsertArgs{}, totp.ErrNoTOTP
 			}
 			isTOTP = true
 		default:
-			return errors.New("unknown argument")
+			return InsertArgs{}, errors.New("unknown argument")
 		}
 		multi = true
 		idx = 1
 	default:
-		return errors.New("too many arguments")
+		return InsertArgs{}, errors.New("too many arguments")
 	}
-	isPipe := cmd.IsPipe()
-	entry := args[idx]
-	if isTOTP {
-		totpToken := cmd.TOTPToken()
-		if !strings.HasSuffix(entry, backend.NewSuffix(totpToken)) {
-			entry = backend.NewPath(entry, totpToken)
+	return InsertArgs{Opts: cmd, Multi: multi, TOTP: isTOTP, Entry: args[idx]}, nil
+}
+
+// Do will execute an insert
+func (args InsertArgs) Do(w io.Writer, t *backend.Transaction) error {
+	if args.TOTP {
+		totpToken := args.Opts.TOTPToken()
+		if !strings.HasSuffix(args.Entry, backend.NewSuffix(totpToken)) {
+			args.Entry = backend.NewPath(args.Entry, totpToken)
 		}
 	}
-	existing, err := t.Get(entry, backend.BlankValue)
+	existing, err := t.Get(args.Entry, backend.BlankValue)
 	if err != nil {
 		return insertError("unable to check for existing entry", err)
 	}
+	isPipe := args.Opts.IsPipe()
 	if existing != nil {
 		if !isPipe {
-			if !cmd.Confirm("overwrite existing") {
+			if !args.Opts.Confirm("overwrite existing") {
 				return nil
 			}
 		}
 	}
-	password, err := cmd.Input(isPipe, multi)
+	password, err := args.Opts.Input(isPipe, args.Multi)
 	if err != nil {
 		return insertError("invalid input", err)
 	}
 	p := strings.TrimSpace(string(password))
-	if err := t.Insert(entry, p); err != nil {
+	if err := t.Insert(args.Entry, p); err != nil {
 		return insertError("failed to insert", err)
 	}
 	if !isPipe {

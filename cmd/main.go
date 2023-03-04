@@ -84,7 +84,11 @@ func run() error {
 		insert.IsNoTOTP = inputs.IsNoTOTP
 		insert.TOTPToken = inputs.TOTPToken
 		insert.Input = inputs.GetUserInputPassword
-		return app.Insert(os.Stdout, t, sub, insert)
+		insertArgs, err := app.ParseInsertArgs(insert, sub)
+		if err != nil {
+			return err
+		}
+		return insertArgs.Do(os.Stdout, t)
 	case cli.RemoveCommand:
 		return app.Remove(os.Stdout, t, sub, confirm)
 	case cli.StatsCommand:

@@ -12,4 +12,11 @@ type (
 		Input     func(bool, bool) ([]byte, error)
 		Confirm   Confirm
 	}
+	// InsertArgs are parsed insert settings for insert commands
+	InsertArgs struct {
+		Entry string
+		Multi bool
+		TOTP  bool
+		Opts  InsertOptions
+	}
 )
