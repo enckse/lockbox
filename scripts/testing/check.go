@@ -193,14 +193,28 @@ func execute() error {
 	ls()
 	clipCopyFile := filepath.Join(path, "clipboard")
 	clipPasteFile := clipCopyFile + ".paste"
+	clipFiles := []string{clipCopyFile, clipPasteFile}
 	os.Setenv("LOCKBOX_CLIP_COPY", fmt.Sprintf("touch %s", clipCopyFile))
 	os.Setenv("LOCKBOX_CLIP_PASTE", fmt.Sprintf("touch %s", clipPasteFile))
 	os.Setenv("LOCKBOX_CLIP_MAX", "5")
 	runCommand([]string{"clip", "keys/k/one2"}, nil)
-	for _, f := range []string{clipCopyFile, clipPasteFile} {
-		if !util.PathExists(f) {
-			fmt.Printf("missing clipboard file: %s\n", f)
+	tries := 3
+	for tries >= 0 {
+		if tries == 0 {
+			fmt.Println("missing clipboard files")
+			break
 		}
+		foundClipCount := 0
+		for _, f := range clipFiles {
+			if util.PathExists(f) {
+				foundClipCount++
+			}
+		}
+		if foundClipCount == len(clipFiles) {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+		tries--
 	}
 	return nil
 }
