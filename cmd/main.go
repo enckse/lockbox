@@ -81,8 +81,6 @@ func run() error {
 		insert := app.InsertOptions{}
 		insert.Confirm = confirm
 		insert.IsPipe = inputs.IsInputFromPipe
-		insert.IsNoTOTP = inputs.IsNoTOTP
-		insert.TOTPToken = inputs.TOTPToken
 		insert.Input = inputs.GetUserInputPassword
 		insertArgs, err := app.ParseInsertArgs(insert, sub)
 		if err != nil {

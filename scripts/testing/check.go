@@ -145,10 +145,6 @@ func execute() error {
 	show("keys/k/one2")
 	show("keys2/k/three")
 	runCommand([]string{"stats", "keys2/k/three"}, nil)
-	for _, k := range []string{"test/k", "test/k/totp"} {
-		runCommand([]string{"insert", "-totp", k}, []string{"5ae472abqdekjqykoyxk7hvc2leklq5n"})
-	}
-	totpList()
 	insert("test/k/totp", []string{"5ae472abqdekjqykoyxk7hvc2leklq5n"})
 	totpList()
 	runCommand([]string{"totp", "test/k"}, nil)

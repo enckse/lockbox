@@ -47,8 +47,6 @@ const (
 	EnvCommand = "env"
 	// InsertMultiCommand handles multi-line inserts
 	InsertMultiCommand = "-multi"
-	// InsertTOTPCommand is a helper for totp inserts
-	InsertTOTPCommand = "-totp"
 	// TOTPClipCommand is the argument for copying totp codes to clipboard
 	TOTPClipCommand = "-clip"
 	// TOTPShortCommand is the argument for getting the short version of a code
@@ -87,7 +85,6 @@ type (
 		TOTPOnceCommand     string
 		TOTPClipCommand     string
 		InsertMultiCommand  string
-		InsertTOTPCommand   string
 		RemoveCommand       string
 		ClipCommand         string
 		ShowCommand         string
@@ -145,7 +142,6 @@ func BashCompletions(defaults bool) ([]string, error) {
 		InsertMultiCommand:  InsertMultiCommand,
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
-		InsertTOTPCommand:   InsertTOTPCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
@@ -216,7 +212,6 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
 	results = append(results, subCommand(InsertCommand, InsertMultiCommand, "entry", "insert a multi-line entry"))
-	results = append(results, subCommand(InsertCommand, InsertTOTPCommand, "entry", "insert a new totp entry"))
 	results = append(results, command(ListCommand, "", "list entries"))
 	results = append(results, command(MoveCommand, "src dst", "move an entry from source to destination"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
