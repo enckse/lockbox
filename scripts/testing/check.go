@@ -109,6 +109,8 @@ func execute() error {
 	keyFile := flag.Bool("keyfile", false, "enable keyfile")
 	dataPath := flag.String("data", "", "data area")
 	runMode := flag.Bool("run", true, "execute tests")
+	clipRetry := flag.Uint("clipboard-retry", 3, "number of tries for the clipboard test")
+	clipWait := flag.Uint("clip-wait", 1000, "number of milliseconds to wait for the clipboard test")
 	flag.Parse()
 	path := *dataPath
 	cwd, err := os.Getwd()
@@ -191,15 +193,20 @@ func execute() error {
 	os.Setenv("LOCKBOX_KEY", reKey)
 	fmt.Println()
 	ls()
-	clipCopyFile := filepath.Join(path, "clipboard")
+	testClipboard(path, *clipRetry, *clipWait)
+	return nil
+}
+
+func testClipboard(dataPath string, tries uint, wait uint) {
+	clipCopyFile := filepath.Join(dataPath, "clipboard")
 	clipPasteFile := clipCopyFile + ".paste"
 	clipFiles := []string{clipCopyFile, clipPasteFile}
 	os.Setenv("LOCKBOX_CLIP_COPY", fmt.Sprintf("touch %s", clipCopyFile))
 	os.Setenv("LOCKBOX_CLIP_PASTE", fmt.Sprintf("touch %s", clipPasteFile))
 	os.Setenv("LOCKBOX_CLIP_MAX", "5")
 	runCommand([]string{"clip", "keys/k/one2"}, nil)
-	tries := 3
-	for tries >= 0 {
+	clipDur := time.Duration(wait) * time.Millisecond
+	for {
 		if tries == 0 {
 			fmt.Println("missing clipboard files")
 			break
@@ -213,8 +220,7 @@ func execute() error {
 		if foundClipCount == len(clipFiles) {
 			break
 		}
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(clipDur)
 		tries--
 	}
-	return nil
 }
