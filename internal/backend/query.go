@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/enckse/pgl/maps"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -70,8 +71,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if args.Mode == noneMode {
 		return nil, errors.New("no query mode specified")
 	}
-	var keys []string
-	entities := make(map[string]QueryEntity)
+	entities := maps.KeyedMap[string, QueryEntity]{}
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
@@ -102,8 +102,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 					}
 				}
 			}
-			keys = append(keys, path)
-			entities[path] = QueryEntity{backing: entry}
+			entities.Add(path, QueryEntity{backing: entry})
 		})
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()
@@ -113,6 +112,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if err != nil {
 		return nil, err
 	}
+	keys := entities.Keys()
 	if isSort {
 		sort.Strings(keys)
 	}
@@ -120,7 +120,10 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	for _, k := range keys {
 		entity := QueryEntity{Path: k}
 		if args.Values != BlankValue {
-			e := entities[k]
+			e, ok := entities.Get(k)
+			if !ok {
+				return nil, errors.New("failed to read entity back from map")
+			}
 			val := getValue(e.backing, notesKey)
 			if strings.TrimSpace(val) == "" {
 				val = e.backing.GetPassword()
