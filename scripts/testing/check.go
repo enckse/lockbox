@@ -213,7 +213,7 @@ func execute() error {
 		if foundClipCount == len(clipFiles) {
 			break
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		tries--
 	}
 	return nil
