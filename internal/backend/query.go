@@ -102,7 +102,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 					}
 				}
 			}
-			entities.Add(path, QueryEntity{backing: entry})
+			entities.Set(path, QueryEntity{backing: entry})
 		})
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()
