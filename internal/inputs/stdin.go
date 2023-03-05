@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/enckse/pgl/stdin"
+	"github.com/enckse/pgl/os/stdin"
 )
 
 func termEcho(on bool) {

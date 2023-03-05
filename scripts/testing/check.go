@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/pgl/exit"
-	"github.com/enckse/pgl/paths"
+	"github.com/enckse/pgl/os/exit"
+	"github.com/enckse/pgl/os/paths"
 )
 
 var yes = []string{"y"}
@@ -211,7 +211,7 @@ func testClipboard(dataPath string, tries uint, wait uint) {
 		}
 		foundClipCount := 0
 		for _, f := range clipFiles {
-			if paths.Exists(f) {
+			if paths.Exist(f) {
 				foundClipCount++
 			}
 		}

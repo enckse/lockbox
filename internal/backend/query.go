@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/enckse/pgl/maps"
+	"github.com/enckse/pgl/types/collections"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -71,7 +71,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if args.Mode == noneMode {
 		return nil, errors.New("no query mode specified")
 	}
-	entities := maps.KeyedMap[string, QueryEntity]{}
+	entities := collections.Map[string, QueryEntity]{}
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {

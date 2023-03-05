@@ -7,7 +7,7 @@ import (
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/pgl/exit"
+	"github.com/enckse/pgl/os/exit"
 )
 
 type (
