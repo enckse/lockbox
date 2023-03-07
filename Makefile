@@ -1,13 +1,13 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
-TESTS   := scripts/testing
+TESTS   := internal/scripts/testing
 
 all: $(TARGET)
 
 build: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
-	go run scripts/version/main.go cmd/vers.txt
+	go run internal/scripts/version/main.go cmd/vers.txt
 	go build $(GOFLAGS) -o $@ cmd/main.go
 
 unittest:
@@ -19,3 +19,8 @@ check: $(TARGET) unittest
 clean:
 	rm -rf $(BUILD)
 	make -C $(TESTS) clean
+
+.runci:
+	rm -rf .git
+	make build
+	make check
