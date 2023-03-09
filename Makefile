@@ -1,6 +1,5 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
-TESTS   := internal/scripts/testing
 
 all: $(TARGET)
 
@@ -19,7 +18,6 @@ check: $(TARGET)
 
 clean:
 	rm -rf $(BUILD)
-	make -C $(TESTS) clean
 
 .runci:
 	rm -rf .git
