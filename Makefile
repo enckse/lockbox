@@ -10,7 +10,7 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 	go build $(GOFLAGS) -o $@ cmd/main.go
 
 .version:
-	@git describe --tags --abbrev=0 | sed 's/^/version:/g'
+	@git describe --tags --abbrev=0 | sha256sum | cut -c 1-7 | sed 's/^/version:/g'
 	@git tag --points-at HEAD | grep -q '' || echo "version:-1"
 
 check: $(TARGET)
