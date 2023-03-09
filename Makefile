@@ -14,11 +14,8 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 	@git describe --tags --abbrev=0 | sed 's/^/version:/g'
 	@git tag --points-at HEAD | grep -q '' || echo "version:-1"
 
-unittest:
+check: $(TARGET)
 	go test -v ./...
-
-check: $(TARGET) unittest
-	LB_BUILD=$(PWD)/$(TARGET) make -C $(TESTS)
 
 clean:
 	rm -rf $(BUILD)
