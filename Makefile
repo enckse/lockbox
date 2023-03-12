@@ -16,7 +16,7 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 unittests:
 	go test -v ./...
 
-check: unittests $(TARGET)
+check: $(TARGET) unittests
 	cd tests && ./run.sh
 
 clean:
