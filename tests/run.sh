@@ -7,7 +7,6 @@ CLIP_COPY="$DATA/clip.copy"
 CLIP_PASTE="$DATA/clip.paste"
 
 _execute() {
-  local rekey rekeyFile clipTries
   export LOCKBOX_HOOKDIR=""
   export LOCKBOX_STORE="${DATA}/passwords.kdbx"
   export LOCKBOX_KEY="testingkey"
@@ -64,6 +63,12 @@ _execute() {
   echo
   ${LB_BINARY} ls
   echo
+  _rekey
+  _clipboard
+}
+
+_rekey() {
+  local rekey rekeyFile 
   rekey="$LOCKBOX_STORE.rekey.kdbx"
   rekeyFile=""
   export LOCKBOX_STORE_NEW="$rekey"
@@ -77,10 +82,10 @@ _execute() {
   echo y |${LB_BINARY} rekey
   echo
   ${LB_BINARY} ls
-  _clipboard
 }
 
 _clipboard() {
+  local clipTries
   export LOCKBOX_CLIP_COPY="touch $CLIP_COPY"
   export LOCKBOX_CLIP_PASTE="touch $CLIP_PASTE"
   export LOCKBOX_CLIP_MAX=5
