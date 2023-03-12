@@ -96,11 +96,6 @@ _clipboard() {
   echo "clipboard test failed"
 }
 
-_cleanup() {
-  mkdir -p "$DATA"
-  find "$DATA" -type f -delete
-}
-
 _logtest() {
   _execute 2>&1 | \
     sed 's/modtime: [0-9].*$/modtime: XXXX-XX-XX/g' | \
@@ -110,8 +105,6 @@ _logtest() {
 _evaluate() {
   local logfile
   logfile="$DATA/actual.log"
-  echo "$1"
-  echo "============"
   _logtest > "$logfile"
   if ! diff -u "$logfile" "expected.log"; then
     echo "failed"
@@ -120,16 +113,29 @@ _evaluate() {
   echo "passed"
 }
 
-_run() {
-  export LOCKBOX_KEYFILE=""
-  _cleanup
-  _evaluate "password"
-  echo
-  _cleanup
-  KEYFILE="$DATA/test.key"
-  echo "thisisatest" > "$KEYFILE"
-  export LOCKBOX_KEYFILE="$KEYFILE"
-  _evaluate "keyfile"
-}
+if [ -z "$1" ]; then
+  echo "no test given"
+  exit 1
+fi
+echo "$1"
+echo "============"
 
-_run
+mkdir -p "$DATA"
+find "$DATA" -type f -delete
+
+case "$1" in
+  "password")
+    export LOCKBOX_KEYFILE=""
+    _evaluate
+    ;;
+  "keyfile")
+    KEYFILE="$DATA/test.key"
+    echo "thisisatest" > "$KEYFILE"
+    export LOCKBOX_KEYFILE="$KEYFILE"
+    _evaluate
+    ;;
+  *)
+    echo "unknown test: $1"
+    exit 1
+    ;;
+esac

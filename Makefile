@@ -17,7 +17,7 @@ unittests:
 	go test -v ./...
 
 check: $(TARGET) unittests
-	cd tests && ./run.sh
+	make -C tests
 
 clean:
 	rm -rf $(BUILD)
