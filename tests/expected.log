@@ -101,3 +101,4 @@ keys/k/one2
 proceed with rekey? (y/N) 
 keys/k/one2
 clipboard will clear in 5 seconds
+Wrong password? HMAC-SHA256 of header mismatching

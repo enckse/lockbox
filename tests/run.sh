@@ -65,6 +65,19 @@ _execute() {
   echo
   _rekey
   _clipboard
+  _invalid
+}
+
+_invalid() {
+  local keyfile
+  if [ -n "$LOCKBOX_KEYFILE" ]; then
+    export LOCKBOX_KEYFILE=""
+  else
+    keyfile="$DATA/invalid.key"
+    echo "invalid" > "$keyfile"
+    export LOCKBOX_KEYFILE="$keyfile"
+  fi
+  ${LB_BINARY} ls
 }
 
 _rekey() {
