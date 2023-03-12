@@ -101,14 +101,18 @@ _cleanup() {
   find "$DATA" -type f -delete
 }
 
+_logtest() {
+  _execute 2>&1 | \
+    sed 's/modtime: [0-9].*$/modtime: XXXX-XX-XX/g' | \
+    sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g'
+}
+
 _evaluate() {
   local logfile
   logfile="$DATA/actual.log"
   echo "$1"
   echo "============"
-  _execute > "$logfile" 2>&1
-  sed -i 's/modtime: [0-9].*$/modtime: XXXX-XX-XX/g' "$logfile"
-  sed -i 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g' "$logfile"
+  _logtest > "$logfile"
   if ! diff -u "$logfile" "expected.log"; then
     echo "failed"
     exit 1

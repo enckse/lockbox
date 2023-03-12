@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "deps"
-        run: apk add go make git
+        run: apk add go make git bash
       - name: "build"
         run: make .runci
   ubuntu-build:
