@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+LB_BINARY=../bin/lb
+DATA=bin
+CLIP_WAIT=1
+CLIP_TRIES=3
+CLIP_COPY="$DATA/clip.copy"
+CLIP_PASTE="$DATA/clip.paste"
+
+_execute() {
+  local rekey rekeyFile clipTries
+  export LOCKBOX_HOOKDIR=""
+  export LOCKBOX_STORE="${DATA}/passwords.kdbx"
+  export LOCKBOX_KEY="testingkey"
+  export LOCKBOX_TOTP=totp
+  export LOCKBOX_INTERACTIVE=no
+  export LOCKBOX_READONLY=no
+  export LOCKBOX_KEYMODE=plaintext
+  echo test2 |${LB_BINARY} insert keys/k/one2
+  echo test |${LB_BINARY} insert keys/k/one
+  echo test |${LB_BINARY} insert key/a/one
+  echo test |${LB_BINARY} insert keys/k/one
+  echo test |${LB_BINARY} insert keys/k/one/
+  echo test |${LB_BINARY} insert /keys/k/one
+  echo test |${LB_BINARY} insert keys/aa/b//s///e
+  printf "test3\ntest4\n" |${LB_BINARY} insert keys2/k/three
+  ${LB_BINARY} ls
+  echo y |${LB_BINARY} rm keys/k/one
+  echo
+  ${LB_BINARY} ls
+  ${LB_BINARY} find e
+  ${LB_BINARY} show keys/k/one2
+  ${LB_BINARY} show keys2/k/three
+  ${LB_BINARY} stats keys2/k/three
+  echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} insert -totp test/k
+  echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} insert -totp test/k/totp
+  ${LB_BINARY} totp -list
+  ${LB_BINARY} totp test/k
+  ${LB_BINARY} hash "$LOCKBOX_STORE"
+  echo y |${LB_BINARY} rm keys2/k/three
+  echo
+  echo y |${LB_BINARY} rm test/k/totp
+  echo
+  echo y |${LB_BINARY} rm test/k/one
+  echo
+  echo
+  ${LB_BINARY} mv key/a/one keyx/d/e
+  ${LB_BINARY} ls
+  echo y |${LB_BINARY} rm keyx/d/e
+  echo
+  ${LB_BINARY} ls
+  echo test2 |${LB_BINARY} insert keys/k2/one2
+  echo test |${LB_BINARY} insert keys/k2/one
+  echo test2 |${LB_BINARY} insert keys/k2/t1/one2
+  echo test |${LB_BINARY} insert keys/k2/t1/one
+  echo test2 |${LB_BINARY} insert keys/k2/t2/one2
+  export LOCKBOX_HOOKDIR="$PWD/hooks"
+  echo test |${LB_BINARY} insert keys/k2/t2/one
+  echo
+  ${LB_BINARY} ls
+  echo y |${LB_BINARY} rm keys/k2/t1/*
+  echo
+  ${LB_BINARY} ls
+  echo y |${LB_BINARY} rm keys/k2/*
+  echo
+  ${LB_BINARY} ls
+  echo
+  rekey="$LOCKBOX_STORE.rekey.kdbx"
+  rekeyFile=""
+  export LOCKBOX_STORE_NEW="$rekey"
+  export LOCKBOX_KEY_NEW="newkey"
+  export LOCKBOX_KEYMODE_NEW=plaintext
+  if [ -n "$LOCKBOX_KEYFILE" ]; then
+    rekeyFile="$DATA/newkeyfile"
+    echo "thisisanewkey" > "$rekeyFile"
+  fi
+  export LOCKBOX_KEYFILE_NEW="$rekeyFile"
+  echo y |${LB_BINARY} rekey
+  echo
+  ${LB_BINARY} ls
+  _clipboard
+}
+
+_clipboard() {
+  export LOCKBOX_CLIP_COPY="touch $CLIP_COPY"
+  export LOCKBOX_CLIP_PASTE="touch $CLIP_PASTE"
+  export LOCKBOX_CLIP_MAX=5
+  ${LB_BINARY} clip keys/k/one2
+  clipTries="$CLIP_TRIES"
+  while [ "$clipTries" -gt 0 ] ; do
+    if [ -e "$CLIP_COPY" ] && [ -e "$CLIP_PASTE" ]; then
+      return
+    fi
+    sleep "$CLIP_WAIT"
+    clipTries=$((clipTries-1))
+  done
+  echo "clipboard test failed"
+}
+
+_cleanup() {
+  mkdir -p "$DATA"
+  find "$DATA" -type f -delete
+}
+
+_evaluate() {
+  local logfile
+  logfile="$DATA/actual.log"
+  echo "$1"
+  echo "============"
+  _execute > "$logfile" 2>&1
+  sed -i 's/modtime: [0-9].*$/modtime: XXXX-XX-XX/g' "$logfile"
+  sed -i 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g' "$logfile"
+  if ! diff -u "$logfile" "expected.log"; then
+    echo "failed"
+    exit 1
+  fi
+  echo "passed"
+}
+
+_run() {
+  export LOCKBOX_KEYFILE=""
+  _cleanup
+  _evaluate "password"
+  echo
+  _cleanup
+  KEYFILE="$DATA/test.key"
+  echo "thisisatest" > "$KEYFILE"
+  export LOCKBOX_KEYFILE="$KEYFILE"
+  _evaluate "keyfile"
+}
+
+_run

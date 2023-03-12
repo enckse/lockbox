@@ -13,8 +13,11 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
 	@git describe --tags --abbrev=0 | sha256sum | cut -c 1-7 | sed 's/^/version:/g'
 	@git tag --points-at HEAD | grep -q '' || echo "version:-1"
 
-check: $(TARGET)
+unittests:
 	go test -v ./...
+
+check: unittests $(TARGET)
+	cd tests && ./run.sh
 
 clean:
 	rm -rf $(BUILD)

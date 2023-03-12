@@ -1,9 +1,6 @@
 path can NOT end with separator
-exit status 1
 path can NOT be rooted
-exit status 1
 unwilling to operate on path with empty segment
-exit status 1
 key/a/one
 keys/k/one
 keys/k/one2
@@ -40,7 +37,6 @@ test/k/totp:
 delete entry? (y/N) 
 delete entry? (y/N) 
 delete entry? (y/N) unable to remove: no entities given
-exit status 1
 
 
 keys/k/one2
