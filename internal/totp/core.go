@@ -206,10 +206,7 @@ func Call(args []string) error {
 		}
 		cmd = args[1]
 	}
-	if err := display(cmd, options); err != nil {
-		return err
-	}
-	return nil
+	return display(cmd, options)
 }
 
 func parseArgs(arg string) arguments {

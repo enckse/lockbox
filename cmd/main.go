@@ -42,7 +42,7 @@ func handleEarly(command string, args []string) (bool, error) {
 	case cli.TOTPCommand:
 		return true, totp.Call(args)
 	case cli.ClearCommand:
-		return true, clearClipboard(args)
+		return true, clearClipboard()
 	}
 	return false, nil
 }
@@ -94,7 +94,7 @@ func run() error {
 	return nil
 }
 
-func clearClipboard(args []string) error {
+func clearClipboard() error {
 	idx := 0
 	val, err := inputs.Stdin(false)
 	if err != nil {
