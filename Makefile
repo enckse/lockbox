@@ -28,5 +28,5 @@ clean:
 	make check
 
 install:
-	install -Dm755 $(TARGET) $(BINARY)
-	$(TARGET) bash > $(COMPLETION)
+	install -Dm755 $(TARGET) $(BINDIR)/lb
+	$(TARGET) bash > $(COMPDIR)/lb
