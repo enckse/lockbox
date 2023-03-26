@@ -26,3 +26,7 @@ clean:
 	rm -rf .git
 	make build
 	make check
+
+install:
+	install -Dm755 $(TARGET) $(BINARY)
+	$(TARGET) bash > $(COMPLETION)
