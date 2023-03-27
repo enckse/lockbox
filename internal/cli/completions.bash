@@ -24,7 +24,7 @@ _{{ $.Executable }}() {
 {{end}}
 {{ if $.CanTOTP }}
                 "{{ $.TOTPCommand }}")
-                    opts="{{ $.TOTPShortCommand }} {{ $.TOTPOnceCommand }} "$({{ $.DoTOTPList }})
+                    opts="{{ $.TOTPShortCommand }} {{ $.TOTPOnceCommand }} {{ $.TOTPListCommand }} "$({{ $.DoTOTPList }})
 {{ if $.CanClip }}
                     opts="$opts {{ $.TOTPClipCommand }}"
 {{end}}

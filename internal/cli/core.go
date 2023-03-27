@@ -86,6 +86,7 @@ type (
 		TOTPShortCommand    string
 		TOTPOnceCommand     string
 		TOTPClipCommand     string
+		TOTPListCommand     string
 		InsertMultiCommand  string
 		InsertTOTPCommand   string
 		RemoveCommand       string
@@ -139,6 +140,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 		TOTPShortCommand:    TOTPShortCommand,
 		TOTPClipCommand:     TOTPClipCommand,
 		TOTPOnceCommand:     TOTPOnceCommand,
+		TOTPListCommand:     TOTPListCommand,
 		ClipCommand:         ClipCommand,
 		ShowCommand:         ShowCommand,
 		StatsCommand:        StatsCommand,
