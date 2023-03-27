@@ -1,7 +1,7 @@
 # {{ $.Executable }} completion
 
 _{{ $.Executable }}() {
-    local cur opts needs
+    local cur opts
     cur=${COMP_WORDS[COMP_CWORD]}
     if [ "$COMP_CWORD" -eq 1 ]; then
         {{range $idx, $value := $.Options }}
@@ -13,7 +13,10 @@ _{{ $.Executable }}() {
             case ${COMP_WORDS[1]} in
 {{ if not $.ReadOnly }}
                 "{{ $.InsertCommand }}")
-                    opts="{{ $.InsertMultiCommand }}{{ if $.CanTOTP }} {{ $.InsertTOTPCommand }}{{end}} $({{ $.DoList }})"
+{{ range $key, $value := .InsertSubCommands }}
+                    opts="$opts {{ $value }}"
+{{end}}
+                    opts="$opts $({{ $.DoList }})"
                     ;;
                 "{{ $.HelpCommand }}")
                     opts="{{ $.HelpAdvancedCommand }}"
@@ -24,10 +27,11 @@ _{{ $.Executable }}() {
 {{end}}
 {{ if $.CanTOTP }}
                 "{{ $.TOTPCommand }}")
-                    opts="{{ $.TOTPShortCommand }} {{ $.TOTPOnceCommand }} {{ $.TOTPListCommand }} "$({{ $.DoTOTPList }})
-{{ if $.CanClip }}
-                    opts="$opts {{ $.TOTPClipCommand }}"
+                    opts="{{ $.TOTPListCommand }} "
+{{ range $key, $value := .TOTPSubCommands }}
+                    opts="$opts {{ $value }}"
 {{end}}
+                    opts="$opts "$({{ $.DoTOTPList }})
                     ;;
 {{end}}
                 "{{ $.ShowCommand }}" | "{{ $.StatsCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
@@ -39,9 +43,13 @@ _{{ $.Executable }}() {
             case "${COMP_WORDS[1]}" in
 {{ if not $.ReadOnly }}
                 "{{ $.InsertCommand }}")
-                    if [ "${COMP_WORDS[2]}" == "{{ $.InsertMultiCommand }}" ] {{ if $.CanTOTP }}|| [ "${COMP_WORDS[2]}" == "{{ $.InsertTOTPCommand }}" ] {{end}}; then
-                        opts=$({{ $.DoList }})
-                    fi
+                    case "${COMP_WORDS[2]}" in
+{{ range $key, $value := .InsertSubCommands }}
+                      "{{ $value }}")
+                      opts=$({{ $.DoList }})
+                      ;;
+{{end}}
+                    esac
                     ;;
                 "{{ $.MoveCommand }}")
                     opts=$({{ $.DoList }})
@@ -49,19 +57,13 @@ _{{ $.Executable }}() {
 {{end}}
 {{ if $.CanTOTP }}
                 "{{ $.TOTPCommand }}")
-                    needs=0
-                    if [ "${COMP_WORDS[2]}" == "{{ $.TOTPOnceCommand }}" ] || [ "${COMP_WORDS[2]}" == "{{ $.TOTPShortCommand }}" ]; then
-                        needs=1
-{{ if $.CanClip }}
-                    else
-                        if [ "${COMP_WORDS[2]}" == "{{ $.TOTPClipCommand }}" ]; then
-                            needs=1
-                        fi
-{{end}}
-                    fi
-                    if [ $needs -eq 1 ]; then
+                    case "${COMP_WORDS[2]}" in
+{{ range $key, $value := .TOTPSubCommands }}
+                      "{{ $value }}")
                         opts=$({{ $.DoTOTPList }})
-                    fi
+                        ;;
+{{end}}
+                    esac
                     ;;
 {{end}}
             esac

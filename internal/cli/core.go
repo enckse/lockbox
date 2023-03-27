@@ -83,12 +83,9 @@ type (
 		CanTOTP             bool
 		ReadOnly            bool
 		InsertCommand       string
-		TOTPShortCommand    string
-		TOTPOnceCommand     string
-		TOTPClipCommand     string
+		InsertSubCommands   []string
+		TOTPSubCommands     []string
 		TOTPListCommand     string
-		InsertMultiCommand  string
-		InsertTOTPCommand   string
 		RemoveCommand       string
 		ClipCommand         string
 		ShowCommand         string
@@ -137,17 +134,14 @@ func BashCompletions(defaults bool) ([]string, error) {
 		Executable:          name,
 		InsertCommand:       InsertCommand,
 		RemoveCommand:       RemoveCommand,
-		TOTPShortCommand:    TOTPShortCommand,
-		TOTPClipCommand:     TOTPClipCommand,
-		TOTPOnceCommand:     TOTPOnceCommand,
+		TOTPSubCommands:     []string{TOTPShortCommand, TOTPOnceCommand},
 		TOTPListCommand:     TOTPListCommand,
 		ClipCommand:         ClipCommand,
 		ShowCommand:         ShowCommand,
 		StatsCommand:        StatsCommand,
-		InsertMultiCommand:  InsertMultiCommand,
+		InsertSubCommands:   []string{InsertMultiCommand, InsertTOTPCommand},
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
-		InsertTOTPCommand:   InsertTOTPCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
@@ -183,6 +177,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand}
 	if c.CanClip {
 		options = append(options, ClipCommand)
+		c.TOTPSubCommands = append(c.TOTPSubCommands, TOTPClipCommand)
 	}
 	if !c.ReadOnly {
 		options = append(options, MoveCommand, RemoveCommand, InsertCommand)
