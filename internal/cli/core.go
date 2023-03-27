@@ -146,7 +146,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
-		Options:             []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand},
+		Options:             []string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand},
 	}
 	isReadOnly := false
 	isClip := true
@@ -207,7 +207,6 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, subCommand(BashCommand, BashDefaultsCommand, "", "generate default bash completion"))
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
-	results = append(results, command(FindCommand, "criteria", "perform a text search over the entry keys"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))

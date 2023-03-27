@@ -2,7 +2,6 @@ package app_test
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
@@ -34,28 +33,14 @@ func setup(t *testing.T) *backend.Transaction {
 
 func TestList(t *testing.T) {
 	m := newMockCommand(t)
-	if err := app.ListFind(m, false); err != nil {
+	if err := app.List(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
 		t.Error("nothing listed")
 	}
 	m.args = []string{"test"}
-	if err := app.ListFind(m, false); err.Error() != "list does not support any arguments" {
+	if err := app.List(m); err.Error() != "list does not support any arguments" {
 		t.Errorf("invalid error: %v", err)
-	}
-}
-
-func TestFind(t *testing.T) {
-	m := newMockCommand(t)
-	if err := app.ListFind(m, true); err.Error() != "find requires search term" {
-		t.Errorf("invalid error: %v", err)
-	}
-	m.args = []string{"test1"}
-	if err := app.ListFind(m, true); err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if m.buf.String() == "" || strings.Contains(m.buf.String(), "test3") {
-		t.Error("wrong find")
 	}
 }

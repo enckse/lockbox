@@ -26,7 +26,7 @@ _execute() {
   echo y |${LB_BINARY} rm keys/k/one
   echo
   ${LB_BINARY} ls
-  ${LB_BINARY} find e
+  ${LB_BINARY} ls | grep e
   ${LB_BINARY} show keys/k/one2
   ${LB_BINARY} show keys2/k/three
   ${LB_BINARY} stats keys2/k/three

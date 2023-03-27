@@ -70,8 +70,8 @@ func run() error {
 		if p.Confirm("proceed with rekey") {
 			return p.Transaction().ReKey()
 		}
-	case cli.ListCommand, cli.FindCommand:
-		return app.ListFind(p, command == cli.FindCommand)
+	case cli.ListCommand:
+		return app.List(p)
 	case cli.MoveCommand:
 		return app.Move(p)
 	case cli.InsertCommand:
