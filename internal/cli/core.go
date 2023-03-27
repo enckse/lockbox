@@ -146,6 +146,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
+		Options:             []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand},
 	}
 	isReadOnly := false
 	isClip := true
@@ -174,18 +175,16 @@ func BashCompletions(defaults bool) ([]string, error) {
 	c.CanClip = isClip
 	c.ReadOnly = isReadOnly
 	c.CanTOTP = isTOTP
-	options := []string{EnvCommand, FindCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand}
 	if c.CanClip {
-		options = append(options, ClipCommand)
+		c.Options = append(c.Options, ClipCommand)
 		c.TOTPSubCommands = append(c.TOTPSubCommands, TOTPClipCommand)
 	}
 	if !c.ReadOnly {
-		options = append(options, MoveCommand, RemoveCommand, InsertCommand)
+		c.Options = append(c.Options, MoveCommand, RemoveCommand, InsertCommand)
 	}
 	if c.CanTOTP {
-		options = append(options, TOTPCommand)
+		c.Options = append(c.Options, TOTPCommand)
 	}
-	c.Options = options
 	t, err := template.New("t").Parse(bashCompletions)
 	if err != nil {
 		return nil, err
