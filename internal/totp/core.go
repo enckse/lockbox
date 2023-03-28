@@ -56,8 +56,8 @@ const (
 	ShowMode
 	// ClipMode will copy to clipboard
 	ClipMode
-	// ShortMode will display minimal information to display the token
-	ShortMode
+	// MinimalMode will display minimal information to display the token
+	MinimalMode
 	// ListMode lists the available tokens
 	ListMode
 	// OnceMode will only show the token once and exit
@@ -81,7 +81,7 @@ func (args *Arguments) display(opts Options) error {
 	if err != nil {
 		return err
 	}
-	if args.Mode == ShortMode {
+	if args.Mode == MinimalMode {
 		interactive = false
 	}
 	once := args.Mode == OnceMode
@@ -252,8 +252,8 @@ func NewArguments(args []string, tokenType string) (*Arguments, error) {
 		opts.Mode = ShowMode
 	case cli.TOTPClipCommand:
 		opts.Mode = ClipMode
-	case cli.TOTPShortCommand:
-		opts.Mode = ShortMode
+	case cli.TOTPMinimalCommand:
+		opts.Mode = MinimalMode
 	case cli.TOTPOnceCommand:
 		opts.Mode = OnceMode
 	default:

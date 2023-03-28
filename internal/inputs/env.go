@@ -67,8 +67,9 @@ const (
 	// ModTimeEnv is modtime override ability for entries
 	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
-	ModTimeFormat      = time.RFC3339
-	reKeySuffix        = "_NEW"
+	ModTimeFormat = time.RFC3339
+	reKeySuffix   = "_NEW"
+	// MaxTOTPTimeDefault is the max TOTP time to run (default)
 	MaxTOTPTimeDefault = "120"
 )
 

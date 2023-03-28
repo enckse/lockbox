@@ -47,8 +47,8 @@ const (
 	EnvCommand = "env"
 	// TOTPClipCommand is the argument for copying totp codes to clipboard
 	TOTPClipCommand = ClipCommand
-	// TOTPShortCommand is the argument for getting the short version of a code
-	TOTPShortCommand = "short"
+	// TOTPMinimalCommand is the argument for getting the short version of a code
+	TOTPMinimalCommand = "minimal"
 	// TOTPListCommand will list the totp-enabled entries
 	TOTPListCommand = ListCommand
 	// TOTPOnceCommand will perform like a normal totp request but not refresh
@@ -136,7 +136,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 		Executable:          name,
 		InsertCommand:       InsertCommand,
 		RemoveCommand:       RemoveCommand,
-		TOTPSubCommands:     []string{TOTPShortCommand, TOTPOnceCommand, TOTPShowCommand},
+		TOTPSubCommands:     []string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand},
 		TOTPListCommand:     TOTPListCommand,
 		ClipCommand:         ClipCommand,
 		ShowCommand:         ShowCommand,
@@ -224,7 +224,7 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPInsertCommand, "entry", "insert a new totp entry into the store"))
 	results = append(results, subCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings"))
 	results = append(results, subCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code"))
-	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code (no details)"))
+	results = append(results, subCommand(TOTPCommand, TOTPMinimalCommand, "entry", "display the first generated code (no details)"))
 	results = append(results, subCommand(TOTPCommand, TOTPShowCommand, "entry", "show the totp entry"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)

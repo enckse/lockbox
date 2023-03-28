@@ -99,8 +99,8 @@ func TestNewArguments(t *testing.T) {
 	if args.Mode != totp.ClipMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
-	args, _ = totp.NewArguments([]string{"short", "test"}, "test")
-	if args.Mode != totp.ShortMode || args.Entry != "test" {
+	args, _ = totp.NewArguments([]string{"minimal", "test"}, "test")
+	if args.Mode != totp.MinimalMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 	args, _ = totp.NewArguments([]string{"once", "test"}, "test")
@@ -180,9 +180,9 @@ func TestNonListError(t *testing.T) {
 	}
 }
 
-func TestShort(t *testing.T) {
+func TestMinimal(t *testing.T) {
 	setup(t)
-	args, _ := totp.NewArguments([]string{"short", "test/test3"}, "totp")
+	args, _ := totp.NewArguments([]string{"minimal", "test/test3"}, "totp")
 	opts := testOptions()
 	m := newMock(t)
 	opts.App = m

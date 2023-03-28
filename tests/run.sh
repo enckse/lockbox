@@ -35,6 +35,8 @@ _execute() {
   echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} totp insert test/k/totp
   ${LB_BINARY} totp ls
   ${LB_BINARY} totp show test/k
+  ${LB_BINARY} totp once test/k
+  ${LB_BINARY} totp minimal test/k
   ${LB_BINARY} hash "$LOCKBOX_STORE"
   echo y |${LB_BINARY} rm keys2/k/three
   echo
