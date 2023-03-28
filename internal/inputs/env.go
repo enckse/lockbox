@@ -38,6 +38,8 @@ const (
 	clipMaxEnv = clipBaseEnv + "MAX"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
+	// MaxTOTPTime indicate how long TOTP tokens will be shown
+	MaxTOTPTime = fieldTOTPEnv + "_MAX"
 	// ClipPasteEnv allows overriding the clipboard paste command
 	ClipPasteEnv = clipBaseEnv + "PASTE"
 	// ClipCopyEnv allows overriding the clipboard copy command
@@ -65,8 +67,9 @@ const (
 	// ModTimeEnv is modtime override ability for entries
 	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
-	ModTimeFormat = time.RFC3339
-	reKeySuffix   = "_NEW"
+	ModTimeFormat      = time.RFC3339
+	reKeySuffix        = "_NEW"
+	MaxTOTPTimeDefault = "120"
 )
 
 var (
@@ -337,6 +340,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
+	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))

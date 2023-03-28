@@ -4,11 +4,11 @@ package totp
 import (
 	"errors"
 	"fmt"
-	"os"
-	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/colors"
@@ -18,8 +18,12 @@ import (
 	otp "github.com/pquerna/otp/totp"
 )
 
-// ErrNoTOTP is used when TOTP is requested BUT is disabled
-var ErrNoTOTP = errors.New("TOTP is disabled")
+var (
+	// ErrNoTOTP is used when TOTP is requested BUT is disabled
+	ErrNoTOTP = errors.New("totp is disabled")
+	// ErrUnknownTOTPMode indicates an unknown totp argument type
+	ErrUnknownTOTPMode = errors.New("unknown totp mode")
+)
 
 type (
 	// Mode is the operating mode for TOTP operations
@@ -28,10 +32,18 @@ type (
 	Arguments struct {
 		Mode  Mode
 		Entry string
+		token string
 	}
 	totpWrapper struct {
 		opts otp.ValidateOpts
 		code string
+	}
+	// Options are TOTP call options
+	Options struct {
+		App           app.CommandOptions
+		Clear         func()
+		IsNoTOTP      func() (bool, error)
+		IsInteractive func() (bool, error)
 	}
 )
 
@@ -52,14 +64,6 @@ const (
 	OnceMode
 )
 
-func clear() {
-	cmd := exec.Command("clear")
-	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("unable to clear screen: %v\n", err)
-	}
-}
-
 func colorWhenRules() ([]inputs.ColorWindow, error) {
 	envTime := inputs.EnvOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
 	if envTime == inputs.TOTPDefaultBetween {
@@ -72,8 +76,8 @@ func (w totpWrapper) generateCode() (string, error) {
 	return otp.GenerateCodeCustom(w.code, time.Now(), w.opts)
 }
 
-func (args *Arguments) display(tx *backend.Transaction) error {
-	interactive, err := inputs.IsInteractive()
+func (args *Arguments) display(opts Options) error {
+	interactive, err := opts.IsInteractive()
 	if err != nil {
 		return err
 	}
@@ -89,7 +93,7 @@ func (args *Arguments) display(tx *backend.Transaction) error {
 	if err != nil {
 		return err
 	}
-	entity, err := tx.Get(backend.NewPath(args.Entry, inputs.TOTPToken()), backend.SecretValue)
+	entity, err := opts.App.Transaction().Get(backend.NewPath(args.Entry, args.token), backend.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -107,12 +111,13 @@ func (args *Arguments) display(tx *backend.Transaction) error {
 	wrapper.opts.Digits = k.Digits()
 	wrapper.opts.Algorithm = k.Algorithm()
 	wrapper.opts.Period = uint(k.Period())
+	writer := opts.App.Writer()
 	if !interactive {
 		code, err := wrapper.generateCode()
 		if err != nil {
 			return err
 		}
-		fmt.Println(code)
+		fmt.Fprintf(writer, "%s\n", code)
 		return nil
 	}
 	first := true
@@ -120,7 +125,7 @@ func (args *Arguments) display(tx *backend.Transaction) error {
 	lastSecond := -1
 	if !clip {
 		if !once {
-			clear()
+			opts.Clear()
 		}
 	}
 	clipboard := platform.Clipboard{}
@@ -134,14 +139,19 @@ func (args *Arguments) display(tx *backend.Transaction) error {
 	if err != nil {
 		return err
 	}
+	runString := inputs.EnvOrDefault(inputs.MaxTOTPTime, inputs.MaxTOTPTimeDefault)
+	runFor, err := strconv.Atoi(runString)
+	if err != nil {
+		return err
+	}
 	for {
 		if !first {
 			time.Sleep(500 * time.Millisecond)
 		}
 		first = false
 		running++
-		if running > 120 {
-			fmt.Println("exiting (timeout)")
+		if running > runFor {
+			fmt.Fprint(writer, "exiting (timeout)\n")
 			return nil
 		}
 		now := time.Now()
@@ -175,13 +185,13 @@ func (args *Arguments) display(tx *backend.Transaction) error {
 				outputs = append(outputs, "-> CTRL+C to exit")
 			}
 		} else {
-			fmt.Printf("-> %s\n", expires)
+			fmt.Fprintf(writer, "-> %s\n", expires)
 			return clipboard.CopyTo(code)
 		}
 		if !once {
-			clear()
+			opts.Clear()
 		}
-		fmt.Printf("%s\n", strings.Join(outputs, "\n\n"))
+		fmt.Fprintf(writer, "%s\n", strings.Join(outputs, "\n\n"))
 		if once {
 			return nil
 		}
@@ -189,11 +199,14 @@ func (args *Arguments) display(tx *backend.Transaction) error {
 }
 
 // Do will perform the TOTP operation
-func (args *Arguments) Do(tx *backend.Transaction) error {
-	if args == nil || args.Mode == UnknownMode {
-		return errors.New("unknown totp mode")
+func (args *Arguments) Do(opts Options) error {
+	if args.Mode == UnknownMode {
+		return ErrUnknownTOTPMode
 	}
-	off, err := inputs.IsNoTOTP()
+	if opts.Clear == nil || opts.IsNoTOTP == nil || opts.IsInteractive == nil {
+		return errors.New("invalid option functions")
+	}
+	off, err := opts.IsNoTOTP()
 	if err != nil {
 		return err
 	}
@@ -201,16 +214,17 @@ func (args *Arguments) Do(tx *backend.Transaction) error {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListMode {
-		e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(inputs.TOTPToken())})
+		e, err := opts.App.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token)})
 		if err != nil {
 			return err
 		}
+		writer := opts.App.Writer()
 		for _, entry := range e {
-			fmt.Println(entry.Directory())
+			fmt.Fprintf(writer, "%s\n", entry.Directory())
 		}
 		return nil
 	}
-	return args.display(tx)
+	return args.display(opts)
 }
 
 // NewArguments will parse the input arguments
@@ -222,6 +236,7 @@ func NewArguments(args []string, tokenType string) (*Arguments, error) {
 		return nil, errors.New("invalid token type, not set?")
 	}
 	opts := &Arguments{Mode: UnknownMode}
+	opts.token = tokenType
 	sub := args[0]
 	needs := true
 	switch sub {
@@ -242,7 +257,7 @@ func NewArguments(args []string, tokenType string) (*Arguments, error) {
 	case cli.TOTPOnceCommand:
 		opts.Mode = OnceMode
 	default:
-		return nil, errors.New("unknown totp command")
+		return nil, ErrUnknownTOTPMode
 	}
 	if needs {
 		if len(args) != 2 {
