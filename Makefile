@@ -20,7 +20,8 @@ check: $(TARGET) unittests
 	make -C tests
 
 clean:
-	rm -rf $(BUILD)
+	@rm -rf $(BUILD) tests/bin
+	@find internal/ -type f -name "*.kdbx" -delete
 
 .runci:
 	rm -rf .git
