@@ -22,16 +22,34 @@ import (
 var ErrNoTOTP = errors.New("TOTP is disabled")
 
 type (
-	arguments struct {
-		Clip  bool
-		Once  bool
-		Short bool
-		List  bool
+	// Mode is the operating mode for TOTP operations
+	Mode int
+	// Arguments are the parsed TOTP call arguments
+	Arguments struct {
+		Mode  Mode
+		Entry string
 	}
 	totpWrapper struct {
 		opts otp.ValidateOpts
 		code string
 	}
+)
+
+const (
+	// UnknownMode is an unknown command
+	UnknownMode Mode = iota
+	// InsertMode is inserting a new totp token
+	InsertMode
+	// ShowMode will show the token
+	ShowMode
+	// ClipMode will copy to clipboard
+	ClipMode
+	// ShortMode will display minimal information to display the token
+	ShortMode
+	// ListMode lists the available tokens
+	ListMode
+	// OnceMode will only show the token once and exit
+	OnceMode
 )
 
 func clear() {
@@ -54,26 +72,24 @@ func (w totpWrapper) generateCode() (string, error) {
 	return otp.GenerateCodeCustom(w.code, time.Now(), w.opts)
 }
 
-func display(token string, args arguments) error {
+func (args *Arguments) display(tx *backend.Transaction) error {
 	interactive, err := inputs.IsInteractive()
 	if err != nil {
 		return err
 	}
-	if args.Short {
+	if args.Mode == ShortMode {
 		interactive = false
 	}
-	if !interactive && args.Clip {
+	once := args.Mode == OnceMode
+	clip := args.Mode == ClipMode
+	if !interactive && clip {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
 	coloring, err := colors.NewTerminal(colors.Red)
 	if err != nil {
 		return err
 	}
-	t, err := backend.NewTransaction()
-	if err != nil {
-		return err
-	}
-	entity, err := t.Get(backend.NewPath(token, inputs.TOTPToken()), backend.SecretValue)
+	entity, err := tx.Get(backend.NewPath(args.Entry, inputs.TOTPToken()), backend.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -102,13 +118,13 @@ func display(token string, args arguments) error {
 	first := true
 	running := 0
 	lastSecond := -1
-	if !args.Clip {
-		if !args.Once {
+	if !clip {
+		if !once {
 			clear()
 		}
 	}
 	clipboard := platform.Clipboard{}
-	if args.Clip {
+	if clip {
 		clipboard, err = platform.NewClipboard()
 		if err != nil {
 			return err
@@ -153,27 +169,30 @@ func display(token string, args arguments) error {
 		}
 		expires := fmt.Sprintf("%s%s (%s)%s", startColor, now.Format("15:04:05"), leftString, endColor)
 		outputs := []string{expires}
-		if !args.Clip {
-			outputs = append(outputs, fmt.Sprintf("%s\n    %s", token, code))
-			if !args.Once {
+		if !clip {
+			outputs = append(outputs, fmt.Sprintf("%s\n    %s", args.Entry, code))
+			if !once {
 				outputs = append(outputs, "-> CTRL+C to exit")
 			}
 		} else {
 			fmt.Printf("-> %s\n", expires)
 			return clipboard.CopyTo(code)
 		}
-		if !args.Once {
+		if !once {
 			clear()
 		}
 		fmt.Printf("%s\n", strings.Join(outputs, "\n\n"))
-		if args.Once {
+		if once {
 			return nil
 		}
 	}
 }
 
-// Call handles UI for TOTP tokens.
-func Call(args []string) error {
+// Do will perform the TOTP operation
+func (args *Arguments) Do(tx *backend.Transaction) error {
+	if args == nil || args.Mode == UnknownMode {
+		return errors.New("unknown totp mode")
+	}
 	off, err := inputs.IsNoTOTP()
 	if err != nil {
 		return err
@@ -181,17 +200,8 @@ func Call(args []string) error {
 	if off {
 		return ErrNoTOTP
 	}
-	if len(args) > 2 || len(args) < 1 {
-		return errors.New("invalid arguments, subkey and entry required")
-	}
-	cmd := args[0]
-	options := parseArgs(cmd)
-	if options.List {
-		t, err := backend.NewTransaction()
-		if err != nil {
-			return err
-		}
-		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(inputs.TOTPToken())})
+	if args.Mode == ListMode {
+		e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(inputs.TOTPToken())})
 		if err != nil {
 			return err
 		}
@@ -200,20 +210,50 @@ func Call(args []string) error {
 		}
 		return nil
 	}
-	if len(args) == 2 {
-		if !options.Clip && !options.Short && !options.Once {
-			return errors.New("invalid sub command")
-		}
-		cmd = args[1]
-	}
-	return display(cmd, options)
+	return args.display(tx)
 }
 
-func parseArgs(arg string) arguments {
-	args := arguments{}
-	args.Clip = arg == cli.TOTPClipCommand
-	args.Once = arg == cli.TOTPOnceCommand
-	args.Short = arg == cli.TOTPShortCommand
-	args.List = arg == cli.TOTPListCommand
-	return args
+// NewArguments will parse the input arguments
+func NewArguments(args []string, tokenType string) (*Arguments, error) {
+	if len(args) == 0 {
+		return nil, errors.New("not enough arguments for totp")
+	}
+	if strings.TrimSpace(tokenType) == "" {
+		return nil, errors.New("invalid token type, not set?")
+	}
+	opts := &Arguments{Mode: UnknownMode}
+	sub := args[0]
+	needs := true
+	switch sub {
+	case cli.TOTPListCommand:
+		needs = false
+		if len(args) != 1 {
+			return nil, errors.New("list takes no arguments")
+		}
+		opts.Mode = ListMode
+	case cli.TOTPInsertCommand:
+		opts.Mode = InsertMode
+	case cli.TOTPShowCommand:
+		opts.Mode = ShowMode
+	case cli.TOTPClipCommand:
+		opts.Mode = ClipMode
+	case cli.TOTPShortCommand:
+		opts.Mode = ShortMode
+	case cli.TOTPOnceCommand:
+		opts.Mode = OnceMode
+	default:
+		return nil, errors.New("unknown totp command")
+	}
+	if needs {
+		if len(args) != 2 {
+			return nil, errors.New("missing entry")
+		}
+		opts.Entry = args[1]
+		if opts.Mode == InsertMode {
+			if !strings.HasSuffix(opts.Entry, tokenType) {
+				opts.Entry = backend.NewPath(opts.Entry, tokenType)
+			}
+		}
+	}
+	return opts, nil
 }

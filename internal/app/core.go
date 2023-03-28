@@ -59,19 +59,14 @@ func (a *DefaultCommand) Confirm(prompt string) bool {
 	return yesNo
 }
 
+// SetArgs allow updating the command args
+func (a *DefaultCommand) SetArgs(args ...string) {
+	a.args = args
+}
+
 // IsPipe will indicate if we're receiving pipe input
 func (a *DefaultCommand) IsPipe() bool {
 	return inputs.IsInputFromPipe()
-}
-
-// TOTPToken will get the configured totp token name
-func (a *DefaultCommand) TOTPToken() string {
-	return inputs.TOTPToken()
-}
-
-// IsNoTOTP indicates if TOTP operations are disabled
-func (a *DefaultCommand) IsNoTOTP() (bool, error) {
-	return inputs.IsNoTOTP()
 }
 
 // Input will read user input

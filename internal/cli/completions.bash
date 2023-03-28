@@ -13,10 +13,7 @@ _{{ $.Executable }}() {
     if [ "$COMP_CWORD" -eq 2 ]; then
       case ${COMP_WORDS[1]} in
 {{- if not $.ReadOnly }}
-        "{{ $.InsertCommand }}")
-{{- range $key, $value := .InsertSubCommands }}
-          opts="$opts {{ $value }}"
-{{- end}}
+        "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}")
           opts="$opts $({{ $.DoList }})"
           ;;
         "{{ $.HelpCommand }}")
@@ -32,7 +29,6 @@ _{{ $.Executable }}() {
 {{- range $key, $value := .TOTPSubCommands }}
           opts="$opts {{ $value }}"
 {{- end}}
-          opts="$opts "$({{ $.DoTOTPList }})
           ;;
 {{- end}}
         "{{ $.ShowCommand }}" | "{{ $.StatsCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
@@ -43,15 +39,6 @@ _{{ $.Executable }}() {
       if [ "$COMP_CWORD" -eq 3 ]; then
         case "${COMP_WORDS[1]}" in
 {{- if not $.ReadOnly }}
-          "{{ $.InsertCommand }}")
-            case "${COMP_WORDS[2]}" in
-{{- range $key, $value := .InsertSubCommands }}
-              "{{ $value }}")
-                opts=$({{ $.DoList }})
-                ;;
-{{- end }}
-            esac
-            ;;
           "{{ $.MoveCommand }}")
             opts=$({{ $.DoList }})
             ;;

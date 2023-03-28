@@ -26,7 +26,7 @@ LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
 LOCKBOX_STORE=/Users/alice/.passwords/secrets.kdbx
 ```
 
-Use `lb help -verbose` for additional information about options and environment variables
+Use `lb help verbose` for additional information about options and environment variables
 
 ## usage
 
@@ -42,7 +42,9 @@ lb clip my/secret/password
 Create a new entry
 ```
 lb insert my/new/key
-# use -m for a multiline entry
+# or
+lb multiline my/new/multi
+# for multiline inserts
 ```
 
 ### list
@@ -70,13 +72,13 @@ lb show my/key/value
 
 To get a totp token
 ```
-lb totp token
+lb totp show token
 # 'token' must contain an entry with the name of LOCKBOX_TOTP
 ```
 
 The token can be automatically copied to the clipboard too
 ```
-lb totp -clip token
+lb totp clip token
 ```
 
 ## git integration

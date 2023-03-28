@@ -22,6 +22,7 @@ _execute() {
   echo test |${LB_BINARY} insert /keys/k/one
   echo test |${LB_BINARY} insert keys/aa/b//s///e
   printf "test3\ntest4\n" |${LB_BINARY} insert keys2/k/three
+  printf "test3\ntest4\n" |${LB_BINARY} multiline keys2/k/three
   ${LB_BINARY} ls
   echo y |${LB_BINARY} rm keys/k/one
   echo
@@ -30,10 +31,10 @@ _execute() {
   ${LB_BINARY} show keys/k/one2
   ${LB_BINARY} show keys2/k/three
   ${LB_BINARY} stats keys2/k/three
-  echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} insert -totp test/k
-  echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} insert -totp test/k/totp
-  ${LB_BINARY} totp -list
-  ${LB_BINARY} totp test/k
+  echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} totp insert test/k
+  echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} totp insert test/k/totp
+  ${LB_BINARY} totp ls
+  ${LB_BINARY} totp show test/k
   ${LB_BINARY} hash "$LOCKBOX_STORE"
   echo y |${LB_BINARY} rm keys2/k/three
   echo

@@ -39,8 +39,6 @@ func handleEarly(command string, args []string) (bool, error) {
 	case cli.VersionCommand:
 		fmt.Printf("version: %s\n", version)
 		return true, nil
-	case cli.TOTPCommand:
-		return true, totp.Call(args)
 	case cli.ClearCommand:
 		return true, clearClipboard()
 	}
@@ -74,12 +72,12 @@ func run() error {
 		return app.List(p)
 	case cli.MoveCommand:
 		return app.Move(p)
-	case cli.InsertCommand:
-		insertArgs, err := app.ReadArgs(p)
-		if err != nil {
-			return err
+	case cli.InsertCommand, cli.MultiLineCommand:
+		mode := app.SingleLineInsert
+		if command == cli.MultiLineCommand {
+			mode = app.MultiLineInsert
 		}
-		return insertArgs.Do(p)
+		return app.Insert(p, mode)
 	case cli.RemoveCommand:
 		return app.Remove(p)
 	case cli.StatsCommand:
@@ -88,6 +86,16 @@ func run() error {
 		return app.ShowClip(p, command == cli.ShowCommand)
 	case cli.HashCommand:
 		return app.Hash(p)
+	case cli.TOTPCommand:
+		args, err := totp.NewArguments(sub, inputs.TOTPToken())
+		if err != nil {
+			return err
+		}
+		if args.Mode == totp.InsertMode {
+			p.SetArgs(args.Entry)
+			return app.Insert(p, app.TOTPInsert)
+		}
+		return args.Do(p.Transaction())
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}

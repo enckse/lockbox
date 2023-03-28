@@ -28,7 +28,7 @@ func TestHelpInfo(t *testing.T) {
 	}
 	old := buf.String()
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "help", []string{"-verbose"})
+	ok, err = app.Info(&buf, "help", []string{"verbose"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -38,7 +38,7 @@ func TestHelpInfo(t *testing.T) {
 	if _, err = app.Info(&buf, "help", []string{"-verb"}); err.Error() != "invalid help option" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err = app.Info(&buf, "help", []string{"-verbose", "A"}); err.Error() != "invalid help command" {
+	if _, err = app.Info(&buf, "help", []string{"verbose", "A"}); err.Error() != "invalid help command" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -54,17 +54,17 @@ func TestBashInfo(t *testing.T) {
 		t.Error("nothing written")
 	}
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "bash", []string{"-defaults"})
+	ok, err = app.Info(&buf, "bash", []string{"defaults"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" {
 		t.Error("nothing written")
 	}
-	if _, err = app.Info(&buf, "bash", []string{"-default"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "bash", []string{"default"}); err.Error() != "invalid argument" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err = app.Info(&buf, "bash", []string{"test", "-default"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "bash", []string{"test", "default"}); err.Error() != "invalid argument" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -80,17 +80,17 @@ func TestEnvInfo(t *testing.T) {
 		t.Error("nothing written")
 	}
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"-defaults"})
+	ok, err = app.Info(&buf, "env", []string{"defaults"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" {
 		t.Error("nothing written")
 	}
-	if _, err = app.Info(&buf, "env", []string{"-default"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "env", []string{"default"}); err.Error() != "invalid argument" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err = app.Info(&buf, "env", []string{"test", "-default"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid argument" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

@@ -40,31 +40,33 @@ const (
 	// HelpCommand shows usage
 	HelpCommand = "help"
 	// HelpAdvancedCommand shows advanced help
-	HelpAdvancedCommand = "-verbose"
+	HelpAdvancedCommand = "verbose"
 	// RemoveCommand removes an entry
 	RemoveCommand = "rm"
 	// EnvCommand shows environment information used by lockbox
 	EnvCommand = "env"
-	// InsertMultiCommand handles multi-line inserts
-	InsertMultiCommand = "-multi"
-	// InsertTOTPCommand is a helper for totp inserts
-	InsertTOTPCommand = "-totp"
 	// TOTPClipCommand is the argument for copying totp codes to clipboard
-	TOTPClipCommand = "-clip"
+	TOTPClipCommand = ClipCommand
 	// TOTPShortCommand is the argument for getting the short version of a code
-	TOTPShortCommand = "-short"
+	TOTPShortCommand = "short"
 	// TOTPListCommand will list the totp-enabled entries
-	TOTPListCommand = "-list"
+	TOTPListCommand = ListCommand
 	// TOTPOnceCommand will perform like a normal totp request but not refresh
-	TOTPOnceCommand = "-once"
+	TOTPOnceCommand = "once"
 	// EnvDefaultsCommand will display the default env variables, not those set
-	EnvDefaultsCommand = "-defaults"
+	EnvDefaultsCommand = "defaults"
 	// BashCommand is the command to generate bash completions
 	BashCommand = "bash"
 	// BashDefaultsCommand will generate environment agnostic completions
-	BashDefaultsCommand = "-defaults"
+	BashDefaultsCommand = "defaults"
 	// ReKeyCommand will rekey the underlying database
 	ReKeyCommand = "rekey"
+	// MultiLineCommand handles multi-line inserts (when not piped)
+	MultiLineCommand = "multiline"
+	// TOTPShowCommand is for showing the TOTP token
+	TOTPShowCommand = ShowCommand
+	// TOTPInsertCommand is for inserting totp tokens
+	TOTPInsertCommand = InsertCommand
 )
 
 var (
@@ -83,12 +85,12 @@ type (
 		CanTOTP             bool
 		ReadOnly            bool
 		InsertCommand       string
-		InsertSubCommands   []string
 		TOTPSubCommands     []string
 		TOTPListCommand     string
 		RemoveCommand       string
 		ClipCommand         string
 		ShowCommand         string
+		MultiLineCommand    string
 		MoveCommand         string
 		TOTPCommand         string
 		DoTOTPList          string
@@ -134,19 +136,19 @@ func BashCompletions(defaults bool) ([]string, error) {
 		Executable:          name,
 		InsertCommand:       InsertCommand,
 		RemoveCommand:       RemoveCommand,
-		TOTPSubCommands:     []string{TOTPShortCommand, TOTPOnceCommand},
+		TOTPSubCommands:     []string{TOTPShortCommand, TOTPOnceCommand, TOTPShowCommand},
 		TOTPListCommand:     TOTPListCommand,
 		ClipCommand:         ClipCommand,
 		ShowCommand:         ShowCommand,
+		MultiLineCommand:    MultiLineCommand,
 		StatsCommand:        StatsCommand,
-		InsertSubCommands:   []string{InsertMultiCommand, InsertTOTPCommand},
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
-		Options:             []string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand},
+		Options:             []string{MultiLineCommand, EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand},
 	}
 	isReadOnly := false
 	isClip := true
@@ -181,6 +183,7 @@ func BashCompletions(defaults bool) ([]string, error) {
 	}
 	if !c.ReadOnly {
 		c.Options = append(c.Options, MoveCommand, RemoveCommand, InsertCommand)
+		c.TOTPSubCommands = append(c.TOTPSubCommands, TOTPInsertCommand)
 	}
 	if c.CanTOTP {
 		c.Options = append(c.Options, TOTPCommand)
@@ -210,18 +213,19 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
-	results = append(results, subCommand(InsertCommand, InsertMultiCommand, "entry", "insert a multi-line entry"))
-	results = append(results, subCommand(InsertCommand, InsertTOTPCommand, "entry", "insert a new totp entry"))
 	results = append(results, command(ListCommand, "", "list entries"))
 	results = append(results, command(MoveCommand, "src dst", "move an entry from source to destination"))
+	results = append(results, command(MultiLineCommand, "entry", "insert a multiline entry into the store"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
 	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
 	results = append(results, command(StatsCommand, "entry", "display entry detail information"))
 	results = append(results, command(TOTPCommand, "entry", "display an updating totp generated code"))
 	results = append(results, subCommand(TOTPCommand, TOTPClipCommand, "entry", "copy totp code to clipboard"))
+	results = append(results, subCommand(TOTPCommand, TOTPInsertCommand, "entry", "insert a new totp entry into the store"))
 	results = append(results, subCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings"))
 	results = append(results, subCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code"))
 	results = append(results, subCommand(TOTPCommand, TOTPShortCommand, "entry", "display the first generated code (no details)"))
+	results = append(results, subCommand(TOTPCommand, TOTPShowCommand, "entry", "show the totp entry"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", name)}
