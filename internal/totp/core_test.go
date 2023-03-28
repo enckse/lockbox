@@ -18,14 +18,24 @@ type (
 	}
 )
 
-func newMock(t *testing.T) *mockOptions {
+func newMock(t *testing.T) (*mockOptions, totp.Options) {
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
 	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n")
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n")
-	return &mockOptions{
+	m := &mockOptions{
 		buf: bytes.Buffer{},
 		tx:  fullSetup(t, true),
 	}
+	opts := totp.NewDefaultOptions(m)
+	opts.Clear = func() {
+	}
+	opts.IsNoTOTP = func() (bool, error) {
+		return false, nil
+	}
+	opts.IsInteractive = func() (bool, error) {
+		return true, nil
+	}
+	return m, opts
 }
 
 func fullSetup(t *testing.T, keep bool) *backend.Transaction {
@@ -149,9 +159,7 @@ func TestDoErrors(t *testing.T) {
 func TestList(t *testing.T) {
 	setup(t)
 	args, _ := totp.NewArguments([]string{"ls"}, "totp")
-	opts := testOptions()
-	m := newMock(t)
-	opts.App = m
+	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -163,9 +171,7 @@ func TestList(t *testing.T) {
 func TestNonListError(t *testing.T) {
 	setup(t)
 	args, _ := totp.NewArguments([]string{"clip", "test"}, "totp")
-	opts := testOptions()
-	m := newMock(t)
-	opts.App = m
+	_, opts := newMock(t)
 	opts.IsInteractive = func() (bool, error) {
 		return false, nil
 	}
@@ -183,9 +189,7 @@ func TestNonListError(t *testing.T) {
 func TestMinimal(t *testing.T) {
 	setup(t)
 	args, _ := totp.NewArguments([]string{"minimal", "test/test3"}, "totp")
-	opts := testOptions()
-	m := newMock(t)
-	opts.App = m
+	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -197,9 +201,7 @@ func TestMinimal(t *testing.T) {
 func TestNonInteractive(t *testing.T) {
 	setup(t)
 	args, _ := totp.NewArguments([]string{"show", "test/test3"}, "totp")
-	opts := testOptions()
-	m := newMock(t)
-	opts.App = m
+	m, opts := newMock(t)
 	opts.IsInteractive = func() (bool, error) {
 		return false, nil
 	}
@@ -214,9 +216,7 @@ func TestNonInteractive(t *testing.T) {
 func TestOnce(t *testing.T) {
 	setup(t)
 	args, _ := totp.NewArguments([]string{"once", "test/test3"}, "totp")
-	opts := testOptions()
-	m := newMock(t)
-	opts.App = m
+	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -228,26 +228,11 @@ func TestOnce(t *testing.T) {
 func TestShow(t *testing.T) {
 	setup(t)
 	args, _ := totp.NewArguments([]string{"show", "test/test3"}, "totp")
-	m := newMock(t)
-	opts := testOptions()
-	opts.App = m
+	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(strings.Split(m.buf.String(), "\n")) < 6 || !strings.Contains(m.buf.String(), "exiting (timeout)") {
 		t.Errorf("invalid short: %s", m.buf.String())
 	}
-}
-
-func testOptions() totp.Options {
-	opts := totp.Options{}
-	opts.Clear = func() {
-	}
-	opts.IsNoTOTP = func() (bool, error) {
-		return false, nil
-	}
-	opts.IsInteractive = func() (bool, error) {
-		return true, nil
-	}
-	return opts
 }

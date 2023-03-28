@@ -95,11 +95,7 @@ func run() error {
 			p.SetArgs(args.Entry)
 			return app.Insert(p, app.TOTPInsert)
 		}
-		opts := totp.Options{App: p}
-		opts.Clear = clear
-		opts.IsNoTOTP = inputs.IsNoTOTP
-		opts.IsInteractive = inputs.IsInteractive
-		return args.Do(opts)
+		return args.Do(totp.NewDefaultOptions(p))
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
@@ -133,12 +129,4 @@ func clearClipboard() error {
 		}
 	}
 	return clipboard.CopyTo("")
-}
-
-func clear() {
-	cmd := exec.Command("clear")
-	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("unable to clear screen: %v\n", err)
-	}
 }

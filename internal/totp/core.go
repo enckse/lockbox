@@ -4,6 +4,8 @@ package totp
 import (
 	"errors"
 	"fmt"
+	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -40,7 +42,7 @@ type (
 	}
 	// Options are TOTP call options
 	Options struct {
-		App           app.CommandOptions
+		app           app.CommandOptions
 		Clear         func()
 		IsNoTOTP      func() (bool, error)
 		IsInteractive func() (bool, error)
@@ -63,6 +65,24 @@ const (
 	// OnceMode will only show the token once and exit
 	OnceMode
 )
+
+// NewDefaultOptions gets the default option set
+func NewDefaultOptions(app app.CommandOptions) Options {
+	return Options{
+		app:           app,
+		Clear:         clear,
+		IsInteractive: inputs.IsInteractive,
+		IsNoTOTP:      inputs.IsNoTOTP,
+	}
+}
+
+func clear() {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("unable to clear screen: %v\n", err)
+	}
+}
 
 func colorWhenRules() ([]inputs.ColorWindow, error) {
 	envTime := inputs.EnvOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
@@ -93,7 +113,7 @@ func (args *Arguments) display(opts Options) error {
 	if err != nil {
 		return err
 	}
-	entity, err := opts.App.Transaction().Get(backend.NewPath(args.Entry, args.token), backend.SecretValue)
+	entity, err := opts.app.Transaction().Get(backend.NewPath(args.Entry, args.token), backend.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -111,7 +131,7 @@ func (args *Arguments) display(opts Options) error {
 	wrapper.opts.Digits = k.Digits()
 	wrapper.opts.Algorithm = k.Algorithm()
 	wrapper.opts.Period = uint(k.Period())
-	writer := opts.App.Writer()
+	writer := opts.app.Writer()
 	if !interactive {
 		code, err := wrapper.generateCode()
 		if err != nil {
@@ -214,11 +234,11 @@ func (args *Arguments) Do(opts Options) error {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListMode {
-		e, err := opts.App.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token)})
+		e, err := opts.app.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token)})
 		if err != nil {
 			return err
 		}
-		writer := opts.App.Writer()
+		writer := opts.app.Writer()
 		for _, entry := range e {
 			fmt.Fprintf(writer, "%s\n", entry.Directory())
 		}
