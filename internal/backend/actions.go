@@ -217,32 +217,6 @@ func splitComponents(path string) ([]string, string, error) {
 	return parts, title, nil
 }
 
-// ReKey will rekey the database to a new store output
-func (t *Transaction) ReKey() error {
-	return t.act(func(c Context) error {
-		t.write = false
-		if err := inputs.SetReKey(); err != nil {
-			return err
-		}
-		n, err := NewTransaction()
-		if err != nil {
-			return err
-		}
-		if err := c.db.UnlockProtectedEntries(); err != nil {
-			return err
-		}
-		err = n.act(func(nCtx Context) error {
-			n.write = true
-			nCtx.db.Content.Root = c.db.Content.Root
-			return nCtx.db.LockProtectedEntries()
-		})
-		if err != nil {
-			return err
-		}
-		return c.db.LockProtectedEntries()
-	})
-}
-
 // Move will move a src object to a dst location
 func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Path) == "" {

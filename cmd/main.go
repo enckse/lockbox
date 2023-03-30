@@ -66,7 +66,7 @@ func run() error {
 	switch command {
 	case cli.ReKeyCommand:
 		if p.Confirm("proceed with rekey") {
-			return p.Transaction().ReKey()
+			return app.ReKey(p)
 		}
 	case cli.ListCommand:
 		return app.List(p)

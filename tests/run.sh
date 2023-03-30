@@ -87,6 +87,7 @@ _rekey() {
   local rekey rekeyFile 
   rekey="$LOCKBOX_STORE.rekey.kdbx"
   rekeyFile=""
+  export LOCKBOX_HOOKDIR=""
   export LOCKBOX_STORE_NEW="$rekey"
   export LOCKBOX_KEY_NEW="newkey"
   export LOCKBOX_KEYMODE_NEW=plaintext

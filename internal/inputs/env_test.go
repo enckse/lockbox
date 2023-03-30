@@ -175,34 +175,31 @@ func TestReKey(t *testing.T) {
 	os.Setenv("LOCKBOX_STORE_NEW", "")
 	os.Setenv("LOCKBOX_KEY_NEW", "")
 	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
-	err := inputs.SetReKey()
-	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEYMODE_NEW=[unset] LOCKBOX_KEY_NEW=[unset] LOCKBOX_KEYFILE_NEW=[unset] LOCKBOX_STORE_NEW=[unset]" {
+	_, err := inputs.GetReKey()
+	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEYMODE= LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_STORE=" {
 		t.Errorf("failed: %v", err)
 	}
 	os.Setenv("LOCKBOX_STORE_NEW", "abc")
-	err = inputs.SetReKey()
-	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEYMODE_NEW=[unset] LOCKBOX_KEY_NEW=[unset] LOCKBOX_KEYFILE_NEW=[unset] LOCKBOX_STORE_NEW=[set]" {
+	_, err = inputs.GetReKey()
+	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEYMODE= LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_STORE=abc" {
 		t.Errorf("failed: %v", err)
 	}
-	if os.Getenv("LOCKBOX_STORE") != "abc" {
-		t.Error("not set")
-	}
 	os.Setenv("LOCKBOX_KEY_NEW", "aaa")
-	err = inputs.SetReKey()
+	out, err := inputs.GetReKey()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if os.Getenv("LOCKBOX_KEY") != "aaa" && os.Getenv("LOCKBOX_KEYFILE") == "" {
-		t.Error("not set")
+	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEYMODE= LOCKBOX_KEY=aaa LOCKBOX_KEYFILE= LOCKBOX_STORE=abc]" {
+		t.Errorf("invalid env: %v", out)
 	}
 	os.Setenv("LOCKBOX_KEY_NEW", "")
 	os.Setenv("LOCKBOX_KEYFILE_NEW", "xxx")
-	err = inputs.SetReKey()
+	out, err = inputs.GetReKey()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if os.Getenv("LOCKBOX_KEYFILE") != "xxx" && os.Getenv("LOCKBOX_KEY") == "" {
-		t.Error("not set")
+	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEYMODE= LOCKBOX_KEY= LOCKBOX_KEYFILE=xxx LOCKBOX_STORE=abc]" {
+		t.Errorf("invalid env: %v", out)
 	}
 	os.Setenv("LOCKBOX_KEY_NEW", "")
 	os.Setenv("LOCKBOX_STORE_NEW", "")

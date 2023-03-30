@@ -94,16 +94,15 @@ type (
 	SystemPlatform string
 )
 
-// SetReKey will enable the rekeying mode for the environment
-func SetReKey() error {
+// GetReKey will get the rekey environment settings
+func GetReKey() ([]string, error) {
 	hasStore := false
 	hasKey := false
 	hasKeyFile := false
-	var env []string
+	var out []string
 	for _, k := range []string{keyModeEnv, keyEnv, KeyFileEnv, StoreEnv} {
 		newKey := fmt.Sprintf("%s%s", k, reKeySuffix)
 		val := os.Getenv(newKey)
-		envVal := "unset"
 		if val != "" {
 			switch k {
 			case StoreEnv:
@@ -113,17 +112,13 @@ func SetReKey() error {
 			case KeyFileEnv:
 				hasKeyFile = true
 			}
-			envVal = "set"
 		}
-		if err := os.Setenv(k, val); err != nil {
-			return err
-		}
-		env = append(env, fmt.Sprintf("%s=[%s]", newKey, envVal))
+		out = append(out, fmt.Sprintf("%s=%s", k, val))
 	}
 	if !hasStore || (!hasKey && !hasKeyFile) {
-		return fmt.Errorf("missing required environment variables for rekey: %s", strings.Join(env, " "))
+		return nil, fmt.Errorf("missing required environment variables for rekey: %s", strings.Join(out, " "))
 	}
-	return nil
+	return out, nil
 }
 
 func toString(windows []ColorWindow) string {
