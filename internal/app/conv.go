@@ -8,11 +8,11 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 )
 
-// Conv will hash 1-N files
+// Conv will convert 1-N files
 func Conv(cmd CommandOptions) error {
 	args := cmd.Args()
 	if len(args) == 0 {
-		return errors.New("hash requires a file")
+		return errors.New("conv requires a file")
 	}
 	w := cmd.Writer()
 	for _, a := range args {
