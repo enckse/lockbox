@@ -98,6 +98,7 @@ _rekey() {
   echo y |${LB_BINARY} rekey
   echo
   ${LB_BINARY} ls
+  ${LB_BINARY} show keys/k/one2
 }
 
 _clipboard() {
