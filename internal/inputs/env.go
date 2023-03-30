@@ -99,8 +99,11 @@ func SetReKey() error {
 	hasStore := false
 	hasKey := false
 	hasKeyFile := false
+	var env []string
 	for _, k := range []string{keyModeEnv, keyEnv, KeyFileEnv, StoreEnv} {
-		val := os.Getenv(fmt.Sprintf("%s%s", k, reKeySuffix))
+		newKey := fmt.Sprintf("%s%s", k, reKeySuffix)
+		val := os.Getenv(newKey)
+		envVal := "unset"
 		if val != "" {
 			switch k {
 			case StoreEnv:
@@ -110,13 +113,15 @@ func SetReKey() error {
 			case KeyFileEnv:
 				hasKeyFile = true
 			}
+			envVal = "set"
 		}
 		if err := os.Setenv(k, val); err != nil {
 			return err
 		}
+		env = append(env, fmt.Sprintf("%s=[%s]", newKey, envVal))
 	}
 	if !hasStore || (!hasKey && !hasKeyFile) {
-		return errors.New("missing required environment variables for rekey")
+		return fmt.Errorf("missing required environment variables for rekey: %s", strings.Join(env, " "))
 	}
 	return nil
 }
