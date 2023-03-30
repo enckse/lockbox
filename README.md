@@ -86,7 +86,7 @@ lb totp clip token
 To manage the `.kdbx` file in a git repository and see _actual_ text diffs add this to a `.gitconfig`
 ```
 [diff "lb"]
-    textconv = lb hash
+    textconv = lb conv
 ```
 
 Setup the `.gitattributes` for the repository to include

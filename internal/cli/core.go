@@ -19,8 +19,8 @@ const (
 	StatsCommand = "stats"
 	// TOTPCommand is the parent of totp and by defaults generates a rotating token
 	TOTPCommand = "totp"
-	// HashCommand handles hashing the data store
-	HashCommand = "hash"
+	// ConvCommand handles text conversion of the data store
+	ConvCommand = "conv"
 	// ClearCommand is a callback to manage clipboard clearing
 	ClearCommand = "clear"
 	// ClipCommand will copy values to the clipboard

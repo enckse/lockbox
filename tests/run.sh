@@ -37,7 +37,7 @@ _execute() {
   ${LB_BINARY} totp show test/k
   ${LB_BINARY} totp once test/k
   ${LB_BINARY} totp minimal test/k
-  ${LB_BINARY} hash "$LOCKBOX_STORE"
+  ${LB_BINARY} conv "$LOCKBOX_STORE"
   echo y |${LB_BINARY} rm keys2/k/three
   echo
   echo y |${LB_BINARY} rm test/k/totp

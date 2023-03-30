@@ -8,8 +8,8 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 )
 
-// Hash will hash 1-N files
-func Hash(cmd CommandOptions) error {
+// Conv will hash 1-N files
+func Conv(cmd CommandOptions) error {
 	args := cmd.Args()
 	if len(args) == 0 {
 		return errors.New("hash requires a file")

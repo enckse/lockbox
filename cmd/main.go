@@ -88,8 +88,8 @@ func run() error {
 		return app.Stats(p)
 	case cli.ShowCommand, cli.ClipCommand:
 		return app.ShowClip(p, command == cli.ShowCommand)
-	case cli.HashCommand:
-		return app.Hash(p)
+	case cli.ConvCommand:
+		return app.Conv(p)
 	case cli.TOTPCommand:
 		args, err := totp.NewArguments(sub, inputs.TOTPToken())
 		if err != nil {
