@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
@@ -15,7 +14,7 @@ type (
 	mockKeyer struct {
 		entries []string
 		data    map[string][]byte
-		stats   map[string][]byte
+		stats   map[string][]string
 		err     error
 		rekeys  []app.ReKeyEntry
 	}
@@ -36,7 +35,7 @@ func (m *mockKeyer) Show(entry string) ([]byte, error) {
 	return val, nil
 }
 
-func (m *mockKeyer) Stats(entry string) ([]byte, error) {
+func (m *mockKeyer) Stats(entry string) ([]string, error) {
 	val, ok := m.stats[entry]
 	if !ok {
 		return nil, errors.New("no stats")
@@ -67,21 +66,20 @@ func TestErrors(t *testing.T) {
 	}
 	m.err = nil
 	m.entries = []string{"test1", "error"}
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "failed to get modtime: no stats" {
+	if err := app.ReKey(&buf, m); err == nil || err.Error() != "failed to get modtime, command failed: no stats" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.stats = make(map[string][]byte)
-	m.stats["test1"] = []byte("modtime")
-	if err := app.ReKey(&buf, m); err == nil || !strings.HasPrefix(err.Error(), "invalid stats json:") {
-		t.Errorf("invalid error: %v", err)
-	}
-	m.stats = make(map[string][]byte)
-	m.stats["test1"] = []byte("{\"modtime\": \"\"}")
+	m.stats = make(map[string][]string)
+	m.stats["test1"] = []string{"modtime"}
+	m.stats["error"] = []string{"modtime: 3"}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "did not read modtime" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.stats["test1"] = []byte("{\"modtime\": \"1\"}")
-	m.stats["error"] = []byte("{\"modtime\": \"1\"}")
+	m.stats["test1"] = []string{"modtime: 1", "modtime: 2"}
+	if err := app.ReKey(&buf, m); err == nil || err.Error() != "unable to read modtime, too many values" {
+		t.Errorf("invalid error: %v", err)
+	}
+	m.stats["test1"] = []string{"modtime: 1"}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "no data" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -107,9 +105,9 @@ func TestReKey(t *testing.T) {
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["test2"] = []byte{2}
-	m.stats = make(map[string][]byte)
-	m.stats["test1"] = []byte("{\"modtime\": \"1\"}")
-	m.stats["test2"] = []byte("{\"modtime\": \"2\"}")
+	m.stats = make(map[string][]string)
+	m.stats["test1"] = []string{"modtime: 1", "modtime2"}
+	m.stats["test2"] = []string{"moime: 1", "modtime: 2"}
 	if err := app.ReKey(&buf, m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

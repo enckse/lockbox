@@ -3,7 +3,6 @@ package backend
 
 import (
 	"crypto/sha512"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -132,17 +131,12 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			switch args.Values {
 			case SecretValue:
 				entity.Value = val
-			case StatsValue:
+			case HashedValue, StatsValue:
 				t := getValue(e.backing, modTimeKey)
-				s := Stats{Path: k, ModTime: t}
-				m, err := json.MarshalIndent(s, "", "  ")
-				if err != nil {
-					return nil, err
+				res := fmt.Sprintf("%s %s", ModTimeField, t)
+				if args.Values == HashedValue {
+					res = fmt.Sprintf("%s\nhash: %x", res, sha512.Sum512([]byte(val)))
 				}
-				entity.Value = string(m)
-			case HashedValue:
-				t := getValue(e.backing, modTimeKey)
-				res := fmt.Sprintf("modtime: %s\nhash: %x", t, sha512.Sum512([]byte(val)))
 				entity.Value = res
 			}
 		}

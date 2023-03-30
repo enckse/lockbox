@@ -1,7 +1,6 @@
 package backend_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -107,15 +106,8 @@ func TestValueModes(t *testing.T) {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.StatsValue)
-	if err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	r := backend.Stats{}
-	if err := json.Unmarshal([]byte(q.Value), &r); err != nil {
-		t.Errorf("json error: %v", err)
-	}
-	if len(r.ModTime) != 25 || r.Path != "test/test/abc" {
-		t.Errorf("invalid stats: %v", r)
+	if err != nil || !strings.HasPrefix(q.Value, "modtime: ") || len(strings.Split(q.Value, "\n")) != 1 {
+		t.Errorf("invalid stats: %s", q.Value)
 	}
 }
 

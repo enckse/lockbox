@@ -122,7 +122,6 @@ _clipboard() {
 _logtest() {
   _execute 2>&1 | \
     sed 's/modtime: [0-9].*$/modtime: XXXX-XX-XX/g' | \
-    sed 's/\"modtime\": \"[0-9].*$/"modtime": "XXXX-XX-XX",/g' | \
     sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g'
 }
 

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -18,7 +17,7 @@ type (
 	// Keyer defines how rekeying happens
 	Keyer interface {
 		List() ([]string, error)
-		Stats(string) ([]byte, error)
+		Stats(string) ([]string, error)
 		Show(string) ([]byte, error)
 		Insert(ReKeyEntry) error
 	}
@@ -49,8 +48,8 @@ func (r DefaultKeyer) List() ([]string, error) {
 }
 
 // Stats will get stats for an entry
-func (r DefaultKeyer) Stats(entry string) ([]byte, error) {
-	return exec.Command(r.exe, cli.StatsCommand, entry).Output()
+func (r DefaultKeyer) Stats(entry string) ([]string, error) {
+	return r.getCommandLines(cli.StatsCommand, entry)
 }
 
 func (r DefaultKeyer) getCommandLines(args ...string) ([]string, error) {
@@ -99,14 +98,18 @@ func ReKey(writer io.Writer, r Keyer) error {
 		}
 		stats, err := r.Stats(entry)
 		if err != nil {
-			return fmt.Errorf("failed to get modtime: %w", err)
+			return fmt.Errorf("failed to get modtime, command failed: %w", err)
 		}
 		modTime := ""
-		j := backend.Stats{}
-		if err := json.Unmarshal(stats, &j); err != nil {
-			return fmt.Errorf("invalid stats json: %w", err)
+		for _, stat := range stats {
+			if strings.HasPrefix(stat, backend.ModTimeField) {
+				if modTime != "" {
+					return errors.New("unable to read modtime, too many values")
+				}
+				modTime = strings.TrimPrefix(stat, backend.ModTimeField)
+			}
 		}
-		modTime = strings.TrimSpace(j.ModTime)
+		modTime = strings.TrimSpace(modTime)
 		if modTime == "" {
 			return errors.New("did not read modtime")
 		}

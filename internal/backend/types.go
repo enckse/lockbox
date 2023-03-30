@@ -48,11 +48,6 @@ type (
 		enabled bool
 		scripts []string
 	}
-	// Stats shows information about the entry
-	Stats struct {
-		ModTime string `json:"modtime"`
-		Path    string `json:"path"`
-	}
 	removal struct {
 		parts []string
 		title string
@@ -105,6 +100,8 @@ const (
 	pathSep    = "/"
 	isGlob     = pathSep + "*"
 	modTimeKey = "ModTime"
+	// ModTimeField is the stats field for modification time
+	ModTimeField = "modtime:"
 )
 
 var errPath = errors.New("input paths must contain at LEAST 2 components")

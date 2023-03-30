@@ -15,10 +15,7 @@ keys2/k/three
 test2
 test3
 test4
-{
-  "modtime": "XXXX-XX-XX",
-  "path": "keys2/k/three"
-}
+modtime: XXXX-XX-XX
 test/k
 XXXXXX
 XXXXXX
