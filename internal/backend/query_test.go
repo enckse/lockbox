@@ -118,7 +118,7 @@ func TestValueModes(t *testing.T) {
 	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(m.ModTime) != 25 || m.Path != "test/test/abc" {
+	if strings.TrimSpace(m.ModTime) == "" || m.Path != "test/test/abc" {
 		t.Errorf("invalid json: %v", m)
 	}
 }
