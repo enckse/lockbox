@@ -53,6 +53,11 @@ type (
 		title string
 		hook  Hook
 	}
+	// JSON is an entry as a JSON string
+	JSON struct {
+		ModTime string `json:"modtime"`
+		Path    string `json:"path"`
+	}
 )
 
 const (
@@ -91,6 +96,8 @@ const (
 	SecretValue
 	// StatsValue will show the last modification time
 	StatsValue
+	// JSONValue will show entries as a JSON payload
+	JSONValue
 )
 
 const (

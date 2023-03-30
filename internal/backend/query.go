@@ -3,6 +3,7 @@ package backend
 
 import (
 	"crypto/sha512"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -129,6 +130,14 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 				val = e.backing.GetPassword()
 			}
 			switch args.Values {
+			case JSONValue:
+				t := getValue(e.backing, modTimeKey)
+				s := JSON{Path: k, ModTime: t}
+				m, err := json.MarshalIndent(s, "", "  ")
+				if err != nil {
+					return nil, err
+				}
+				entity.Value = string(m)
 			case SecretValue:
 				entity.Value = val
 			case HashedValue, StatsValue:
