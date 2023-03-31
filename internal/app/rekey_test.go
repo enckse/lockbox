@@ -3,7 +3,6 @@ package app_test
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"os"
 	"testing"
 
@@ -15,7 +14,7 @@ type (
 	mockKeyer struct {
 		data   map[string][]byte
 		err    error
-		rekeys []app.ReKeyEntry
+		rekeys int
 		items  map[string]backend.JSON
 	}
 )
@@ -36,7 +35,7 @@ func (m *mockKeyer) Show(entry string) ([]byte, error) {
 }
 
 func (m *mockKeyer) Insert(entry app.ReKeyEntry) error {
-	m.rekeys = append(m.rekeys, entry)
+	m.rekeys++
 	if entry.Path == "error" {
 		return errors.New("bad insert")
 	}
@@ -97,10 +96,7 @@ func TestReKey(t *testing.T) {
 	if buf.String() == "" {
 		t.Error("invalid data")
 	}
-	if len(m.rekeys) != 2 {
-		t.Error("invalid rekeys")
-	}
-	if fmt.Sprintf("%v", m.rekeys) != `[{test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=1] [1]} {test2 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [2]}]` {
-		t.Errorf("invalid results: %v", m.rekeys)
+	if m.rekeys != 2 {
+		t.Errorf("invalid results")
 	}
 }

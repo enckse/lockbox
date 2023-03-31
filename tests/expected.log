@@ -31,8 +31,10 @@ test2
 test3
 test4
 {
-  "modtime": "XXXX-XX-XX",
-  "hash": "132ab0244293c495a027cec12d0050598616daca888449920fc652719be0987830827d069ef78cc613e348de37c9b592d3406e2fb8d99a6961bf0c58da8a334f"
+  "keys2/k/three": {
+    "modtime": "XXXX-XX-XX",
+    "hash": "132ab0244293c495a027cec12d0050598616daca888449920fc652719be0987830827d069ef78cc613e348de37c9b592d3406e2fb8d99a6961bf0c58da8a334f"
+  }
 }
 
 test/k

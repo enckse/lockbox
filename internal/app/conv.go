@@ -22,21 +22,28 @@ func Conv(cmd CommandOptions) error {
 		if err != nil {
 			return err
 		}
-		if err := serialize(w, t); err != nil {
+		if err := serialize(w, t, ""); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func serialize(w io.Writer, tx *backend.Transaction) error {
+func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 	e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.JSONValue})
 	if err != nil {
 		return err
 	}
 	fmt.Fprint(w, "{\n")
-	for idx, item := range e {
-		if idx > 0 {
+	hasFilter := len(filter) > 0
+	printed := false
+	for _, item := range e {
+		if hasFilter {
+			if !strings.HasPrefix(item.Path, filter) {
+				continue
+			}
+		}
+		if printed {
 			fmt.Fprintf(w, ",\n")
 		}
 		b, err := json.MarshalIndent(map[string]json.RawMessage{item.Path: json.RawMessage([]byte(item.Value))}, "", "  ")
@@ -47,6 +54,7 @@ func serialize(w io.Writer, tx *backend.Transaction) error {
 		trimmed = strings.TrimPrefix(trimmed, "{")
 		trimmed = strings.TrimSuffix(trimmed, "}")
 		fmt.Fprintf(w, "  %s", strings.TrimSpace(trimmed))
+		printed = true
 	}
 	fmt.Fprintf(w, "\n}\n")
 	return nil

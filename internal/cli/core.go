@@ -213,7 +213,7 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
-	results = append(results, command(JSONCommand, "", "display detailed information"))
+	results = append(results, command(JSONCommand, "filter", "display detailed information"))
 	results = append(results, command(ListCommand, "", "list entries"))
 	results = append(results, command(MoveCommand, "src dst", "move an entry from source to destination"))
 	results = append(results, command(MultiLineCommand, "entry", "insert a multiline entry into the store"))
