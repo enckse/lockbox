@@ -20,7 +20,7 @@ func JSON(cmd CommandOptions) error {
 	entry := args[0]
 	v, err := cmd.Transaction().Get(entry, backend.JSONValue)
 	if err != nil {
-		return fmt.Errorf("unable to get stats: %w", err)
+		return fmt.Errorf("unable to get json: %w", err)
 	}
 	if v != nil {
 		fmt.Fprintln(cmd.Writer(), v.Value)
