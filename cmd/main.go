@@ -65,13 +65,11 @@ func run() error {
 	}
 	switch command {
 	case cli.ReKeyCommand:
-		if p.Confirm("proceed with rekey") {
-			keyer, err := app.NewDefaultKeyer()
-			if err != nil {
-				return err
-			}
-			return app.ReKey(p.Args(), p.Writer(), keyer)
+		keyer, err := app.NewDefaultKeyer()
+		if err != nil {
+			return err
 		}
+		return app.ReKey(p, keyer)
 	case cli.ListCommand:
 		return app.List(p)
 	case cli.MoveCommand:
@@ -103,7 +101,6 @@ func run() error {
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
-	return nil
 }
 
 func clearClipboard() error {

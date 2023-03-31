@@ -119,11 +119,11 @@ func TestListVariables(t *testing.T) {
 
 func TestReKey(t *testing.T) {
 	_, err := inputs.GetReKey([]string{})
-	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=" {
+	if err == nil || err.Error() != "missing required arguments for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=" {
 		t.Errorf("failed: %v", err)
 	}
 	_, err = inputs.GetReKey([]string{"-store", "abc"})
-	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc" {
+	if err == nil || err.Error() != "missing required arguments for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc" {
 		t.Errorf("failed: %v", err)
 	}
 	out, err := inputs.GetReKey([]string{"-store", "abc", "-key", "aaa"})

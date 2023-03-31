@@ -114,7 +114,7 @@ func GetReKey(args []string) ([]string, error) {
 	}
 	sort.Strings(out)
 	if !hasStore || (!hasKey && !hasKeyFile) {
-		return nil, fmt.Errorf("missing required environment variables for rekey: %s", strings.Join(out, " "))
+		return nil, fmt.Errorf("missing required arguments for rekey: %s", strings.Join(out, " "))
 	}
 	return out, nil
 }

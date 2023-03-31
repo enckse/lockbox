@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -78,15 +77,20 @@ func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
 }
 
 // ReKey handles entry rekeying
-func ReKey(args []string, writer io.Writer, r Keyer) error {
+func ReKey(cmd CommandOptions, r Keyer) error {
+	args := cmd.Args()
 	env, err := inputs.GetReKey(args)
 	if err != nil {
 		return err
+	}
+	if !cmd.Confirm("proceed with rekey") {
+		return nil
 	}
 	entries, err := r.JSON()
 	if err != nil {
 		return err
 	}
+	writer := cmd.Writer()
 	for path, entry := range entries {
 		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", path); err != nil {
 			return err
