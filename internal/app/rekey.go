@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,34 +13,90 @@ import (
 	"github.com/enckse/lockbox/internal/inputs"
 )
 
-func getCommandLines(exe string, args ...string) ([]string, error) {
-	out, err := exec.Command(exe, args...).Output()
+type (
+	// Keyer defines how rekeying happens
+	Keyer interface {
+		List() ([]string, error)
+		Stats(string) ([]string, error)
+		Show(string) ([]byte, error)
+		Insert(ReKeyEntry) error
+	}
+	// ReKeyEntry is an entry that is being rekeyed
+	ReKeyEntry struct {
+		Path string
+		Env  []string
+		Data []byte
+	}
+	// DefaultKeyer is the default keyer for the application
+	DefaultKeyer struct {
+		exe string
+	}
+)
+
+// NewDefaultKeyer initializes the default keyer
+func NewDefaultKeyer() (DefaultKeyer, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return DefaultKeyer{}, err
+	}
+	return DefaultKeyer{exe: exe}, nil
+}
+
+// List will get the list of keys in the store
+func (r DefaultKeyer) List() ([]string, error) {
+	return r.getCommandLines(cli.ListCommand)
+}
+
+// Stats will get stats for an entry
+func (r DefaultKeyer) Stats(entry string) ([]string, error) {
+	return r.getCommandLines(cli.StatsCommand, entry)
+}
+
+func (r DefaultKeyer) getCommandLines(args ...string) ([]string, error) {
+	out, err := exec.Command(r.exe, args...).Output()
 	if err != nil {
 		return nil, err
 	}
 	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
 }
 
-// ReKey handles entry rekeying
-func ReKey(cmd *DefaultCommand) error {
-	exe, err := os.Executable()
-	if err != nil {
+// Show will get entry payload
+func (r DefaultKeyer) Show(entry string) ([]byte, error) {
+	return exec.Command(r.exe, cli.ShowCommand, entry).Output()
+}
+
+// Insert will insert the rekeying entry
+func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
+	cmd := exec.Command(r.exe, cli.InsertCommand, entry.Path)
+	cmd.Env = append(os.Environ(), entry.Env...)
+	in, err := cmd.StdinPipe()
+	if nil != err {
 		return err
 	}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	go func() {
+		defer in.Close()
+		in.Write(entry.Data)
+	}()
+	return cmd.Run()
+}
+
+// ReKey handles entry rekeying
+func ReKey(writer io.Writer, r Keyer) error {
 	env, err := inputs.GetReKey()
 	if err != nil {
 		return err
 	}
-	entries, err := getCommandLines(exe, cli.ListCommand)
+	entries, err := r.List()
 	if err != nil {
 		return err
 	}
-	writer := cmd.Writer()
 	for _, entry := range entries {
 		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", entry); err != nil {
 			return err
 		}
-		stats, err := getCommandLines(exe, cli.StatsCommand, entry)
+		stats, err := r.Stats(entry)
 		if err != nil {
 			return fmt.Errorf("failed to get modtime, command failed: %w", err)
 		}
@@ -56,24 +113,14 @@ func ReKey(cmd *DefaultCommand) error {
 		if modTime == "" {
 			return errors.New("did not read modtime")
 		}
-		data, err := exec.Command(exe, cli.ShowCommand, entry).Output()
+		data, err := r.Show(entry)
 		if err != nil {
 			return err
 		}
-		cmd := exec.Command(exe, cli.InsertCommand, entry)
-		cmd.Env = append(os.Environ(), env...)
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", inputs.ModTimeEnv, modTime))
-		in, err := cmd.StdinPipe()
-		if nil != err {
-			return err
-		}
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		go func() {
-			defer in.Close()
-			in.Write(data)
-		}()
-		if err := cmd.Run(); err != nil {
+		var insertEnv []string
+		insertEnv = append(insertEnv, env...)
+		insertEnv = append(insertEnv, fmt.Sprintf("%s=%s", inputs.ModTimeEnv, modTime))
+		if err := r.Insert(ReKeyEntry{Path: entry, Env: insertEnv, Data: data}); err != nil {
 			return err
 		}
 	}

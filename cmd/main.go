@@ -66,7 +66,11 @@ func run() error {
 	switch command {
 	case cli.ReKeyCommand:
 		if p.Confirm("proceed with rekey") {
-			return app.ReKey(p)
+			keyer, err := app.NewDefaultKeyer()
+			if err != nil {
+				return err
+			}
+			return app.ReKey(p.Writer(), keyer)
 		}
 	case cli.ListCommand:
 		return app.List(p)
