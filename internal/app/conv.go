@@ -39,11 +39,7 @@ func serialize(w io.Writer, tx *backend.Transaction) error {
 		if idx > 0 {
 			fmt.Fprintf(w, ",\n")
 		}
-		obj := backend.JSON{}
-		if err := json.Unmarshal([]byte(item.Value), &obj); err != nil {
-			return err
-		}
-		b, err := json.MarshalIndent(map[string]backend.JSON{item.Path: obj}, "", "  ")
+		b, err := json.MarshalIndent(map[string]json.RawMessage{item.Path: json.RawMessage([]byte(item.Value))}, "", "  ")
 		if err != nil {
 			return err
 		}
