@@ -16,6 +16,9 @@ func Load(file string) (*Transaction, error) {
 }
 
 func loadFile(file string, must bool) (*Transaction, error) {
+	if strings.TrimSpace(file) == "" {
+		return nil, errors.New("no store set")
+	}
 	if !strings.HasSuffix(file, ".kdbx") {
 		return nil, errors.New("should use a .kdbx extension")
 	}

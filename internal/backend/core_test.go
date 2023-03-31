@@ -7,6 +7,9 @@ import (
 )
 
 func TestLoad(t *testing.T) {
+	if _, err := backend.Load("  "); err.Error() != "no store set" {
+		t.Errorf("invalid error: %v", err)
+	}
 	if _, err := backend.Load("garbage"); err.Error() != "should use a .kdbx extension" {
 		t.Errorf("invalid error: %v", err)
 	}
