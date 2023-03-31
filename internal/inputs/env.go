@@ -4,7 +4,6 @@ package inputs
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
@@ -15,8 +14,6 @@ import (
 )
 
 const (
-	otpAuth        = "otpauth"
-	otpIssuer      = "lbissuer"
 	prefixKey      = "LOCKBOX_"
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
@@ -58,8 +55,6 @@ const (
 	// WindowsLinuxPlatform for WSL subsystems
 	WindowsLinuxPlatform = "wsl"
 	defaultMaxClipboard  = 45
-	colorWindowDelimiter = ","
-	colorWindowSpan      = ":"
 	detectedValue        = "(detected)"
 	noTOTPEnv            = prefixKey + "NOTOTP"
 	// HookDirEnv represents a stored location for user hooks
@@ -73,22 +68,11 @@ const (
 	MaxTOTPTimeDefault = "120"
 )
 
-var (
-	isYesNoArgs = []string{isYes, isNo}
-	// TOTPDefaultColorWindow is the default coloring rules for totp
-	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
-	// TOTPDefaultBetween is the default color window as a string
-	TOTPDefaultBetween = toString(TOTPDefaultColorWindow)
-)
+var isYesNoArgs = []string{isYes, isNo}
 
 type (
 	environmentOutput struct {
 		showValues bool
-	}
-	// ColorWindow for handling terminal colors based on timing
-	ColorWindow struct {
-		Start int
-		End   int
 	}
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform string
@@ -119,45 +103,6 @@ func GetReKey() ([]string, error) {
 		return nil, fmt.Errorf("missing required environment variables for rekey: %s", strings.Join(out, " "))
 	}
 	return out, nil
-}
-
-func toString(windows []ColorWindow) string {
-	var results []string
-	for _, w := range windows {
-		results = append(results, fmt.Sprintf("%d%s%d", w.Start, colorWindowSpan, w.End))
-	}
-	return strings.Join(results, colorWindowDelimiter)
-}
-
-// ParseColorWindow will handle parsing a window of colors for TOTP operations
-func ParseColorWindow(windowString string) ([]ColorWindow, error) {
-	var rules []ColorWindow
-	for _, item := range strings.Split(windowString, colorWindowDelimiter) {
-		line := strings.TrimSpace(item)
-		if line == "" {
-			continue
-		}
-		parts := strings.Split(line, colorWindowSpan)
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid colorization rule found: %s", line)
-		}
-		s, err := strconv.Atoi(parts[0])
-		if err != nil {
-			return nil, err
-		}
-		e, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return nil, err
-		}
-		if s < 0 || e < 0 || e < s || s > 59 || e > 59 {
-			return nil, fmt.Errorf("invalid time found for colorization rule: %s", line)
-		}
-		rules = append(rules, ColorWindow{Start: s, End: e})
-	}
-	if len(rules) == 0 {
-		return nil, errors.New("invalid colorization rules for totp, none found")
-	}
-	return rules, nil
 }
 
 // EnvOrDefault will get the environment value OR default if env is not set.
@@ -280,30 +225,6 @@ func IsInteractive() (bool, error) {
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
 	return EnvOrDefault(fieldTOTPEnv, defaultTOTPField)
-}
-
-// FormatTOTP will format a totp otpauth url
-func FormatTOTP(value string) string {
-	if strings.HasPrefix(value, otpAuth) {
-		return value
-	}
-	override := EnvOrDefault(formatTOTPEnv, "")
-	if override != "" {
-		return fmt.Sprintf(override, value)
-	}
-	v := url.Values{}
-	v.Set("secret", value)
-	v.Set("issuer", otpIssuer)
-	v.Set("period", "30")
-	v.Set("algorithm", "SHA1")
-	v.Set("digits", "6")
-	u := url.URL{
-		Scheme:   otpAuth,
-		Host:     "totp",
-		Path:     "/" + otpIssuer + ":" + "lbaccount",
-		RawQuery: v.Encode(),
-	}
-	return u.String()
 }
 
 func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, desc string, allowed []string) string {
