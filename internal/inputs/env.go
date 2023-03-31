@@ -189,7 +189,7 @@ func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
 		return false, nil
 	case env.YesValue:
 		return true, nil
-	case env.UnknownValue:
+	case env.EmptyValue:
 		return defaultValue, nil
 	}
 
