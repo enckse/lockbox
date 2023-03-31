@@ -16,11 +16,11 @@ type (
 		data   map[string][]byte
 		err    error
 		rekeys []app.ReKeyEntry
-		items  []backend.JSON
+		items  map[string]backend.JSON
 	}
 )
 
-func (m *mockKeyer) JSON() ([]backend.JSON, error) {
+func (m *mockKeyer) JSON() (map[string]backend.JSON, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -57,18 +57,18 @@ func TestErrors(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.err = nil
-	m.items = []backend.JSON{{Path: "test1", ModTime: ""}}
+	m.items = map[string]backend.JSON{"test": {ModTime: ""}}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "did not read modtime" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.items = []backend.JSON{{Path: "test1", ModTime: "2"}}
+	m.items = map[string]backend.JSON{"test1": {ModTime: "2"}}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "no data" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["error"] = []byte{2}
-	m.items = []backend.JSON{{Path: "error", ModTime: "2"}}
+	m.items = map[string]backend.JSON{"error": {ModTime: "2"}}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "bad insert" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -84,7 +84,10 @@ func TestReKey(t *testing.T) {
 		t.Error("no data")
 	}
 	m := &mockKeyer{}
-	m.items = []backend.JSON{{Path: "test1", ModTime: "2"}, {Path: "test1", ModTime: "2"}}
+	m.items = map[string]backend.JSON{
+		"test1": {ModTime: "1"},
+		"test2": {ModTime: "2"},
+	}
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["test2"] = []byte{2}
@@ -97,7 +100,7 @@ func TestReKey(t *testing.T) {
 	if len(m.rekeys) != 2 {
 		t.Error("invalid rekeys")
 	}
-	if fmt.Sprintf("%v", m.rekeys) != `[{test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [1]} {test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [1]}]` {
+	if fmt.Sprintf("%v", m.rekeys) != `[{test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=1] [1]} {test2 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [2]}]` {
 		t.Errorf("invalid results: %v", m.rekeys)
 	}
 }

@@ -132,8 +132,8 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			switch args.Values {
 			case JSONValue:
 				t := getValue(e.backing, modTimeKey)
-				s := JSON{Path: k, ModTime: t, Hash: fmt.Sprintf("%x", sha512.Sum512([]byte(val)))}
-				m, err := json.MarshalIndent(s, "", "  ")
+				s := JSON{ModTime: t, Hash: fmt.Sprintf("%x", sha512.Sum512([]byte(val)))}
+				m, err := json.Marshal(s)
 				if err != nil {
 					return nil, err
 				}

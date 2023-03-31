@@ -17,7 +17,7 @@ import (
 type (
 	// Keyer defines how rekeying happens
 	Keyer interface {
-		JSON() ([]backend.JSON, error)
+		JSON() (map[string]backend.JSON, error)
 		Show(string) ([]byte, error)
 		Insert(ReKeyEntry) error
 	}
@@ -48,12 +48,12 @@ func (r DefaultKeyer) Show(entry string) ([]byte, error) {
 }
 
 // JSON will get the JSON backing entries
-func (r DefaultKeyer) JSON() ([]backend.JSON, error) {
+func (r DefaultKeyer) JSON() (map[string]backend.JSON, error) {
 	out, err := exec.Command(r.exe, cli.JSONCommand).Output()
 	if err != nil {
 		return nil, err
 	}
-	var j []backend.JSON
+	var j map[string]backend.JSON
 	if err := json.Unmarshal(out, &j); err != nil {
 		return nil, err
 	}
@@ -87,22 +87,22 @@ func ReKey(writer io.Writer, r Keyer) error {
 	if err != nil {
 		return err
 	}
-	for _, entry := range entries {
-		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", entry.Path); err != nil {
+	for path, entry := range entries {
+		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", path); err != nil {
 			return err
 		}
 		modTime := strings.TrimSpace(entry.ModTime)
 		if modTime == "" {
 			return errors.New("did not read modtime")
 		}
-		data, err := r.Show(entry.Path)
+		data, err := r.Show(path)
 		if err != nil {
 			return err
 		}
 		var insertEnv []string
 		insertEnv = append(insertEnv, env...)
 		insertEnv = append(insertEnv, fmt.Sprintf("%s=%s", inputs.ModTimeEnv, modTime))
-		if err := r.Insert(ReKeyEntry{Path: entry.Path, Env: insertEnv, Data: data}); err != nil {
+		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: data}); err != nil {
 			return err
 		}
 	}

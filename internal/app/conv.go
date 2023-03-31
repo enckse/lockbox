@@ -1,6 +1,8 @@
 package app
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -32,13 +34,17 @@ func serialize(w io.Writer, tx *backend.Transaction) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(w, "[")
+	fmt.Fprint(w, "{\n")
 	for idx, item := range e {
 		if idx > 0 {
-			fmt.Fprint(w, ",")
+			fmt.Fprintf(w, ",\n")
 		}
-		fmt.Fprintf(w, "\n%s\n", item.Value)
+		var buf bytes.Buffer
+		if err := json.Indent(&buf, []byte(item.Value), "  ", "  "); err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "  \"%s\": %s\n", item.Path, buf.String())
 	}
-	fmt.Fprintf(w, "]")
+	fmt.Fprintf(w, "}")
 	return nil
 }

@@ -2,6 +2,8 @@
 package app
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -23,7 +25,11 @@ func JSON(cmd CommandOptions) error {
 		return fmt.Errorf("unable to get json: %w", err)
 	}
 	if v != nil {
-		fmt.Fprintln(cmd.Writer(), v.Value)
+		var buf bytes.Buffer
+		if err := json.Indent(&buf, []byte(v.Value), "", "  "); err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.Writer(), buf.String())
 	}
 	return nil
 }

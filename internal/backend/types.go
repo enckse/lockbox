@@ -55,7 +55,6 @@ type (
 	}
 	// JSON is an entry as a JSON string
 	JSON struct {
-		Path    string `json:"path"`
 		ModTime string `json:"modtime"`
 		Hash    string `json:"hash"`
 	}
