@@ -3,7 +3,6 @@ package app_test
 import (
 	"bytes"
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
@@ -42,41 +41,34 @@ func (m *mockKeyer) Insert(entry app.ReKeyEntry) error {
 	return nil
 }
 
-func setupReKey() {
-	os.Setenv("LOCKBOX_KEY_NEW", "abc")
-	os.Setenv("LOCKBOX_STORE_NEW", "store")
-}
-
 func TestErrors(t *testing.T) {
-	setupReKey()
 	var buf bytes.Buffer
 	m := &mockKeyer{}
 	m.err = errors.New("invalid call")
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "invalid call" {
+	if err := app.ReKey([]string{"-store", "store", "-key", "abc"}, &buf, m); err == nil || err.Error() != "invalid call" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.err = nil
 	m.items = map[string]backend.JSON{"test": {ModTime: ""}}
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "did not read modtime" {
+	if err := app.ReKey([]string{"-store", "store", "-key", "abc"}, &buf, m); err == nil || err.Error() != "did not read modtime" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.items = map[string]backend.JSON{"test1": {ModTime: "2"}}
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "no data" {
+	if err := app.ReKey([]string{"-store", "store", "-key", "abc"}, &buf, m); err == nil || err.Error() != "no data" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["error"] = []byte{2}
 	m.items = map[string]backend.JSON{"error": {ModTime: "2"}}
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "bad insert" {
+	if err := app.ReKey([]string{"-store", "store", "-key", "abc"}, &buf, m); err == nil || err.Error() != "bad insert" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestReKey(t *testing.T) {
-	setupReKey()
 	var buf bytes.Buffer
-	if err := app.ReKey(&buf, &mockKeyer{}); err != nil {
+	if err := app.ReKey([]string{"-store", "store", "-key", "abc"}, &buf, &mockKeyer{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() != "" {
@@ -90,7 +82,7 @@ func TestReKey(t *testing.T) {
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["test2"] = []byte{2}
-	if err := app.ReKey(&buf, m); err != nil {
+	if err := app.ReKey([]string{"-store", "store", "-key", "abc"}, &buf, m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" {

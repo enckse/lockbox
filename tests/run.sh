@@ -91,15 +91,11 @@ _rekey() {
   rekey="$LOCKBOX_STORE.rekey.kdbx"
   rekeyFile=""
   export LOCKBOX_HOOKDIR=""
-  export LOCKBOX_STORE_NEW="$rekey"
-  export LOCKBOX_KEY_NEW="newkey"
-  export LOCKBOX_KEYMODE_NEW=plaintext
   if [ -n "$LOCKBOX_KEYFILE" ]; then
     rekeyFile="$DATA/newkeyfile"
     echo "thisisanewkey" > "$rekeyFile"
   fi
-  export LOCKBOX_KEYFILE_NEW="$rekeyFile"
-  echo y |${LB_BINARY} rekey
+  echo y |${LB_BINARY} rekey -store="$rekey" -key="newkey" -keymode="plaintext" -keyfile="$rekeyFile"
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2

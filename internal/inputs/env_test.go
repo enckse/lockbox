@@ -118,33 +118,26 @@ func TestListVariables(t *testing.T) {
 }
 
 func TestReKey(t *testing.T) {
-	os.Setenv("LOCKBOX_STORE_NEW", "")
-	os.Setenv("LOCKBOX_KEY_NEW", "")
-	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
-	_, err := inputs.GetReKey()
-	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEYMODE= LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_STORE=" {
+	_, err := inputs.GetReKey([]string{})
+	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=" {
 		t.Errorf("failed: %v", err)
 	}
-	os.Setenv("LOCKBOX_STORE_NEW", "abc")
-	_, err = inputs.GetReKey()
-	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEYMODE= LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_STORE=abc" {
+	_, err = inputs.GetReKey([]string{"-store", "abc"})
+	if err == nil || err.Error() != "missing required environment variables for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc" {
 		t.Errorf("failed: %v", err)
 	}
-	os.Setenv("LOCKBOX_KEY_NEW", "aaa")
-	out, err := inputs.GetReKey()
+	out, err := inputs.GetReKey([]string{"-store", "abc", "-key", "aaa"})
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEYMODE= LOCKBOX_KEY=aaa LOCKBOX_KEYFILE= LOCKBOX_STORE=abc]" {
+	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEY=aaa LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
 		t.Errorf("invalid env: %v", out)
 	}
-	os.Setenv("LOCKBOX_KEY_NEW", "")
-	os.Setenv("LOCKBOX_KEYFILE_NEW", "xxx")
-	out, err = inputs.GetReKey()
+	out, err = inputs.GetReKey([]string{"-store", "abc", "-keyfile", "aaa"})
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEYMODE= LOCKBOX_KEY= LOCKBOX_KEYFILE=xxx LOCKBOX_STORE=abc]" {
+	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEY= LOCKBOX_KEYFILE=aaa LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
 		t.Errorf("invalid env: %v", out)
 	}
 	os.Setenv("LOCKBOX_KEY_NEW", "")

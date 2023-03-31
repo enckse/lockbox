@@ -78,8 +78,8 @@ func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
 }
 
 // ReKey handles entry rekeying
-func ReKey(writer io.Writer, r Keyer) error {
-	env, err := inputs.GetReKey()
+func ReKey(args []string, writer io.Writer, r Keyer) error {
+	env, err := inputs.GetReKey(args)
 	if err != nil {
 		return err
 	}

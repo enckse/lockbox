@@ -70,7 +70,7 @@ func run() error {
 			if err != nil {
 				return err
 			}
-			return app.ReKey(p.Writer(), keyer)
+			return app.ReKey(p.Args(), p.Writer(), keyer)
 		}
 	case cli.ListCommand:
 		return app.List(p)

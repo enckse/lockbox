@@ -3,9 +3,11 @@ package inputs
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -63,7 +65,6 @@ const (
 	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
-	reKeySuffix   = "_NEW"
 	// MaxTOTPTimeDefault is the max TOTP time to run (default)
 	MaxTOTPTimeDefault = "120"
 )
@@ -79,14 +80,26 @@ type (
 )
 
 // GetReKey will get the rekey environment settings
-func GetReKey() ([]string, error) {
+func GetReKey(args []string) ([]string, error) {
+	set := flag.NewFlagSet("rekey", flag.ExitOnError)
+	store := set.String("store", "", "new store")
+	key := set.String("key", "", "new key")
+	keyFile := set.String("keyfile", "", "new keyfile")
+	keyMode := set.String("keymode", "", "new keymode")
+	if err := set.Parse(args); err != nil {
+		return nil, err
+	}
+	mapped := map[string]string{
+		keyModeEnv: *keyMode,
+		keyEnv:     *key,
+		KeyFileEnv: *keyFile,
+		StoreEnv:   *store,
+	}
 	hasStore := false
 	hasKey := false
 	hasKeyFile := false
 	var out []string
-	for _, k := range []string{keyModeEnv, keyEnv, KeyFileEnv, StoreEnv} {
-		newKey := fmt.Sprintf("%s%s", k, reKeySuffix)
-		val := os.Getenv(newKey)
+	for k, val := range mapped {
 		if val != "" {
 			switch k {
 			case StoreEnv:
@@ -99,6 +112,7 @@ func GetReKey() ([]string, error) {
 		}
 		out = append(out, fmt.Sprintf("%s=%s", k, val))
 	}
+	sort.Strings(out)
 	if !hasStore || (!hasKey && !hasKeyFile) {
 		return nil, fmt.Errorf("missing required environment variables for rekey: %s", strings.Join(out, " "))
 	}
