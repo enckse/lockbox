@@ -16,11 +16,19 @@ func TestJSON(t *testing.T) {
 	if err := app.JSON(m); err.Error() != "invalid arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
+	m.args = []string{"test2/test1"}
+	if err := app.JSON(m); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() == "" || m.buf.String() == "{}\n" {
+		t.Error("no data")
+	}
+	m.buf = bytes.Buffer{}
 	m.args = []string{"test/test2/test1"}
 	if err := app.JSON(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if m.buf.String() == "" {
+	if m.buf.String() == "" || m.buf.String() == "{}\n" {
 		t.Error("no data")
 	}
 	m.buf = bytes.Buffer{}

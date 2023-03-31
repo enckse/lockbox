@@ -39,7 +39,7 @@ func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 	printed := false
 	for _, item := range e {
 		if hasFilter {
-			if !strings.HasPrefix(item.Path, filter) {
+			if !strings.Contains(item.Path, filter) {
 				continue
 			}
 		}
