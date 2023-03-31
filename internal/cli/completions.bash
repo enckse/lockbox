@@ -31,7 +31,7 @@ _{{ $.Executable }}() {
 {{- end}}
           ;;
 {{- end}}
-        "{{ $.ShowCommand }}" | "{{ $.StatsCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
           opts=$({{ $.DoList }})
           ;;
       esac

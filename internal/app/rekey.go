@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -16,8 +17,7 @@ import (
 type (
 	// Keyer defines how rekeying happens
 	Keyer interface {
-		List() ([]string, error)
-		Stats(string) ([]string, error)
+		JSON() ([]backend.JSON, error)
 		Show(string) ([]byte, error)
 		Insert(ReKeyEntry) error
 	}
@@ -42,27 +42,22 @@ func NewDefaultKeyer() (DefaultKeyer, error) {
 	return DefaultKeyer{exe: exe}, nil
 }
 
-// List will get the list of keys in the store
-func (r DefaultKeyer) List() ([]string, error) {
-	return r.getCommandLines(cli.ListCommand)
-}
-
-// Stats will get stats for an entry
-func (r DefaultKeyer) Stats(entry string) ([]string, error) {
-	return r.getCommandLines(cli.StatsCommand, entry)
-}
-
-func (r DefaultKeyer) getCommandLines(args ...string) ([]string, error) {
-	out, err := exec.Command(r.exe, args...).Output()
-	if err != nil {
-		return nil, err
-	}
-	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
-}
-
 // Show will get entry payload
 func (r DefaultKeyer) Show(entry string) ([]byte, error) {
 	return exec.Command(r.exe, cli.ShowCommand, entry).Output()
+}
+
+// JSON will get the JSON backing entries
+func (r DefaultKeyer) JSON() ([]backend.JSON, error) {
+	out, err := exec.Command(r.exe, cli.JSONCommand).Output()
+	if err != nil {
+		return nil, err
+	}
+	var j []backend.JSON
+	if err := json.Unmarshal(out, &j); err != nil {
+		return nil, err
+	}
+	return j, nil
 }
 
 // Insert will insert the rekeying entry
@@ -88,39 +83,26 @@ func ReKey(writer io.Writer, r Keyer) error {
 	if err != nil {
 		return err
 	}
-	entries, err := r.List()
+	entries, err := r.JSON()
 	if err != nil {
 		return err
 	}
 	for _, entry := range entries {
-		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", entry); err != nil {
+		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", entry.Path); err != nil {
 			return err
 		}
-		stats, err := r.Stats(entry)
-		if err != nil {
-			return fmt.Errorf("failed to get modtime, command failed: %w", err)
-		}
-		modTime := ""
-		for _, stat := range stats {
-			if strings.HasPrefix(stat, backend.ModTimeField) {
-				if modTime != "" {
-					return errors.New("unable to read modtime, too many values")
-				}
-				modTime = strings.TrimPrefix(stat, backend.ModTimeField)
-			}
-		}
-		modTime = strings.TrimSpace(modTime)
+		modTime := strings.TrimSpace(entry.ModTime)
 		if modTime == "" {
 			return errors.New("did not read modtime")
 		}
-		data, err := r.Show(entry)
+		data, err := r.Show(entry.Path)
 		if err != nil {
 			return err
 		}
 		var insertEnv []string
 		insertEnv = append(insertEnv, env...)
 		insertEnv = append(insertEnv, fmt.Sprintf("%s=%s", inputs.ModTimeEnv, modTime))
-		if err := r.Insert(ReKeyEntry{Path: entry, Env: insertEnv, Data: data}); err != nil {
+		if err := r.Insert(ReKeyEntry{Path: entry.Path, Env: insertEnv, Data: data}); err != nil {
 			return err
 		}
 	}

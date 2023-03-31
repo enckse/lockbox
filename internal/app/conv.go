@@ -3,7 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
-	"strings"
+	"io"
 
 	"github.com/enckse/lockbox/internal/backend"
 )
@@ -20,13 +20,25 @@ func Conv(cmd CommandOptions) error {
 		if err != nil {
 			return err
 		}
-		e, err := t.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.HashedValue})
-		if err != nil {
+		if err := serialize(w, t); err != nil {
 			return err
 		}
-		for _, item := range e {
-			fmt.Fprintf(w, "%s:\n  %s\n\n", item.Path, strings.ReplaceAll(item.Value, "\n", "\n  "))
-		}
 	}
+	return nil
+}
+
+func serialize(w io.Writer, tx *backend.Transaction) error {
+	e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.JSONValue})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(w, "[")
+	for idx, item := range e {
+		if idx > 0 {
+			fmt.Fprint(w, ",")
+		}
+		fmt.Fprintf(w, "\n%s\n", item.Value)
+	}
+	fmt.Fprintf(w, "]")
 	return nil
 }

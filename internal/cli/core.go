@@ -15,8 +15,6 @@ import (
 )
 
 const (
-	// StatsCommand will display additional entry stat information
-	StatsCommand = "stats"
 	// TOTPCommand is the parent of totp and by defaults generates a rotating token
 	TOTPCommand = "totp"
 	// ConvCommand handles text conversion of the data store
@@ -67,6 +65,8 @@ const (
 	TOTPShowCommand = ShowCommand
 	// TOTPInsertCommand is for inserting totp tokens
 	TOTPInsertCommand = InsertCommand
+	// JSONCommand handles JSON outputs
+	JSONCommand = "json"
 )
 
 var (
@@ -96,7 +96,7 @@ type (
 		DoTOTPList          string
 		DoList              string
 		Executable          string
-		StatsCommand        string
+		JSONCommand         string
 		HelpCommand         string
 		HelpAdvancedCommand string
 	}
@@ -141,14 +141,14 @@ func BashCompletions(defaults bool) ([]string, error) {
 		ClipCommand:         ClipCommand,
 		ShowCommand:         ShowCommand,
 		MultiLineCommand:    MultiLineCommand,
-		StatsCommand:        StatsCommand,
+		JSONCommand:         JSONCommand,
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
-		Options:             []string{MultiLineCommand, EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, StatsCommand},
+		Options:             []string{MultiLineCommand, EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 	}
 	isReadOnly := false
 	isClip := true
@@ -213,12 +213,12 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
+	results = append(results, command(JSONCommand, "", "display detailed information"))
 	results = append(results, command(ListCommand, "", "list entries"))
 	results = append(results, command(MoveCommand, "src dst", "move an entry from source to destination"))
 	results = append(results, command(MultiLineCommand, "entry", "insert a multiline entry into the store"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
 	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
-	results = append(results, command(StatsCommand, "entry", "display entry detail information"))
 	results = append(results, command(TOTPCommand, "entry", "display an updating totp generated code"))
 	results = append(results, subCommand(TOTPCommand, TOTPClipCommand, "entry", "copy totp code to clipboard"))
 	results = append(results, subCommand(TOTPCommand, TOTPInsertCommand, "entry", "insert a new totp entry into the store"))

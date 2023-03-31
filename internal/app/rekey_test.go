@@ -8,37 +8,29 @@ import (
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
+	"github.com/enckse/lockbox/internal/backend"
 )
 
 type (
 	mockKeyer struct {
-		entries []string
-		data    map[string][]byte
-		stats   map[string][]string
-		err     error
-		rekeys  []app.ReKeyEntry
+		data   map[string][]byte
+		err    error
+		rekeys []app.ReKeyEntry
+		items  []backend.JSON
 	}
 )
 
-func (m *mockKeyer) List() ([]string, error) {
+func (m *mockKeyer) JSON() ([]backend.JSON, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
-	return m.entries, nil
+	return m.items, nil
 }
 
 func (m *mockKeyer) Show(entry string) ([]byte, error) {
 	val, ok := m.data[entry]
 	if !ok {
 		return nil, errors.New("no data")
-	}
-	return val, nil
-}
-
-func (m *mockKeyer) Stats(entry string) ([]string, error) {
-	val, ok := m.stats[entry]
-	if !ok {
-		return nil, errors.New("no stats")
 	}
 	return val, nil
 }
@@ -60,32 +52,23 @@ func TestErrors(t *testing.T) {
 	setupReKey()
 	var buf bytes.Buffer
 	m := &mockKeyer{}
-	m.err = errors.New("invalid ls")
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "invalid ls" {
+	m.err = errors.New("invalid call")
+	if err := app.ReKey(&buf, m); err == nil || err.Error() != "invalid call" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.err = nil
-	m.entries = []string{"test1", "error"}
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "failed to get modtime, command failed: no stats" {
-		t.Errorf("invalid error: %v", err)
-	}
-	m.stats = make(map[string][]string)
-	m.stats["test1"] = []string{"modtime"}
-	m.stats["error"] = []string{"modtime: 3"}
+	m.items = []backend.JSON{{Path: "test1", ModTime: ""}}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "did not read modtime" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.stats["test1"] = []string{"modtime: 1", "modtime: 2"}
-	if err := app.ReKey(&buf, m); err == nil || err.Error() != "unable to read modtime, too many values" {
-		t.Errorf("invalid error: %v", err)
-	}
-	m.stats["test1"] = []string{"modtime: 1"}
+	m.items = []backend.JSON{{Path: "test1", ModTime: "2"}}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "no data" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["error"] = []byte{2}
+	m.items = []backend.JSON{{Path: "error", ModTime: "2"}}
 	if err := app.ReKey(&buf, m); err == nil || err.Error() != "bad insert" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -101,13 +84,10 @@ func TestReKey(t *testing.T) {
 		t.Error("no data")
 	}
 	m := &mockKeyer{}
-	m.entries = []string{"test1", "test2"}
+	m.items = []backend.JSON{{Path: "test1", ModTime: "2"}, {Path: "test1", ModTime: "2"}}
 	m.data = make(map[string][]byte)
 	m.data["test1"] = []byte{1}
 	m.data["test2"] = []byte{2}
-	m.stats = make(map[string][]string)
-	m.stats["test1"] = []string{"modtime: 1", "modtime2"}
-	m.stats["test2"] = []string{"moime: 1", "modtime: 2"}
 	if err := app.ReKey(&buf, m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -117,7 +97,7 @@ func TestReKey(t *testing.T) {
 	if len(m.rekeys) != 2 {
 		t.Error("invalid rekeys")
 	}
-	if fmt.Sprintf("%v", m.rekeys) != `[{test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=1] [1]} {test2 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [2]}]` {
+	if fmt.Sprintf("%v", m.rekeys) != `[{test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [1]} {test1 [LOCKBOX_KEYMODE= LOCKBOX_KEY=abc LOCKBOX_KEYFILE= LOCKBOX_STORE=store LOCKBOX_SET_MODTIME=2] [1]}]` {
 		t.Errorf("invalid results: %v", m.rekeys)
 	}
 }

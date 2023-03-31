@@ -7,13 +7,17 @@ import (
 	"github.com/enckse/lockbox/internal/app"
 )
 
-func TestStats(t *testing.T) {
+func TestJSON(t *testing.T) {
 	m := newMockCommand(t)
-	if err := app.Stats(m); err.Error() != "entry required" {
+	if err := app.JSON(m); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	m.args = []string{"test", "test2"}
+	if err := app.JSON(m); err.Error() != "invalid arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.args = []string{"test/test2/test1"}
-	if err := app.Stats(m); err != nil {
+	if err := app.JSON(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
@@ -21,7 +25,7 @@ func TestStats(t *testing.T) {
 	}
 	m.buf = bytes.Buffer{}
 	m.args = []string{"tsest/test2/test1"}
-	if err := app.Stats(m); err != nil {
+	if err := app.JSON(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() != "" {

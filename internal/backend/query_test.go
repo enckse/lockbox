@@ -2,7 +2,6 @@ package backend_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -83,33 +82,6 @@ func TestValueModes(t *testing.T) {
 	if q.Value != "" {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
-	q, err = fullSetup(t, true).Get("test/test/abc", backend.HashedValue)
-	if err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	hash := strings.TrimSpace(q.Value)
-	parts := strings.Split(hash, "\n")
-	if len(parts) != 2 {
-		t.Errorf("invalid hash output: %v", parts)
-	}
-	if parts[1] != "hash: 44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
-		t.Errorf("invalid result value: %s", q.Value)
-	}
-	dt := parts[0]
-	if !strings.HasPrefix(dt, "modtime: ") || len(dt) <= 20 {
-		t.Errorf("invalid date/time: %s", dt)
-	}
-	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
-	if err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if q.Value != "tdest\ntest" {
-		t.Errorf("invalid result value: %s", q.Value)
-	}
-	q, err = fullSetup(t, true).Get("test/test/abc", backend.StatsValue)
-	if err != nil || !strings.HasPrefix(q.Value, "modtime: ") || len(strings.Split(q.Value, "\n")) != 1 {
-		t.Errorf("invalid stats: %s", q.Value)
-	}
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -118,7 +90,28 @@ func TestValueModes(t *testing.T) {
 	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if strings.TrimSpace(m.ModTime) == "" || m.Path != "test/test/abc" {
+	if m.Hash != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	if len(m.ModTime) < 20 {
+		t.Errorf("invalid date/time")
+	}
+	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "tdest\ntest" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(m.ModTime) < 20 || m.Path != "test/test/abc" {
 		t.Errorf("invalid json: %v", m)
 	}
 }
@@ -208,35 +201,31 @@ func TestSetModTime(t *testing.T) {
 	tr := fullSetup(t, false)
 	os.Setenv("LOCKBOX_SET_MODTIME", testDateTime)
 	tr.Insert("test/xyz", "test")
-	q, err := fullSetup(t, true).Get("test/xyz", backend.HashedValue)
+	q, err := fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	hash := strings.TrimSpace(q.Value)
-	parts := strings.Split(hash, "\n")
-	if len(parts) != 2 {
-		t.Errorf("invalid hash output: %v", parts)
+	m := backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
 	}
-	dt := parts[0]
-	if dt != fmt.Sprintf("modtime: %s", testDateTime) {
-		t.Errorf("invalid date/time: %s", dt)
+	if m.ModTime != testDateTime {
+		t.Errorf("invalid date/time")
 	}
 
 	tr = fullSetup(t, false)
 	os.Setenv("LOCKBOX_SET_MODTIME", "")
 	tr.Insert("test/xyz", "test")
-	q, err = fullSetup(t, true).Get("test/xyz", backend.HashedValue)
+	q, err = fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	hash = strings.TrimSpace(q.Value)
-	parts = strings.Split(hash, "\n")
-	if len(parts) != 2 {
-		t.Errorf("invalid hash output: %v", parts)
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
 	}
-	dt = parts[0]
-	if dt == fmt.Sprintf("modtime: %s", testDateTime) {
-		t.Errorf("invalid date/time: %s", dt)
+	if m.ModTime == testDateTime {
+		t.Errorf("invalid date/time")
 	}
 
 	tr = fullSetup(t, false)

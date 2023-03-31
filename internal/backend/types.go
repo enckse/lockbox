@@ -55,8 +55,9 @@ type (
 	}
 	// JSON is an entry as a JSON string
 	JSON struct {
-		ModTime string `json:"modtime"`
 		Path    string `json:"path"`
+		ModTime string `json:"modtime"`
+		Hash    string `json:"hash"`
 	}
 )
 
@@ -90,12 +91,8 @@ const (
 const (
 	// BlankValue will not decrypt secrets, empty value
 	BlankValue ValueMode = iota
-	// HashedValue will decrypt and then hash the password
-	HashedValue
 	// SecretValue will have the raw secret onboard
 	SecretValue
-	// StatsValue will show the last modification time
-	StatsValue
 	// JSONValue will show entries as a JSON payload
 	JSONValue
 )
@@ -107,7 +104,7 @@ const (
 	pathSep    = "/"
 	isGlob     = pathSep + "*"
 	modTimeKey = "ModTime"
-	// ModTimeField is the stats field for modification time
+	// ModTimeField is the field for modification time
 	ModTimeField = "modtime:"
 )
 

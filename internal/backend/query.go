@@ -132,7 +132,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			switch args.Values {
 			case JSONValue:
 				t := getValue(e.backing, modTimeKey)
-				s := JSON{Path: k, ModTime: t}
+				s := JSON{Path: k, ModTime: t, Hash: fmt.Sprintf("%x", sha512.Sum512([]byte(val)))}
 				m, err := json.MarshalIndent(s, "", "  ")
 				if err != nil {
 					return nil, err
@@ -140,13 +140,6 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 				entity.Value = string(m)
 			case SecretValue:
 				entity.Value = val
-			case HashedValue, StatsValue:
-				t := getValue(e.backing, modTimeKey)
-				res := fmt.Sprintf("%s %s", ModTimeField, t)
-				if args.Values == HashedValue {
-					res = fmt.Sprintf("%s\nhash: %x", res, sha512.Sum512([]byte(val)))
-				}
-				entity.Value = res
 			}
 		}
 		results = append(results, entity)

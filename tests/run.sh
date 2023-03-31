@@ -28,9 +28,12 @@ _execute() {
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} ls | grep e
+  ${LB_BINARY} json
+  echo
   ${LB_BINARY} show keys/k/one2
   ${LB_BINARY} show keys2/k/three
-  ${LB_BINARY} stats keys2/k/three
+  ${LB_BINARY} json keys2/k/three
+  echo
   echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} totp insert test/k
   echo 5ae472abqdekjqykoyxk7hvc2leklq5n |${LB_BINARY} totp insert test/k/totp
   ${LB_BINARY} totp ls
@@ -121,7 +124,7 @@ _clipboard() {
 
 _logtest() {
   _execute 2>&1 | \
-    sed 's/modtime: [0-9].*$/modtime: XXXX-XX-XX/g' | \
+    sed 's/"modtime": "[0-9].*$/"modtime": "XXXX-XX-XX",/g' | \
     sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g'
 }
 

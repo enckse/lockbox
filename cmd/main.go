@@ -84,8 +84,8 @@ func run() error {
 		return app.Insert(p, mode)
 	case cli.RemoveCommand:
 		return app.Remove(p)
-	case cli.StatsCommand:
-		return app.Stats(p)
+	case cli.JSONCommand:
+		return app.JSON(p)
 	case cli.ShowCommand, cli.ClipCommand:
 		return app.ShowClip(p, command == cli.ShowCommand)
 	case cli.ConvCommand:
