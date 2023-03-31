@@ -28,7 +28,7 @@ func TestJSON(t *testing.T) {
 	if err := app.JSON(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if m.buf.String() == "" {
+	if m.buf.String() != "{}\n" {
 		t.Error("no data")
 	}
 }

@@ -34,7 +34,7 @@ func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(w, "{\n")
+	fmt.Fprint(w, "{")
 	hasFilter := len(filter) > 0
 	printed := false
 	for _, item := range e {
@@ -44,8 +44,9 @@ func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 			}
 		}
 		if printed {
-			fmt.Fprintf(w, ",\n")
+			fmt.Fprint(w, ",")
 		}
+		fmt.Fprint(w, "\n")
 		b, err := json.MarshalIndent(map[string]json.RawMessage{item.Path: json.RawMessage([]byte(item.Value))}, "", "  ")
 		if err != nil {
 			return err
@@ -56,6 +57,9 @@ func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 		fmt.Fprintf(w, "  %s", strings.TrimSpace(trimmed))
 		printed = true
 	}
-	fmt.Fprintf(w, "\n}\n")
+	if printed {
+		fmt.Fprint(w, "\n")
+	}
+	fmt.Fprint(w, "}\n")
 	return nil
 }
