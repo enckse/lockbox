@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+
+	"github.com/enckse/pgl/os/env"
 )
 
 const (
@@ -17,7 +19,7 @@ func FormatTOTP(value string) string {
 	if strings.HasPrefix(value, otpAuth) {
 		return value
 	}
-	override := EnvOrDefault(formatTOTPEnv, "")
+	override := env.GetOrDefault(formatTOTPEnv, "")
 	if override != "" {
 		return fmt.Sprintf(override, value)
 	}

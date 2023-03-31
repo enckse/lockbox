@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/pgl/os/env"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
@@ -19,7 +20,7 @@ func NewHook(path string, a ActionMode) (Hook, error) {
 	if strings.TrimSpace(path) == "" {
 		return Hook{}, errors.New("empty path is not allowed for hooks")
 	}
-	dir := inputs.EnvOrDefault(inputs.HookDirEnv, "")
+	dir := env.GetOrDefault(inputs.HookDirEnv, "")
 	if dir == "" {
 		return Hook{enabled: false}, nil
 	}
@@ -65,7 +66,7 @@ func (t *Transaction) act(cb action) error {
 		return err
 	}
 	k := string(key)
-	file := inputs.EnvOrDefault(inputs.KeyFileEnv, "")
+	file := env.GetOrDefault(inputs.KeyFileEnv, "")
 	if !t.exists {
 		if err := create(t.file, k, file); err != nil {
 			return err
@@ -225,7 +226,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	mod := inputs.EnvOrDefault(inputs.ModTimeEnv, "")
+	mod := env.GetOrDefault(inputs.ModTimeEnv, "")
 	modTime := time.Now()
 	if mod != "" {
 		p, err := time.Parse(inputs.ModTimeFormat, mod)

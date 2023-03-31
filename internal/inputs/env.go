@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/enckse/pgl/os/env"
 	"mvdan.cc/sh/v3/shell"
 )
 
@@ -44,8 +45,6 @@ const (
 	// ClipCopyEnv allows overriding the clipboard copy command
 	ClipCopyEnv        = clipBaseEnv + "COPY"
 	clipOSC52Env       = clipBaseEnv + "OSC52"
-	isYes              = "yes"
-	isNo               = "no"
 	defaultTOTPField   = "totp"
 	commandArgsExample = "[cmd args...]"
 	// MacOSPlatform is the macos indicator for platform
@@ -69,7 +68,7 @@ const (
 	MaxTOTPTimeDefault = "120"
 )
 
-var isYesNoArgs = []string{isYes, isNo}
+var isYesNoArgs = []string{env.Yes, env.No}
 
 type (
 	environmentOutput struct {
@@ -117,15 +116,6 @@ func GetReKey(args []string) ([]string, error) {
 		return nil, fmt.Errorf("missing required arguments for rekey: %s", strings.Join(out, " "))
 	}
 	return out, nil
-}
-
-// EnvOrDefault will get the environment value OR default if env is not set.
-func EnvOrDefault(envKey, defaultValue string) string {
-	val := os.Getenv(envKey)
-	if val == "" {
-		return defaultValue
-	}
-	return val
 }
 
 // GetClipboardMax will get max time to keep an entry in the clipboard before clearing
@@ -192,18 +182,18 @@ func getKey(keyMode, name string) ([]byte, error) {
 	return []byte(strings.TrimSpace(string(data))), nil
 }
 
-func isYesNoEnv(defaultValue bool, env string) (bool, error) {
-	value := strings.ToLower(strings.TrimSpace(os.Getenv(env)))
-	if len(value) == 0 {
+func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
+	read := env.GetValue(envKey)
+	switch read {
+	case env.NoValue:
+		return false, nil
+	case env.YesValue:
+		return true, nil
+	case env.UnknownValue:
 		return defaultValue, nil
 	}
-	switch value {
-	case isNo:
-		return false, nil
-	case isYes:
-		return true, nil
-	}
-	return false, fmt.Errorf("invalid yes/no env value for %s", env)
+
+	return false, fmt.Errorf("invalid yes/no env value for %s", envKey)
 }
 
 // IsClipOSC52 indicates if OSC52 mode is enabled
@@ -238,7 +228,7 @@ func IsInteractive() (bool, error) {
 
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
-	return EnvOrDefault(fieldTOTPEnv, defaultTOTPField)
+	return env.GetOrDefault(fieldTOTPEnv, defaultTOTPField)
 }
 
 func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, desc string, allowed []string) string {
@@ -270,10 +260,10 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"}))
 	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
 	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
-	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, isNo, "operate in readonly mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, env.No, "disable clipboard operations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, env.No, "disable terminal colors", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, env.Yes, "enable interactive mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, env.No, "operate in readonly mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
 	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", []string{"integer"}))
@@ -282,9 +272,9 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
-	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, isNo, "disable TOTP integrations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, env.No, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
-	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, isNo, "enable OSC52 clipboard mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, env.No, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	return results

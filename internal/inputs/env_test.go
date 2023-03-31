@@ -34,7 +34,7 @@ func checkYesNo(key string, t *testing.T, cb func() (bool, error), onEmpty bool)
 	if c {
 		t.Error("invalid setting")
 	}
-	os.Setenv(key, "lkaj;f")
+	os.Setenv(key, "true")
 	_, err = cb()
 	if err == nil || err.Error() != fmt.Sprintf("invalid yes/no env value for %s", key) {
 		t.Errorf("unexpected error: %v", err)
