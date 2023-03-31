@@ -334,7 +334,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	var results []string
 	results = append(results, e.formatEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"}))
 	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
-	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or shell command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
+	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
 	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, isNo, "disable clipboard operations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, isNo, "disable terminal colors", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, isYes, "enable interactive mode", isYesNoArgs))
