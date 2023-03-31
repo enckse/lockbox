@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/pgl/types/collections"
 	"github.com/tobischo/gokeepasslib/v3"
 )
@@ -117,6 +118,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if isSort {
 		sort.Strings(keys)
 	}
+	plain, err := inputs.IsJSONPlainText()
+	if err != nil {
+		return nil, err
+	}
+	jsonHash := !plain
 	var results []QueryEntity
 	for _, k := range keys {
 		entity := QueryEntity{Path: k}
@@ -132,7 +138,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			switch args.Values {
 			case JSONValue:
 				t := getValue(e.backing, modTimeKey)
-				s := JSON{ModTime: t, Hash: fmt.Sprintf("%x", sha512.Sum512([]byte(val)))}
+				data := val
+				if jsonHash {
+					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+				}
+				s := JSON{ModTime: t, Data: data}
 				m, err := json.Marshal(s)
 				if err != nil {
 					return nil, err

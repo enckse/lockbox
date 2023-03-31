@@ -99,6 +99,8 @@ _rekey() {
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2
+  export LOCKBOX_JSON_PLAINTEXT=yes
+  ${LB_BINARY} json k
 }
 
 _clipboard() {

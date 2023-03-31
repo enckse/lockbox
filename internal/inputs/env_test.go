@@ -53,6 +53,10 @@ func TestIsReadOnly(t *testing.T) {
 	checkYesNo("LOCKBOX_READONLY", t, inputs.IsReadOnly, false)
 }
 
+func TestIsJSONPlaintext(t *testing.T) {
+	checkYesNo("LOCKBOX_JSON_PLAINTEXT", t, inputs.IsJSONPlainText, false)
+}
+
 func TestIsOSC52(t *testing.T) {
 	checkYesNo("LOCKBOX_CLIP_OSC52", t, inputs.IsClipOSC52, false)
 }
@@ -112,7 +116,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 20 {
+	if l != 21 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }

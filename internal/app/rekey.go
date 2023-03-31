@@ -11,13 +11,13 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/pgl/os/env"
 )
 
 type (
 	// Keyer defines how rekeying happens
 	Keyer interface {
 		JSON() (map[string]backend.JSON, error)
-		Show(string) ([]byte, error)
 		Insert(ReKeyEntry) error
 	}
 	// ReKeyEntry is an entry that is being rekeyed
@@ -39,11 +39,6 @@ func NewDefaultKeyer() (DefaultKeyer, error) {
 		return DefaultKeyer{}, err
 	}
 	return DefaultKeyer{exe: exe}, nil
-}
-
-// Show will get entry payload
-func (r DefaultKeyer) Show(entry string) ([]byte, error) {
-	return exec.Command(r.exe, cli.ShowCommand, entry).Output()
 }
 
 // JSON will get the JSON backing entries
@@ -79,13 +74,15 @@ func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
 // ReKey handles entry rekeying
 func ReKey(cmd CommandOptions, r Keyer) error {
 	args := cmd.Args()
-	env, err := inputs.GetReKey(args)
+	vars, err := inputs.GetReKey(args)
 	if err != nil {
 		return err
 	}
 	if !cmd.Confirm("proceed with rekey") {
 		return nil
 	}
+
+	os.Setenv(inputs.JSONPlainTextEnv, env.Yes)
 	entries, err := r.JSON()
 	if err != nil {
 		return err
@@ -99,14 +96,10 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		if modTime == "" {
 			return errors.New("did not read modtime")
 		}
-		data, err := r.Show(path)
-		if err != nil {
-			return err
-		}
 		var insertEnv []string
-		insertEnv = append(insertEnv, env...)
+		insertEnv = append(insertEnv, vars...)
 		insertEnv = append(insertEnv, fmt.Sprintf("%s=%s", inputs.ModTimeEnv, modTime))
-		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: data}); err != nil {
+		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: []byte(entry.Data)}); err != nil {
 			return err
 		}
 	}

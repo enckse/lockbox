@@ -25,14 +25,6 @@ func (m *mockKeyer) JSON() (map[string]backend.JSON, error) {
 	return m.items, nil
 }
 
-func (m *mockKeyer) Show(entry string) ([]byte, error) {
-	val, ok := m.data[entry]
-	if !ok {
-		return nil, errors.New("no data")
-	}
-	return val, nil
-}
-
 func (m *mockKeyer) Insert(entry app.ReKeyEntry) error {
 	m.rekeys++
 	if entry.Path == "error" {
@@ -58,10 +50,6 @@ func TestErrors(t *testing.T) {
 	m.err = nil
 	m.items = map[string]backend.JSON{"test": {ModTime: ""}}
 	if err := app.ReKey(cmd, m); err == nil || err.Error() != "did not read modtime" {
-		t.Errorf("invalid error: %v", err)
-	}
-	m.items = map[string]backend.JSON{"test1": {ModTime: "2"}}
-	if err := app.ReKey(cmd, m); err == nil || err.Error() != "no data" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.data = make(map[string][]byte)

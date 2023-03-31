@@ -90,7 +90,7 @@ func TestValueModes(t *testing.T) {
 	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if m.Hash != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
+	if m.Data != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
 		t.Errorf("invalid result value: %s", q.Value)
 	}
 	if len(m.ModTime) < 20 {
@@ -111,7 +111,20 @@ func TestValueModes(t *testing.T) {
 	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(m.ModTime) < 20 || m.Hash == "" {
+	if len(m.ModTime) < 20 || m.Data == "" {
+		t.Errorf("invalid json: %v", m)
+	}
+	os.Setenv("LOCKBOX_JSON_PLAINTEXT", "yes")
+	defer os.Clearenv()
+	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(m.ModTime) < 20 || m.Data != "tedst" {
 		t.Errorf("invalid json: %v", m)
 	}
 }
