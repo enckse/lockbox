@@ -284,6 +284,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, env.No, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
-	results = append(results, e.formatEnvironmentVariable(false, JSONPlainTextEnv, env.No, "JSON output will show values as plaintext (not hashed)", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, JSONPlainTextEnv, env.No, "JSON output will show values as plaintext (not hashed)\nuse this option with CAUTION", isYesNoArgs))
 	return results
 }
