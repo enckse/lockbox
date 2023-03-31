@@ -1,11 +1,11 @@
 package app
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/enckse/lockbox/internal/backend"
 )
@@ -39,12 +39,19 @@ func serialize(w io.Writer, tx *backend.Transaction) error {
 		if idx > 0 {
 			fmt.Fprintf(w, ",\n")
 		}
-		var buf bytes.Buffer
-		if err := json.Indent(&buf, []byte(item.Value), "  ", "  "); err != nil {
+		obj := backend.JSON{}
+		if err := json.Unmarshal([]byte(item.Value), &obj); err != nil {
 			return err
 		}
-		fmt.Fprintf(w, "  \"%s\": %s\n", item.Path, buf.String())
+		b, err := json.MarshalIndent(map[string]backend.JSON{item.Path: obj}, "", "  ")
+		if err != nil {
+			return err
+		}
+		trimmed := strings.TrimSpace(string(b))
+		trimmed = strings.TrimPrefix(trimmed, "{")
+		trimmed = strings.TrimSuffix(trimmed, "}")
+		fmt.Fprintf(w, "  %s", strings.TrimSpace(trimmed))
 	}
-	fmt.Fprintf(w, "}")
+	fmt.Fprintf(w, "\n}\n")
 	return nil
 }
