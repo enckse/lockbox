@@ -10,6 +10,7 @@ import (
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/pgl/os/env"
+	"github.com/enckse/pgl/os/paths"
 )
 
 // NewHook will create a new hook type
@@ -21,7 +22,7 @@ func NewHook(path string, a ActionMode) (Hook, error) {
 	if dir == "" {
 		return Hook{enabled: false}, nil
 	}
-	if !pathExists(dir) {
+	if !paths.Exist(dir) {
 		return Hook{}, errors.New("hook directory does NOT exist")
 	}
 	entries, err := os.ReadDir(dir)

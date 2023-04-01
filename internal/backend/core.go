@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/pgl/os/paths"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -22,7 +23,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 	if !strings.HasSuffix(file, ".kdbx") {
 		return nil, errors.New("should use a .kdbx extension")
 	}
-	exists := pathExists(file)
+	exists := paths.Exist(file)
 	if must {
 		if !exists {
 			return nil, errors.New("invalid file, does not exist")
@@ -42,7 +43,7 @@ func NewTransaction() (*Transaction, error) {
 
 func getCredentials(key, keyFile string) (*gokeepasslib.DBCredentials, error) {
 	if len(keyFile) > 0 {
-		if !pathExists(keyFile) {
+		if !paths.Exist(keyFile) {
 			return nil, errors.New("no keyfile found on disk")
 		}
 		return gokeepasslib.NewPasswordAndKeyCredentials(key, keyFile)
@@ -76,14 +77,6 @@ func create(file, key, keyFile string) error {
 
 func encode(f *os.File, db *gokeepasslib.Database) error {
 	return gokeepasslib.NewEncoder(f).Encode(db)
-}
-
-// pathExists indicates if a path exists.
-func pathExists(path string) bool {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-	return true
 }
 
 func isTOTP(title string) (bool, error) {
