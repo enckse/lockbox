@@ -22,19 +22,21 @@ func Conv(cmd CommandOptions) error {
 		if err != nil {
 			return err
 		}
-		if err := serialize(w, t, ""); err != nil {
+		if err := serialize(w, t, false, ""); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
+func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string) error {
 	e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.JSONValue})
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(w, "{")
+	if isJSON {
+		fmt.Fprint(w, "{")
+	}
 	hasFilter := len(filter) > 0
 	printed := false
 	for _, item := range e {
@@ -44,9 +46,13 @@ func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 			}
 		}
 		if printed {
-			fmt.Fprint(w, ",")
+			if isJSON {
+				fmt.Fprint(w, ",")
+			}
 		}
-		fmt.Fprint(w, "\n")
+		if isJSON {
+			fmt.Fprint(w, "\n")
+		}
 		b, err := json.MarshalIndent(map[string]json.RawMessage{item.Path: json.RawMessage([]byte(item.Value))}, "", "  ")
 		if err != nil {
 			return err
@@ -54,12 +60,23 @@ func serialize(w io.Writer, tx *backend.Transaction, filter string) error {
 		trimmed := strings.TrimSpace(string(b))
 		trimmed = strings.TrimPrefix(trimmed, "{")
 		trimmed = strings.TrimSuffix(trimmed, "}")
-		fmt.Fprintf(w, "  %s", strings.TrimSpace(trimmed))
+		if isJSON {
+			fmt.Fprintf(w, "  %s", strings.TrimSpace(trimmed))
+		} else {
+			for _, line := range strings.Split(trimmed, "\n") {
+				if strings.TrimSpace(line) == "" {
+					continue
+				}
+				fmt.Fprintf(w, "%s\n", strings.Replace(line, "  ", "", 1))
+			}
+		}
 		printed = true
 	}
-	if printed {
-		fmt.Fprint(w, "\n")
+	if isJSON {
+		if printed {
+			fmt.Fprint(w, "\n")
+		}
+		fmt.Fprint(w, "}\n")
 	}
-	fmt.Fprint(w, "}\n")
 	return nil
 }

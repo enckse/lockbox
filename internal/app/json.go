@@ -15,5 +15,5 @@ func JSON(cmd CommandOptions) error {
 	if len(args) == 1 {
 		filter = args[0]
 	}
-	return serialize(cmd.Writer(), cmd.Transaction(), filter)
+	return serialize(cmd.Writer(), cmd.Transaction(), true, filter)
 }
