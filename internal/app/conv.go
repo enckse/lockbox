@@ -67,7 +67,7 @@ func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string)
 				if strings.TrimSpace(line) == "" {
 					continue
 				}
-				fmt.Fprintf(w, "%s\n", strings.Replace(line, "  ", "", 1))
+				fmt.Fprintf(w, "%s\n", strings.TrimPrefix(line, "  "))
 			}
 		}
 		printed = true
