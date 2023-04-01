@@ -187,3 +187,11 @@ func directory(s string) string {
 	parts := strings.Split(s, pathSep)
 	return NewPath(parts[0 : len(parts)-1]...)
 }
+
+func getValue(e gokeepasslib.Entry, key string) string {
+	v := e.Get(key)
+	if v == nil {
+		return ""
+	}
+	return v.Value.Content
+}

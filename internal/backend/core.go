@@ -41,6 +41,24 @@ func NewTransaction() (*Transaction, error) {
 	return loadFile(os.Getenv(inputs.StoreEnv), false)
 }
 
+func splitComponents(path string) ([]string, string, error) {
+	if len(strings.Split(path, pathSep)) < 2 {
+		return nil, "", errPath
+	}
+	if strings.HasPrefix(path, pathSep) {
+		return nil, "", errors.New("path can NOT be rooted")
+	}
+	if strings.HasSuffix(path, pathSep) {
+		return nil, "", errors.New("path can NOT end with separator")
+	}
+	if strings.Contains(path, pathSep+pathSep) {
+		return nil, "", errors.New("unwilling to operate on path with empty segment")
+	}
+	title := base(path)
+	parts := strings.Split(directory(path), pathSep)
+	return parts, title, nil
+}
+
 func getCredentials(key, keyFile string) (*gokeepasslib.DBCredentials, error) {
 	if len(keyFile) > 0 {
 		if !paths.Exist(keyFile) {
@@ -85,4 +103,8 @@ func isTOTP(title string) (bool, error) {
 		return false, errors.New("invalid totp field, uses restricted name")
 	}
 	return NewSuffix(title) == NewSuffix(t), nil
+}
+
+func getPathName(entry gokeepasslib.Entry) string {
+	return entry.GetTitle()
 }

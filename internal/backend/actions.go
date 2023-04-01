@@ -156,24 +156,6 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 	return g, e, done
 }
 
-func splitComponents(path string) ([]string, string, error) {
-	if len(strings.Split(path, pathSep)) < 2 {
-		return nil, "", errPath
-	}
-	if strings.HasPrefix(path, pathSep) {
-		return nil, "", errors.New("path can NOT be rooted")
-	}
-	if strings.HasSuffix(path, pathSep) {
-		return nil, "", errors.New("path can NOT end with separator")
-	}
-	if strings.Contains(path, pathSep+pathSep) {
-		return nil, "", errors.New("unwilling to operate on path with empty segment")
-	}
-	title := base(path)
-	parts := strings.Split(directory(path), pathSep)
-	return parts, title, nil
-}
-
 // Move will move a src object to a dst location
 func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Path) == "" {
@@ -303,20 +285,8 @@ func (t *Transaction) RemoveAll(entities []QueryEntity) error {
 	return nil
 }
 
-func getValue(e gokeepasslib.Entry, key string) string {
-	v := e.Get(key)
-	if v == nil {
-		return ""
-	}
-	return v.Value.Content
-}
-
 func value(key string, value string) gokeepasslib.ValueData {
 	return gokeepasslib.ValueData{Key: key, Value: gokeepasslib.V{Content: value}}
-}
-
-func getPathName(entry gokeepasslib.Entry) string {
-	return entry.GetTitle()
 }
 
 func protectedValue(key string, value string) gokeepasslib.ValueData {
