@@ -118,7 +118,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if isSort {
 		sort.Strings(keys)
 	}
-	jsonMode := inputs.JSONBlankMode
+	jsonMode := inputs.JSONDataOutputBlank
 	if args.Values == JSONValue {
 		m, err := inputs.ParseJSONOutput()
 		if err != nil {
@@ -142,9 +142,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			case JSONValue:
 				data := ""
 				switch jsonMode {
-				case inputs.JSONRawMode:
+				case inputs.JSONDataOutputRaw:
 					data = val
-				case inputs.JSONHashMode:
+				case inputs.JSONDataOutputHash:
 					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 				}
 				t := getValue(e.backing, modTimeKey)

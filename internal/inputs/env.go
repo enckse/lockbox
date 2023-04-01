@@ -68,12 +68,6 @@ const (
 	MaxTOTPTimeDefault = "120"
 	// JSONDataOutputEnv controls how JSON is output
 	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
-	// JSONDataOutputHash means output data is hashed
-	JSONDataOutputHash = "hash"
-	// JSONDataOutputBlank means an empty entry is set
-	JSONDataOutputBlank = "empty"
-	// JSONDataOutputRaw means the RAW (unencrypted) value is displayed
-	JSONDataOutputRaw = "plaintext"
 )
 
 var isYesNoArgs = []string{env.Yes, env.No}
@@ -285,6 +279,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, env.No, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
-	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, JSONDataOutputHash, fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{JSONDataOutputRaw, JSONDataOutputHash, JSONDataOutputBlank}))
+	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
 	return results
 }

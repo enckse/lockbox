@@ -8,30 +8,30 @@ import (
 	"github.com/enckse/pgl/os/env"
 )
 
-type (
-	// JSONOutputMode is the output mode definition
-	JSONOutputMode uint
+const (
+	// JSONDataOutputHash means output data is hashed
+	JSONDataOutputHash JSONOutputMode = "hash"
+	// JSONDataOutputBlank means an empty entry is set
+	JSONDataOutputBlank JSONOutputMode = "empty"
+	// JSONDataOutputRaw means the RAW (unencrypted) value is displayed
+	JSONDataOutputRaw JSONOutputMode = "plaintext"
 )
 
-const (
-	// JSONBlankMode will results in an empty field
-	JSONBlankMode JSONOutputMode = iota
-	// JSONHashMode will use a common hasher to hash the raw value
-	JSONHashMode
-	// JSONRawMode will display the raw value
-	JSONRawMode
+type (
+	// JSONOutputMode is the output mode definition
+	JSONOutputMode string
 )
 
 // ParseJSONOutput handles detecting the JSON output mode
 func ParseJSONOutput() (JSONOutputMode, error) {
-	val := strings.ToLower(strings.TrimSpace(env.GetOrDefault(JSONDataOutputEnv, JSONDataOutputHash)))
-	switch val {
+	val := strings.ToLower(strings.TrimSpace(env.GetOrDefault(JSONDataOutputEnv, string(JSONDataOutputHash))))
+	switch JSONOutputMode(val) {
 	case JSONDataOutputHash:
-		return JSONHashMode, nil
+		return JSONDataOutputHash, nil
 	case JSONDataOutputBlank:
-		return JSONBlankMode, nil
+		return JSONDataOutputBlank, nil
 	case JSONDataOutputRaw:
-		return JSONRawMode, nil
+		return JSONDataOutputRaw, nil
 	}
-	return JSONBlankMode, fmt.Errorf("invalid JSON output mode: %s", val)
+	return JSONDataOutputBlank, fmt.Errorf("invalid JSON output mode: %s", val)
 }

@@ -81,7 +81,7 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		return nil
 	}
 
-	os.Setenv(inputs.JSONDataOutputEnv, inputs.JSONDataOutputRaw)
+	os.Setenv(inputs.JSONDataOutputEnv, string(inputs.JSONDataOutputRaw))
 	entries, err := r.JSON()
 	if err != nil {
 		return err

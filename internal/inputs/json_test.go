@@ -10,22 +10,22 @@ import (
 func TestParseJSONMode(t *testing.T) {
 	defer os.Clearenv()
 	m, err := inputs.ParseJSONOutput()
-	if m != inputs.JSONHashMode || err != nil {
+	if m != inputs.JSONDataOutputHash || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "hAsH ")
 	m, err = inputs.ParseJSONOutput()
-	if m != inputs.JSONHashMode || err != nil {
+	if m != inputs.JSONDataOutputHash || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "EMPTY")
 	m, err = inputs.ParseJSONOutput()
-	if m != inputs.JSONBlankMode || err != nil {
+	if m != inputs.JSONDataOutputBlank || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", " PLAINtext ")
 	m, err = inputs.ParseJSONOutput()
-	if m != inputs.JSONRawMode || err != nil {
+	if m != inputs.JSONDataOutputRaw || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "a")
