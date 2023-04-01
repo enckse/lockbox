@@ -56,7 +56,7 @@ type (
 	// JSON is an entry as a JSON string
 	JSON struct {
 		ModTime string `json:"modtime"`
-		Data    string `json:"data"`
+		Data    string `json:"data,omitempty"`
 	}
 )
 

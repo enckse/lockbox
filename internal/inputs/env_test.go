@@ -53,10 +53,6 @@ func TestIsReadOnly(t *testing.T) {
 	checkYesNo("LOCKBOX_READONLY", t, inputs.IsReadOnly, false)
 }
 
-func TestIsJSONPlaintext(t *testing.T) {
-	checkYesNo("LOCKBOX_JSON_PLAINTEXT", t, inputs.IsJSONPlainText, false)
-}
-
 func TestIsOSC52(t *testing.T) {
 	checkYesNo("LOCKBOX_CLIP_OSC52", t, inputs.IsClipOSC52, false)
 }

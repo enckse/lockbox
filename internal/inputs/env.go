@@ -66,8 +66,14 @@ const (
 	ModTimeFormat = time.RFC3339
 	// MaxTOTPTimeDefault is the max TOTP time to run (default)
 	MaxTOTPTimeDefault = "120"
-	// JSONPlainTextEnv toggles plain text on for JSON outputs
-	JSONPlainTextEnv = prefixKey + "JSON_PLAINTEXT"
+	// JSONDataOutputEnv controls how JSON is output
+	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
+	// JSONDataOutputHash means output data is hashed
+	JSONDataOutputHash = "hash"
+	// JSONDataOutputBlank means an empty entry is set
+	JSONDataOutputBlank = "empty"
+	// JSONDataOutputRaw means the RAW (unencrypted) value is displayed
+	JSONDataOutputRaw = "plaintext"
 )
 
 var isYesNoArgs = []string{env.Yes, env.No}
@@ -228,11 +234,6 @@ func IsInteractive() (bool, error) {
 	return isYesNoEnv(true, interactiveEnv)
 }
 
-// IsJSONPlainText indicates if JSON should plaintext values (not hashed)
-func IsJSONPlainText() (bool, error) {
-	return isYesNoEnv(false, JSONPlainTextEnv)
-}
-
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
 	return env.GetOrDefault(fieldTOTPEnv, defaultTOTPField)
@@ -284,6 +285,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, env.No, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
-	results = append(results, e.formatEnvironmentVariable(false, JSONPlainTextEnv, env.No, "JSON output will show values as plaintext (not hashed)\nuse this option with CAUTION", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, JSONDataOutputHash, fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{JSONDataOutputRaw, JSONDataOutputHash, JSONDataOutputBlank}))
 	return results
 }

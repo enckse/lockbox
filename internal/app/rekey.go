@@ -11,7 +11,6 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/pgl/os/env"
 )
 
 type (
@@ -82,7 +81,7 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		return nil
 	}
 
-	os.Setenv(inputs.JSONPlainTextEnv, env.Yes)
+	os.Setenv(inputs.JSONDataOutputEnv, inputs.JSONDataOutputRaw)
 	entries, err := r.JSON()
 	if err != nil {
 		return err

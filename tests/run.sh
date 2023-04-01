@@ -99,7 +99,9 @@ _rekey() {
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2
-  export LOCKBOX_JSON_PLAINTEXT=yes
+  export LOCKBOX_JSON_DATA_OUTPUT=plaintext
+  ${LB_BINARY} json k
+  export LOCKBOX_JSON_DATA_OUTPUT=empty
   ${LB_BINARY} json k
 }
 

@@ -133,5 +133,10 @@ test2
     "data": "test2"
   }
 }
+{
+  "keys/k/one2": {
+    "modtime": "XXXX-XX-XX",
+  }
+}
 clipboard will clear in 5 seconds
 Wrong password? HMAC-SHA256 of header mismatching

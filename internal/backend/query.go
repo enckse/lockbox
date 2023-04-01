@@ -118,11 +118,14 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if isSort {
 		sort.Strings(keys)
 	}
-	plain, err := inputs.IsJSONPlainText()
-	if err != nil {
-		return nil, err
+	jsonMode := inputs.JSONBlankMode
+	if args.Values == JSONValue {
+		m, err := inputs.ParseJSONOutput()
+		if err != nil {
+			return nil, err
+		}
+		jsonMode = m
 	}
-	jsonHash := !plain
 	var results []QueryEntity
 	for _, k := range keys {
 		entity := QueryEntity{Path: k}
@@ -137,11 +140,14 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			}
 			switch args.Values {
 			case JSONValue:
-				t := getValue(e.backing, modTimeKey)
-				data := val
-				if jsonHash {
+				data := ""
+				switch jsonMode {
+				case inputs.JSONRawMode:
+					data = val
+				case inputs.JSONHashMode:
 					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 				}
+				t := getValue(e.backing, modTimeKey)
 				s := JSON{ModTime: t, Data: data}
 				m, err := json.Marshal(s)
 				if err != nil {
