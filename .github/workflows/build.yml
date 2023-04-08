@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "deps"
-        run: sudo apt-get install -y make git golang
+        run: sudo apt-get install -y golang
       - name: "build"
         run: make .runci
   macos-build:
