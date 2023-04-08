@@ -25,9 +25,5 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: "deps rm"
-        run: rm -f /usr/local/bin/go /usr/local/bin/gofmt
-      - name: "deps"
-        run: brew install go
       - name: "build"
         run: make .runci
