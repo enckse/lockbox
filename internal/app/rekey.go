@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/pgl/types/values"
 )
 
 type (
@@ -91,8 +91,8 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", path); err != nil {
 			return err
 		}
-		modTime := strings.TrimSpace(entry.ModTime)
-		if modTime == "" {
+		modTime, empty := values.EmptyStringTrimmed(entry.ModTime)
+		if empty {
 			return errors.New("did not read modtime")
 		}
 		var insertEnv []string

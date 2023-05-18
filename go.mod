@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aymanbagabas/go-osc52 v1.2.2
-	github.com/enckse/pgl v1.0.10
+	github.com/enckse/pgl v1.0.11
 	github.com/pquerna/otp v1.4.0
 	github.com/tobischo/gokeepasslib/v3 v3.5.1
 	mvdan.cc/sh/v3 v3.6.0
