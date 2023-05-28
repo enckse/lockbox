@@ -16,7 +16,7 @@ import (
 	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/pgl/os/env"
+	"github.com/enckse/lockbox/internal/system"
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
 )
@@ -86,7 +86,7 @@ func clear() {
 }
 
 func colorWhenRules() ([]inputs.ColorWindow, error) {
-	envTime := env.GetOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
+	envTime := system.EnvironOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
 	if envTime == inputs.TOTPDefaultBetween {
 		return inputs.TOTPDefaultColorWindow, nil
 	}
@@ -160,7 +160,7 @@ func (args *Arguments) display(opts Options) error {
 	if err != nil {
 		return err
 	}
-	runString := env.GetOrDefault(inputs.MaxTOTPTime, inputs.MaxTOTPTimeDefault)
+	runString := system.EnvironOrDefault(inputs.MaxTOTPTime, inputs.MaxTOTPTimeDefault)
 	runFor, err := strconv.Atoi(runString)
 	if err != nil {
 		return err

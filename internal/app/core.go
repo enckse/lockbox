@@ -2,12 +2,12 @@
 package app
 
 import (
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/pgl/os/exit"
+	"github.com/enckse/lockbox/internal/system"
 )
 
 type (
@@ -52,11 +52,17 @@ func (a *DefaultCommand) Transaction() *backend.Transaction {
 
 // Confirm will confirm with the user (dying if something abnormal happens)
 func (a *DefaultCommand) Confirm(prompt string) bool {
-	yesNo, err := inputs.ConfirmYesNoPrompt(prompt)
+	yesNo, err := system.ConfirmYesNoPrompt(prompt)
 	if err != nil {
-		exit.Dief("failed to read stdin for confirmation: %v", err)
+		Die(fmt.Sprintf("failed to read stdin for confirmation: %v", err))
 	}
 	return yesNo
+}
+
+// Die will print a message and exit (non-zero)
+func Die(msg string) {
+	fmt.Fprintf(os.Stderr, "%s\n", msg)
+	os.Exit(1)
 }
 
 // SetArgs allow updating the command args
@@ -66,10 +72,10 @@ func (a *DefaultCommand) SetArgs(args ...string) {
 
 // IsPipe will indicate if we're receiving pipe input
 func (a *DefaultCommand) IsPipe() bool {
-	return inputs.IsInputFromPipe()
+	return system.IsInputFromPipe()
 }
 
 // Input will read user input
 func (a *DefaultCommand) Input(pipe, multi bool) ([]byte, error) {
-	return inputs.GetUserInputPassword(pipe, multi)
+	return system.GetUserInputPassword(pipe, multi)
 }

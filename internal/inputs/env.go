@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/pgl/os/env"
+	"github.com/enckse/lockbox/internal/system"
 	"mvdan.cc/sh/v3/shell"
 )
 
@@ -70,7 +70,7 @@ const (
 	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
 )
 
-var isYesNoArgs = []string{env.Yes, env.No}
+var isYesNoArgs = []string{system.Yes, system.No}
 
 type (
 	environmentOutput struct {
@@ -185,13 +185,13 @@ func getKey(keyMode, name string) ([]byte, error) {
 }
 
 func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
-	read := env.GetValue(envKey)
+	read := system.EnvironValue(envKey)
 	switch read {
-	case env.NoValue:
+	case system.NoValue:
 		return false, nil
-	case env.YesValue:
+	case system.YesValue:
 		return true, nil
-	case env.EmptyValue:
+	case system.EmptyValue:
 		return defaultValue, nil
 	}
 
@@ -230,7 +230,7 @@ func IsInteractive() (bool, error) {
 
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
-	return env.GetOrDefault(fieldTOTPEnv, defaultTOTPField)
+	return system.EnvironOrDefault(fieldTOTPEnv, defaultTOTPField)
 }
 
 func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, desc string, allowed []string) string {
@@ -262,10 +262,10 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"}))
 	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
 	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
-	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, env.No, "disable clipboard operations", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, env.No, "disable terminal colors", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, env.Yes, "enable interactive mode", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, env.No, "operate in readonly mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, system.No, "disable clipboard operations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, system.No, "disable terminal colors", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, system.Yes, "enable interactive mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, system.No, "operate in readonly mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
 	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", []string{"integer"}))
@@ -274,9 +274,9 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
-	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, env.No, "disable TOTP integrations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, system.No, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
-	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, env.No, "enable OSC52 clipboard mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, system.No, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))

@@ -9,8 +9,7 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/pgl/os/env"
-	"github.com/enckse/pgl/os/paths"
+	"github.com/enckse/lockbox/internal/system"
 )
 
 // NewHook will create a new hook type
@@ -18,11 +17,11 @@ func NewHook(path string, a ActionMode) (Hook, error) {
 	if strings.TrimSpace(path) == "" {
 		return Hook{}, errors.New("empty path is not allowed for hooks")
 	}
-	dir := env.GetOrDefault(inputs.HookDirEnv, "")
+	dir := system.EnvironOrDefault(inputs.HookDirEnv, "")
 	if dir == "" {
 		return Hook{enabled: false}, nil
 	}
-	if !paths.Exist(dir) {
+	if !system.PathExists(dir) {
 		return Hook{}, errors.New("hook directory does NOT exist")
 	}
 	entries, err := os.ReadDir(dir)

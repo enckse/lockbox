@@ -1,14 +1,18 @@
-// Package inputs handles stdin management/access.
-package inputs
+// Package system handles stdin processing
+package system
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"syscall"
+)
 
-	"github.com/enckse/pgl/os/stdin"
+type (
+	stdinReaderFunc func(string) (bool, error)
 )
 
 func termEcho(on bool) {
@@ -89,9 +93,9 @@ func Stdin(one bool) (string, error) {
 	var b []byte
 	var err error
 	if one {
-		b, err = stdin.ReadLine()
+		b, err = readLine()
 	} else {
-		b, err = stdin.ReadAll()
+		b, err = readAll()
 	}
 	if err != nil {
 		return "", err
@@ -113,4 +117,50 @@ func ConfirmYesNoPrompt(prompt string) (bool, error) {
 		return false, err
 	}
 	return resp == "Y" || resp == "y", nil
+}
+
+func readAll() ([]byte, error) {
+	return read(false)
+}
+
+func readLine() ([]byte, error) {
+	return read(true)
+}
+
+// ReadFunc will read stdin and execute the given function
+func ReadFunc(reader stdinReaderFunc) error {
+	if reader == nil {
+		return errors.New("invalid reader, nil")
+	}
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		ok, err := reader(scanner.Text())
+		if err != nil {
+			return err
+		}
+		if !ok {
+			break
+		}
+	}
+	return scanner.Err()
+}
+
+func read(one bool) ([]byte, error) {
+	var b bytes.Buffer
+	err := ReadFunc(func(line string) (bool, error) {
+		if _, err := b.WriteString(line); err != nil {
+			return false, err
+		}
+		if _, err := b.WriteString("\n"); err != nil {
+			return false, err
+		}
+		if one {
+			return false, nil
+		}
+		return true, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
 }

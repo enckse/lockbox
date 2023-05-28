@@ -10,7 +10,7 @@ import (
 
 	osc "github.com/aymanbagabas/go-osc52"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/pgl/os/env"
+	"github.com/enckse/lockbox/internal/system"
 )
 
 type (
@@ -32,7 +32,7 @@ func newClipboard(copying, pasting []string) (Clipboard, error) {
 }
 
 func overrideCommand(v string) ([]string, error) {
-	value := env.GetOrDefault(v, "")
+	value := system.EnvironOrDefault(v, "")
 	if strings.TrimSpace(value) == "" {
 		return nil, nil
 	}

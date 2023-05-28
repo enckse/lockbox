@@ -14,8 +14,8 @@ import (
 	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/system"
 	"github.com/enckse/lockbox/internal/totp"
-	"github.com/enckse/pgl/os/exit"
 )
 
 //go:embed "vers.txt"
@@ -23,7 +23,7 @@ var version string
 
 func main() {
 	if err := run(); err != nil {
-		exit.Die(err)
+		app.Die(err.Error())
 	}
 }
 
@@ -105,7 +105,7 @@ func run() error {
 
 func clearClipboard() error {
 	idx := 0
-	val, err := inputs.Stdin(false)
+	val, err := system.Stdin(false)
 	if err != nil {
 		return err
 	}
