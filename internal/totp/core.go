@@ -282,7 +282,7 @@ func NewArguments(args []string, tokenType string) (*Arguments, error) {
 	}
 	if needs {
 		if len(args) != 2 {
-			return nil, errors.New("missing entry")
+			return nil, errors.New("invalid arguments")
 		}
 		opts.Entry = args[1]
 		if opts.Mode == InsertMode {

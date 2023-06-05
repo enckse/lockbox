@@ -91,7 +91,7 @@ func TestNewArgumentsErrors(t *testing.T) {
 	if _, err := totp.NewArguments([]string{"ls", "test"}, "a"); err == nil || err.Error() != "list takes no arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := totp.NewArguments([]string{"show"}, "a"); err == nil || err.Error() != "missing entry" {
+	if _, err := totp.NewArguments([]string{"show"}, "a"); err == nil || err.Error() != "invalid arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
