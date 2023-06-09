@@ -10,7 +10,7 @@ import (
 
 func TestShowClip(t *testing.T) {
 	m := newMockCommand(t)
-	if err := app.ShowClip(m, true); err.Error() != "entry required" {
+	if err := app.ShowClip(m, true); err.Error() != "only one argument supported" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.args = []string{"test/test2/test1"}

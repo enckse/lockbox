@@ -13,7 +13,7 @@ import (
 func ShowClip(cmd CommandOptions, isShow bool) error {
 	args := cmd.Args()
 	if len(args) != 1 {
-		return errors.New("entry required")
+		return errors.New("only one argument supported")
 	}
 	entry := args[0]
 	clipboard := platform.Clipboard{}
