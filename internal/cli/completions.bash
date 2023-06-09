@@ -64,4 +64,4 @@ _{{ $.Executable }}() {
   fi
 }
 
-complete -F _{{ $.Executable }} -o bashdefault -o default {{ $.Executable }}
+complete -F _{{ $.Executable }} -o bashdefault {{ $.Executable }}
