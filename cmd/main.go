@@ -2,7 +2,6 @@
 package main
 
 import (
-	_ "embed"
 	"errors"
 	"fmt"
 	"os"
@@ -18,7 +17,6 @@ import (
 	"github.com/enckse/lockbox/internal/totp"
 )
 
-//go:embed "vers.txt"
 var version string
 
 func main() {

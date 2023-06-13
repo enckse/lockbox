@@ -1,17 +1,16 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
+VERSION :=
+ifeq ($(VERSION),)
+VERSION := $(shell git log -n 1 --format=%h)
+endif
 
 all: $(TARGET)
 
 build: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
-	@! test -d .git || make .version | grep 'version:' | cut -d ':' -f 2 | tr '\n' '_' | sed 's/_//g' > cmd/vers.txt
-	go build $(GOFLAGS) -o $@ cmd/main.go
-
-.version:
-	@git describe --tags --abbrev=0 | sha256sum | cut -c 1-7 | sed 's/^/version:/g'
-	@git tag --points-at HEAD | grep -q '' || echo "version:-1"
+	go build $(GOFLAGS) -ldflags "-X main.version=$(VERSION)" -o $@ cmd/main.go
 
 unittests:
 	go test -v ./...
@@ -25,8 +24,7 @@ clean:
 
 .runci:
 	rm -rf .git
-	make build
-	make check
+	make build check VERSION=$(GITHUB_SHA)
 
 install:
 	install -Dm755 $(TARGET) $(BINDIR)/lb
