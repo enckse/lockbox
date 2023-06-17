@@ -1,15 +1,15 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
-VERSION :=
-ifeq ($(VERSION),)
-VERSION := $(shell git log -n 1 --format=%h)
-endif
+VERSION ?= $(shell git log -n 1 --format=%h)
 
 all: $(TARGET)
 
 build: $(TARGET)
 
 $(TARGET): cmd/main.go internal/**/*.go  go.* internal/cli/completions*
+ifeq ($(VERSION),)
+	$(error version not set)
+endif
 	go build $(GOFLAGS) -ldflags "-X main.version=$(VERSION)" -o $@ cmd/main.go
 
 unittests:
