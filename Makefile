@@ -25,7 +25,3 @@ clean:
 .runci:
 	rm -rf .git
 	make build check VERSION=$(GITHUB_SHA)
-
-install:
-	install -Dm755 $(TARGET) $(BINDIR)/lb
-	$(TARGET) bash > $(COMPDIR)/lb
