@@ -22,7 +22,7 @@ func TestShowClip(t *testing.T) {
 	}
 	m.buf = bytes.Buffer{}
 	m.args = []string{"test211/test2/test"}
-	if err := app.ShowClip(m, true); err != nil {
+	if err := app.ShowClip(m, true); err == nil || err.Error() != "entry does not exist" {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() != "" {

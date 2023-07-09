@@ -29,7 +29,7 @@ func ShowClip(cmd CommandOptions, isShow bool) error {
 		return err
 	}
 	if existing == nil {
-		return nil
+		return errors.New("entry does not exist")
 	}
 	if isShow {
 		fmt.Fprintln(cmd.Writer(), existing.Value)
