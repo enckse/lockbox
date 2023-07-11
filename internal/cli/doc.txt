@@ -8,14 +8,23 @@ changing it outside of 'lb' usage. If a database not normally used by 'lb' is
 to be used by 'lb', try using the various readonly settings to control
 interactions.
 
-[remove]
-The 'rm' command can handle a simplistic glob if it is at the END of the path.
-This allows for bulk-removal of entries at multiple levels. Confirmation will
-still be required for removal (matching entries will be listed)
+[globs]
+The 'rm' and 'mv' command can handle a simplistic glob if it is at the END
+of the path. This allows for bulk-removal of entries at multiple levels.
+Confirmation will still be required for removal (matching entries will be
+listed)
+
+For 'mv' the destination must NOT be an entry but the final destination
+location for all matched entries. Overwriting is not allowed by moving
+via glob.
+
+Examples:
 
 lb rm path/to/leaf/dir/*
 
 lb rm path/to/*
+
+lb mv path/to/* new/path/
 
 [clipboard]
 By default clipboard commands are detected via determing the platform and 

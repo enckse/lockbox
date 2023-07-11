@@ -22,7 +22,11 @@ type (
 func newMockCommand(t *testing.T) *mockCommand {
 	setup(t)
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
+	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test2"), "pass")
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
+	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "test1"), "pass")
+	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "test2"), "pass")
+	fullSetup(t, true).Insert(backend.NewPath("test", "test4", "test5"), "pass")
 	return &mockCommand{t: t, confirmed: false, confirm: true}
 }
 
@@ -48,8 +52,8 @@ func TestMove(t *testing.T) {
 	if err := app.Move(m); err.Error() != "src/dst required for move" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.args = []string{"a", "b"}
-	if err := app.Move(m); err.Error() != "unable to get source entry" {
+	m.args = []string{"a/c", "b"}
+	if err := app.Move(m); err.Error() != "no source entries matched" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.confirmed = false
@@ -59,5 +63,17 @@ func TestMove(t *testing.T) {
 	}
 	if !m.confirmed {
 		t.Error("no move")
+	}
+	m.args = []string{"test/test3/*", "test/test2/test3"}
+	if err := app.Move(m); err.Error() != "test/test2/test3 must be a path, not an entry" {
+		t.Errorf("invalid error: %v", err)
+	}
+	m.args = []string{"test/test3/*", "test/test2/"}
+	if err := app.Move(m); err.Error() != "unable to overwrite entries when moving multiple items" {
+		t.Errorf("invalid error: %v", err)
+	}
+	m.args = []string{"test/test3/*", "test/test4/"}
+	if err := app.Move(m); err != nil {
+		t.Errorf("invalid error: %v", err)
 	}
 }

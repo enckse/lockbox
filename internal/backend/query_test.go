@@ -261,3 +261,57 @@ func TestSetModTime(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 }
+
+func TestIsDirectory(t *testing.T) {
+	if backend.IsDirectory("") {
+		t.Error("invalid directory detection")
+	}
+	if !backend.IsDirectory("/") {
+		t.Error("invalid directory detection")
+	}
+	if backend.IsDirectory("/a") {
+		t.Error("invalid directory detection")
+	}
+}
+
+func TestBase(t *testing.T) {
+	b := backend.Base("")
+	if b != "" {
+		t.Error("invalid base")
+	}
+	b = backend.Base("aaa")
+	if b != "aaa" {
+		t.Error("invalid base")
+	}
+	b = backend.Base("aaa/")
+	if b != "" {
+		t.Error("invalid base")
+	}
+	b = backend.Base("aaa/a")
+	if b != "a" {
+		t.Error("invalid base")
+	}
+}
+
+func TestDirectory(t *testing.T) {
+	b := backend.Directory("")
+	if b != "" {
+		t.Error("invalid directory")
+	}
+	b = backend.Directory("/")
+	if b != "" {
+		t.Error("invalid directory")
+	}
+	b = backend.Directory("/a")
+	if b != "" {
+		t.Error("invalid directory")
+	}
+	b = backend.Directory("a")
+	if b != "" {
+		t.Error("invalid directory")
+	}
+	b = backend.Directory("b/a")
+	if b != "b" {
+		t.Error("invalid directory")
+	}
+}

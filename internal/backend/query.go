@@ -175,15 +175,20 @@ func NewPath(segments ...string) string {
 
 // Directory gets the offset location of the entry without the 'name'
 func (e QueryEntity) Directory() string {
-	return directory(e.Path)
+	return Directory(e.Path)
 }
 
-func base(s string) string {
+// Base will get the base name of input path
+func Base(s string) string {
 	parts := strings.Split(s, pathSep)
+	if len(parts) == 0 {
+		return s
+	}
 	return parts[len(parts)-1]
 }
 
-func directory(s string) string {
+// Directory will get the directory/group for the given path
+func Directory(s string) string {
 	parts := strings.Split(s, pathSep)
 	return NewPath(parts[0 : len(parts)-1]...)
 }
@@ -194,4 +199,9 @@ func getValue(e gokeepasslib.Entry, key string) string {
 		return ""
 	}
 	return v.Value.Content
+}
+
+// IsDirectory will indicate if a path looks like a group/directory
+func IsDirectory(path string) bool {
+	return strings.HasSuffix(path, pathSep)
 }

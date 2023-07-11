@@ -48,8 +48,20 @@ _execute() {
   echo y |${LB_BINARY} rm test/k/one
   echo
   echo
+  echo test2 |${LB_BINARY} insert move/m/ka/abc
+  echo test |${LB_BINARY} insert move/m/ka/xyz
+  echo test2 |${LB_BINARY} insert move/ma/ka/yyy
+  echo test |${LB_BINARY} insert move/ma/ka/zzz
+  echo test |${LB_BINARY} insert move/ma/ka2/zzz
+  echo test |${LB_BINARY} insert move/ma/ka3/yyy
+  echo test |${LB_BINARY} insert move/ma/ka3/zzz
+  ${LB_BINARY} mv move/m/* move/mac/
+  ${LB_BINARY} mv move/ma/ka/* move/mac/
+  ${LB_BINARY} mv move/ma/ka2/* move/mac/
+  ${LB_BINARY} mv move/ma/ka3/* move/mac/
   ${LB_BINARY} mv key/a/one keyx/d/e
   ${LB_BINARY} ls
+  echo y |${LB_BINARY} rm move/*
   echo y |${LB_BINARY} rm keyx/d/e
   echo
   ${LB_BINARY} ls

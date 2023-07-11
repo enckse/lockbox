@@ -62,9 +62,27 @@ delete entry? (y/N)
 delete entry? (y/N) unable to remove: no entities given
 
 
+unable to get destination object
+unable to overwrite entries when moving multiple items
 keys/k/one2
 keyx/d/e
-delete entry? (y/N) 
+move/ma/ka2/zzz
+move/ma/ka3/yyy
+move/ma/ka3/zzz
+move/mac/abc
+move/mac/xyz
+move/mac/yyy
+move/mac/zzz
+selected entities:
+ move/ma/ka2/zzz
+ move/ma/ka3/yyy
+ move/ma/ka3/zzz
+ move/mac/abc
+ move/mac/xyz
+ move/mac/yyy
+ move/mac/zzz
+
+delete entries? (y/N) delete entry? (y/N) 
 keys/k/one2
 pre insert keys/k2/t2/one
 CALLED

@@ -54,8 +54,8 @@ func splitComponents(path string) ([]string, string, error) {
 	if strings.Contains(path, pathSep+pathSep) {
 		return nil, "", errors.New("unwilling to operate on path with empty segment")
 	}
-	title := base(path)
-	parts := strings.Split(directory(path), pathSep)
+	title := Base(path)
+	parts := strings.Split(Directory(path), pathSep)
 	return parts, title, nil
 }
 
