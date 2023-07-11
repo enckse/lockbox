@@ -62,23 +62,24 @@ delete entry? (y/N)
 delete entry? (y/N) unable to remove: no entities given
 
 
+multiple moves can only be done at a leaf level
 unable to get destination object
 unable to overwrite entries when moving multiple items
 keys/k/one2
 keyx/d/e
+move/m/ka/abc
+move/m/ka/xyz
 move/ma/ka2/zzz
 move/ma/ka3/yyy
 move/ma/ka3/zzz
-move/mac/abc
-move/mac/xyz
 move/mac/yyy
 move/mac/zzz
 selected entities:
+ move/m/ka/abc
+ move/m/ka/xyz
  move/ma/ka2/zzz
  move/ma/ka3/yyy
  move/ma/ka3/zzz
- move/mac/abc
- move/mac/xyz
  move/mac/yyy
  move/mac/zzz
 

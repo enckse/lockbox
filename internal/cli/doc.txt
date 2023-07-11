@@ -16,7 +16,7 @@ listed)
 
 For 'mv' the destination must NOT be an entry but the final destination
 location for all matched entries. Overwriting is not allowed by moving
-via glob.
+via glob and moving via globs can ONLY be done via leaf level globs.
 
 Examples:
 

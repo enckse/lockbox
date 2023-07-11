@@ -39,8 +39,13 @@ func Move(cmd CommandOptions) error {
 		if !backend.IsDirectory(dst) {
 			return fmt.Errorf("%s must be a path, not an entry", dst)
 		}
+		srcDir := backend.Directory(src)
 		dir := backend.Directory(dst)
 		for _, e := range m {
+			srcPath := backend.Directory(e.Path)
+			if srcPath != srcDir {
+				return fmt.Errorf("multiple moves can only be done at a leaf level")
+			}
 			r := moveRequest{cmd: cmd, src: e.Path, dst: backend.NewPath(dir, backend.Base(e.Path)), overwrite: false}
 			if err := r.do(true, true); err != nil {
 				return err

@@ -68,6 +68,10 @@ func TestMove(t *testing.T) {
 	if err := app.Move(m); err.Error() != "test/test2/test3 must be a path, not an entry" {
 		t.Errorf("invalid error: %v", err)
 	}
+	m.args = []string{"test/*", "test/test2/"}
+	if err := app.Move(m); err.Error() != "multiple moves can only be done at a leaf level" {
+		t.Errorf("invalid error: %v", err)
+	}
 	m.args = []string{"test/test3/*", "test/test2/"}
 	if err := app.Move(m); err.Error() != "unable to overwrite entries when moving multiple items" {
 		t.Errorf("invalid error: %v", err)
