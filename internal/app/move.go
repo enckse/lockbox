@@ -47,7 +47,7 @@ func Move(cmd CommandOptions) error {
 				return fmt.Errorf("multiple moves can only be done at a leaf level")
 			}
 			r := moveRequest{cmd: cmd, src: e.Path, dst: backend.NewPath(dir, backend.Base(e.Path)), overwrite: false}
-			if err := r.do(true, true); err != nil {
+			if err := r.do(true); err != nil {
 				return err
 			}
 			requests = append(requests, r)
@@ -58,14 +58,14 @@ func Move(cmd CommandOptions) error {
 		return errors.New("no source entries matched")
 	}
 	for _, r := range requests {
-		if err := r.do(false, rCount == 1); err != nil {
+		if err := r.do(false); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r moveRequest) do(dryRun, useCommandTransaction bool) error {
+func (r moveRequest) do(dryRun bool) error {
 	tx := r.cmd.Transaction()
 	if !dryRun {
 		use, err := backend.NewTransaction()
