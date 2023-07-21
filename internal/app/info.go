@@ -43,7 +43,7 @@ func info(command string, args []string) ([]string, error) {
 			return nil, err
 		}
 		return results, nil
-	case cli.EnvCommand, cli.BashCommand:
+	case cli.EnvCommand, cli.BashCommand, cli.ZshCommand:
 		defaultFlag := cli.BashDefaultsCommand
 		isEnv := command == cli.EnvCommand
 		if isEnv {
@@ -56,7 +56,7 @@ func info(command string, args []string) ([]string, error) {
 		if isEnv {
 			return inputs.ListEnvironmentVariables(!defaults), nil
 		}
-		return cli.BashCompletions(defaults)
+		return cli.GenerateCompletions(command == cli.BashCommand, defaults)
 	}
 	return nil, nil
 }

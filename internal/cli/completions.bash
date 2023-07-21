@@ -12,12 +12,12 @@ _{{ $.Executable }}() {
   else
     if [ "$COMP_CWORD" -eq 2 ]; then
       case ${COMP_WORDS[1]} in
+        "{{ $.HelpCommand }}")
+          opts="{{ $.HelpAdvancedCommand }}"
+          ;;
 {{- if not $.ReadOnly }}
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}")
           opts="$opts $({{ $.DoList }})"
-          ;;
-        "{{ $.HelpCommand }}")
-          opts="{{ $.HelpAdvancedCommand }}"
           ;;
         "{{ $.MoveCommand }}")
           opts=$({{ $.DoList }})

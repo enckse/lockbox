@@ -10,11 +10,11 @@ import (
 
 func TestUsage(t *testing.T) {
 	u, _ := cli.Usage(false)
-	if len(u) != 22 {
+	if len(u) != 24 {
 		t.Errorf("invalid usage, out of date? %d", len(u))
 	}
 	u, _ = cli.Usage(true)
-	if len(u) != 92 {
+	if len(u) != 94 {
 		t.Errorf("invalid verbose usage, out of date? %d", len(u))
 	}
 	for _, usage := range u {
@@ -26,36 +26,41 @@ func TestUsage(t *testing.T) {
 	}
 }
 
-func TestCompletionsBash(t *testing.T) {
+func TestGenerateCompletions(t *testing.T) {
+	testCompletions(t, true)
+	testCompletions(t, false)
+}
+
+func testCompletions(t *testing.T, bash bool) {
 	os.Setenv("LOCKBOX_NOTOTP", "yes")
 	os.Setenv("LOCKBOX_READONLY", "yes")
 	os.Setenv("LOCKBOX_NOCLIP", "yes")
-	defaults, _ := cli.BashCompletions(true)
-	roNoTOTPClip, _ := cli.BashCompletions(false)
+	defaults, _ := cli.GenerateCompletions(bash, true)
+	roNoTOTPClip, _ := cli.GenerateCompletions(bash, false)
 	if roNoTOTPClip[0] == defaults[0] {
 		t.Error("should not match defaults")
 	}
 	os.Setenv("LOCKBOX_NOTOTP", "")
-	roNoClip, _ := cli.BashCompletions(false)
+	roNoClip, _ := cli.GenerateCompletions(bash, false)
 	if roNoClip[0] == defaults[0] || roNoClip[0] == roNoTOTPClip[0] {
 		t.Error("should not equal defaults nor no totp/clip")
 	}
 	os.Setenv("LOCKBOX_READONLY", "")
 	os.Setenv("LOCKBOX_NOCLIP", "yes")
-	noClip, _ := cli.BashCompletions(false)
+	noClip, _ := cli.GenerateCompletions(bash, false)
 	if roNoClip[0] == noClip[0] || noClip[0] == defaults[0] || noClip[0] == roNoTOTPClip[0] {
 		t.Error("readonly/noclip != noclip (nor defaults, nor ro/no totp/clip)")
 	}
 	os.Setenv("LOCKBOX_READONLY", "yes")
 	os.Setenv("LOCKBOX_NOCLIP", "")
-	ro, _ := cli.BashCompletions(false)
+	ro, _ := cli.GenerateCompletions(bash, false)
 	if roNoClip[0] == ro[0] || noClip[0] == ro[0] || ro[0] == defaults[0] || ro[0] == roNoTOTPClip[0] {
 		t.Error("readonly/noclip != ro (nor ro == noclip, nor ro == defaults)")
 	}
 	os.Setenv("LOCKBOX_READONLY", "")
 	os.Setenv("LOCKBOX_NOCLIP", "")
 	os.Setenv("LOCKBOX_NOTOTP", "")
-	isDefaultsToo, _ := cli.BashCompletions(false)
+	isDefaultsToo, _ := cli.GenerateCompletions(bash, false)
 	if isDefaultsToo[0] != defaults[0] {
 		t.Error("defaults should match env defaults")
 	}

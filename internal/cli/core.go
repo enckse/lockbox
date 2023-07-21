@@ -67,11 +67,17 @@ const (
 	TOTPInsertCommand = InsertCommand
 	// JSONCommand handles JSON outputs
 	JSONCommand = "json"
+	// ZshCommand is the command to generate zsh completions
+	ZshCommand = "zsh"
+	// ZshDefaultsCommand will generate environment agnostic completions
+	ZshDefaultsCommand = "defaults"
 )
 
 var (
 	//go:embed "completions.bash"
 	bashCompletions string
+	//go:embed "completions.zsh"
+	zshCompletions string
 
 	//go:embed "doc.txt"
 	docSection string
@@ -126,8 +132,8 @@ func exeName() (string, error) {
 	return filepath.Base(n), nil
 }
 
-// BashCompletions handles creating bash completion outputs
-func BashCompletions(defaults bool) ([]string, error) {
+// GenerateCompletions handles creating shell completion outputs
+func GenerateCompletions(isBash, defaults bool) ([]string, error) {
 	name, err := exeName()
 	if err != nil {
 		return nil, err
@@ -188,7 +194,11 @@ func BashCompletions(defaults bool) ([]string, error) {
 	if c.CanTOTP {
 		c.Options = append(c.Options, TOTPCommand)
 	}
-	t, err := template.New("t").Parse(bashCompletions)
+	using := zshCompletions
+	if isBash {
+		using = bashCompletions
+	}
+	t, err := template.New("t").Parse(using)
 	if err != nil {
 		return nil, err
 	}
@@ -227,6 +237,8 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPMinimalCommand, "entry", "display the first generated code (no details)"))
 	results = append(results, subCommand(TOTPCommand, TOTPShowCommand, "entry", "show the totp entry"))
 	results = append(results, command(VersionCommand, "", "display version information"))
+	results = append(results, command(ZshCommand, "", "generate user environment zsh completion"))
+	results = append(results, subCommand(ZshCommand, ZshDefaultsCommand, "", "generate default zsh completion"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", name)}
 	if verbose {
