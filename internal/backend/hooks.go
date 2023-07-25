@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/system"
 )
 
@@ -21,7 +22,7 @@ func NewHook(path string, a ActionMode) (Hook, error) {
 	if dir == "" {
 		return Hook{enabled: false}, nil
 	}
-	if !system.PathExists(dir) {
+	if !platform.PathExists(dir) {
 		return Hook{}, errors.New("hook directory does NOT exist")
 	}
 	entries, err := os.ReadDir(dir)

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/system"
+	"github.com/enckse/lockbox/internal/platform"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -23,7 +23,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 	if !strings.HasSuffix(file, ".kdbx") {
 		return nil, errors.New("should use a .kdbx extension")
 	}
-	exists := system.PathExists(file)
+	exists := platform.PathExists(file)
 	if must {
 		if !exists {
 			return nil, errors.New("invalid file, does not exist")
@@ -61,7 +61,7 @@ func splitComponents(path string) ([]string, string, error) {
 
 func getCredentials(key, keyFile string) (*gokeepasslib.DBCredentials, error) {
 	if len(keyFile) > 0 {
-		if !system.PathExists(keyFile) {
+		if !platform.PathExists(keyFile) {
 			return nil, errors.New("no keyfile found on disk")
 		}
 		return gokeepasslib.NewPasswordAndKeyCredentials(key, keyFile)

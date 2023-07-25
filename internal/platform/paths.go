@@ -1,5 +1,5 @@
-// Package system is responsible for pathing operations/commands
-package system
+// Package platform is responsible for pathing operations/commands
+package platform
 
 import (
 	"errors"
