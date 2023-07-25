@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 )
 
@@ -42,7 +41,7 @@ func NewDefaultKeyer() (DefaultKeyer, error) {
 
 // JSON will get the JSON backing entries
 func (r DefaultKeyer) JSON() (map[string]backend.JSON, error) {
-	out, err := exec.Command(r.exe, cli.JSONCommand).Output()
+	out, err := exec.Command(r.exe, JSONCommand).Output()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +54,7 @@ func (r DefaultKeyer) JSON() (map[string]backend.JSON, error) {
 
 // Insert will insert the rekeying entry
 func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
-	cmd := exec.Command(r.exe, cli.InsertCommand, entry.Path)
+	cmd := exec.Command(r.exe, InsertCommand, entry.Path)
 	cmd.Env = append(os.Environ(), entry.Env...)
 	in, err := cmd.StdinPipe()
 	if nil != err {

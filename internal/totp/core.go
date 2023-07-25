@@ -12,7 +12,6 @@ import (
 
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/system"
@@ -260,21 +259,21 @@ func NewArguments(args []string, tokenType string) (*Arguments, error) {
 	sub := args[0]
 	needs := true
 	switch sub {
-	case cli.TOTPListCommand:
+	case app.TOTPListCommand:
 		needs = false
 		if len(args) != 1 {
 			return nil, errors.New("list takes no arguments")
 		}
 		opts.Mode = ListMode
-	case cli.TOTPInsertCommand:
+	case app.TOTPInsertCommand:
 		opts.Mode = InsertMode
-	case cli.TOTPShowCommand:
+	case app.TOTPShowCommand:
 		opts.Mode = ShowMode
-	case cli.TOTPClipCommand:
+	case app.TOTPClipCommand:
 		opts.Mode = ClipMode
-	case cli.TOTPMinimalCommand:
+	case app.TOTPMinimalCommand:
 		opts.Mode = MinimalMode
-	case cli.TOTPOnceCommand:
+	case app.TOTPOnceCommand:
 		opts.Mode = OnceMode
 	default:
 		return nil, ErrUnknownTOTPMode

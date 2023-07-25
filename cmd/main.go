@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/app"
-	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/system"
@@ -34,10 +33,10 @@ func handleEarly(command string, args []string) (bool, error) {
 		return true, nil
 	}
 	switch command {
-	case cli.VersionCommand:
+	case app.VersionCommand:
 		fmt.Printf("version: %s\n", version)
 		return true, nil
-	case cli.ClearCommand:
+	case app.ClearCommand:
 		return true, clearClipboard()
 	}
 	return false, nil
@@ -62,31 +61,31 @@ func run() error {
 		return err
 	}
 	switch command {
-	case cli.ReKeyCommand:
+	case app.ReKeyCommand:
 		keyer, err := app.NewDefaultKeyer()
 		if err != nil {
 			return err
 		}
 		return app.ReKey(p, keyer)
-	case cli.ListCommand:
+	case app.ListCommand:
 		return app.List(p)
-	case cli.MoveCommand:
+	case app.MoveCommand:
 		return app.Move(p)
-	case cli.InsertCommand, cli.MultiLineCommand:
+	case app.InsertCommand, app.MultiLineCommand:
 		mode := app.SingleLineInsert
-		if command == cli.MultiLineCommand {
+		if command == app.MultiLineCommand {
 			mode = app.MultiLineInsert
 		}
 		return app.Insert(p, mode)
-	case cli.RemoveCommand:
+	case app.RemoveCommand:
 		return app.Remove(p)
-	case cli.JSONCommand:
+	case app.JSONCommand:
 		return app.JSON(p)
-	case cli.ShowCommand, cli.ClipCommand:
-		return app.ShowClip(p, command == cli.ShowCommand)
-	case cli.ConvCommand:
+	case app.ShowCommand, app.ClipCommand:
+		return app.ShowClip(p, command == app.ShowCommand)
+	case app.ConvCommand:
 		return app.Conv(p)
-	case cli.TOTPCommand:
+	case app.TOTPCommand:
 		args, err := totp.NewArguments(sub, inputs.TOTPToken())
 		if err != nil {
 			return err

@@ -7,7 +7,6 @@ import (
 	"io"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/cli"
 	"github.com/enckse/lockbox/internal/inputs"
 )
 
@@ -26,28 +25,28 @@ func Info(w io.Writer, command string, args []string) (bool, error) {
 
 func info(command string, args []string) ([]string, error) {
 	switch command {
-	case cli.HelpCommand:
+	case HelpCommand:
 		if len(args) > 1 {
 			return nil, errors.New("invalid help command")
 		}
 		isAdvanced := false
 		if len(args) == 1 {
-			if args[0] == cli.HelpAdvancedCommand {
+			if args[0] == HelpAdvancedCommand {
 				isAdvanced = true
 			} else {
 				return nil, errors.New("invalid help option")
 			}
 		}
-		results, err := cli.Usage(isAdvanced)
+		results, err := Usage(isAdvanced)
 		if err != nil {
 			return nil, err
 		}
 		return results, nil
-	case cli.EnvCommand, cli.BashCommand, cli.ZshCommand:
-		defaultFlag := cli.BashDefaultsCommand
-		isEnv := command == cli.EnvCommand
+	case EnvCommand, BashCommand, ZshCommand:
+		defaultFlag := BashDefaultsCommand
+		isEnv := command == EnvCommand
 		if isEnv {
-			defaultFlag = cli.EnvDefaultsCommand
+			defaultFlag = EnvDefaultsCommand
 		}
 		defaults, err := getInfoDefault(args, defaultFlag)
 		if err != nil {
@@ -56,7 +55,7 @@ func info(command string, args []string) ([]string, error) {
 		if isEnv {
 			return inputs.ListEnvironmentVariables(!defaults), nil
 		}
-		return cli.GenerateCompletions(command == cli.BashCommand, defaults)
+		return GenerateCompletions(command == BashCommand, defaults)
 	}
 	return nil, nil
 }
