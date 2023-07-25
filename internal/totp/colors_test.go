@@ -1,16 +1,16 @@
-package colors_test
+package totp_test
 
 import (
 	"os"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/colors"
+	"github.com/enckse/lockbox/internal/totp"
 )
 
 func TestHasColoring(t *testing.T) {
 	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
 	os.Setenv("LOCKBOX_NOCOLOR", "no")
-	term, err := colors.NewTerminal(colors.Red)
+	term, err := totp.NewTerminal(totp.Red)
 	if err != nil {
 		t.Errorf("color was valid: %v", err)
 	}
@@ -20,7 +20,7 @@ func TestHasColoring(t *testing.T) {
 }
 
 func TestBadColor(t *testing.T) {
-	_, err := colors.NewTerminal(colors.Color(5))
+	_, err := totp.NewTerminal(totp.Color(5))
 	if err == nil || err.Error() != "bad color" {
 		t.Errorf("invalid color error: %v", err)
 	}
@@ -29,7 +29,7 @@ func TestBadColor(t *testing.T) {
 func TestNoColoring(t *testing.T) {
 	os.Setenv("LOCKBOX_INTERACTIVE", "no")
 	os.Setenv("LOCKBOX_NOCOLOR", "yes")
-	term, err := colors.NewTerminal(colors.Red)
+	term, err := totp.NewTerminal(totp.Red)
 	if err != nil {
 		t.Errorf("color was valid: %v", err)
 	}
@@ -38,7 +38,7 @@ func TestNoColoring(t *testing.T) {
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
 	os.Setenv("LOCKBOX_NOCOLOR", "yes")
-	term, err = colors.NewTerminal(colors.Red)
+	term, err = totp.NewTerminal(totp.Red)
 	if err != nil {
 		t.Errorf("color was valid: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestNoColoring(t *testing.T) {
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "no")
 	os.Setenv("LOCKBOX_NOCOLOR", "no")
-	term, err = colors.NewTerminal(colors.Red)
+	term, err = totp.NewTerminal(totp.Red)
 	if err != nil {
 		t.Errorf("color was valid: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestNoColoring(t *testing.T) {
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
 	os.Setenv("LOCKBOX_NOCOLOR", "no")
-	term, err = colors.NewTerminal(colors.Red)
+	term, err = totp.NewTerminal(totp.Red)
 	if err != nil {
 		t.Errorf("color was valid: %v", err)
 	}

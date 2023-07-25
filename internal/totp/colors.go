@@ -1,10 +1,20 @@
-// Package colors handles terminal handling for lockbox.
-package colors
+// Package totp manages definitions within lockbox for colorization.
+package totp
 
 import (
 	"errors"
 
 	"github.com/enckse/lockbox/internal/inputs"
+)
+
+const (
+	// Red will get red terminal coloring.
+	Red = iota
+)
+
+type (
+	// Color are terminal colors for dumb terminal coloring.
+	Color int
 )
 
 const (

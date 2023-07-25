@@ -14,6 +14,7 @@ _execute() {
   export LOCKBOX_INTERACTIVE=no
   export LOCKBOX_READONLY=no
   export LOCKBOX_KEYMODE=plaintext
+  export LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH=0
   echo test2 |${LB_BINARY} insert keys/k/one2
   echo test |${LB_BINARY} insert keys/k/one
   echo test |${LB_BINARY} insert key/a/one

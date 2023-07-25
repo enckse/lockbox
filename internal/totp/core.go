@@ -13,7 +13,6 @@ import (
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/cli"
-	"github.com/enckse/lockbox/internal/colors"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/enckse/lockbox/internal/system"
@@ -110,7 +109,7 @@ func (args *Arguments) display(opts Options) error {
 	if !interactive && clip {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
-	coloring, err := colors.NewTerminal(colors.Red)
+	coloring, err := NewTerminal(Red)
 	if err != nil {
 		return err
 	}

@@ -74,6 +74,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestValueModes(t *testing.T) {
+	os.Clearenv()
 	setupInserts(t)
 	q, err := fullSetup(t, true).Get("test/test/abc", backend.BlankValue)
 	if err != nil {
