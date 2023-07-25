@@ -155,5 +155,11 @@ test2
     "modtime": "XXXX-XX-XX",
   }
 }
+{
+  "keys/k/one2": {
+    "modtime": "XXXX-XX-XX",
+    "data": "6d2"
+  }
+}
 clipboard will clear in 5 seconds
 Wrong password? HMAC-SHA256 of header mismatching

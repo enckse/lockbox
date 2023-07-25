@@ -112,7 +112,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 21 {
+	if l != 22 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
@@ -144,4 +144,57 @@ func TestReKey(t *testing.T) {
 	os.Setenv("LOCKBOX_STORE_NEW", "")
 	os.Setenv("LOCKBOX_KEY_NEW", "")
 	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
+}
+
+func TestGetClipboardMax(t *testing.T) {
+	os.Setenv("LOCKBOX_CLIP_MAX", "")
+	defer os.Clearenv()
+	max, err := inputs.GetClipboardMax()
+	if err != nil || max != 45 {
+		t.Error("invalid clipboard read")
+	}
+	os.Setenv("LOCKBOX_CLIP_MAX", "1")
+	max, err = inputs.GetClipboardMax()
+	if err != nil || max != 1 {
+		t.Error("invalid clipboard read")
+	}
+	os.Setenv("LOCKBOX_CLIP_MAX", "-1")
+	if _, err := inputs.GetClipboardMax(); err == nil || err.Error() != "clipboard max time must be > 0" {
+		t.Errorf("invalid err: %v", err)
+	}
+	os.Setenv("LOCKBOX_CLIP_MAX", "alk;ja")
+	if _, err := inputs.GetClipboardMax(); err == nil || err.Error() != "strconv.Atoi: parsing \"alk;ja\": invalid syntax" {
+		t.Errorf("invalid err: %v", err)
+	}
+	os.Setenv("LOCKBOX_CLIP_MAX", "0")
+	if _, err := inputs.GetClipboardMax(); err == nil || err.Error() != "clipboard max time must be > 0" {
+		t.Errorf("invalid err: %v", err)
+	}
+}
+
+func TestGetHashLength(t *testing.T) {
+	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "")
+	defer os.Clearenv()
+	val, err := inputs.GetHashLength()
+	if err != nil || val != 0 {
+		t.Error("invalid hash read")
+	}
+	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "1")
+	val, err = inputs.GetHashLength()
+	if err != nil || val != 1 {
+		t.Error("invalid hash read")
+	}
+	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "0")
+	val, err = inputs.GetHashLength()
+	if err != nil || val != 0 {
+		t.Error("invalid hash read")
+	}
+	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "-1")
+	if _, err := inputs.GetHashLength(); err == nil || err.Error() != "hash length must be >= 0" {
+		t.Errorf("invalid err: %v", err)
+	}
+	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "-aoaofaij;p1")
+	if _, err := inputs.GetHashLength(); err == nil || err.Error() != "strconv.Atoi: parsing \"-aoaofaij;p1\": invalid syntax" {
+		t.Errorf("invalid err: %v", err)
+	}
 }

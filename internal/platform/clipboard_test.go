@@ -41,7 +41,7 @@ func TestMaxTime(t *testing.T) {
 	}
 	os.Setenv("LOCKBOX_CLIP_MAX", "-1")
 	_, err = platform.NewClipboard()
-	if err == nil || err.Error() != "clipboard max time must be greater than 0" {
+	if err == nil || err.Error() != "clipboard max time must be > 0" {
 		t.Errorf("invalid max time error: %v", err)
 	}
 	os.Setenv("LOCKBOX_CLIP_MAX", "$&(+")

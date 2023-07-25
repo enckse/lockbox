@@ -96,6 +96,19 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 {
 		t.Errorf("invalid date/time")
 	}
+	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "10")
+	defer os.Clearenv()
+	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if m.Data != "44276ba24d" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
 	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)

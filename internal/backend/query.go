@@ -126,6 +126,13 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 		}
 		jsonMode = m
 	}
+	var hashLength int
+	if jsonMode == inputs.JSONDataOutputHash {
+		hashLength, err = inputs.GetHashLength()
+		if err != nil {
+			return nil, err
+		}
+	}
 	var results []QueryEntity
 	for _, k := range keys {
 		entity := QueryEntity{Path: k}
@@ -146,6 +153,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 					data = val
 				case inputs.JSONDataOutputHash:
 					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+					if hashLength > 0 && len(data) > hashLength {
+						data = data[0:hashLength]
+					}
 				}
 				t := getValue(e.backing, modTimeKey)
 				s := JSON{ModTime: t, Data: data}

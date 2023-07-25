@@ -68,6 +68,8 @@ const (
 	MaxTOTPTimeDefault = "120"
 	// JSONDataOutputEnv controls how JSON is output
 	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
+	defaultHashLength = 0
+	hashJSONLengthEnv = JSONDataOutputEnv + "_HASH_LENGTH"
 )
 
 var isYesNoArgs = []string{system.Yes, system.No}
@@ -122,19 +124,39 @@ func GetReKey(args []string) ([]string, error) {
 
 // GetClipboardMax will get max time to keep an entry in the clipboard before clearing
 func GetClipboardMax() (int, error) {
-	max := defaultMaxClipboard
-	useMax := os.Getenv(clipMaxEnv)
-	if useMax != "" {
-		i, err := strconv.Atoi(useMax)
+	return getPositiveIntEnv(defaultMaxClipboard, clipMaxEnv, "clipboard max time", false)
+}
+
+// GetHashLength will get the maximum hash length allowed in JSON output hashing mode
+func GetHashLength() (int, error) {
+	return getPositiveIntEnv(defaultHashLength, hashJSONLengthEnv, "hash length", true)
+}
+
+func getPositiveIntEnv(defaultVal int, key, desc string, canBeZero bool) (int, error) {
+	val := defaultVal
+	use := os.Getenv(key)
+	if use != "" {
+		i, err := strconv.Atoi(use)
 		if err != nil {
 			return -1, err
 		}
-		if i < 1 {
-			return -1, errors.New("clipboard max time must be greater than 0")
+		invalid := false
+		check := ""
+		if canBeZero {
+			check = "="
 		}
-		max = i
+		switch i {
+		case 0:
+			invalid = !canBeZero
+		default:
+			invalid = i < 0
+		}
+		if invalid {
+			return -1, fmt.Errorf("%s must be >%s 0", desc, check)
+		}
+		val = i
 	}
-	return max, nil
+	return val, nil
 }
 
 // GetKey will get the encryption key setup for lb
@@ -280,5 +302,6 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
+	results = append(results, e.formatEnvironmentVariable(false, hashJSONLengthEnv, fmt.Sprintf("%d", defaultHashLength), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), []string{"integer"}))
 	return results
 }

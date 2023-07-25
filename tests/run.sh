@@ -115,6 +115,9 @@ _rekey() {
   ${LB_BINARY} json k
   export LOCKBOX_JSON_DATA_OUTPUT=empty
   ${LB_BINARY} json k
+  export LOCKBOX_JSON_DATA_OUTPUT=hash
+  export LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH=3
+  ${LB_BINARY} json k
 }
 
 _clipboard() {
