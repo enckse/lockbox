@@ -1,5 +1,5 @@
-// Package system handles stdin processing
-package system
+// Package platform handles stdin processing
+package platform
 
 import (
 	"bufio"

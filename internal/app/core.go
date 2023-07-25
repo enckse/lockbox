@@ -14,7 +14,7 @@ import (
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/system"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
 const (
@@ -143,7 +143,7 @@ func (a *DefaultCommand) Transaction() *backend.Transaction {
 
 // Confirm will confirm with the user (dying if something abnormal happens)
 func (a *DefaultCommand) Confirm(prompt string) bool {
-	yesNo, err := system.ConfirmYesNoPrompt(prompt)
+	yesNo, err := platform.ConfirmYesNoPrompt(prompt)
 	if err != nil {
 		Die(fmt.Sprintf("failed to read stdin for confirmation: %v", err))
 	}
@@ -163,12 +163,12 @@ func (a *DefaultCommand) SetArgs(args ...string) {
 
 // IsPipe will indicate if we're receiving pipe input
 func (a *DefaultCommand) IsPipe() bool {
-	return system.IsInputFromPipe()
+	return platform.IsInputFromPipe()
 }
 
 // Input will read user input
 func (a *DefaultCommand) Input(pipe, multi bool) ([]byte, error) {
-	return system.GetUserInputPassword(pipe, multi)
+	return platform.GetUserInputPassword(pipe, multi)
 }
 
 func subCommand(parent, name, args, desc string) string {

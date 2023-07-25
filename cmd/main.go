@@ -12,7 +12,6 @@ import (
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/lockbox/internal/system"
 	"github.com/enckse/lockbox/internal/totp"
 )
 
@@ -102,7 +101,7 @@ func run() error {
 
 func clearClipboard() error {
 	idx := 0
-	val, err := system.Stdin(false)
+	val, err := platform.Stdin(false)
 	if err != nil {
 		return err
 	}
