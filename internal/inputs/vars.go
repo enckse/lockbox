@@ -136,21 +136,10 @@ func GetKey() ([]byte, error) {
 	if useKey == "" {
 		return nil, errors.New("no key given")
 	}
-	b, err := getKey(useKeyMode, useKey)
-	if err != nil {
-		return nil, err
-	}
-	if len(b) == 0 {
-		return nil, errors.New("key is empty")
-	}
-	return b, nil
-}
-
-func getKey(keyMode, name string) ([]byte, error) {
 	var data []byte
-	switch keyMode {
+	switch useKeyMode {
 	case commandKeyMode:
-		parts, err := Shlex(name)
+		parts, err := Shlex(useKey)
 		if err != nil {
 			return nil, err
 		}
@@ -161,11 +150,15 @@ func getKey(keyMode, name string) ([]byte, error) {
 		}
 		data = b
 	case plainKeyMode:
-		data = []byte(name)
+		data = []byte(useKey)
 	default:
 		return nil, errors.New("unknown keymode")
 	}
-	return []byte(strings.TrimSpace(string(data))), nil
+	b := []byte(strings.TrimSpace(string(data)))
+	if len(b) == 0 {
+		return nil, errors.New("key is empty")
+	}
+	return b, nil
 }
 
 // TOTPToken gets the name of the totp special case tokens
