@@ -12,11 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/lockbox/internal/system"
 	"mvdan.cc/sh/v3/shell"
 )
 
 const (
+	yes            = "yes"
+	no             = "no"
 	prefixKey      = "LOCKBOX_"
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
@@ -72,7 +73,7 @@ const (
 	hashJSONLengthEnv = JSONDataOutputEnv + "_HASH_LENGTH"
 )
 
-var isYesNoArgs = []string{system.Yes, system.No}
+var isYesNoArgs = []string{yes, no}
 
 type (
 	environmentOutput struct {
@@ -206,20 +207,6 @@ func getKey(keyMode, name string) ([]byte, error) {
 	return []byte(strings.TrimSpace(string(data))), nil
 }
 
-func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
-	read := system.EnvironValue(envKey)
-	switch read {
-	case system.NoValue:
-		return false, nil
-	case system.YesValue:
-		return true, nil
-	case system.EmptyValue:
-		return defaultValue, nil
-	}
-
-	return false, fmt.Errorf("invalid yes/no env value for %s", envKey)
-}
-
 // IsClipOSC52 indicates if OSC52 mode is enabled
 func IsClipOSC52() (bool, error) {
 	return isYesNoEnv(false, clipOSC52Env)
@@ -252,7 +239,7 @@ func IsInteractive() (bool, error) {
 
 // TOTPToken gets the name of the totp special case tokens
 func TOTPToken() string {
-	return system.EnvironOrDefault(fieldTOTPEnv, defaultTOTPField)
+	return EnvironOrDefault(fieldTOTPEnv, defaultTOTPField)
 }
 
 func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, desc string, allowed []string) string {
@@ -284,10 +271,10 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"}))
 	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
 	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
-	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, system.No, "disable clipboard operations", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, system.No, "disable terminal colors", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, system.Yes, "enable interactive mode", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, system.No, "operate in readonly mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noClipEnv, no, "disable clipboard operations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noColorEnv, no, "disable terminal colors", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, interactiveEnv, yes, "enable interactive mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, readOnlyEnv, no, "operate in readonly mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
 	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", []string{"integer"}))
@@ -296,12 +283,35 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
-	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, system.No, "disable TOTP integrations", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, no, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
-	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, system.No, "enable OSC52 clipboard mode", isYesNoArgs))
+	results = append(results, e.formatEnvironmentVariable(false, clipOSC52Env, no, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
 	results = append(results, e.formatEnvironmentVariable(false, hashJSONLengthEnv, fmt.Sprintf("%d", defaultHashLength), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), []string{"integer"}))
 	return results
+}
+
+// EnvironOrDefault will get the environment value OR default if env is not set.
+func EnvironOrDefault(envKey, defaultValue string) string {
+	val := os.Getenv(envKey)
+	if strings.TrimSpace(val) == "" {
+		return defaultValue
+	}
+	return val
+}
+
+func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
+	read := strings.ToLower(strings.TrimSpace(os.Getenv(envKey)))
+	switch read {
+	case no:
+		return false, nil
+	case yes:
+		return true, nil
+	case "":
+		return defaultValue, nil
+	}
+
+	return false, fmt.Errorf("invalid yes/no env value for %s", envKey)
 }

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/inputs"
-	"github.com/enckse/lockbox/internal/system"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
@@ -22,7 +21,7 @@ func (t *Transaction) act(cb action) error {
 		return err
 	}
 	k := string(key)
-	file := system.EnvironOrDefault(inputs.KeyFileEnv, "")
+	file := inputs.EnvironOrDefault(inputs.KeyFileEnv, "")
 	if !t.exists {
 		if err := create(t.file, k, file); err != nil {
 			return err
@@ -164,7 +163,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	mod := system.EnvironOrDefault(inputs.ModTimeEnv, "")
+	mod := inputs.EnvironOrDefault(inputs.ModTimeEnv, "")
 	modTime := time.Now()
 	if mod != "" {
 		p, err := time.Parse(inputs.ModTimeFormat, mod)

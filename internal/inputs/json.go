@@ -4,8 +4,6 @@ package inputs
 import (
 	"fmt"
 	"strings"
-
-	"github.com/enckse/lockbox/internal/system"
 )
 
 const (
@@ -24,7 +22,7 @@ type (
 
 // ParseJSONOutput handles detecting the JSON output mode
 func ParseJSONOutput() (JSONOutputMode, error) {
-	val := strings.ToLower(strings.TrimSpace(system.EnvironOrDefault(JSONDataOutputEnv, string(JSONDataOutputHash))))
+	val := strings.ToLower(strings.TrimSpace(EnvironOrDefault(JSONDataOutputEnv, string(JSONDataOutputHash))))
 	switch JSONOutputMode(val) {
 	case JSONDataOutputHash:
 		return JSONDataOutputHash, nil

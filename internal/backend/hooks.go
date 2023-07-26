@@ -10,7 +10,6 @@ import (
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/lockbox/internal/system"
 )
 
 // NewHook will create a new hook type
@@ -18,7 +17,7 @@ func NewHook(path string, a ActionMode) (Hook, error) {
 	if strings.TrimSpace(path) == "" {
 		return Hook{}, errors.New("empty path is not allowed for hooks")
 	}
-	dir := system.EnvironOrDefault(inputs.HookDirEnv, "")
+	dir := inputs.EnvironOrDefault(inputs.HookDirEnv, "")
 	if dir == "" {
 		return Hook{enabled: false}, nil
 	}

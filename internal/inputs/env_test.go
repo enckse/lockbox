@@ -198,3 +198,21 @@ func TestGetHashLength(t *testing.T) {
 		t.Errorf("invalid err: %v", err)
 	}
 }
+
+func TestEnvDefault(t *testing.T) {
+	os.Clearenv()
+	val := inputs.EnvironOrDefault("TEST", "value")
+	if val != "value" {
+		t.Error("invalid read")
+	}
+	os.Setenv("TEST", "  ")
+	val = inputs.EnvironOrDefault("TEST", "value")
+	if val != "value" {
+		t.Error("invalid read")
+	}
+	os.Setenv("TEST", " a")
+	val = inputs.EnvironOrDefault("TEST", "value")
+	if val != " a" {
+		t.Error("invalid read")
+	}
+}

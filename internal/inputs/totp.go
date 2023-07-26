@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-
-	"github.com/enckse/lockbox/internal/system"
 )
 
 const (
@@ -19,7 +17,7 @@ func FormatTOTP(value string) string {
 	if strings.HasPrefix(value, otpAuth) {
 		return value
 	}
-	override := system.EnvironOrDefault(formatTOTPEnv, "")
+	override := EnvironOrDefault(formatTOTPEnv, "")
 	if override != "" {
 		return fmt.Sprintf(override, value)
 	}
