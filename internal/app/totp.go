@@ -1,5 +1,5 @@
-// Package totp handles TOTP tokens.
-package totp
+// Package app handles TOTP tokens.
+package app
 
 import (
 	"errors"
@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
@@ -28,8 +27,8 @@ var (
 type (
 	// Mode is the operating mode for TOTP operations
 	Mode int
-	// Arguments are the parsed TOTP call arguments
-	Arguments struct {
+	// TOTPArguments are the parsed TOTP call arguments
+	TOTPArguments struct {
 		Mode  Mode
 		Entry string
 		token string
@@ -38,9 +37,9 @@ type (
 		opts otp.ValidateOpts
 		code string
 	}
-	// Options are TOTP call options
-	Options struct {
-		app           app.CommandOptions
+	// TOTPOptions are TOTP call options
+	TOTPOptions struct {
+		app           CommandOptions
 		Clear         func()
 		IsNoTOTP      func() (bool, error)
 		IsInteractive func() (bool, error)
@@ -48,25 +47,25 @@ type (
 )
 
 const (
-	// UnknownMode is an unknown command
-	UnknownMode Mode = iota
-	// InsertMode is inserting a new totp token
-	InsertMode
-	// ShowMode will show the token
-	ShowMode
-	// ClipMode will copy to clipboard
-	ClipMode
-	// MinimalMode will display minimal information to display the token
-	MinimalMode
-	// ListMode lists the available tokens
-	ListMode
-	// OnceMode will only show the token once and exit
-	OnceMode
+	// UnknownTOTPMode is an unknown command
+	UnknownTOTPMode Mode = iota
+	// InsertTOTPMode is inserting a new totp token
+	InsertTOTPMode
+	// ShowTOTPMode will show the token
+	ShowTOTPMode
+	// ClipTOTPMode will copy to clipboard
+	ClipTOTPMode
+	// MinimalTOTPMode will display minimal information to display the token
+	MinimalTOTPMode
+	// ListTOTPMode lists the available tokens
+	ListTOTPMode
+	// OnceTOTPMode will only show the token once and exit
+	OnceTOTPMode
 )
 
-// NewDefaultOptions gets the default option set
-func NewDefaultOptions(app app.CommandOptions) Options {
-	return Options{
+// NewDefaultTOTPOptions gets the default option set
+func NewDefaultTOTPOptions(app CommandOptions) TOTPOptions {
+	return TOTPOptions{
 		app:           app,
 		Clear:         clear,
 		IsInteractive: inputs.IsInteractive,
@@ -94,16 +93,16 @@ func (w totpWrapper) generateCode() (string, error) {
 	return otp.GenerateCodeCustom(w.code, time.Now(), w.opts)
 }
 
-func (args *Arguments) display(opts Options) error {
+func (args *TOTPArguments) display(opts TOTPOptions) error {
 	interactive, err := opts.IsInteractive()
 	if err != nil {
 		return err
 	}
-	if args.Mode == MinimalMode {
+	if args.Mode == MinimalTOTPMode {
 		interactive = false
 	}
-	once := args.Mode == OnceMode
-	clip := args.Mode == ClipMode
+	once := args.Mode == OnceTOTPMode
+	clip := args.Mode == ClipTOTPMode
 	if !interactive && clip {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
@@ -217,8 +216,8 @@ func (args *Arguments) display(opts Options) error {
 }
 
 // Do will perform the TOTP operation
-func (args *Arguments) Do(opts Options) error {
-	if args.Mode == UnknownMode {
+func (args *TOTPArguments) Do(opts TOTPOptions) error {
+	if args.Mode == UnknownTOTPMode {
 		return ErrUnknownTOTPMode
 	}
 	if opts.Clear == nil || opts.IsNoTOTP == nil || opts.IsInteractive == nil {
@@ -231,7 +230,7 @@ func (args *Arguments) Do(opts Options) error {
 	if off {
 		return ErrNoTOTP
 	}
-	if args.Mode == ListMode {
+	if args.Mode == ListTOTPMode {
 		e, err := opts.app.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token)})
 		if err != nil {
 			return err
@@ -245,35 +244,35 @@ func (args *Arguments) Do(opts Options) error {
 	return args.display(opts)
 }
 
-// NewArguments will parse the input arguments
-func NewArguments(args []string, tokenType string) (*Arguments, error) {
+// NewTOTPArguments will parse the input arguments
+func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 	if len(args) == 0 {
 		return nil, errors.New("not enough arguments for totp")
 	}
 	if strings.TrimSpace(tokenType) == "" {
 		return nil, errors.New("invalid token type, not set?")
 	}
-	opts := &Arguments{Mode: UnknownMode}
+	opts := &TOTPArguments{Mode: UnknownTOTPMode}
 	opts.token = tokenType
 	sub := args[0]
 	needs := true
 	switch sub {
-	case app.TOTPListCommand:
+	case TOTPListCommand:
 		needs = false
 		if len(args) != 1 {
 			return nil, errors.New("list takes no arguments")
 		}
-		opts.Mode = ListMode
-	case app.TOTPInsertCommand:
-		opts.Mode = InsertMode
-	case app.TOTPShowCommand:
-		opts.Mode = ShowMode
-	case app.TOTPClipCommand:
-		opts.Mode = ClipMode
-	case app.TOTPMinimalCommand:
-		opts.Mode = MinimalMode
-	case app.TOTPOnceCommand:
-		opts.Mode = OnceMode
+		opts.Mode = ListTOTPMode
+	case TOTPInsertCommand:
+		opts.Mode = InsertTOTPMode
+	case TOTPShowCommand:
+		opts.Mode = ShowTOTPMode
+	case TOTPClipCommand:
+		opts.Mode = ClipTOTPMode
+	case TOTPMinimalCommand:
+		opts.Mode = MinimalTOTPMode
+	case TOTPOnceCommand:
+		opts.Mode = OnceTOTPMode
 	default:
 		return nil, ErrUnknownTOTPMode
 	}
@@ -282,7 +281,7 @@ func NewArguments(args []string, tokenType string) (*Arguments, error) {
 			return nil, errors.New("invalid arguments")
 		}
 		opts.Entry = args[1]
-		if opts.Mode == InsertMode {
+		if opts.Mode == InsertTOTPMode {
 			if !strings.HasSuffix(opts.Entry, tokenType) {
 				opts.Entry = backend.NewPath(opts.Entry, tokenType)
 			}

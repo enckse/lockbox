@@ -12,7 +12,6 @@ import (
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/enckse/lockbox/internal/totp"
 )
 
 var version string
@@ -85,15 +84,15 @@ func run() error {
 	case app.ConvCommand:
 		return app.Conv(p)
 	case app.TOTPCommand:
-		args, err := totp.NewArguments(sub, inputs.TOTPToken())
+		args, err := app.NewTOTPArguments(sub, inputs.TOTPToken())
 		if err != nil {
 			return err
 		}
-		if args.Mode == totp.InsertMode {
+		if args.Mode == app.InsertTOTPMode {
 			p.SetArgs(args.Entry)
 			return app.Insert(p, app.TOTPInsert)
 		}
-		return args.Do(totp.NewDefaultOptions(p))
+		return args.Do(app.NewDefaultTOTPOptions(p))
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}

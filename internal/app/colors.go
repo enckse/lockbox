@@ -1,5 +1,5 @@
-// Package totp manages definitions within lockbox for colorization.
-package totp
+// Package app manages definitions within lockbox for colorization.
+package app
 
 import (
 	"errors"
