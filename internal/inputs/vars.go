@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"sort"
@@ -13,6 +14,8 @@ import (
 )
 
 const (
+	otpAuth        = "otpauth"
+	otpIssuer      = "lbissuer"
 	prefixKey      = "LOCKBOX_"
 	noClipEnv      = prefixKey + "NOCLIP"
 	noColorEnv     = prefixKey + "NOCOLOR"
@@ -232,4 +235,28 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
 	results = append(results, e.formatEnvironmentVariable(false, hashJSONLengthEnv, fmt.Sprintf("%d", defaultHashLength), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), []string{"integer"}))
 	return results
+}
+
+// FormatTOTP will format a totp otpauth url
+func FormatTOTP(value string) string {
+	if strings.HasPrefix(value, otpAuth) {
+		return value
+	}
+	override := EnvironOrDefault(formatTOTPEnv, "")
+	if override != "" {
+		return fmt.Sprintf(override, value)
+	}
+	v := url.Values{}
+	v.Set("secret", value)
+	v.Set("issuer", otpIssuer)
+	v.Set("period", "30")
+	v.Set("algorithm", "SHA1")
+	v.Set("digits", "6")
+	u := url.URL{
+		Scheme:   otpAuth,
+		Host:     "totp",
+		Path:     "/" + otpIssuer + ":" + "lbaccount",
+		RawQuery: v.Encode(),
+	}
+	return u.String()
 }
