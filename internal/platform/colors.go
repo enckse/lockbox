@@ -1,5 +1,5 @@
-// Package app manages definitions within lockbox for colorization.
-package app
+// Package platform manages definitions within lockbox for colorization.
+package platform
 
 import (
 	"errors"

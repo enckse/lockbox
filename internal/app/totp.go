@@ -106,7 +106,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if !interactive && clip {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
-	coloring, err := NewTerminal(Red)
+	coloring, err := platform.NewTerminal(platform.Red)
 	if err != nil {
 		return err
 	}
