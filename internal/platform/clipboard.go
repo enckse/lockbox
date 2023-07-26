@@ -40,7 +40,7 @@ func overrideCommand(v string) ([]string, error) {
 
 // NewClipboard will retrieve the commands to use for clipboard operations.
 func NewClipboard() (Clipboard, error) {
-	noClip, err := inputs.IsNoClipEnabled()
+	noClip, err := inputs.EnvNoClip.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
@@ -58,7 +58,7 @@ func NewClipboard() (Clipboard, error) {
 	if overrideCopy != nil && overridePaste != nil {
 		return newClipboard(overrideCopy, overridePaste)
 	}
-	isOSC, err := inputs.IsClipOSC52()
+	isOSC, err := inputs.EnvClipOSC52.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}

@@ -29,7 +29,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 			return nil, errors.New("invalid file, does not exist")
 		}
 	}
-	ro, err := inputs.IsReadOnly()
+	ro, err := inputs.EnvReadOnly.Get()
 	if err != nil {
 		return nil, err
 	}

@@ -35,13 +35,13 @@ func NewTerminal(color Color) (Terminal, error) {
 	if color != Red {
 		return Terminal{}, errors.New("bad color")
 	}
-	interactive, err := inputs.IsInteractive()
+	interactive, err := inputs.EnvInteractive.Get()
 	if err != nil {
 		return Terminal{}, err
 	}
 	colors := interactive
 	if colors {
-		isColored, err := inputs.IsNoColorEnabled()
+		isColored, err := inputs.EnvNoColor.Get()
 		if err != nil {
 			return Terminal{}, err
 		}

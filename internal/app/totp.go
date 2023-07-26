@@ -68,8 +68,8 @@ func NewDefaultTOTPOptions(app CommandOptions) TOTPOptions {
 	return TOTPOptions{
 		app:           app,
 		Clear:         clear,
-		IsInteractive: inputs.IsInteractive,
-		IsNoTOTP:      inputs.IsNoTOTP,
+		IsInteractive: inputs.EnvInteractive.Get,
+		IsNoTOTP:      inputs.EnvNoTOTP.Get,
 	}
 }
 

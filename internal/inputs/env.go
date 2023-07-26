@@ -27,12 +27,21 @@ var isYesNoArgs = []string{yes, no}
 
 type (
 	// SystemPlatform represents the platform lockbox is running on.
-	SystemPlatform string
-	environmentInt struct {
-		key          string
+	SystemPlatform  string
+	environmentBase struct {
+		key string
+	}
+	// EnvironmentInt are environment settings that are integers
+	EnvironmentInt struct {
+		environmentBase
 		defaultValue int
-		shortDesc    string
 		allowZero    bool
+		shortDesc    string
+	}
+	// EnvironmentBool are environment settings that are booleans
+	EnvironmentBool struct {
+		environmentBase
+		defaultValue bool
 	}
 )
 
@@ -60,21 +69,23 @@ func EnvironOrDefault(envKey, defaultValue string) string {
 	return val
 }
 
-func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
-	read := strings.ToLower(strings.TrimSpace(os.Getenv(envKey)))
+// Get will get the boolean value for the setting
+func (e EnvironmentBool) Get() (bool, error) {
+	read := strings.ToLower(strings.TrimSpace(os.Getenv(e.key)))
 	switch read {
 	case no:
 		return false, nil
 	case yes:
 		return true, nil
 	case "":
-		return defaultValue, nil
+		return e.defaultValue, nil
 	}
 
-	return false, fmt.Errorf("invalid yes/no env value for %s", envKey)
+	return false, fmt.Errorf("invalid yes/no env value for %s", e.key)
 }
 
-func (e environmentInt) Get() (int, error) {
+// Get will get the integer value for the setting
+func (e EnvironmentInt) Get() (int, error) {
 	val := e.defaultValue
 	use := os.Getenv(e.key)
 	if use != "" {

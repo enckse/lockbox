@@ -62,19 +62,19 @@ func GenerateCompletions(isBash, defaults bool) ([]string, error) {
 	isClip := true
 	isTOTP := true
 	if !defaults {
-		ro, err := inputs.IsReadOnly()
+		ro, err := inputs.EnvReadOnly.Get()
 		if err != nil {
 			return nil, err
 		}
 		isReadOnly = ro
-		noClip, err := inputs.IsNoClipEnabled()
+		noClip, err := inputs.EnvNoClip.Get()
 		if err != nil {
 			return nil, err
 		}
 		if noClip {
 			isClip = false
 		}
-		noTOTP, err := inputs.IsNoTOTP()
+		noTOTP, err := inputs.EnvNoTOTP.Get()
 		if err != nil {
 			return nil, err
 		}

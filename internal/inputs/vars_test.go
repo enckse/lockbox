@@ -9,9 +9,9 @@ import (
 	"github.com/enckse/lockbox/internal/inputs"
 )
 
-func checkYesNo(key string, t *testing.T, cb func() (bool, error), onEmpty bool) {
+func checkYesNo(key string, t *testing.T, obj inputs.EnvironmentBool, onEmpty bool) {
 	os.Setenv(key, "yes")
-	c, err := cb()
+	c, err := obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -19,7 +19,7 @@ func checkYesNo(key string, t *testing.T, cb func() (bool, error), onEmpty bool)
 		t.Error("invalid setting")
 	}
 	os.Setenv(key, "")
-	c, err = cb()
+	c, err = obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -27,7 +27,7 @@ func checkYesNo(key string, t *testing.T, cb func() (bool, error), onEmpty bool)
 		t.Error("invalid setting")
 	}
 	os.Setenv(key, "no")
-	c, err = cb()
+	c, err = obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -35,34 +35,34 @@ func checkYesNo(key string, t *testing.T, cb func() (bool, error), onEmpty bool)
 		t.Error("invalid setting")
 	}
 	os.Setenv(key, "afoieae")
-	_, err = cb()
+	_, err = obj.Get()
 	if err == nil || err.Error() != fmt.Sprintf("invalid yes/no env value for %s", key) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestColorSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_NOCOLOR", t, inputs.IsNoColorEnabled, false)
+	checkYesNo("LOCKBOX_NOCOLOR", t, inputs.EnvNoColor, false)
 }
 
 func TestInteractiveSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_INTERACTIVE", t, inputs.IsInteractive, true)
+	checkYesNo("LOCKBOX_INTERACTIVE", t, inputs.EnvInteractive, true)
 }
 
 func TestIsReadOnly(t *testing.T) {
-	checkYesNo("LOCKBOX_READONLY", t, inputs.IsReadOnly, false)
+	checkYesNo("LOCKBOX_READONLY", t, inputs.EnvReadOnly, false)
 }
 
 func TestIsOSC52(t *testing.T) {
-	checkYesNo("LOCKBOX_CLIP_OSC52", t, inputs.IsClipOSC52, false)
+	checkYesNo("LOCKBOX_CLIP_OSC52", t, inputs.EnvClipOSC52, false)
 }
 
 func TestIsNoTOTP(t *testing.T) {
-	checkYesNo("LOCKBOX_NOTOTP", t, inputs.IsNoTOTP, false)
+	checkYesNo("LOCKBOX_NOTOTP", t, inputs.EnvNoTOTP, false)
 }
 
 func TestIsNoClip(t *testing.T) {
-	checkYesNo("LOCKBOX_NOCLIP", t, inputs.IsNoClipEnabled, false)
+	checkYesNo("LOCKBOX_NOCLIP", t, inputs.EnvNoClip, false)
 }
 
 func TestTOTP(t *testing.T) {
