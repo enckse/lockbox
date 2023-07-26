@@ -28,6 +28,12 @@ var isYesNoArgs = []string{yes, no}
 type (
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform string
+	environmentInt struct {
+		key          string
+		defaultValue int
+		shortDesc    string
+		allowZero    bool
+	}
 )
 
 // Shlex will do simple shell command lex-ing
@@ -68,9 +74,9 @@ func isYesNoEnv(defaultValue bool, envKey string) (bool, error) {
 	return false, fmt.Errorf("invalid yes/no env value for %s", envKey)
 }
 
-func getPositiveIntEnv(defaultVal int, key, desc string, canBeZero bool) (int, error) {
-	val := defaultVal
-	use := os.Getenv(key)
+func (e environmentInt) Get() (int, error) {
+	val := e.defaultValue
+	use := os.Getenv(e.key)
 	if use != "" {
 		i, err := strconv.Atoi(use)
 		if err != nil {
@@ -78,17 +84,17 @@ func getPositiveIntEnv(defaultVal int, key, desc string, canBeZero bool) (int, e
 		}
 		invalid := false
 		check := ""
-		if canBeZero {
+		if e.allowZero {
 			check = "="
 		}
 		switch i {
 		case 0:
-			invalid = !canBeZero
+			invalid = !e.allowZero
 		default:
 			invalid = i < 0
 		}
 		if invalid {
-			return -1, fmt.Errorf("%s must be >%s 0", desc, check)
+			return -1, fmt.Errorf("%s must be >%s 0", e.shortDesc, check)
 		}
 		val = i
 	}

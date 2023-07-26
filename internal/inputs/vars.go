@@ -33,8 +33,7 @@ const (
 	// PlatformEnv is the platform lb is running on.
 	PlatformEnv = prefixKey + "PLATFORM"
 	// StoreEnv is the location of the filesystem store that lb is operating on.
-	StoreEnv   = prefixKey + "STORE"
-	clipMaxEnv = clipBaseEnv + "MAX"
+	StoreEnv = prefixKey + "STORE"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
 	// MaxTOTPTime indicate how long TOTP tokens will be shown
@@ -42,13 +41,12 @@ const (
 	// ClipPasteEnv allows overriding the clipboard paste command
 	ClipPasteEnv = clipBaseEnv + "PASTE"
 	// ClipCopyEnv allows overriding the clipboard copy command
-	ClipCopyEnv         = clipBaseEnv + "COPY"
-	clipOSC52Env        = clipBaseEnv + "OSC52"
-	defaultTOTPField    = "totp"
-	commandArgsExample  = "[cmd args...]"
-	defaultMaxClipboard = 45
-	detectedValue       = "(detected)"
-	noTOTPEnv           = prefixKey + "NOTOTP"
+	ClipCopyEnv        = clipBaseEnv + "COPY"
+	clipOSC52Env       = clipBaseEnv + "OSC52"
+	defaultTOTPField   = "totp"
+	commandArgsExample = "[cmd args...]"
+	detectedValue      = "(detected)"
+	noTOTPEnv          = prefixKey + "NOTOTP"
 	// HookDirEnv represents a stored location for user hooks
 	HookDirEnv = prefixKey + "HOOKDIR"
 	// ModTimeEnv is modtime override ability for entries
@@ -59,14 +57,19 @@ const (
 	MaxTOTPTimeDefault = "120"
 	// JSONDataOutputEnv controls how JSON is output
 	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
-	defaultHashLength = 0
-	hashJSONLengthEnv = JSONDataOutputEnv + "_HASH_LENGTH"
 	// JSONDataOutputHash means output data is hashed
 	JSONDataOutputHash JSONOutputMode = "hash"
 	// JSONDataOutputBlank means an empty entry is set
 	JSONDataOutputBlank JSONOutputMode = "empty"
 	// JSONDataOutputRaw means the RAW (unencrypted) value is displayed
 	JSONDataOutputRaw JSONOutputMode = "plaintext"
+)
+
+var (
+	// EnvClipboardMax gets the maximum clipboard time
+	EnvClipboardMax = environmentInt{key: clipBaseEnv + "MAX", shortDesc: "clipboard max time", allowZero: false, defaultValue: 45}
+	// EnvHashLength handles the hashing output length
+	EnvHashLength = environmentInt{key: JSONDataOutputEnv + "_HASH_LENGTH", shortDesc: "hash length", allowZero: true, defaultValue: 0}
 )
 
 type (
@@ -115,16 +118,6 @@ func GetReKey(args []string) ([]string, error) {
 		return nil, fmt.Errorf("missing required arguments for rekey: %s", strings.Join(out, " "))
 	}
 	return out, nil
-}
-
-// GetClipboardMax will get max time to keep an entry in the clipboard before clearing
-func GetClipboardMax() (int, error) {
-	return getPositiveIntEnv(defaultMaxClipboard, clipMaxEnv, "clipboard max time", false)
-}
-
-// GetHashLength will get the maximum hash length allowed in JSON output hashing mode
-func GetHashLength() (int, error) {
-	return getPositiveIntEnv(defaultHashLength, hashJSONLengthEnv, "hash length", true)
 }
 
 // GetKey will get the encryption key setup for lb
@@ -233,7 +226,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
-	results = append(results, e.formatEnvironmentVariable(false, clipMaxEnv, fmt.Sprintf("%d", defaultMaxClipboard), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", []string{"integer"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvClipboardMax.key, fmt.Sprintf("%d", EnvClipboardMax.defaultValue), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", []string{"integer"}))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
 	results = append(results, e.formatEnvironmentVariable(false, noTOTPEnv, no, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
@@ -241,7 +234,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
-	results = append(results, e.formatEnvironmentVariable(false, hashJSONLengthEnv, fmt.Sprintf("%d", defaultHashLength), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), []string{"integer"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvHashLength.key, fmt.Sprintf("%d", EnvHashLength.defaultValue), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), []string{"integer"}))
 	return results
 }
 

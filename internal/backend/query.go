@@ -128,7 +128,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	}
 	var hashLength int
 	if jsonMode == inputs.JSONDataOutputHash {
-		hashLength, err = inputs.GetHashLength()
+		hashLength, err = inputs.EnvHashLength.Get()
 		if err != nil {
 			return nil, err
 		}
