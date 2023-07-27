@@ -150,16 +150,21 @@ _print() {
   printf "[%d] %s\n" "$$" "$1"
 }
 
+_result() {
+  touch "$DATA/$1"
+  _print "$1"
+}
+
 _evaluate() {
   local logfile
   logfile="$DATA/actual.log"
   _print "$1 starting..."
   _logtest > "$logfile"
   if ! diff -u "$logfile" "expected.log"; then
-    _print "failed"
+    _result "failed"
     exit 1
   fi
-  _print "passed"
+  _result "passed"
 }
 
 if [ -z "$1" ]; then
