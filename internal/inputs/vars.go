@@ -15,9 +15,7 @@ import (
 
 const (
 	prefixKey          = "LOCKBOX_"
-	fieldTOTPEnv       = prefixKey + "TOTP"
 	clipBaseEnv        = prefixKey + "CLIP_"
-	formatTOTPEnv      = fieldTOTPEnv + "_FORMAT"
 	plainKeyMode       = "plaintext"
 	commandKeyMode     = "command"
 	defaultTOTPField   = "totp"
@@ -51,9 +49,9 @@ var (
 	// EnvInteractive indicates if operating in interactive mode
 	EnvInteractive = EnvironmentBool{environmentBase: environmentBase{key: prefixKey + "INTERACTIVE"}, defaultValue: true}
 	// EnvMaxTOTP is the max TOTP time to run (default)
-	EnvMaxTOTP = EnvironmentInt{environmentBase: environmentBase{key: fieldTOTPEnv + "_MAX"}, shortDesc: "max totp time", allowZero: false, defaultValue: 120}
+	EnvMaxTOTP = EnvironmentInt{environmentBase: environmentBase{key: EnvTOTPToken.key + "_MAX"}, shortDesc: "max totp time", allowZero: false, defaultValue: 120}
 	// EnvTOTPToken is the leaf token to use to store TOTP tokens
-	EnvTOTPToken = EnvironmentString{environmentBase: environmentBase{key: fieldTOTPEnv}, canDefault: true, defaultValue: "totp"}
+	EnvTOTPToken = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "TOTP"}, canDefault: true, defaultValue: "totp"}
 	// EnvPlatform is the platform that the application is running on
 	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM"}, canDefault: false}
 	// EnvStore is the location of the keepass file/store
@@ -65,7 +63,7 @@ var (
 	// EnvClipPaste allows overriding the clipboard paste command
 	EnvClipPaste = EnvironmentCommand{environmentBase: environmentBase{key: clipBaseEnv + "PASTE"}}
 	// EnvColorBetween handles terminal coloring for TOTP windows (seconds)
-	EnvColorBetween = EnvironmentString{environmentBase: environmentBase{key: fieldTOTPEnv + "_BETWEEN"}, canDefault: true, defaultValue: TOTPDefaultBetween}
+	EnvColorBetween = EnvironmentString{environmentBase: environmentBase{key: EnvTOTPToken.key + "_BETWEEN"}, canDefault: true, defaultValue: TOTPDefaultBetween}
 	// EnvKeyFile is an OPTIONAL keyfile for the database
 	EnvKeyFile = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYFILE"}, canDefault: true, defaultValue: ""}
 	envKeyMode = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE"}, canDefault: true, defaultValue: commandKeyMode}
@@ -74,6 +72,8 @@ var (
 	EnvModTime = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "SET_MODTIME"}, canDefault: true, defaultValue: ""}
 	// EnvJSONDataOutput controls how JSON is output in the 'data' field
 	EnvJSONDataOutput = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "JSON_DATA_OUTPUT"}, canDefault: true, defaultValue: string(JSONDataOutputHash)}
+	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
+	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT"}, fxn: formatterTOTP}
 )
 
 type (
@@ -179,8 +179,8 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoColor.key, no, "disable terminal colors", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvInteractive.key, yes, "enable interactive mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvReadOnly.key, no, "operate in readonly mode", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
-	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvTOTPToken.key, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvFormatTOTP.key, strings.ReplaceAll(strings.ReplaceAll(EnvFormatTOTP.Get("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvMaxTOTP.key, fmt.Sprintf("%d", EnvMaxTOTP.defaultValue), "time, in seconds, in which to show a TOTP token before automatically exiting", intArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvColorBetween.key, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipPaste.key, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
@@ -197,8 +197,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	return results
 }
 
-// FormatTOTP will format a totp otpauth url
-func FormatTOTP(value string) string {
+func formatterTOTP(key, value string) string {
 	const (
 		otpAuth   = "otpauth"
 		otpIssuer = "lbissuer"
@@ -206,7 +205,7 @@ func FormatTOTP(value string) string {
 	if strings.HasPrefix(value, otpAuth) {
 		return value
 	}
-	override := EnvironOrDefault(formatTOTPEnv, "")
+	override := environOrDefault(key, "")
 	if override != "" {
 		return fmt.Sprintf(override, value)
 	}

@@ -56,6 +56,11 @@ type (
 	EnvironmentCommand struct {
 		environmentBase
 	}
+	// EnvironmentFormatter allows for sending a string into a get request
+	EnvironmentFormatter struct {
+		environmentBase
+		fxn func(string, string) string
+	}
 )
 
 func shlex(in string) ([]string, error) {
@@ -72,8 +77,7 @@ func PlatformSet() []string {
 	}
 }
 
-// EnvironOrDefault will get the environment value OR default if env is not set.
-func EnvironOrDefault(envKey, defaultValue string) string {
+func environOrDefault(envKey, defaultValue string) string {
 	val := os.Getenv(envKey)
 	if strings.TrimSpace(val) == "" {
 		return defaultValue
@@ -129,12 +133,12 @@ func (e EnvironmentString) Get() string {
 	if !e.canDefault {
 		return os.Getenv(e.key)
 	}
-	return EnvironOrDefault(e.key, e.defaultValue)
+	return environOrDefault(e.key, e.defaultValue)
 }
 
 // Get will read (and shlex) the value if set
 func (e EnvironmentCommand) Get() ([]string, error) {
-	value := EnvironOrDefault(e.key, "")
+	value := environOrDefault(e.key, "")
 	if strings.TrimSpace(value) == "" {
 		return nil, nil
 	}
@@ -149,4 +153,9 @@ func (e environmentBase) KeyValue(value string) string {
 // Set will do an environment set for the value to key
 func (e environmentBase) Set(value string) {
 	os.Setenv(e.key, value)
+}
+
+// Get will retrieve the value with the formatted input included
+func (e EnvironmentFormatter) Get(value string) string {
+	return e.fxn(e.key, value)
 }
