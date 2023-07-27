@@ -13,6 +13,47 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
+type (
+	// QueryOptions indicates how to find entities
+	QueryOptions struct {
+		Mode     QueryMode
+		Values   ValueMode
+		Criteria string
+	}
+	// JSON is an entry as a JSON string
+	JSON struct {
+		ModTime string `json:"modtime"`
+		Data    string `json:"data,omitempty"`
+	}
+	// QueryMode indicates HOW an entity will be found
+	QueryMode int
+	// ValueMode indicates what to do with the store value of the entity
+	ValueMode int
+)
+
+const (
+	// BlankValue will not decrypt secrets, empty value
+	BlankValue ValueMode = iota
+	// SecretValue will have the raw secret onboard
+	SecretValue
+	// JSONValue will show entries as a JSON payload
+	JSONValue
+)
+
+const (
+	noneMode QueryMode = iota
+	// ListMode indicates ALL entities will be listed
+	ListMode
+	// FindMode indicates a _contains_ search for an entity
+	FindMode
+	// ExactMode means an entity must MATCH the string exactly
+	ExactMode
+	// SuffixMode will look for an entity ending in a specific value
+	SuffixMode
+	// PrefixMode allows for entities starting with a specific value
+	PrefixMode
+)
+
 // MatchPath will try to match 1 or more elements (more elements when globbing)
 func (t *Transaction) MatchPath(path string) ([]QueryEntity, error) {
 	if !strings.HasSuffix(path, isGlob) {

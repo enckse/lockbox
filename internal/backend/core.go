@@ -11,6 +11,38 @@ import (
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
+var errPath = errors.New("input paths must contain at LEAST 2 components")
+
+const (
+	notesKey   = "Notes"
+	titleKey   = "Title"
+	passKey    = "Password"
+	pathSep    = "/"
+	isGlob     = pathSep + "*"
+	modTimeKey = "ModTime"
+)
+
+type (
+	// Transaction handles the overall operation of the transaction
+	Transaction struct {
+		valid    bool
+		file     string
+		exists   bool
+		write    bool
+		readonly bool
+	}
+	// Context handles operating on the underlying database
+	Context struct {
+		db *gokeepasslib.Database
+	}
+	// QueryEntity is the result of a query
+	QueryEntity struct {
+		Path    string
+		Value   string
+		backing gokeepasslib.Entry
+	}
+)
+
 // Load will load a kdbx file for transactions
 func Load(file string) (*Transaction, error) {
 	return loadFile(file, true)

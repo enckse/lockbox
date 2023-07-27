@@ -12,6 +12,26 @@ import (
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
+type (
+	// ActionMode represents activities performed via transactions
+	ActionMode string
+	removal    struct {
+		parts []string
+		title string
+		hook  Hook
+	}
+	action func(t Context) error
+)
+
+const (
+	// MoveAction represents changes via moves, like the Move command
+	MoveAction ActionMode = "mv"
+	// InsertAction represents changes via inserts, like the Insert command
+	InsertAction ActionMode = "insert"
+	// RemoveAction represents changes via deletions, like Remove or globbed remove commands
+	RemoveAction ActionMode = "rm"
+)
+
 func (t *Transaction) act(cb action) error {
 	if !t.valid {
 		return errors.New("invalid transaction")

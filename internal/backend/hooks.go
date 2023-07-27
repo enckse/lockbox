@@ -12,6 +12,25 @@ import (
 	"github.com/enckse/lockbox/internal/platform"
 )
 
+type (
+	// HookMode are hook operations the user can tie to
+	HookMode string
+	// Hook represents a runnable user-defined hook
+	Hook struct {
+		path    string
+		mode    ActionMode
+		enabled bool
+		scripts []string
+	}
+)
+
+const (
+	// HookPre are triggers BEFORE an action is performed on an entity
+	HookPre HookMode = "pre"
+	// HookPost are triggers AFTER an action is performed on an entity
+	HookPost HookMode = "post"
+)
+
 // NewHook will create a new hook type
 func NewHook(path string, a ActionMode) (Hook, error) {
 	if strings.TrimSpace(path) == "" {
