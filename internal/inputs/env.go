@@ -2,8 +2,10 @@
 package inputs
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 
@@ -21,6 +23,7 @@ const (
 	LinuxXPlatform = "linux-x"
 	// WindowsLinuxPlatform for WSL subsystems
 	WindowsLinuxPlatform = "wsl"
+	unknownPlatform      = ""
 )
 
 type (
@@ -194,4 +197,39 @@ func (e EnvironmentFormatter) values() (string, []string) {
 
 func (e EnvironmentCommand) values() (string, []string) {
 	return detectedValue, []string{commandArgsExample}
+}
+
+// NewPlatform gets a new system platform.
+func NewPlatform() (SystemPlatform, error) {
+	env := EnvPlatform.Get()
+	if env != "" {
+		for _, p := range EnvPlatform.allowed {
+			if p == env {
+				return SystemPlatform(p), nil
+			}
+		}
+		return unknownPlatform, errors.New("unknown platform mode")
+	}
+	b, err := exec.Command("uname", "-a").Output()
+	if err != nil {
+		return unknownPlatform, err
+	}
+	raw := strings.ToLower(strings.TrimSpace(string(b)))
+	parts := strings.Split(raw, " ")
+	switch parts[0] {
+	case "darwin":
+		return MacOSPlatform, nil
+	case "linux":
+		if strings.Contains(raw, "microsoft-standard-wsl") {
+			return WindowsLinuxPlatform, nil
+		}
+		if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
+			if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
+				return unknownPlatform, errors.New("unable to detect linux clipboard mode")
+			}
+			return LinuxXPlatform, nil
+		}
+		return LinuxWaylandPlatform, nil
+	}
+	return unknownPlatform, errors.New("unable to detect clipboard mode")
 }

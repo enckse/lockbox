@@ -88,15 +88,9 @@ func confirmInputsMatch() (string, error) {
 	return first, nil
 }
 
-// Stdin will get one (or more) lines of stdin as string.
+// Stdin will get one (or more) lines of stdin as a string.
 func Stdin(one bool) (string, error) {
-	var b []byte
-	var err error
-	if one {
-		b, err = readLine()
-	} else {
-		b, err = readAll()
-	}
+	b, err := read(one)
 	if err != nil {
 		return "", err
 	}
@@ -119,16 +113,7 @@ func ConfirmYesNoPrompt(prompt string) (bool, error) {
 	return resp == "Y" || resp == "y", nil
 }
 
-func readAll() ([]byte, error) {
-	return read(false)
-}
-
-func readLine() ([]byte, error) {
-	return read(true)
-}
-
-// ReadFunc will read stdin and execute the given function
-func ReadFunc(reader stdinReaderFunc) error {
+func readFunc(reader stdinReaderFunc) error {
 	if reader == nil {
 		return errors.New("invalid reader, nil")
 	}
@@ -147,7 +132,7 @@ func ReadFunc(reader stdinReaderFunc) error {
 
 func read(one bool) ([]byte, error) {
 	var b bytes.Buffer
-	err := ReadFunc(func(line string) (bool, error) {
+	err := readFunc(func(line string) (bool, error) {
 		if _, err := b.WriteString(line); err != nil {
 			return false, err
 		}
@@ -163,4 +148,12 @@ func read(one bool) ([]byte, error) {
 		return nil, err
 	}
 	return b.Bytes(), nil
+}
+
+// PathExists indicates whether a path exists (true) or not (false)
+func PathExists(file string) bool {
+	if _, err := os.Stat(file); errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	return true
 }

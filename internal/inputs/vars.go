@@ -53,7 +53,7 @@ var (
 	// EnvTOTPToken is the leaf token to use to store TOTP tokens
 	EnvTOTPToken = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "TOTP", desc: "attribute name to store TOTP tokens within the database"}, allowed: []string{"string"}, canDefault: true, defaultValue: "totp"}
 	// EnvPlatform is the platform that the application is running on
-	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM", desc: "override the detected platform"}, defaultValue: detectedValue, allowed: PlatformSet(), canDefault: false}
+	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM", desc: "override the detected platform"}, defaultValue: detectedValue, allowed: []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}, canDefault: false}
 	// EnvStore is the location of the keepass file/store
 	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", desc: "directory to the database file", requirement: "must be set"}, canDefault: false, allowed: []string{"file"}}
 	// EnvHookDir is the directory of hooks to execute

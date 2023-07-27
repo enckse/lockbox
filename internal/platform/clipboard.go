@@ -57,7 +57,7 @@ func NewClipboard() (Clipboard, error) {
 		c := Clipboard{isOSC52: true}
 		return c, nil
 	}
-	sys, err := NewPlatform()
+	sys, err := inputs.NewPlatform()
 	if err != nil {
 		return Clipboard{}, err
 	}

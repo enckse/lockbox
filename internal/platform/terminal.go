@@ -1,10 +1,15 @@
-// Package platform manages definitions within lockbox for colorization.
+// Package platform handles platform-specific operations.
 package platform
 
 import (
 	"errors"
 
 	"github.com/enckse/lockbox/internal/inputs"
+)
+
+const (
+	termBeginRed = "\033[1;31m"
+	termEndRed   = "\033[0m"
 )
 
 const (
@@ -15,11 +20,6 @@ const (
 type (
 	// Color are terminal colors for dumb terminal coloring.
 	Color int
-)
-
-const (
-	termBeginRed = "\033[1;31m"
-	termEndRed   = "\033[0m"
 )
 
 type (
