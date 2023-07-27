@@ -9,7 +9,6 @@ CLIP_PASTE="$DATA/clip.paste"
 _execute() {
   export LOCKBOX_HOOKDIR=""
   export LOCKBOX_STORE="${DATA}/passwords.kdbx"
-  export LOCKBOX_KEY="testingkey"
   export LOCKBOX_TOTP=totp
   export LOCKBOX_INTERACTIVE=no
   export LOCKBOX_READONLY=no
@@ -165,19 +164,21 @@ echo "============"
 mkdir -p "$DATA"
 find "$DATA" -type f -delete
 
-case "$1" in
-  "password")
-    export LOCKBOX_KEYFILE=""
-    _evaluate
-    ;;
-  "keyfile")
-    KEYFILE="$DATA/test.key"
-    echo "thisisatest" > "$KEYFILE"
-    export LOCKBOX_KEYFILE="$KEYFILE"
-    _evaluate
-    ;;
-  *)
-    echo "unknown test: $1"
-    exit 1
-    ;;
-esac
+export LOCKBOX_KEYFILE=""
+export LOCKBOX_KEY=""
+VALID=0
+if [ "$1" == "password" ] || [ "$1" == "both" ]; then
+  VALID=1
+  export LOCKBOX_KEY="testingkey"
+fi
+if [ "$1" == "keyfile" ] || [ "$1" == "both" ]; then
+  VALID=1
+  KEYFILE="$DATA/test.key"
+  echo "thisisatest" > "$KEYFILE"
+  export LOCKBOX_KEYFILE="$KEYFILE"
+fi
+if [ "$VALID" -eq 0 ]; then
+  echo "invalid test"
+  exit 1
+fi
+_evaluate

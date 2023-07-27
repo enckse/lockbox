@@ -14,12 +14,13 @@ import (
 )
 
 const (
-	prefixKey          = "LOCKBOX_"
-	clipBaseEnv        = prefixKey + "CLIP_"
-	plainKeyMode       = "plaintext"
-	commandKeyMode     = "command"
-	commandArgsExample = "[cmd args...]"
-	detectedValue      = "(detected)"
+	prefixKey            = "LOCKBOX_"
+	clipBaseEnv          = prefixKey + "CLIP_"
+	plainKeyMode         = "plaintext"
+	commandKeyMode       = "command"
+	commandArgsExample   = "[cmd args...]"
+	detectedValue        = "(detected)"
+	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
 	// JSONDataOutputHash means output data is hashed
@@ -54,7 +55,7 @@ var (
 	// EnvPlatform is the platform that the application is running on
 	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM", desc: "override the detected platform"}, defaultValue: detectedValue, allowed: PlatformSet(), canDefault: false}
 	// EnvStore is the location of the keepass file/store
-	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", required: true, desc: "directory to the database file"}, canDefault: false, allowed: []string{"file"}}
+	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", desc: "directory to the database file", requirement: "must be set"}, canDefault: false, allowed: []string{"file"}}
 	// EnvHookDir is the directory of hooks to execute
 	EnvHookDir = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "HOOKDIR", desc: "the path to hooks to execute on actions against the database"}, allowed: []string{"directory"}, canDefault: true, defaultValue: ""}
 	// EnvClipCopy allows overriding the clipboard copy command
@@ -63,16 +64,16 @@ var (
 	EnvClipPaste = EnvironmentCommand{environmentBase: environmentBase{key: clipBaseEnv + "PASTE", desc: "override the detected platform paste command"}}
 	// EnvTOTPColorBetween handles terminal coloring for TOTP windows (seconds)
 	EnvTOTPColorBetween = EnvironmentString{environmentBase: environmentBase{key: EnvTOTPToken.key + "_BETWEEN", desc: "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)"}, canDefault: true, defaultValue: TOTPDefaultBetween, allowed: []string{"start:end,start:end,start:end..."}}
-	// EnvKeyFile is an OPTIONAL keyfile for the database
-	EnvKeyFile = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYFILE", desc: "additional keyfile to access/protect the database"}, allowed: []string{"keyfile"}, canDefault: true, defaultValue: ""}
+	// EnvKeyFile is an keyfile for the database
+	EnvKeyFile = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYFILE", requirement: requiredKeyOrKeyFile, desc: "keyfile to access/protect the database"}, allowed: []string{"keyfile"}, canDefault: true, defaultValue: ""}
 	// EnvModTime is modtime override ability for entries
 	EnvModTime = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "SET_MODTIME", desc: fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat)}, canDefault: true, defaultValue: "", allowed: []string{"modtime"}}
 	// EnvJSONDataOutput controls how JSON is output in the 'data' field
 	EnvJSONDataOutput = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "JSON_DATA_OUTPUT", desc: fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw)}, canDefault: true, defaultValue: string(JSONDataOutputHash), allowed: []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}}
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code"}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
-	envKeyMode    = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", required: true, desc: "how to retrieve the database store password"}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
-	envKey        = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEY", required: true, desc: fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
+	envKeyMode    = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode", desc: "how to retrieve the database store password"}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
+	envKey        = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 )
 
 // GetReKey will get the rekey environment settings
@@ -114,7 +115,7 @@ func GetKey() ([]byte, error) {
 	useKeyMode := envKeyMode.Get()
 	useKey := envKey.Get()
 	if useKey == "" {
-		return nil, errors.New("no key given")
+		return nil, nil
 	}
 	var data []byte
 	switch useKeyMode {
@@ -155,7 +156,12 @@ func ListEnvironmentVariables(showValues bool) []string {
 			value = "(unset)"
 		}
 		description := strings.ReplaceAll(env.desc, "\n", "\n  ")
-		text := fmt.Sprintf("\n%s\n  %s\n\n  required: %t\n  value: %s\n  options: %s\n", env.key, description, env.required, value, strings.Join(allow, "|"))
+		requirement := "optional/default"
+		r := strings.TrimSpace(env.requirement)
+		if r != "" {
+			requirement = r
+		}
+		text := fmt.Sprintf("\n%s\n  %s\n\n  requirement: %s\n  value: %s\n  options: %s\n", env.key, description, requirement, value, strings.Join(allow, "|"))
 		results = append(results, text)
 	}
 	return results

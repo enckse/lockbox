@@ -84,7 +84,7 @@ func TestGetKey(t *testing.T) {
 	}
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_KEY", "")
-	if _, err := inputs.GetKey(); err.Error() != "no key given" {
+	if _, err := inputs.GetKey(); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_KEY", "key")

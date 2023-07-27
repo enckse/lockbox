@@ -32,9 +32,9 @@ type (
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform  string
 	environmentBase struct {
-		key      string
-		required bool
-		desc     string
+		key         string
+		desc        string
+		requirement string
 	}
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {

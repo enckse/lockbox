@@ -1,4 +1,4 @@
-TESTS := password keyfile
+TESTS := password keyfile both
 
 all: $(TESTS)
 
