@@ -38,7 +38,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 
 // NewTransaction will use the underlying environment data store location
 func NewTransaction() (*Transaction, error) {
-	return loadFile(os.Getenv(inputs.StoreEnv), false)
+	return loadFile(inputs.EnvStore.Get(), false)
 }
 
 func splitComponents(path string) ([]string, string, error) {
@@ -98,7 +98,7 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 }
 
 func isTOTP(title string) (bool, error) {
-	t := inputs.TOTPToken()
+	t := inputs.EnvTOTPToken.Get()
 	if t == notesKey || t == passKey || t == titleKey {
 		return false, errors.New("invalid totp field, uses restricted name")
 	}

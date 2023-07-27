@@ -46,6 +46,12 @@ type (
 		environmentBase
 		defaultValue bool
 	}
+	// EnvironmentString are string-based settings
+	EnvironmentString struct {
+		environmentBase
+		canDefault   bool
+		defaultValue string
+	}
 )
 
 // Shlex will do simple shell command lex-ing
@@ -113,4 +119,12 @@ func (e EnvironmentInt) Get() (int, error) {
 		val = i
 	}
 	return val, nil
+}
+
+// Get will read the string from the environment
+func (e EnvironmentString) Get() string {
+	if !e.canDefault {
+		return os.Getenv(e.key)
+	}
+	return EnvironOrDefault(e.key, e.defaultValue)
 }

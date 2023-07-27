@@ -16,7 +16,7 @@ const (
 
 // NewPlatform gets a new system platform.
 func NewPlatform() (inputs.SystemPlatform, error) {
-	env := os.Getenv(inputs.PlatformEnv)
+	env := inputs.EnvPlatform.Get()
 	if env != "" {
 		for _, p := range inputs.PlatformSet() {
 			if p == env {

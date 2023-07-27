@@ -67,11 +67,11 @@ func TestIsNoClip(t *testing.T) {
 
 func TestTOTP(t *testing.T) {
 	os.Setenv("LOCKBOX_TOTP", "abc")
-	if inputs.TOTPToken() != "abc" {
+	if inputs.EnvTOTPToken.Get() != "abc" {
 		t.Error("invalid totp token field")
 	}
 	os.Setenv("LOCKBOX_TOTP", "")
-	if inputs.TOTPToken() != "totp" {
+	if inputs.EnvTOTPToken.Get() != "totp" {
 		t.Error("invalid totp token field")
 	}
 }

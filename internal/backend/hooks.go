@@ -17,7 +17,7 @@ func NewHook(path string, a ActionMode) (Hook, error) {
 	if strings.TrimSpace(path) == "" {
 		return Hook{}, errors.New("empty path is not allowed for hooks")
 	}
-	dir := inputs.EnvironOrDefault(inputs.HookDirEnv, "")
+	dir := inputs.EnvHookDir.Get()
 	if dir == "" {
 		return Hook{enabled: false}, nil
 	}

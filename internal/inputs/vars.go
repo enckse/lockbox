@@ -24,10 +24,6 @@ const (
 	KeyFileEnv     = prefixKey + "KEYFILE"
 	plainKeyMode   = "plaintext"
 	commandKeyMode = "command"
-	// PlatformEnv is the platform lb is running on.
-	PlatformEnv = prefixKey + "PLATFORM"
-	// StoreEnv is the location of the filesystem store that lb is operating on.
-	StoreEnv = prefixKey + "STORE"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
 	// ClipPasteEnv allows overriding the clipboard paste command
@@ -37,8 +33,6 @@ const (
 	defaultTOTPField   = "totp"
 	commandArgsExample = "[cmd args...]"
 	detectedValue      = "(detected)"
-	// HookDirEnv represents a stored location for user hooks
-	HookDirEnv = prefixKey + "HOOKDIR"
 	// ModTimeEnv is modtime override ability for entries
 	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
@@ -72,6 +66,14 @@ var (
 	EnvInteractive = EnvironmentBool{environmentBase: environmentBase{key: prefixKey + "INTERACTIVE"}, defaultValue: true}
 	// EnvMaxTOTP is the max TOTP time to run (default)
 	EnvMaxTOTP = EnvironmentInt{environmentBase: environmentBase{key: fieldTOTPEnv + "_MAX"}, shortDesc: "max totp time", allowZero: false, defaultValue: 120}
+	// EnvTOTPToken is the leaf token to use to store TOTP tokens
+	EnvTOTPToken = EnvironmentString{environmentBase: environmentBase{key: fieldTOTPEnv}, canDefault: true, defaultValue: "totp"}
+	// EnvPlatform is the platform that the application is running on
+	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM"}, canDefault: false}
+	// EnvStore is the location of the keepass file/store
+	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE"}, canDefault: false}
+	// EnvHookDir is the directory of hooks to execute
+	EnvHookDir = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "HOOKDIR"}, canDefault: true, defaultValue: ""}
 )
 
 type (
@@ -93,10 +95,10 @@ func GetReKey(args []string) ([]string, error) {
 		return nil, err
 	}
 	mapped := map[string]string{
-		keyModeEnv: *keyMode,
-		keyEnv:     *key,
-		KeyFileEnv: *keyFile,
-		StoreEnv:   *store,
+		keyModeEnv:   *keyMode,
+		keyEnv:       *key,
+		KeyFileEnv:   *keyFile,
+		EnvStore.key: *store,
 	}
 	hasStore := false
 	hasKey := false
@@ -105,7 +107,7 @@ func GetReKey(args []string) ([]string, error) {
 	for k, val := range mapped {
 		if val != "" {
 			switch k {
-			case StoreEnv:
+			case EnvStore.key:
 				hasStore = true
 			case keyEnv:
 				hasKey = true
@@ -157,11 +159,6 @@ func GetKey() ([]byte, error) {
 	return b, nil
 }
 
-// TOTPToken gets the name of the totp special case tokens
-func TOTPToken() string {
-	return EnvironOrDefault(fieldTOTPEnv, defaultTOTPField)
-}
-
 func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, desc string, allowed []string) string {
 	value := val
 	if o.showValues {
@@ -178,7 +175,7 @@ func (o environmentOutput) formatEnvironmentVariable(required bool, name, val, d
 func ListEnvironmentVariables(showValues bool) []string {
 	e := environmentOutput{showValues: showValues}
 	var results []string
-	results = append(results, e.formatEnvironmentVariable(true, StoreEnv, "", "directory to the database file", []string{"file"}))
+	results = append(results, e.formatEnvironmentVariable(true, EnvStore.key, "", "directory to the database file", []string{"file"}))
 	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
 	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoClip.key, no, "disable clipboard operations", isYesNoArgs))
@@ -192,9 +189,9 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipboardMax.key, fmt.Sprintf("%d", EnvClipboardMax.defaultValue), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", intArgs))
-	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
+	results = append(results, e.formatEnvironmentVariable(false, EnvPlatform.key, detectedValue, "override the detected platform", PlatformSet()))
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoTOTP.key, no, "disable TOTP integrations", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvHookDir.key, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipOSC52.key, no, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
