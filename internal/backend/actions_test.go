@@ -28,7 +28,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 }
 
 func TestKeyFile(t *testing.T) {
-	os.Remove("file.key")
+	os.Clearenv()
 	os.Remove("keyfile_test.kdbx")
 	os.Setenv("LOCKBOX_READONLY", "no")
 	os.Setenv("LOCKBOX_STORE", "keyfile_test.kdbx")
@@ -242,4 +242,40 @@ func check(t *testing.T, checks ...string) error {
 		}
 	}
 	return nil
+}
+
+func TestKeyAndOrKeyFile(t *testing.T) {
+	keyAndOrKeyFile(t, true, true)
+	keyAndOrKeyFile(t, false, true)
+	keyAndOrKeyFile(t, true, false)
+	keyAndOrKeyFile(t, false, false)
+}
+
+func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
+	os.Clearenv()
+	os.Remove("keyorkeyfile_test.kdbx")
+	os.Setenv("LOCKBOX_STORE", "keyorkeyfile_test.kdbx")
+	if key {
+		os.Setenv("LOCKBOX_KEY", "test")
+		os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	}
+	if keyFile {
+		os.Setenv("LOCKBOX_KEYFILE", "keyfileor.key.kdbx")
+		os.WriteFile("keyfileor.key.kdbx", []byte("test"), 0o644)
+	}
+	tr, err := backend.NewTransaction()
+	if err != nil {
+		t.Errorf("failed: %v", err)
+	}
+	invalid := !key && !keyFile
+	err = tr.Insert(backend.NewPath("a", "b"), "t")
+	if invalid {
+		if err == nil || err.Error() != "key and/or keyfile must be set" {
+			t.Errorf("invalid error: %v", err)
+		}
+	} else {
+		if err != nil {
+			t.Errorf("no error allowed: %v", err)
+		}
+	}
 }

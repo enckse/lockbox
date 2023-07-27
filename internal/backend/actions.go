@@ -9,18 +9,12 @@ import (
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/tobischo/gokeepasslib/v3"
-	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 type (
 	// ActionMode represents activities performed via transactions
 	ActionMode string
-	removal    struct {
-		parts []string
-		title string
-		hook  Hook
-	}
-	action func(t Context) error
+	action     func(t Context) error
 )
 
 const (
@@ -96,10 +90,6 @@ func (t *Transaction) change(cb action) error {
 		t.write = true
 		return cb(c)
 	})
-}
-
-func (c Context) insertEntity(offset []string, title string, entity gokeepasslib.Entry) bool {
-	return c.alterEntities(true, offset, title, &entity)
 }
 
 func (c Context) alterEntities(isAdd bool, offset []string, title string, entity *gokeepasslib.Entry) bool {
@@ -237,7 +227,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 		}
 		e.Values = append(e.Values, protectedValue(field, v))
 		e.Values = append(e.Values, value(modTimeKey, modTime.Format(time.RFC3339)))
-		c.insertEntity(dOffset, dTitle, e)
+		c.alterEntities(true, dOffset, dTitle, &e)
 		return nil
 	})
 	if err != nil {
@@ -263,6 +253,11 @@ func (t *Transaction) Remove(entity *QueryEntity) error {
 func (t *Transaction) RemoveAll(entities []QueryEntity) error {
 	if len(entities) == 0 {
 		return errors.New("no entities given")
+	}
+	type removal struct {
+		parts []string
+		title string
+		hook  Hook
 	}
 	removals := []removal{}
 	hasHooks := false
@@ -302,15 +297,4 @@ func (t *Transaction) RemoveAll(entities []QueryEntity) error {
 		}
 	}
 	return nil
-}
-
-func value(key string, value string) gokeepasslib.ValueData {
-	return gokeepasslib.ValueData{Key: key, Value: gokeepasslib.V{Content: value}}
-}
-
-func protectedValue(key string, value string) gokeepasslib.ValueData {
-	return gokeepasslib.ValueData{
-		Key:   key,
-		Value: gokeepasslib.V{Content: value, Protected: wrappers.NewBoolWrapper(true)},
-	}
 }

@@ -3,12 +3,14 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/inputs"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/tobischo/gokeepasslib/v3"
+	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
 var errPath = errors.New("input paths must contain at LEAST 2 components")
@@ -147,4 +149,58 @@ func isTOTP(title string) (bool, error) {
 
 func getPathName(entry gokeepasslib.Entry) string {
 	return entry.GetTitle()
+}
+
+func value(key string, value string) gokeepasslib.ValueData {
+	return gokeepasslib.ValueData{Key: key, Value: gokeepasslib.V{Content: value}}
+}
+
+func protectedValue(key string, value string) gokeepasslib.ValueData {
+	return gokeepasslib.ValueData{
+		Key:   key,
+		Value: gokeepasslib.V{Content: value, Protected: wrappers.NewBoolWrapper(true)},
+	}
+}
+
+// NewSuffix creates a new user 'name' suffix
+func NewSuffix(name string) string {
+	return fmt.Sprintf("%s%s", pathSep, name)
+}
+
+// NewPath creates a new storage location path.
+func NewPath(segments ...string) string {
+	return strings.Join(segments, pathSep)
+}
+
+// Directory gets the offset location of the entry without the 'name'
+func (e QueryEntity) Directory() string {
+	return Directory(e.Path)
+}
+
+// Base will get the base name of input path
+func Base(s string) string {
+	parts := strings.Split(s, pathSep)
+	if len(parts) == 0 {
+		return s
+	}
+	return parts[len(parts)-1]
+}
+
+// Directory will get the directory/group for the given path
+func Directory(s string) string {
+	parts := strings.Split(s, pathSep)
+	return NewPath(parts[0 : len(parts)-1]...)
+}
+
+func getValue(e gokeepasslib.Entry, key string) string {
+	v := e.Get(key)
+	if v == nil {
+		return ""
+	}
+	return v.Value.Content
+}
+
+// IsDirectory will indicate if a path looks like a group/directory
+func IsDirectory(path string) bool {
+	return strings.HasSuffix(path, pathSep)
 }
