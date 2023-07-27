@@ -1,4 +1,6 @@
 TESTS := password keyfile both
 
-all:
-	@./run.sh $(TESTS)
+all: $(TESTS)
+
+$(TESTS):
+	@./run.sh $@
