@@ -64,6 +64,9 @@ func getCredentials(key, keyFile string) (*gokeepasslib.DBCredentials, error) {
 		if !platform.PathExists(keyFile) {
 			return nil, errors.New("no keyfile found on disk")
 		}
+		if len(key) == 0 {
+			return gokeepasslib.NewKeyCredentials(keyFile)
+		}
 		return gokeepasslib.NewPasswordAndKeyCredentials(key, keyFile)
 	}
 	return gokeepasslib.NewPasswordCredentials(key), nil
