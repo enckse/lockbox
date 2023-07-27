@@ -32,6 +32,10 @@ const (
 )
 
 var (
+	// TOTPDefaultColorWindow is the default coloring rules for totp
+	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
+	// TOTPDefaultBetween is the default color window as a string
+	TOTPDefaultBetween = toString(TOTPDefaultColorWindow)
 	// EnvClipMax gets the maximum clipboard time
 	EnvClipMax = EnvironmentInt{environmentBase: environmentBase{key: clipBaseEnv + "MAX", desc: "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer"}, shortDesc: "clipboard max time", allowZero: false, defaultValue: 45}
 	// EnvHashLength handles the hashing output length
