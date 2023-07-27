@@ -195,7 +195,7 @@ func TestParseJSONMode(t *testing.T) {
 }
 
 func TestClipboardMax(t *testing.T) {
-	checkInt(inputs.EnvClipboardMax, "LOCKBOX_CLIP_MAX", "clipboard max time", 45, false, t)
+	checkInt(inputs.EnvClipMax, "LOCKBOX_CLIP_MAX", "clipboard max time", 45, false, t)
 }
 
 func TestHashLength(t *testing.T) {

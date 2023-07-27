@@ -23,16 +23,18 @@ const (
 	WindowsLinuxPlatform = "wsl"
 )
 
-var (
-	isYesNoArgs = []string{yes, no}
-	intArgs     = []string{"integer"}
-)
-
 type (
+	// JSONOutputMode is the output mode definition
+	JSONOutputMode    string
+	environmentOutput struct {
+		showValues bool
+	}
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform  string
 	environmentBase struct {
-		key string
+		key      string
+		required bool
+		desc     string
 	}
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {
@@ -51,6 +53,7 @@ type (
 		environmentBase
 		canDefault   bool
 		defaultValue string
+		allowed      []string
 	}
 	// EnvironmentCommand are settings that are parsed as shell commands
 	EnvironmentCommand struct {
@@ -59,7 +62,12 @@ type (
 	// EnvironmentFormatter allows for sending a string into a get request
 	EnvironmentFormatter struct {
 		environmentBase
-		fxn func(string, string) string
+		allowed string
+		fxn     func(string, string) string
+	}
+	printer interface {
+		values() (string, []string)
+		self() environmentBase
 	}
 )
 
@@ -158,4 +166,32 @@ func (e environmentBase) Set(value string) {
 // Get will retrieve the value with the formatted input included
 func (e EnvironmentFormatter) Get(value string) string {
 	return e.fxn(e.key, value)
+}
+
+func (e EnvironmentString) values() (string, []string) {
+	return e.defaultValue, e.allowed
+}
+
+func (e environmentBase) self() environmentBase {
+	return e
+}
+
+func (e EnvironmentBool) values() (string, []string) {
+	val := no
+	if e.defaultValue {
+		val = yes
+	}
+	return val, []string{yes, no}
+}
+
+func (e EnvironmentInt) values() (string, []string) {
+	return fmt.Sprintf("%d", e.defaultValue), []string{"integer"}
+}
+
+func (e EnvironmentFormatter) values() (string, []string) {
+	return strings.ReplaceAll(strings.ReplaceAll(EnvFormatTOTP.Get("%s"), "%25s", "%s"), "&", " \\\n           &"), []string{e.allowed}
+}
+
+func (e EnvironmentCommand) values() (string, []string) {
+	return detectedValue, []string{commandArgsExample}
 }

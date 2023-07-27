@@ -22,7 +22,7 @@ type (
 )
 
 func newClipboard(copying, pasting []string) (Clipboard, error) {
-	max, err := inputs.EnvClipboardMax.Get()
+	max, err := inputs.EnvClipMax.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
