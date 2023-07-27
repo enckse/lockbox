@@ -85,31 +85,25 @@ func GetReKey(args []string) ([]string, error) {
 	if err := set.Parse(args); err != nil {
 		return nil, err
 	}
-	mapped := map[string]string{
-		envKeyMode.key: *keyMode,
-		envKey.key:     *key,
-		EnvKeyFile.key: *keyFile,
-		EnvStore.key:   *store,
+	type keyer struct {
+		env EnvironmentString
+		has bool
+		in  string
 	}
-	hasStore := false
-	hasKey := false
-	hasKeyFile := false
+	check := func(in string, e EnvironmentString) keyer {
+		val := strings.TrimSpace(in)
+		return keyer{has: val != "", env: e, in: in}
+	}
+	inStore := check(*store, EnvStore)
+	inKey := check(*key, envKey)
+	inKeyFile := check(*keyFile, EnvKeyFile)
+	inKeyMode := check(*keyMode, envKeyMode)
 	var out []string
-	for k, val := range mapped {
-		if val != "" {
-			switch k {
-			case EnvStore.key:
-				hasStore = true
-			case envKey.key:
-				hasKey = true
-			case EnvKeyFile.key:
-				hasKeyFile = true
-			}
-		}
-		out = append(out, fmt.Sprintf("%s=%s", k, val))
+	for _, k := range []keyer{inStore, inKey, inKeyFile, inKeyMode} {
+		out = append(out, k.env.KeyValue(k.in))
 	}
 	sort.Strings(out)
-	if !hasStore || (!hasKey && !hasKeyFile) {
+	if !inStore.has || (!inKey.has && !inKeyFile.has) {
 		return nil, fmt.Errorf("missing required arguments for rekey: %s", strings.Join(out, " "))
 	}
 	return out, nil
