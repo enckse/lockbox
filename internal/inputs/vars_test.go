@@ -146,59 +146,6 @@ func TestReKey(t *testing.T) {
 	os.Setenv("LOCKBOX_KEYFILE_NEW", "")
 }
 
-func TestGetClipboardMax(t *testing.T) {
-	os.Setenv("LOCKBOX_CLIP_MAX", "")
-	defer os.Clearenv()
-	max, err := inputs.EnvClipboardMax.Get()
-	if err != nil || max != 45 {
-		t.Error("invalid clipboard read")
-	}
-	os.Setenv("LOCKBOX_CLIP_MAX", "1")
-	max, err = inputs.EnvClipboardMax.Get()
-	if err != nil || max != 1 {
-		t.Error("invalid clipboard read")
-	}
-	os.Setenv("LOCKBOX_CLIP_MAX", "-1")
-	if _, err := inputs.EnvClipboardMax.Get(); err == nil || err.Error() != "clipboard max time must be > 0" {
-		t.Errorf("invalid err: %v", err)
-	}
-	os.Setenv("LOCKBOX_CLIP_MAX", "alk;ja")
-	if _, err := inputs.EnvClipboardMax.Get(); err == nil || err.Error() != "strconv.Atoi: parsing \"alk;ja\": invalid syntax" {
-		t.Errorf("invalid err: %v", err)
-	}
-	os.Setenv("LOCKBOX_CLIP_MAX", "0")
-	if _, err := inputs.EnvClipboardMax.Get(); err == nil || err.Error() != "clipboard max time must be > 0" {
-		t.Errorf("invalid err: %v", err)
-	}
-}
-
-func TestGetHashLength(t *testing.T) {
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "")
-	defer os.Clearenv()
-	val, err := inputs.EnvHashLength.Get()
-	if err != nil || val != 0 {
-		t.Error("invalid hash read")
-	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "1")
-	val, err = inputs.EnvHashLength.Get()
-	if err != nil || val != 1 {
-		t.Error("invalid hash read")
-	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "0")
-	val, err = inputs.EnvHashLength.Get()
-	if err != nil || val != 0 {
-		t.Error("invalid hash read")
-	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "-1")
-	if _, err := inputs.EnvHashLength.Get(); err == nil || err.Error() != "hash length must be >= 0" {
-		t.Errorf("invalid err: %v", err)
-	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "-aoaofaij;p1")
-	if _, err := inputs.EnvHashLength.Get(); err == nil || err.Error() != "strconv.Atoi: parsing \"-aoaofaij;p1\": invalid syntax" {
-		t.Errorf("invalid err: %v", err)
-	}
-}
-
 func TestFormatTOTP(t *testing.T) {
 	otp := inputs.FormatTOTP("otpauth://abc")
 	if otp != "otpauth://abc" {
@@ -244,5 +191,54 @@ func TestParseJSONMode(t *testing.T) {
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "a")
 	if _, err = inputs.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
 		t.Errorf("invalid error: %v", err)
+	}
+}
+
+func TestClipboardMax(t *testing.T) {
+	checkInt(inputs.EnvClipboardMax, "LOCKBOX_CLIP_MAX", "clipboard max time", 45, false, t)
+}
+
+func TestHashLength(t *testing.T) {
+	checkInt(inputs.EnvHashLength, "LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "hash length", 0, true, t)
+}
+
+func TestMaxTOTP(t *testing.T) {
+	checkInt(inputs.EnvMaxTOTP, "LOCKBOX_TOTP_MAX", "max totp time", 120, false, t)
+}
+
+func checkInt(e inputs.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {
+	os.Setenv(key, "")
+	defer os.Clearenv()
+	val, err := e.Get()
+	if err != nil || val != def {
+		t.Error("invalid read")
+	}
+	os.Setenv(key, "1")
+	val, err = e.Get()
+	if err != nil || val != 1 {
+		t.Error("invalid read")
+	}
+	os.Setenv(key, "-1")
+	zero := ""
+	if allowZero {
+		zero = "="
+	}
+	if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be >%s 0", text, zero) {
+		t.Errorf("invalid err: %v", err)
+	}
+	os.Setenv(key, "alk;ja")
+	if _, err := e.Get(); err == nil || err.Error() != "strconv.Atoi: parsing \"alk;ja\": invalid syntax" {
+		t.Errorf("invalid err: %v", err)
+	}
+	os.Setenv(key, "0")
+	if allowZero {
+		val, err = e.Get()
+		if err != nil || val != 0 {
+			t.Error("invalid read")
+		}
+	} else {
+		if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be > 0", text) {
+			t.Errorf("invalid err: %v", err)
+		}
 	}
 }

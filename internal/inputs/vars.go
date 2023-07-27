@@ -30,8 +30,6 @@ const (
 	StoreEnv = prefixKey + "STORE"
 	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
 	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
-	// MaxTOTPTime indicate how long TOTP tokens will be shown
-	MaxTOTPTime = fieldTOTPEnv + "_MAX"
 	// ClipPasteEnv allows overriding the clipboard paste command
 	ClipPasteEnv = clipBaseEnv + "PASTE"
 	// ClipCopyEnv allows overriding the clipboard copy command
@@ -45,8 +43,6 @@ const (
 	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
-	// MaxTOTPTimeDefault is the max TOTP time to run (default)
-	MaxTOTPTimeDefault = "120"
 	// JSONDataOutputEnv controls how JSON is output
 	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
 	// JSONDataOutputHash means output data is hashed
@@ -74,6 +70,8 @@ var (
 	EnvNoColor = EnvironmentBool{environmentBase: environmentBase{key: prefixKey + "NOCOLOR"}, defaultValue: false}
 	// EnvInteractive indicates if operating in interactive mode
 	EnvInteractive = EnvironmentBool{environmentBase: environmentBase{key: prefixKey + "INTERACTIVE"}, defaultValue: true}
+	// EnvMaxTOTP is the max TOTP time to run (default)
+	EnvMaxTOTP = EnvironmentInt{environmentBase: environmentBase{key: fieldTOTPEnv + "_MAX"}, shortDesc: "max totp time", allowZero: false, defaultValue: 120}
 )
 
 type (
@@ -189,7 +187,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, EnvReadOnly.key, no, "operate in readonly mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
-	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", intArgs))
+	results = append(results, e.formatEnvironmentVariable(false, EnvMaxTOTP.key, fmt.Sprintf("%d", EnvMaxTOTP.defaultValue), "time, in seconds, in which to show a TOTP token before automatically exiting", intArgs))
 	results = append(results, e.formatEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -156,8 +155,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
-	runString := inputs.EnvironOrDefault(inputs.MaxTOTPTime, inputs.MaxTOTPTimeDefault)
-	runFor, err := strconv.Atoi(runString)
+	runFor, err := inputs.EnvMaxTOTP.Get()
 	if err != nil {
 		return err
 	}
