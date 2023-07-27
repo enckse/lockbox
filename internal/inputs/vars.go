@@ -14,14 +14,10 @@ import (
 )
 
 const (
-	prefixKey     = "LOCKBOX_"
-	fieldTOTPEnv  = prefixKey + "TOTP"
-	clipBaseEnv   = prefixKey + "CLIP_"
-	formatTOTPEnv = fieldTOTPEnv + "_FORMAT"
-	keyModeEnv    = prefixKey + "KEYMODE"
-	keyEnv        = prefixKey + "KEY"
-	// KeyFileEnv is an OPTIONAL keyfile for the database
-	KeyFileEnv         = prefixKey + "KEYFILE"
+	prefixKey          = "LOCKBOX_"
+	fieldTOTPEnv       = prefixKey + "TOTP"
+	clipBaseEnv        = prefixKey + "CLIP_"
+	formatTOTPEnv      = fieldTOTPEnv + "_FORMAT"
 	plainKeyMode       = "plaintext"
 	commandKeyMode     = "command"
 	defaultTOTPField   = "totp"
@@ -74,6 +70,10 @@ var (
 	EnvClipPaste = EnvironmentCommand{environmentBase: environmentBase{key: clipBaseEnv + "PASTE"}}
 	// EnvColorBetween handles terminal coloring for TOTP windows (seconds)
 	EnvColorBetween = EnvironmentString{environmentBase: environmentBase{key: fieldTOTPEnv + "_BETWEEN"}, canDefault: true, defaultValue: TOTPDefaultBetween}
+	// EnvKeyFile is an OPTIONAL keyfile for the database
+	EnvKeyFile = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYFILE"}, canDefault: true, defaultValue: ""}
+	envKeyMode = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE"}, canDefault: true, defaultValue: commandKeyMode}
+	envKey     = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEY"}, canDefault: false}
 )
 
 type (
@@ -95,10 +95,10 @@ func GetReKey(args []string) ([]string, error) {
 		return nil, err
 	}
 	mapped := map[string]string{
-		keyModeEnv:   *keyMode,
-		keyEnv:       *key,
-		KeyFileEnv:   *keyFile,
-		EnvStore.key: *store,
+		envKeyMode.key: *keyMode,
+		envKey.key:     *key,
+		EnvKeyFile.key: *keyFile,
+		EnvStore.key:   *store,
 	}
 	hasStore := false
 	hasKey := false
@@ -109,9 +109,9 @@ func GetReKey(args []string) ([]string, error) {
 			switch k {
 			case EnvStore.key:
 				hasStore = true
-			case keyEnv:
+			case envKey.key:
 				hasKey = true
-			case KeyFileEnv:
+			case EnvKeyFile.key:
 				hasKeyFile = true
 			}
 		}
@@ -126,11 +126,8 @@ func GetReKey(args []string) ([]string, error) {
 
 // GetKey will get the encryption key setup for lb
 func GetKey() ([]byte, error) {
-	useKeyMode := os.Getenv(keyModeEnv)
-	if useKeyMode == "" {
-		useKeyMode = commandKeyMode
-	}
-	useKey := os.Getenv(keyEnv)
+	useKeyMode := envKeyMode.Get()
+	useKey := envKey.Get()
 	if useKey == "" {
 		return nil, errors.New("no key given")
 	}
@@ -176,8 +173,8 @@ func ListEnvironmentVariables(showValues bool) []string {
 	e := environmentOutput{showValues: showValues}
 	var results []string
 	results = append(results, e.formatEnvironmentVariable(true, EnvStore.key, "", "directory to the database file", []string{"file"}))
-	results = append(results, e.formatEnvironmentVariable(true, keyModeEnv, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
-	results = append(results, e.formatEnvironmentVariable(true, keyEnv, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
+	results = append(results, e.formatEnvironmentVariable(true, envKeyMode.key, commandKeyMode, "how to retrieve the database store password", []string{commandKeyMode, plainKeyMode}))
+	results = append(results, e.formatEnvironmentVariable(true, envKey.key, "", fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode), []string{commandArgsExample, "password"}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoClip.key, no, "disable clipboard operations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoColor.key, no, "disable terminal colors", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvInteractive.key, yes, "enable interactive mode", isYesNoArgs))
@@ -193,7 +190,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoTOTP.key, no, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvHookDir.key, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipOSC52.key, no, "enable OSC52 clipboard mode", isYesNoArgs))
-	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvKeyFile.key, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvHashLength.key, fmt.Sprintf("%d", EnvHashLength.defaultValue), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), intArgs))

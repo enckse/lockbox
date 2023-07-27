@@ -21,7 +21,7 @@ func (t *Transaction) act(cb action) error {
 		return err
 	}
 	k := string(key)
-	file := inputs.EnvironOrDefault(inputs.KeyFileEnv, "")
+	file := inputs.EnvKeyFile.Get()
 	if !t.exists {
 		if err := create(t.file, k, file); err != nil {
 			return err
