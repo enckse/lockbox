@@ -79,8 +79,7 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 	if !cmd.Confirm("proceed with rekey") {
 		return nil
 	}
-
-	os.Setenv(inputs.JSONDataOutputEnv, string(inputs.JSONDataOutputRaw))
+	inputs.EnvJSONDataOutput.Set(string(inputs.JSONDataOutputRaw))
 	entries, err := r.JSON()
 	if err != nil {
 		return err
@@ -96,7 +95,7 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		}
 		var insertEnv []string
 		insertEnv = append(insertEnv, vars...)
-		insertEnv = append(insertEnv, inputs.EnvModTime.Set(modTime))
+		insertEnv = append(insertEnv, inputs.EnvModTime.KeyValue(modTime))
 		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: []byte(entry.Data)}); err != nil {
 			return err
 		}

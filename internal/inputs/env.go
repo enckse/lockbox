@@ -141,6 +141,12 @@ func (e EnvironmentCommand) Get() ([]string, error) {
 	return shlex(value)
 }
 
-func (e environmentBase) Set(value string) string {
+// KeyValue will get the string representation of the key+value
+func (e environmentBase) KeyValue(value string) string {
 	return fmt.Sprintf("%s=%s", e.key, value)
+}
+
+// Set will do an environment set for the value to key
+func (e environmentBase) Set(value string) {
+	os.Setenv(e.key, value)
 }

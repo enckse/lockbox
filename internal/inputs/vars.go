@@ -25,8 +25,6 @@ const (
 	detectedValue      = "(detected)"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
-	// JSONDataOutputEnv controls how JSON is output
-	JSONDataOutputEnv = prefixKey + "JSON_DATA_OUTPUT"
 	// JSONDataOutputHash means output data is hashed
 	JSONDataOutputHash JSONOutputMode = "hash"
 	// JSONDataOutputBlank means an empty entry is set
@@ -39,7 +37,7 @@ var (
 	// EnvClipboardMax gets the maximum clipboard time
 	EnvClipboardMax = EnvironmentInt{environmentBase: environmentBase{key: clipBaseEnv + "MAX"}, shortDesc: "clipboard max time", allowZero: false, defaultValue: 45}
 	// EnvHashLength handles the hashing output length
-	EnvHashLength = EnvironmentInt{environmentBase: environmentBase{key: JSONDataOutputEnv + "_HASH_LENGTH"}, shortDesc: "hash length", allowZero: true, defaultValue: 0}
+	EnvHashLength = EnvironmentInt{environmentBase: environmentBase{key: EnvJSONDataOutput.key + "_HASH_LENGTH"}, shortDesc: "hash length", allowZero: true, defaultValue: 0}
 	// EnvClipOSC52 indicates if OSC52 clipboard mode is enabled
 	EnvClipOSC52 = EnvironmentBool{environmentBase: environmentBase{key: clipBaseEnv + "OSC52"}, defaultValue: false}
 	// EnvNoTOTP indicates if TOTP is disabled
@@ -74,6 +72,8 @@ var (
 	envKey     = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEY"}, canDefault: false}
 	// EnvModTime is modtime override ability for entries
 	EnvModTime = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "SET_MODTIME"}, canDefault: true, defaultValue: ""}
+	// EnvJSONDataOutput controls how JSON is output in the 'data' field
+	EnvJSONDataOutput = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "JSON_DATA_OUTPUT"}, canDefault: true, defaultValue: string(JSONDataOutputHash)}
 )
 
 type (
@@ -192,7 +192,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipOSC52.key, no, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvKeyFile.key, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvModTime.key, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
-	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvJSONDataOutput.key, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvHashLength.key, fmt.Sprintf("%d", EnvHashLength.defaultValue), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), intArgs))
 	return results
 }
@@ -227,7 +227,7 @@ func FormatTOTP(value string) string {
 
 // ParseJSONOutput handles detecting the JSON output mode
 func ParseJSONOutput() (JSONOutputMode, error) {
-	val := strings.ToLower(strings.TrimSpace(EnvironOrDefault(JSONDataOutputEnv, string(JSONDataOutputHash))))
+	val := strings.ToLower(strings.TrimSpace(EnvJSONDataOutput.Get()))
 	switch JSONOutputMode(val) {
 	case JSONDataOutputHash:
 		return JSONDataOutputHash, nil
