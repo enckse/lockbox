@@ -90,6 +90,9 @@ _invalid() {
   local keyfile
   if [ -n "$LOCKBOX_KEYFILE" ]; then
     export LOCKBOX_KEYFILE=""
+    if [ -z "$LOCKBOX_KEY" ]; then
+      export LOCKBOX_KEY="garbage"
+    fi
   else
     keyfile="$DATA/invalid.key"
     echo "invalid" > "$keyfile"

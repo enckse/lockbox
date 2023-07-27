@@ -72,7 +72,7 @@ var (
 	EnvJSONDataOutput = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "JSON_DATA_OUTPUT", desc: fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw)}, canDefault: true, defaultValue: string(JSONDataOutputHash), allowed: []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}}
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code"}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
-	envKeyMode    = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode", desc: "how to retrieve the database store password"}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
+	envKeyMode    = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: "how to retrieve the database store password"}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
 	envKey        = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 )
 
@@ -112,13 +112,12 @@ func GetReKey(args []string) ([]string, error) {
 
 // GetKey will get the encryption key setup for lb
 func GetKey() ([]byte, error) {
-	useKeyMode := envKeyMode.Get()
 	useKey := envKey.Get()
 	if useKey == "" {
 		return nil, nil
 	}
 	var data []byte
-	switch useKeyMode {
+	switch envKeyMode.Get() {
 	case commandKeyMode:
 		parts, err := shlex(useKey)
 		if err != nil {
