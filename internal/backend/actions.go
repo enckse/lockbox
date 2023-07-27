@@ -163,7 +163,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	mod := inputs.EnvironOrDefault(inputs.ModTimeEnv, "")
+	mod := inputs.EnvModTime.Get()
 	modTime := time.Now()
 	if mod != "" {
 		p, err := time.Parse(inputs.ModTimeFormat, mod)

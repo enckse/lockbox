@@ -96,7 +96,7 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		}
 		var insertEnv []string
 		insertEnv = append(insertEnv, vars...)
-		insertEnv = append(insertEnv, fmt.Sprintf("%s=%s", inputs.ModTimeEnv, modTime))
+		insertEnv = append(insertEnv, inputs.EnvModTime.Set(modTime))
 		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: []byte(entry.Data)}); err != nil {
 			return err
 		}

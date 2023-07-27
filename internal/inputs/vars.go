@@ -23,8 +23,6 @@ const (
 	defaultTOTPField   = "totp"
 	commandArgsExample = "[cmd args...]"
 	detectedValue      = "(detected)"
-	// ModTimeEnv is modtime override ability for entries
-	ModTimeEnv = prefixKey + "SET_MODTIME"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
 	// JSONDataOutputEnv controls how JSON is output
@@ -74,6 +72,8 @@ var (
 	EnvKeyFile = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYFILE"}, canDefault: true, defaultValue: ""}
 	envKeyMode = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE"}, canDefault: true, defaultValue: commandKeyMode}
 	envKey     = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEY"}, canDefault: false}
+	// EnvModTime is modtime override ability for entries
+	EnvModTime = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "SET_MODTIME"}, canDefault: true, defaultValue: ""}
 )
 
 type (
@@ -191,7 +191,7 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, EnvHookDir.key, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipOSC52.key, no, "enable OSC52 clipboard mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvKeyFile.key, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
-	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvModTime.key, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvHashLength.key, fmt.Sprintf("%d", EnvHashLength.defaultValue), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), intArgs))
 	return results

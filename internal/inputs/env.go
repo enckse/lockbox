@@ -140,3 +140,7 @@ func (e EnvironmentCommand) Get() ([]string, error) {
 	}
 	return shlex(value)
 }
+
+func (e environmentBase) Set(value string) string {
+	return fmt.Sprintf("%s=%s", e.key, value)
+}
