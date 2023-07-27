@@ -85,16 +85,6 @@ func shlex(in string) ([]string, error) {
 	return shell.Fields(in, os.Getenv)
 }
 
-// PlatformSet returns the list of possible platforms
-func PlatformSet() []string {
-	return []string{
-		MacOSPlatform,
-		LinuxWaylandPlatform,
-		LinuxXPlatform,
-		WindowsLinuxPlatform,
-	}
-}
-
 func environOrDefault(envKey, defaultValue string) string {
 	val := os.Getenv(envKey)
 	if strings.TrimSpace(val) == "" {

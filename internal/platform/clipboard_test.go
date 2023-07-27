@@ -55,7 +55,7 @@ func TestClipboardInstances(t *testing.T) {
 	os.Setenv("LOCKBOX_NOCLIP", "no")
 	os.Setenv("LOCKBOX_CLIP_MAX", "")
 	os.Setenv("LOCKBOX_CLIP_OSC52", "no")
-	for _, item := range inputs.PlatformSet() {
+	for _, item := range inputs.Platforms {
 		os.Setenv("LOCKBOX_PLATFORM", item)
 		_, err := platform.NewClipboard()
 		if err != nil {

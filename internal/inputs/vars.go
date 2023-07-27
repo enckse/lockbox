@@ -32,6 +32,8 @@ const (
 )
 
 var (
+	// Platforms represent the platforms that lockbox understands to run on
+	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string
@@ -57,7 +59,7 @@ var (
 	// EnvTOTPToken is the leaf token to use to store TOTP tokens
 	EnvTOTPToken = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "TOTP", desc: "attribute name to store TOTP tokens within the database"}, allowed: []string{"string"}, canDefault: true, defaultValue: "totp"}
 	// EnvPlatform is the platform that the application is running on
-	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM", desc: "override the detected platform"}, defaultValue: detectedValue, allowed: []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}, canDefault: false}
+	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM", desc: "override the detected platform"}, defaultValue: detectedValue, allowed: Platforms, canDefault: false}
 	// EnvStore is the location of the keepass file/store
 	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", desc: "directory to the database file", requirement: "must be set"}, canDefault: false, allowed: []string{"file"}}
 	// EnvHookDir is the directory of hooks to execute
