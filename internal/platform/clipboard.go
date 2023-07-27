@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	osc "github.com/aymanbagabas/go-osc52"
 	"github.com/enckse/lockbox/internal/inputs"
@@ -30,14 +29,6 @@ func newClipboard(copying, pasting []string) (Clipboard, error) {
 	return Clipboard{copying: copying, pasting: pasting, MaxTime: max, isOSC52: false}, nil
 }
 
-func overrideCommand(v string) ([]string, error) {
-	value := inputs.EnvironOrDefault(v, "")
-	if strings.TrimSpace(value) == "" {
-		return nil, nil
-	}
-	return inputs.Shlex(value)
-}
-
 // NewClipboard will retrieve the commands to use for clipboard operations.
 func NewClipboard() (Clipboard, error) {
 	noClip, err := inputs.EnvNoClip.Get()
@@ -47,11 +38,11 @@ func NewClipboard() (Clipboard, error) {
 	if noClip {
 		return Clipboard{}, errors.New("clipboard is off")
 	}
-	overridePaste, err := overrideCommand(inputs.ClipPasteEnv)
+	overridePaste, err := inputs.EnvClipPaste.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
-	overrideCopy, err := overrideCommand(inputs.ClipCopyEnv)
+	overrideCopy, err := inputs.EnvClipCopy.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}

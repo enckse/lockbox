@@ -52,10 +52,13 @@ type (
 		canDefault   bool
 		defaultValue string
 	}
+	// EnvironmentCommand are settings that are parsed as shell commands
+	EnvironmentCommand struct {
+		environmentBase
+	}
 )
 
-// Shlex will do simple shell command lex-ing
-func Shlex(in string) ([]string, error) {
+func shlex(in string) ([]string, error) {
 	return shell.Fields(in, os.Getenv)
 }
 
@@ -127,4 +130,13 @@ func (e EnvironmentString) Get() string {
 		return os.Getenv(e.key)
 	}
 	return EnvironOrDefault(e.key, e.defaultValue)
+}
+
+// Get will read (and shlex) the value if set
+func (e EnvironmentCommand) Get() ([]string, error) {
+	value := EnvironOrDefault(e.key, "")
+	if strings.TrimSpace(value) == "" {
+		return nil, nil
+	}
+	return shlex(value)
 }

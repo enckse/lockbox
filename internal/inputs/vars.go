@@ -21,15 +21,9 @@ const (
 	keyModeEnv    = prefixKey + "KEYMODE"
 	keyEnv        = prefixKey + "KEY"
 	// KeyFileEnv is an OPTIONAL keyfile for the database
-	KeyFileEnv     = prefixKey + "KEYFILE"
-	plainKeyMode   = "plaintext"
-	commandKeyMode = "command"
-	// ColorBetweenEnv is a comma-delimited list of times to color totp outputs (e.g. 0:5,30:35 which is the default).
-	ColorBetweenEnv = fieldTOTPEnv + "_BETWEEN"
-	// ClipPasteEnv allows overriding the clipboard paste command
-	ClipPasteEnv = clipBaseEnv + "PASTE"
-	// ClipCopyEnv allows overriding the clipboard copy command
-	ClipCopyEnv        = clipBaseEnv + "COPY"
+	KeyFileEnv         = prefixKey + "KEYFILE"
+	plainKeyMode       = "plaintext"
+	commandKeyMode     = "command"
 	defaultTOTPField   = "totp"
 	commandArgsExample = "[cmd args...]"
 	detectedValue      = "(detected)"
@@ -74,6 +68,12 @@ var (
 	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE"}, canDefault: false}
 	// EnvHookDir is the directory of hooks to execute
 	EnvHookDir = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "HOOKDIR"}, canDefault: true, defaultValue: ""}
+	// EnvClipCopy allows overriding the clipboard copy command
+	EnvClipCopy = EnvironmentCommand{environmentBase: environmentBase{key: clipBaseEnv + "COPY"}}
+	// EnvClipPaste allows overriding the clipboard paste command
+	EnvClipPaste = EnvironmentCommand{environmentBase: environmentBase{key: clipBaseEnv + "PASTE"}}
+	// EnvColorBetween handles terminal coloring for TOTP windows (seconds)
+	EnvColorBetween = EnvironmentString{environmentBase: environmentBase{key: fieldTOTPEnv + "_BETWEEN"}, canDefault: true, defaultValue: TOTPDefaultBetween}
 )
 
 type (
@@ -137,7 +137,7 @@ func GetKey() ([]byte, error) {
 	var data []byte
 	switch useKeyMode {
 	case commandKeyMode:
-		parts, err := Shlex(useKey)
+		parts, err := shlex(useKey)
 		if err != nil {
 			return nil, err
 		}
@@ -185,9 +185,9 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvMaxTOTP.key, fmt.Sprintf("%d", EnvMaxTOTP.defaultValue), "time, in seconds, in which to show a TOTP token before automatically exiting", intArgs))
-	results = append(results, e.formatEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
-	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
-	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvColorBetween.key, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvClipPaste.key, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvClipCopy.key, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, EnvClipboardMax.key, fmt.Sprintf("%d", EnvClipboardMax.defaultValue), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", intArgs))
 	results = append(results, e.formatEnvironmentVariable(false, EnvPlatform.key, detectedValue, "override the detected platform", PlatformSet()))
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoTOTP.key, no, "disable TOTP integrations", isYesNoArgs))

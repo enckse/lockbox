@@ -81,7 +81,7 @@ func clear() {
 }
 
 func colorWhenRules() ([]inputs.ColorWindow, error) {
-	envTime := inputs.EnvironOrDefault(inputs.ColorBetweenEnv, inputs.TOTPDefaultBetween)
+	envTime := inputs.EnvColorBetween.Get()
 	if envTime == inputs.TOTPDefaultBetween {
 		return inputs.TOTPDefaultColorWindow, nil
 	}
