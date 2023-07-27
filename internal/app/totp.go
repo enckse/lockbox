@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
@@ -67,8 +67,8 @@ func NewDefaultTOTPOptions(app CommandOptions) TOTPOptions {
 	return TOTPOptions{
 		app:           app,
 		Clear:         clear,
-		IsInteractive: inputs.EnvInteractive.Get,
-		IsNoTOTP:      inputs.EnvNoTOTP.Get,
+		IsInteractive: config.EnvInteractive.Get,
+		IsNoTOTP:      config.EnvNoTOTP.Get,
 	}
 }
 
@@ -80,12 +80,12 @@ func clear() {
 	}
 }
 
-func colorWhenRules() ([]inputs.ColorWindow, error) {
-	envTime := inputs.EnvTOTPColorBetween.Get()
-	if envTime == inputs.TOTPDefaultBetween {
-		return inputs.TOTPDefaultColorWindow, nil
+func colorWhenRules() ([]config.ColorWindow, error) {
+	envTime := config.EnvTOTPColorBetween.Get()
+	if envTime == config.TOTPDefaultBetween {
+		return config.TOTPDefaultColorWindow, nil
 	}
-	return inputs.ParseColorWindow(envTime)
+	return config.ParseColorWindow(envTime)
 }
 
 func (w totpWrapper) generateCode() (string, error) {
@@ -117,7 +117,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		return errors.New("object does not exist")
 	}
 	totpToken := string(entity.Value)
-	k, err := coreotp.NewKeyFromURL(inputs.EnvFormatTOTP.Get(totpToken))
+	k, err := coreotp.NewKeyFromURL(config.EnvFormatTOTP.Get(totpToken))
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
-	runFor, err := inputs.EnvMaxTOTP.Get()
+	runFor, err := config.EnvMaxTOTP.Get()
 	if err != nil {
 		return err
 	}

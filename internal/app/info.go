@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 // Info will report help/bash/env details
@@ -53,7 +53,7 @@ func info(command string, args []string) ([]string, error) {
 			return nil, err
 		}
 		if isEnv {
-			return inputs.ListEnvironmentVariables(!defaults), nil
+			return config.ListEnvironmentVariables(!defaults), nil
 		}
 		return GenerateCompletions(command == BashCommand, defaults)
 	}

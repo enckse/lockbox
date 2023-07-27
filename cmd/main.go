@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/app"
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
 )
 
@@ -84,7 +84,7 @@ func run() error {
 	case app.ConvCommand:
 		return app.Conv(p)
 	case app.TOTPCommand:
-		args, err := app.NewTOTPArguments(sub, inputs.EnvTOTPToken.Get())
+		args, err := app.NewTOTPArguments(sub, config.EnvTOTPToken.Get())
 		if err != nil {
 			return err
 		}

@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
 )
 
@@ -211,7 +211,7 @@ func Usage(verbose bool) ([]string, error) {
 		}
 		results = append(results, strings.Split(strings.TrimSpace(doc), "\n")...)
 		results = append(results, "")
-		results = append(results, inputs.ListEnvironmentVariables(false)...)
+		results = append(results, config.ListEnvironmentVariables(false)...)
 	}
 	return append(usage, results...), nil
 }

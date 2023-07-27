@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
@@ -63,7 +63,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 			return nil, errors.New("invalid file, does not exist")
 		}
 	}
-	ro, err := inputs.EnvReadOnly.Get()
+	ro, err := config.EnvReadOnly.Get()
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 
 // NewTransaction will use the underlying environment data store location
 func NewTransaction() (*Transaction, error) {
-	return loadFile(inputs.EnvStore.Get(), false)
+	return loadFile(config.EnvStore.Get(), false)
 }
 
 func splitComponents(path string) ([]string, string, error) {
@@ -140,7 +140,7 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 }
 
 func isTOTP(title string) (bool, error) {
-	t := inputs.EnvTOTPToken.Get()
+	t := config.EnvTOTPToken.Get()
 	if t == notesKey || t == passKey || t == titleKey {
 		return false, errors.New("invalid totp field, uses restricted name")
 	}

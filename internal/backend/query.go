@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -159,17 +159,17 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if isSort {
 		sort.Strings(keys)
 	}
-	jsonMode := inputs.JSONDataOutputBlank
+	jsonMode := config.JSONDataOutputBlank
 	if args.Values == JSONValue {
-		m, err := inputs.ParseJSONOutput()
+		m, err := config.ParseJSONOutput()
 		if err != nil {
 			return nil, err
 		}
 		jsonMode = m
 	}
 	var hashLength int
-	if jsonMode == inputs.JSONDataOutputHash {
-		hashLength, err = inputs.EnvHashLength.Get()
+	if jsonMode == config.JSONDataOutputHash {
+		hashLength, err = config.EnvHashLength.Get()
 		if err != nil {
 			return nil, err
 		}
@@ -190,9 +190,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			case JSONValue:
 				data := ""
 				switch jsonMode {
-				case inputs.JSONDataOutputRaw:
+				case config.JSONDataOutputRaw:
 					data = val
-				case inputs.JSONDataOutputHash:
+				case config.JSONDataOutputHash:
 					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 					if hashLength > 0 && len(data) > hashLength {
 						data = data[0:hashLength]

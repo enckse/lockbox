@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	osc "github.com/aymanbagabas/go-osc52"
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 type (
@@ -22,7 +22,7 @@ type (
 )
 
 func newClipboard(copying, pasting []string) (Clipboard, error) {
-	max, err := inputs.EnvClipMax.Get()
+	max, err := config.EnvClipMax.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
@@ -31,25 +31,25 @@ func newClipboard(copying, pasting []string) (Clipboard, error) {
 
 // NewClipboard will retrieve the commands to use for clipboard operations.
 func NewClipboard() (Clipboard, error) {
-	noClip, err := inputs.EnvNoClip.Get()
+	noClip, err := config.EnvNoClip.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
 	if noClip {
 		return Clipboard{}, errors.New("clipboard is off")
 	}
-	overridePaste, err := inputs.EnvClipPaste.Get()
+	overridePaste, err := config.EnvClipPaste.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
-	overrideCopy, err := inputs.EnvClipCopy.Get()
+	overrideCopy, err := config.EnvClipCopy.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
 	if overrideCopy != nil && overridePaste != nil {
 		return newClipboard(overrideCopy, overridePaste)
 	}
-	isOSC, err := inputs.EnvClipOSC52.Get()
+	isOSC, err := config.EnvClipOSC52.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
@@ -57,7 +57,7 @@ func NewClipboard() (Clipboard, error) {
 		c := Clipboard{isOSC52: true}
 		return c, nil
 	}
-	sys, err := inputs.NewPlatform()
+	sys, err := config.NewPlatform()
 	if err != nil {
 		return Clipboard{}, err
 	}
@@ -65,16 +65,16 @@ func NewClipboard() (Clipboard, error) {
 	var copying []string
 	var pasting []string
 	switch sys {
-	case inputs.MacOSPlatform:
+	case config.MacOSPlatform:
 		copying = []string{"pbcopy"}
 		pasting = []string{"pbpaste"}
-	case inputs.LinuxXPlatform:
+	case config.LinuxXPlatform:
 		copying = []string{"xclip"}
 		pasting = []string{"xclip", "-o"}
-	case inputs.LinuxWaylandPlatform:
+	case config.LinuxWaylandPlatform:
 		copying = []string{"wl-copy"}
 		pasting = []string{"wl-paste"}
-	case inputs.WindowsLinuxPlatform:
+	case config.WindowsLinuxPlatform:
 		copying = []string{"clip.exe"}
 		pasting = []string{"powershell.exe", "-command", "Get-Clipboard"}
 	default:

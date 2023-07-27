@@ -4,7 +4,7 @@ package platform
 import (
 	"errors"
 
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 const (
@@ -35,13 +35,13 @@ func NewTerminal(color Color) (Terminal, error) {
 	if color != Red {
 		return Terminal{}, errors.New("bad color")
 	}
-	interactive, err := inputs.EnvInteractive.Get()
+	interactive, err := config.EnvInteractive.Get()
 	if err != nil {
 		return Terminal{}, err
 	}
 	colors := interactive
 	if colors {
-		isColored, err := inputs.EnvNoColor.Get()
+		isColored, err := config.EnvNoColor.Get()
 		if err != nil {
 			return Terminal{}, err
 		}

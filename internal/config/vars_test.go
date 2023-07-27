@@ -1,4 +1,4 @@
-package inputs_test
+package config_test
 
 import (
 	"fmt"
@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 )
 
-func checkYesNo(key string, t *testing.T, obj inputs.EnvironmentBool, onEmpty bool) {
+func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {
 	os.Setenv(key, "yes")
 	c, err := obj.Get()
 	if err != nil {
@@ -42,36 +42,36 @@ func checkYesNo(key string, t *testing.T, obj inputs.EnvironmentBool, onEmpty bo
 }
 
 func TestColorSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_NOCOLOR", t, inputs.EnvNoColor, false)
+	checkYesNo("LOCKBOX_NOCOLOR", t, config.EnvNoColor, false)
 }
 
 func TestInteractiveSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_INTERACTIVE", t, inputs.EnvInteractive, true)
+	checkYesNo("LOCKBOX_INTERACTIVE", t, config.EnvInteractive, true)
 }
 
 func TestIsReadOnly(t *testing.T) {
-	checkYesNo("LOCKBOX_READONLY", t, inputs.EnvReadOnly, false)
+	checkYesNo("LOCKBOX_READONLY", t, config.EnvReadOnly, false)
 }
 
 func TestIsOSC52(t *testing.T) {
-	checkYesNo("LOCKBOX_CLIP_OSC52", t, inputs.EnvClipOSC52, false)
+	checkYesNo("LOCKBOX_CLIP_OSC52", t, config.EnvClipOSC52, false)
 }
 
 func TestIsNoTOTP(t *testing.T) {
-	checkYesNo("LOCKBOX_NOTOTP", t, inputs.EnvNoTOTP, false)
+	checkYesNo("LOCKBOX_NOTOTP", t, config.EnvNoTOTP, false)
 }
 
 func TestIsNoClip(t *testing.T) {
-	checkYesNo("LOCKBOX_NOCLIP", t, inputs.EnvNoClip, false)
+	checkYesNo("LOCKBOX_NOCLIP", t, config.EnvNoClip, false)
 }
 
 func TestTOTP(t *testing.T) {
 	os.Setenv("LOCKBOX_TOTP", "abc")
-	if inputs.EnvTOTPToken.Get() != "abc" {
+	if config.EnvTOTPToken.Get() != "abc" {
 		t.Error("invalid totp token field")
 	}
 	os.Setenv("LOCKBOX_TOTP", "")
-	if inputs.EnvTOTPToken.Get() != "totp" {
+	if config.EnvTOTPToken.Get() != "totp" {
 		t.Error("invalid totp token field")
 	}
 }
@@ -79,29 +79,29 @@ func TestTOTP(t *testing.T) {
 func TestGetKey(t *testing.T) {
 	os.Setenv("LOCKBOX_KEY", "aaa")
 	os.Setenv("LOCKBOX_KEYMODE", "lak;jfea")
-	if _, err := inputs.GetKey(); err.Error() != "unknown keymode" {
+	if _, err := config.GetKey(); err.Error() != "unknown keymode" {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_KEY", "")
-	if _, err := inputs.GetKey(); err != nil {
+	if _, err := config.GetKey(); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_KEY", "key")
-	k, err := inputs.GetKey()
+	k, err := config.GetKey()
 	if err != nil || string(k) != "key" {
 		t.Error("invalid key retrieval")
 	}
 	os.Setenv("LOCKBOX_KEYMODE", "command")
 	os.Setenv("LOCKBOX_KEY", "invalid command text is long and invalid via shlex")
-	if _, err := inputs.GetKey(); err == nil {
+	if _, err := config.GetKey(); err == nil {
 		t.Error("should have failed")
 	}
 }
 
 func TestListVariables(t *testing.T) {
 	known := make(map[string]struct{})
-	for _, v := range inputs.ListEnvironmentVariables(false) {
+	for _, v := range config.ListEnvironmentVariables(false) {
 		trim := strings.Split(strings.TrimSpace(v), " ")[0]
 		if !strings.HasPrefix(trim, "LOCKBOX_") {
 			t.Errorf("invalid env: %s", v)
@@ -118,22 +118,22 @@ func TestListVariables(t *testing.T) {
 }
 
 func TestReKey(t *testing.T) {
-	_, err := inputs.GetReKey([]string{})
+	_, err := config.GetReKey([]string{})
 	if err == nil || err.Error() != "missing required arguments for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=" {
 		t.Errorf("failed: %v", err)
 	}
-	_, err = inputs.GetReKey([]string{"-store", "abc"})
+	_, err = config.GetReKey([]string{"-store", "abc"})
 	if err == nil || err.Error() != "missing required arguments for rekey: LOCKBOX_KEY= LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc" {
 		t.Errorf("failed: %v", err)
 	}
-	out, err := inputs.GetReKey([]string{"-store", "abc", "-key", "aaa"})
+	out, err := config.GetReKey([]string{"-store", "abc", "-key", "aaa"})
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
 	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEY=aaa LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
 		t.Errorf("invalid env: %v", out)
 	}
-	out, err = inputs.GetReKey([]string{"-store", "abc", "-keyfile", "aaa"})
+	out, err = config.GetReKey([]string{"-store", "abc", "-keyfile", "aaa"})
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
@@ -147,21 +147,21 @@ func TestReKey(t *testing.T) {
 }
 
 func TestFormatTOTP(t *testing.T) {
-	otp := inputs.EnvFormatTOTP.Get("otpauth://abc")
+	otp := config.EnvFormatTOTP.Get("otpauth://abc")
 	if otp != "otpauth://abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	otp = inputs.EnvFormatTOTP.Get("abc")
+	otp = config.EnvFormatTOTP.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
 	os.Setenv("LOCKBOX_TOTP_FORMAT", "test/%s")
-	otp = inputs.EnvFormatTOTP.Get("abc")
+	otp = config.EnvFormatTOTP.Get("abc")
 	if otp != "test/abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
 	os.Setenv("LOCKBOX_TOTP_FORMAT", "")
-	otp = inputs.EnvFormatTOTP.Get("abc")
+	otp = config.EnvFormatTOTP.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
@@ -169,44 +169,44 @@ func TestFormatTOTP(t *testing.T) {
 
 func TestParseJSONMode(t *testing.T) {
 	defer os.Clearenv()
-	m, err := inputs.ParseJSONOutput()
-	if m != inputs.JSONDataOutputHash || err != nil {
+	m, err := config.ParseJSONOutput()
+	if m != config.JSONDataOutputHash || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "hAsH ")
-	m, err = inputs.ParseJSONOutput()
-	if m != inputs.JSONDataOutputHash || err != nil {
+	m, err = config.ParseJSONOutput()
+	if m != config.JSONDataOutputHash || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "EMPTY")
-	m, err = inputs.ParseJSONOutput()
-	if m != inputs.JSONDataOutputBlank || err != nil {
+	m, err = config.ParseJSONOutput()
+	if m != config.JSONDataOutputBlank || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", " PLAINtext ")
-	m, err = inputs.ParseJSONOutput()
-	if m != inputs.JSONDataOutputRaw || err != nil {
+	m, err = config.ParseJSONOutput()
+	if m != config.JSONDataOutputRaw || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "a")
-	if _, err = inputs.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
+	if _, err = config.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestClipboardMax(t *testing.T) {
-	checkInt(inputs.EnvClipMax, "LOCKBOX_CLIP_MAX", "clipboard max time", 45, false, t)
+	checkInt(config.EnvClipMax, "LOCKBOX_CLIP_MAX", "clipboard max time", 45, false, t)
 }
 
 func TestHashLength(t *testing.T) {
-	checkInt(inputs.EnvHashLength, "LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "hash length", 0, true, t)
+	checkInt(config.EnvHashLength, "LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "hash length", 0, true, t)
 }
 
 func TestMaxTOTP(t *testing.T) {
-	checkInt(inputs.EnvMaxTOTP, "LOCKBOX_TOTP_MAX", "max totp time", 120, false, t)
+	checkInt(config.EnvMaxTOTP, "LOCKBOX_TOTP_MAX", "max totp time", 120, false, t)
 }
 
-func checkInt(e inputs.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {
+func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {
 	os.Setenv(key, "")
 	defer os.Clearenv()
 	val, err := e.Get()

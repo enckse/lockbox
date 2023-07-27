@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 type (
@@ -72,14 +72,14 @@ func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
 // ReKey handles entry rekeying
 func ReKey(cmd CommandOptions, r Keyer) error {
 	args := cmd.Args()
-	vars, err := inputs.GetReKey(args)
+	vars, err := config.GetReKey(args)
 	if err != nil {
 		return err
 	}
 	if !cmd.Confirm("proceed with rekey") {
 		return nil
 	}
-	inputs.EnvJSONDataOutput.Set(string(inputs.JSONDataOutputRaw))
+	config.EnvJSONDataOutput.Set(string(config.JSONDataOutputRaw))
 	entries, err := r.JSON()
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		}
 		var insertEnv []string
 		insertEnv = append(insertEnv, vars...)
-		insertEnv = append(insertEnv, inputs.EnvModTime.KeyValue(modTime))
+		insertEnv = append(insertEnv, config.EnvModTime.KeyValue(modTime))
 		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: []byte(entry.Data)}); err != nil {
 			return err
 		}

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/lockbox/internal/inputs"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -30,12 +30,12 @@ func (t *Transaction) act(cb action) error {
 	if !t.valid {
 		return errors.New("invalid transaction")
 	}
-	key, err := inputs.GetKey()
+	key, err := config.GetKey()
 	if err != nil {
 		return err
 	}
 	k := string(key)
-	file := inputs.EnvKeyFile.Get()
+	file := config.EnvKeyFile.Get()
 	if !t.exists {
 		if err := create(t.file, k, file); err != nil {
 			return err
@@ -173,10 +173,10 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	mod := inputs.EnvModTime.Get()
+	mod := config.EnvModTime.Get()
 	modTime := time.Now()
 	if mod != "" {
-		p, err := time.Parse(inputs.ModTimeFormat, mod)
+		p, err := time.Parse(config.ModTimeFormat, mod)
 		if err != nil {
 			return err
 		}
@@ -222,7 +222,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 			if multi {
 				return errors.New("totp tokens can NOT be multi-line")
 			}
-			otp := inputs.EnvFormatTOTP.Get(v)
+			otp := config.EnvFormatTOTP.Get(v)
 			e.Values = append(e.Values, protectedValue("otp", otp))
 		}
 		e.Values = append(e.Values, protectedValue(field, v))

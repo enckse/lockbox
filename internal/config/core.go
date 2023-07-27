@@ -1,5 +1,5 @@
-// Package inputs handles user inputs/UI elements.
-package inputs
+// Package config handles user inputs/UI elements.
+package config
 
 import (
 	"errors"
