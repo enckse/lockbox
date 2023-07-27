@@ -14,8 +14,6 @@ import (
 )
 
 const (
-	otpAuth       = "otpauth"
-	otpIssuer     = "lbissuer"
 	prefixKey     = "LOCKBOX_"
 	fieldTOTPEnv  = prefixKey + "TOTP"
 	clipBaseEnv   = prefixKey + "CLIP_"
@@ -191,11 +189,11 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, EnvReadOnly.key, no, "operate in readonly mode", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, fieldTOTPEnv, defaultTOTPField, "attribute name to store TOTP tokens within the database", []string{"string"}))
 	results = append(results, e.formatEnvironmentVariable(false, formatTOTPEnv, strings.ReplaceAll(strings.ReplaceAll(FormatTOTP("%s"), "%25s", "%s"), "&", " \\\n           &"), "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code", []string{"otpauth//url/%s/args..."}))
-	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", []string{"integer"}))
+	results = append(results, e.formatEnvironmentVariable(false, MaxTOTPTime, MaxTOTPTimeDefault, "time, in seconds, in which to show a TOTP token before automatically exiting", intArgs))
 	results = append(results, e.formatEnvironmentVariable(false, ColorBetweenEnv, TOTPDefaultBetween, "override when to set totp generated outputs to different colors, must be a\nlist of one (or more) rules where a semicolon delimits the start and end\nsecond (0-60 for each)", []string{"start:end,start:end,start:end..."}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipPasteEnv, detectedValue, "override the detected platform paste command", []string{commandArgsExample}))
 	results = append(results, e.formatEnvironmentVariable(false, ClipCopyEnv, detectedValue, "override the detected platform copy command", []string{commandArgsExample}))
-	results = append(results, e.formatEnvironmentVariable(false, EnvClipboardMax.key, fmt.Sprintf("%d", EnvClipboardMax.defaultValue), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", []string{"integer"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvClipboardMax.key, fmt.Sprintf("%d", EnvClipboardMax.defaultValue), "override the amount of time before totp clears the clipboard (e.g. 10),\nmust be an integer", intArgs))
 	results = append(results, e.formatEnvironmentVariable(false, PlatformEnv, detectedValue, "override the detected platform", PlatformSet()))
 	results = append(results, e.formatEnvironmentVariable(false, EnvNoTOTP.key, no, "disable TOTP integrations", isYesNoArgs))
 	results = append(results, e.formatEnvironmentVariable(false, HookDirEnv, "", "the path to hooks to execute on actions against the database", []string{"directory"}))
@@ -203,12 +201,16 @@ func ListEnvironmentVariables(showValues bool) []string {
 	results = append(results, e.formatEnvironmentVariable(false, KeyFileEnv, "", "additional keyfile to access/protect the database", []string{"keyfile"}))
 	results = append(results, e.formatEnvironmentVariable(false, ModTimeEnv, ModTimeFormat, fmt.Sprintf("input modification time to set for the entry\n(expected format: %s)", ModTimeFormat), []string{"modtime"}))
 	results = append(results, e.formatEnvironmentVariable(false, JSONDataOutputEnv, string(JSONDataOutputHash), fmt.Sprintf("changes what the data field in JSON outputs will contain\nuse '%s' with CAUTION", JSONDataOutputRaw), []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}))
-	results = append(results, e.formatEnvironmentVariable(false, EnvHashLength.key, fmt.Sprintf("%d", EnvHashLength.defaultValue), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), []string{"integer"}))
+	results = append(results, e.formatEnvironmentVariable(false, EnvHashLength.key, fmt.Sprintf("%d", EnvHashLength.defaultValue), fmt.Sprintf("maximum hash length the JSON output should contain\nwhen '%s' mode is set for JSON output", JSONDataOutputHash), intArgs))
 	return results
 }
 
 // FormatTOTP will format a totp otpauth url
 func FormatTOTP(value string) string {
+	const (
+		otpAuth   = "otpauth"
+		otpIssuer = "lbissuer"
+	)
 	if strings.HasPrefix(value, otpAuth) {
 		return value
 	}

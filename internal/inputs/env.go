@@ -23,7 +23,10 @@ const (
 	WindowsLinuxPlatform = "wsl"
 )
 
-var isYesNoArgs = []string{yes, no}
+var (
+	isYesNoArgs = []string{yes, no}
+	intArgs     = []string{"integer"}
+)
 
 type (
 	// SystemPlatform represents the platform lockbox is running on.
