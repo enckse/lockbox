@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 LB_BINARY=../bin/lb
 DATA="bin/$1"
+ENV="$DATA/env"
 CLIP_WAIT=1
 CLIP_TRIES=3
 CLIP_COPY="$DATA/clip.copy"
@@ -81,13 +82,32 @@ _execute() {
   echo
   ${LB_BINARY} ls
   echo
-  _rekey
+  _rekey 1
   _clipboard
   _invalid
+  _config
+  _rekey 2
+}
+
+_unset() {
+  local i
+  for i in $(env | grep '^LOCKBOX' | cut -d "=" -f 1); do
+    unset "$i"
+  done
+}
+
+_config() {
+  env | grep '^LOCKBOX' > "$ENV"
+  _unset
+  ${LB_BINARY} ls
+  export LOCKBOX_ENV="$ENV"
+  ${LB_BINARY} ls
 }
 
 _invalid() {
-  local keyfile
+  local keyfile oldkey oldkeyfile
+  oldkey="$LOCKBOX_KEY"
+  oldkeyfile="$LOCKBOX_KEYFILE"
   if [ -n "$LOCKBOX_KEYFILE" ]; then
     export LOCKBOX_KEYFILE=""
     if [ -z "$LOCKBOX_KEY" ]; then
@@ -99,6 +119,8 @@ _invalid() {
     export LOCKBOX_KEYFILE="$keyfile"
   fi
   ${LB_BINARY} ls
+  export LOCKBOX_KEYFILE="$oldkeyfile"
+  export LOCKBOX_KEY="$oldkey"
 }
 
 _rekey() {
@@ -110,7 +132,7 @@ _rekey() {
     rekeyFile="$DATA/newkeyfile"
     echo "thisisanewkey" > "$rekeyFile"
   fi
-  echo y |${LB_BINARY} rekey -store="$rekey" -key="newkey" -keymode="plaintext" -keyfile="$rekeyFile"
+  echo y |${LB_BINARY} rekey -store="$rekey" -key="newkey$1" -keymode="plaintext" -keyfile="$rekeyFile"
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2
@@ -166,6 +188,8 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+_unset
+unset LOCKBOX_ENV
 mkdir -p "$DATA"
 find "$DATA" -type f -delete
 

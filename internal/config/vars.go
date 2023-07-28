@@ -32,6 +32,7 @@ const (
 )
 
 var (
+	fileExample = []string{"file"}
 	// Platforms represent the platforms that lockbox understands to run on
 	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
@@ -61,7 +62,7 @@ var (
 	// EnvPlatform is the platform that the application is running on
 	EnvPlatform = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "PLATFORM", desc: "override the detected platform"}, defaultValue: detectedValue, allowed: Platforms, canDefault: false}
 	// EnvStore is the location of the keepass file/store
-	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", desc: "directory to the database file", requirement: "must be set"}, canDefault: false, allowed: []string{"file"}}
+	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", desc: "directory to the database file", requirement: "must be set"}, canDefault: false, allowed: fileExample}
 	// EnvHookDir is the directory of hooks to execute
 	EnvHookDir = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "HOOKDIR", desc: "the path to hooks to execute on actions against the database"}, allowed: []string{"directory"}, canDefault: true, defaultValue: ""}
 	// EnvClipCopy allows overriding the clipboard copy command
@@ -80,6 +81,8 @@ var (
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code"}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
 	envKeyMode    = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: "how to retrieve the database store password"}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
 	envKey        = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
+	// EnvConfig is the location of the config file to read environment variables from
+	EnvConfig = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("allows setting a specific file of environment variables\nfor lockbox to read and use as configuration values (an '.env' file)\nthe keyword '%s' will search for a file in the following paths,\nmatching the first:\n(%v)", detectEnvironment, detectEnvironmentPaths)}, canDefault: false, allowed: fileExample}
 )
 
 // GetReKey will get the rekey environment settings
@@ -151,7 +154,7 @@ func GetKey() ([]byte, error) {
 func ListEnvironmentVariables(showValues bool) []string {
 	out := environmentOutput{showValues: showValues}
 	var results []string
-	for _, item := range []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength} {
+	for _, item := range []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig} {
 		env := item.self()
 		value, allow := item.values()
 		if out.showValues {

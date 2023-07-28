@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -17,6 +18,8 @@ const (
 	colorWindowSpan      = ":"
 	yes                  = "yes"
 	no                   = "no"
+	detectEnvironment    = "detect"
+	envFile              = "lockbox.env"
 	// MacOSPlatform is the macos indicator for platform
 	MacOSPlatform = "macos"
 	// LinuxWaylandPlatform for linux+wayland
@@ -27,6 +30,8 @@ const (
 	WindowsLinuxPlatform = "wsl"
 	unknownPlatform      = ""
 )
+
+var detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}
 
 type (
 	// JSONOutputMode is the output mode definition
@@ -268,4 +273,26 @@ func ParseColorWindow(windowString string) ([]ColorWindow, error) {
 		return nil, errors.New("invalid colorization rules for totp, none found")
 	}
 	return rules, nil
+}
+
+// NewEnvFiles will get the list of candidate environment files
+// it will also set the environment to empty for the caller
+func NewEnvFiles() ([]string, error) {
+	v := EnvConfig.Get()
+	if v == "" {
+		return []string{}, nil
+	}
+	EnvConfig.Set("")
+	if v != detectEnvironment {
+		return []string{v}, nil
+	}
+	h, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	var results []string
+	for _, p := range detectEnvironmentPaths {
+		results = append(results, filepath.Join(h, p))
+	}
+	return results, nil
 }

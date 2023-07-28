@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
+	env "github.com/hashicorp/go-envparse"
 )
 
 var version string
@@ -41,6 +43,28 @@ func handleEarly(command string, args []string) (bool, error) {
 }
 
 func run() error {
+	paths, err := config.NewEnvFiles()
+	if err != nil {
+		return err
+	}
+	for _, useEnv := range paths {
+		if !platform.PathExists(useEnv) {
+			continue
+		}
+		b, err := os.ReadFile(useEnv)
+		if err != nil {
+			return err
+		}
+		r := bytes.NewReader(b)
+		found, err := env.Parse(r)
+		if err != nil {
+			return err
+		}
+		for k, v := range found {
+			os.Setenv(k, v)
+		}
+		break
+	}
 	args := os.Args
 	if len(args) < 2 {
 		return errors.New("requires subcommand")
