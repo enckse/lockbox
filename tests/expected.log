@@ -165,27 +165,3 @@ clipboard will clear in 5 seconds
 Wrong password? HMAC-SHA256 of header mismatching
 no store set
 keys/k/one2
-proceed with rekey? (y/N) rekeying: keys/k/one2
-Wrong password? HMAC-SHA256 of header mismatching
-exit status 1
-
-keys/k/one2
-test2
-{
-  "keys/k/one2": {
-    "modtime": "XXXX-XX-XX",
-    "data": "6d2"
-  }
-}
-{
-  "keys/k/one2": {
-    "modtime": "XXXX-XX-XX",
-    "data": "6d2"
-  }
-}
-{
-  "keys/k/one2": {
-    "modtime": "XXXX-XX-XX",
-    "data": "6d2"
-  }
-}

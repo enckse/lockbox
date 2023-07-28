@@ -86,7 +86,6 @@ _execute() {
   _clipboard
   _invalid
   _config
-  _rekey 2
 }
 
 _unset() {
