@@ -61,7 +61,12 @@ func run() error {
 			return err
 		}
 		for k, v := range found {
-			os.Setenv(k, v)
+			os.Setenv(k, os.Expand(v, func(in string) string {
+				if val, ok := found[in]; ok {
+					return val
+				}
+				return os.Getenv(in)
+			}))
 		}
 		break
 	}

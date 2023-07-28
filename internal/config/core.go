@@ -90,8 +90,12 @@ func shlex(in string) ([]string, error) {
 	return shell.Fields(in, os.Getenv)
 }
 
+func getExpand(key string) string {
+	return os.ExpandEnv(os.Getenv(key))
+}
+
 func environOrDefault(envKey, defaultValue string) string {
-	val := os.Getenv(envKey)
+	val := getExpand(envKey)
 	if strings.TrimSpace(val) == "" {
 		return defaultValue
 	}
@@ -100,7 +104,7 @@ func environOrDefault(envKey, defaultValue string) string {
 
 // Get will get the boolean value for the setting
 func (e EnvironmentBool) Get() (bool, error) {
-	read := strings.ToLower(strings.TrimSpace(os.Getenv(e.key)))
+	read := strings.ToLower(strings.TrimSpace(getExpand(e.key)))
 	switch read {
 	case no:
 		return false, nil
@@ -116,7 +120,7 @@ func (e EnvironmentBool) Get() (bool, error) {
 // Get will get the integer value for the setting
 func (e EnvironmentInt) Get() (int, error) {
 	val := e.defaultValue
-	use := os.Getenv(e.key)
+	use := getExpand(e.key)
 	if use != "" {
 		i, err := strconv.Atoi(use)
 		if err != nil {
@@ -144,7 +148,7 @@ func (e EnvironmentInt) Get() (int, error) {
 // Get will read the string from the environment
 func (e EnvironmentString) Get() string {
 	if !e.canDefault {
-		return os.Getenv(e.key)
+		return getExpand(e.key)
 	}
 	return environOrDefault(e.key, e.defaultValue)
 }
@@ -225,8 +229,8 @@ func NewPlatform() (SystemPlatform, error) {
 		if strings.Contains(raw, "microsoft-standard-wsl") {
 			return WindowsLinuxPlatform, nil
 		}
-		if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
-			if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
+		if strings.TrimSpace(getExpand("WAYLAND_DISPLAY")) == "" {
+			if strings.TrimSpace(getExpand("DISPLAY")) == "" {
 				return unknownPlatform, errors.New("unable to detect linux clipboard mode")
 			}
 			return LinuxXPlatform, nil

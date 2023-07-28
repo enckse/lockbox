@@ -96,8 +96,12 @@ _unset() {
 }
 
 _config() {
-  env | grep '^LOCKBOX' > "$ENV"
+  {
+    echo "PLAINTEXT=text"
+    env | grep '^LOCKBOX' | sed 's/plaintext/$LOCKBOX_FAKE_TEST$PLAINTEXT/g'
+  } > "$ENV"
   _unset
+  export LOCKBOX_FAKE_TEST=plain
   ${LB_BINARY} ls
   export LOCKBOX_ENV="$ENV"
   ${LB_BINARY} ls
