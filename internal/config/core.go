@@ -329,11 +329,16 @@ func IsUnset(k, v string) (bool, error) {
 func Environ() []string {
 	var results []string
 	for _, k := range os.Environ() {
-		if strings.HasPrefix(k, prefixKey) {
-			if strings.HasPrefix(k, fmt.Sprintf("%s=", EnvConfig.key)) {
+		for _, r := range registry {
+			key := r.self().key
+			if key == EnvConfig.key {
 				continue
 			}
-			results = append(results, k)
+			key = fmt.Sprintf("%s=", key)
+			if strings.HasPrefix(k, key) {
+				results = append(results, k)
+				break
+			}
 		}
 	}
 	sort.Strings(results)

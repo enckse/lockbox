@@ -32,6 +32,7 @@ const (
 )
 
 var (
+	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands}
 	// Platforms represent the platforms that lockbox understands to run on
 	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
@@ -153,7 +154,7 @@ func GetKey() ([]byte, error) {
 // ListEnvironmentVariables will print information about env variables
 func ListEnvironmentVariables() []string {
 	var results []string
-	for _, item := range []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands} {
+	for _, item := range registry {
 		env := item.self()
 		value, allow := item.values()
 		if len(value) == 0 {

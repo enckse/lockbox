@@ -82,7 +82,7 @@ func TestEnvInfo(t *testing.T) {
 	if buf.String() != "" {
 		t.Error("nothing written")
 	}
-	os.Setenv("LOCKBOX_TEST", "1")
+	os.Setenv("LOCKBOX_STORE", "1")
 	ok, err = app.Info(&buf, "env", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
