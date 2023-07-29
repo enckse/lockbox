@@ -60,18 +60,17 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		for k, v := range found {
+		result, err := config.ExpandParsed(found)
+		if err != nil {
+			return err
+		}
+		for k, v := range result {
 			ok, err := config.IsUnset(k, v)
 			if err != nil {
 				return err
 			}
 			if !ok {
-				if err := os.Setenv(k, os.Expand(v, func(in string) string {
-					if val, ok := found[in]; ok {
-						return val
-					}
-					return os.Getenv(in)
-				})); err != nil {
+				if err := os.Setenv(k, v); err != nil {
 					return err
 				}
 			}

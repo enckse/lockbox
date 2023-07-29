@@ -330,7 +330,7 @@ func Environ() []string {
 	var results []string
 	for _, k := range os.Environ() {
 		if strings.HasPrefix(k, prefixKey) {
-			if strings.HasPrefix(k, EnvConfig.key) {
+			if strings.HasPrefix(k, fmt.Sprintf("%s=", EnvConfig.key)) {
 				continue
 			}
 			results = append(results, k)
@@ -338,4 +338,34 @@ func Environ() []string {
 	}
 	sort.Strings(results)
 	return results
+}
+
+// ExpandParsed handles cycles of parsing configuration env inputs to resolve ALL variables
+func ExpandParsed(inputs map[string]string) (map[string]string, error) {
+	cycles, err := envConfigExpands.Get()
+	if err != nil {
+		return nil, err
+	}
+	if cycles == 0 {
+		return inputs, nil
+	}
+	result := inputs
+	for cycles > 0 {
+		result = expandParsed(result)
+		cycles--
+	}
+	return result, nil
+}
+
+func expandParsed(inputs map[string]string) map[string]string {
+	result := make(map[string]string)
+	for k, v := range inputs {
+		result[k] = os.Expand(v, func(in string) string {
+			if val, ok := inputs[in]; ok {
+				return val
+			}
+			return os.Getenv(in)
+		})
+	}
+	return result
 }
