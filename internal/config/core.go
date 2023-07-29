@@ -322,6 +322,9 @@ func Environ() []string {
 	var results []string
 	for _, k := range os.Environ() {
 		if strings.HasPrefix(k, prefixKey) {
+			if strings.HasPrefix(k, EnvConfig.key) {
+				continue
+			}
 			results = append(results, k)
 		}
 	}
