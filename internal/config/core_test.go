@@ -208,4 +208,21 @@ func TestExpandParsed(t *testing.T) {
 	if err != nil || len(r) != 4 || r["TEST"] != "2" || r["OTHER"] != "2|2|2|2" || r["OTHER_OTHER"] != "2|2|2" {
 		t.Errorf("invalid expand: %v", r)
 	}
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "0")
+	delete(ins, "OTHER_FIRST")
+	delete(ins, "OTHER")
+	delete(ins, "OTHER_OTHER")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 1 || r["TEST"] != "$TEST_ABC" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	os.Unsetenv("LOCKBOX_ENV_EXPANDS")
+	delete(ins, "OTHER_FIRST")
+	delete(ins, "OTHER")
+	delete(ins, "OTHER_OTHER")
+	ins["LOCKBOX_ENV_EXPANDS"] = "0"
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 2 || r["TEST"] != "$TEST_ABC" {
+		t.Errorf("invalid expand: %v", r)
+	}
 }
