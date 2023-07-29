@@ -348,7 +348,14 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	if len(inputs) == 0 {
 		return inputs, nil
 	}
-	cycles, err := envConfigExpands.Get()
+	var err error
+	var cycles int
+	possibleCycles, ok := inputs[envConfigExpands.key]
+	if ok {
+		cycles, err = strconv.Atoi(possibleCycles)
+	} else {
+		cycles, err = envConfigExpands.Get()
+	}
 	if err != nil {
 		return nil, err
 	}
