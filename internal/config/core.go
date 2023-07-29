@@ -200,7 +200,7 @@ func (e EnvironmentBool) values() (string, []string) {
 }
 
 func (e EnvironmentInt) values() (string, []string) {
-	return fmt.Sprintf("%d", e.defaultValue), []string{"integer"}
+	return fmt.Sprintf("%d", e.defaultValue), []string{"<integer>"}
 }
 
 func (e EnvironmentFormatter) values() (string, []string) {

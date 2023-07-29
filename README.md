@@ -83,6 +83,14 @@ The token can be automatically copied to the clipboard too
 lb totp clip token
 ```
 
+### rekey
+
+To rekey (change password/keyfile) use the `rekey` command
+```
+lb rekey -store=path/to/new/db.kdbx -key="mynewkey" -keymode="plaintext"
+-keyfile="my/new/keyfile"
+```
+
 ## git integration
 
 To manage the `.kdbx` file in a git repository and see _actual_ text diffs add this to a `.gitconfig`

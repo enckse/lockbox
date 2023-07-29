@@ -12,7 +12,7 @@ interactions.
 The 'rm' and 'mv' command can handle a simplistic glob if it is at the END
 of the path. This allows for bulk-removal of entries at multiple levels.
 Confirmation will still be required for removal (matching entries will be
-listed)
+listed).
 
 For 'mv' the destination must NOT be an entry but the final destination
 location for all matched entries. Overwriting is not allowed by moving
@@ -29,19 +29,20 @@ lb mv path/to/* new/path/
 [clipboard]
 By default clipboard commands are detected via determing the platform and 
 utilizing default commands to interact with (copy to/paste to) the clipboard.
-These settings can be overriden via environment variables
+These settings can be overriden via environment variables.
 
 [totp]
 By default 'lb' tries to use some reasonable defaults to setup/manage oauth
 token inputs and displaying of code outputs. Many of these settings can be
-changed via environment variables
+changed via environment variables.
 
 [rekey]
-The password store can have the key (and file) changed via the 'key'
-subcommand. This will require setting additional environment variables for the
-new key, key mode, key file, and store (as specified as environment variables)
-but with '_NEW' added as a suffix
+The password store can have the key (and file) changed via the 'rekey'
+subcommand. This command requires a '-store' value and some combination
+of '-key=', '-keymode=', and '-keyfile=' depending on the new database
+credential preferences. The settings correspond to the 'LOCKBOX_'
+settings normally used when running `lb`.
 
 [environment variables]
 
-The following environment variables can alter how 'lb' works
+The following environment variables can alter how 'lb' works.
