@@ -111,10 +111,10 @@ func GetReKey(args []string) ([]string, error) {
 	for _, k := range []keyer{inStore, inKey, inKeyFile, inKeyMode} {
 		out = append(out, k.env.KeyValue(k.in))
 	}
-	sort.Strings(out)
 	if !inStore.has || (!inKey.has && !inKeyFile.has) {
-		return nil, fmt.Errorf("missing required arguments for rekey: %s", strings.Join(out, " "))
+		return nil, fmt.Errorf("missing required arguments for rekey:\n  -help for information on the flags or the lockbox help documentation for detailed usage")
 	}
+	sort.Strings(out)
 	return out, nil
 }
 
