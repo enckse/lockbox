@@ -168,9 +168,16 @@ func (e environmentBase) KeyValue(value string) string {
 	return fmt.Sprintf("%s=%s", e.key, value)
 }
 
-// Set will do an environment set for the value to key
-func (e environmentBase) Set(value string) {
-	os.Setenv(e.key, value)
+// Setenv will do an environment set for the value to key
+func (e environmentBase) Set(value string) error {
+	unset, err := IsUnset(e.key, value)
+	if err != nil {
+		return err
+	}
+	if unset {
+		return nil
+	}
+	return os.Setenv(e.key, value)
 }
 
 // Get will retrieve the value with the formatted input included
@@ -287,7 +294,9 @@ func NewEnvFiles() ([]string, error) {
 	if v == "" || v == noEnvironment {
 		return []string{}, nil
 	}
-	EnvConfig.Set("")
+	if err := EnvConfig.Set(noEnvironment); err != nil {
+		return nil, err
+	}
 	if v != detectEnvironment {
 		return []string{v}, nil
 	}
@@ -300,4 +309,12 @@ func NewEnvFiles() ([]string, error) {
 		results = append(results, filepath.Join(h, p))
 	}
 	return results, nil
+}
+
+// IsUnset will indicate if a variable is an unset (and unset it) or return that it isn't
+func IsUnset(k, v string) (bool, error) {
+	if strings.TrimSpace(v) == "" {
+		return true, os.Unsetenv(k)
+	}
+	return false, nil
 }

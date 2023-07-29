@@ -79,7 +79,9 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 	if !cmd.Confirm("proceed with rekey") {
 		return nil
 	}
-	config.EnvJSONDataOutput.Set(string(config.JSONDataOutputRaw))
+	if err := config.EnvJSONDataOutput.Set(string(config.JSONDataOutputRaw)); err != nil {
+		return err
+	}
 	entries, err := r.JSON()
 	if err != nil {
 		return err

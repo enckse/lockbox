@@ -1,7 +1,9 @@
 package config_test
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/config"
@@ -13,12 +15,28 @@ func TestPlatformSet(t *testing.T) {
 	}
 }
 
+func isSet(key string) bool {
+	for _, item := range os.Environ() {
+		if strings.HasPrefix(item, fmt.Sprintf("%s=", key)) {
+			return true
+		}
+	}
+	return false
+}
+
 func TestSet(t *testing.T) {
 	os.Clearenv()
 	defer os.Clearenv()
 	config.EnvStore.Set("TEST")
 	if config.EnvStore.Get() != "TEST" {
 		t.Errorf("invalid set/get")
+	}
+	if !isSet("LOCKBOX_STORE") {
+		t.Error("should be set")
+	}
+	config.EnvStore.Set("")
+	if isSet("LOCKBOX_STORE") {
+		t.Error("should be set")
 	}
 }
 
@@ -99,5 +117,27 @@ func TestNewEnvFiles(t *testing.T) {
 	f, err = config.NewEnvFiles()
 	if len(f) != 2 || err != nil {
 		t.Errorf("invalid files: %v %v", f, err)
+	}
+}
+
+func TestIsUnset(t *testing.T) {
+	os.Clearenv()
+	o, err := config.IsUnset("test", "   ")
+	if err != nil || !o {
+		t.Error("was unset")
+	}
+	o, err = config.IsUnset("test", "")
+	if err != nil || !o {
+		t.Error("was unset")
+	}
+	o, err = config.IsUnset("test", "a")
+	if err != nil || o {
+		t.Error("was set")
+	}
+	os.Setenv("UNSET_TEST", "abc")
+	defer os.Clearenv()
+	config.IsUnset("UNSET_TEST", "")
+	if isSet("UNSET_TEST") {
+		t.Error("found unset var")
 	}
 }
