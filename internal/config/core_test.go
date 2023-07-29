@@ -176,18 +176,18 @@ func TestExpandParsed(t *testing.T) {
 	if err == nil || err.Error() != "strconv.Atoi: parsing \"a\": invalid syntax" {
 		t.Errorf("invalid error: %v", err)
 	}
-	ins["LOCKBOX_ENV_EXPANDS"] = "1"
+	ins["LOCKBOX_ENV_EXPANDS"] = "2"
 	r, err = config.ExpandParsed(ins)
 	if err != nil || len(r) != 2 || r["TEST"] != "1" {
 		t.Errorf("invalid expand: %v", r)
 	}
 	delete(ins, "LOCKBOX_ENV_EXPANDS")
-	os.Setenv("LOCKBOX_ENV_EXPANDS", "1")
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "2")
 	r, err = config.ExpandParsed(ins)
 	if err != nil || len(r) != 1 || r["TEST"] != "1" {
 		t.Errorf("invalid expand: %v", r)
 	}
-	os.Setenv("LOCKBOX_ENV_EXPANDS", "1")
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "2")
 	r, err = config.ExpandParsed(ins)
 	if err != nil || len(r) != 1 || r["TEST"] != "1" {
 		t.Errorf("invalid expand: %v", r)
@@ -196,9 +196,8 @@ func TestExpandParsed(t *testing.T) {
 	os.Setenv("OTHER_TEST", "$ANOTHER_TEST")
 	os.Setenv("ANOTHER_TEST", "2")
 	os.Setenv("LOCKBOX_ENV_EXPANDS", "1")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 1 || r["TEST"] != "$OTHER_TEST" {
-		t.Errorf("invalid expand: %v", r)
+	if _, err = config.ExpandParsed(ins); err == nil || err.Error() != "reached maximum expand cycle count" {
+		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_ENV_EXPANDS", "2")
 	ins["OTHER_FIRST"] = "2"

@@ -385,7 +385,7 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 		result = expanded
 		cycles--
 	}
-	return result, nil
+	return nil, errors.New("reached maximum expand cycle count")
 }
 
 func expandParsed(inputs map[string]string) map[string]string {
