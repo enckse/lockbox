@@ -18,5 +18,7 @@ builds:
 archives:
   - name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     format: tar.gz
+    files:
+      - none*
 checksum:
   name_template: "{{ .ProjectName }}-{{ .Version }}-checksums.txt"
