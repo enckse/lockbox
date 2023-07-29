@@ -97,7 +97,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 {
 		t.Errorf("invalid date/time")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "10")
+	os.Setenv("LOCKBOX_JSON_DATA_HASH_LENGTH", "10")
 	defer os.Clearenv()
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
@@ -128,7 +128,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data == "" {
 		t.Errorf("invalid json: %v", m)
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "plAINtExt")
+	os.Setenv("LOCKBOX_JSON_DATA", "plAINtExt")
 	defer os.Clearenv()
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
@@ -141,7 +141,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data != "tedst" {
 		t.Errorf("invalid json: %v", m)
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "emPTY")
+	os.Setenv("LOCKBOX_JSON_DATA", "emPTY")
 	defer os.Clearenv()
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {

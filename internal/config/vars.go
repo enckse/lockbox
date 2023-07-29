@@ -75,7 +75,7 @@ var (
 	// EnvModTime is modtime override ability for entries
 	EnvModTime = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "SET_MODTIME", desc: fmt.Sprintf("Input modification time to set for the entry\n(expected format: %s).", ModTimeFormat)}, canDefault: true, defaultValue: "", allowed: []string{"modtime"}}
 	// EnvJSONDataOutput controls how JSON is output in the 'data' field
-	EnvJSONDataOutput = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "JSON_DATA_OUTPUT", desc: fmt.Sprintf("Changes what the data field in JSON outputs will contain use\n'%s' with CAUTION.", JSONDataOutputRaw)}, canDefault: true, defaultValue: string(JSONDataOutputHash), allowed: []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}}
+	EnvJSONDataOutput = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "JSON_DATA", desc: fmt.Sprintf("Changes what the data field in JSON outputs will contain use\n'%s' with CAUTION.", JSONDataOutputRaw)}, canDefault: true, defaultValue: string(JSONDataOutputHash), allowed: []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)}}
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "Override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code."}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
 	// EnvConfig is the location of the config file to read environment variables from

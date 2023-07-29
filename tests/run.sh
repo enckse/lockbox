@@ -14,7 +14,7 @@ _execute() {
   export LOCKBOX_INTERACTIVE=no
   export LOCKBOX_READONLY=no
   export LOCKBOX_KEYMODE=plaintext
-  export LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH=0
+  export LOCKBOX_JSON_DATA_HASH_LENGTH=0
   echo test2 |${LB_BINARY} insert keys/k/one2
   echo test |${LB_BINARY} insert keys/k/one
   echo test |${LB_BINARY} insert key/a/one
@@ -140,12 +140,12 @@ _rekey() {
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2
-  export LOCKBOX_JSON_DATA_OUTPUT=plaintext
+  export LOCKBOX_JSON_DATA=plaintext
   ${LB_BINARY} json k
-  export LOCKBOX_JSON_DATA_OUTPUT=empty
+  export LOCKBOX_JSON_DATA=empty
   ${LB_BINARY} json k
-  export LOCKBOX_JSON_DATA_OUTPUT=hash
-  export LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH=3
+  export LOCKBOX_JSON_DATA=hash
+  export LOCKBOX_JSON_DATA_HASH_LENGTH=3
   ${LB_BINARY} json k
 }
 

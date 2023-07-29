@@ -173,22 +173,22 @@ func TestParseJSONMode(t *testing.T) {
 	if m != config.JSONDataOutputHash || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "hAsH ")
+	os.Setenv("LOCKBOX_JSON_DATA", "hAsH ")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONDataOutputHash || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "EMPTY")
+	os.Setenv("LOCKBOX_JSON_DATA", "EMPTY")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONDataOutputBlank || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", " PLAINtext ")
+	os.Setenv("LOCKBOX_JSON_DATA", " PLAINtext ")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONDataOutputRaw || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_OUTPUT", "a")
+	os.Setenv("LOCKBOX_JSON_DATA", "a")
 	if _, err = config.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -199,7 +199,7 @@ func TestClipboardMax(t *testing.T) {
 }
 
 func TestHashLength(t *testing.T) {
-	checkInt(config.EnvHashLength, "LOCKBOX_JSON_DATA_OUTPUT_HASH_LENGTH", "hash length", 0, true, t)
+	checkInt(config.EnvHashLength, "LOCKBOX_JSON_DATA_HASH_LENGTH", "hash length", 0, true, t)
 }
 
 func TestMaxTOTP(t *testing.T) {
