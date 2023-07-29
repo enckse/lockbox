@@ -102,6 +102,7 @@ _config() {
   } > "$ENV"
   _unset
   export LOCKBOX_FAKE_TEST=plain
+  export LOCKBOX_ENV="none"
   ${LB_BINARY} ls
   export LOCKBOX_ENV="$ENV"
   ${LB_BINARY} ls

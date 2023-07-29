@@ -1,6 +1,7 @@
 BUILD   := bin/
 TARGET  := $(BUILD)lb
 VERSION ?= $(shell git log -n 1 --format=%h)
+VARS    := LOCKBOX_ENV=none
 
 all: $(TARGET)
 
@@ -13,10 +14,10 @@ endif
 	go build $(GOFLAGS) -ldflags "-X main.version=$(VERSION)" -o $@ cmd/main.go
 
 unittests:
-	go test -v ./...
+	$(VARS) go test -v ./...
 
 check: $(TARGET) unittests
-	make -C tests
+	$(VARS) make -C tests
 
 clean:
 	@rm -rf $(BUILD) tests/bin
