@@ -1,0 +1,25 @@
+archives:
+  -
+    replacements:
+      amd64: x86_64
+      darwin: Darwin
+      linux: Linux
+before:
+  hooks:
+    - "go mod download"
+builds:
+  -
+    env:
+      - CGO_ENABLED=0
+      - BUILDER=GoReleaser
+    goos:
+      - linux
+      - darwin
+
+changelog:
+  sort: asc
+checksum:
+  name_template: checksums.txt
+snapshot:
+  name_template: "{{ .Tag }}-next"
+project_name: lockbox
