@@ -342,6 +342,12 @@ func Environ() []string {
 
 // ExpandParsed handles cycles of parsing configuration env inputs to resolve ALL variables
 func ExpandParsed(inputs map[string]string) (map[string]string, error) {
+	if inputs == nil {
+		return nil, errors.New("invalid input variables")
+	}
+	if len(inputs) == 0 {
+		return inputs, nil
+	}
 	cycles, err := envConfigExpands.Get()
 	if err != nil {
 		return nil, err

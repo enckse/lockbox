@@ -156,3 +156,51 @@ func TestEnviron(t *testing.T) {
 		t.Errorf("invalid environ: %v", e)
 	}
 }
+
+func TestExpandParsed(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("TEST_ABC", "1")
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "a")
+	_, err := config.ExpandParsed(nil)
+	if err == nil || err.Error() != "invalid input variables" {
+		t.Errorf("invalid error: %v", err)
+	}
+	r, err := config.ExpandParsed(make(map[string]string))
+	if err != nil || len(r) != 0 {
+		t.Errorf("invalid expand")
+	}
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "a")
+	ins := make(map[string]string)
+	ins["TEST"] = "$TEST_ABC"
+	_, err = config.ExpandParsed(ins)
+	if err == nil || err.Error() != "strconv.Atoi: parsing \"a\": invalid syntax" {
+		t.Errorf("invalid error: %v", err)
+	}
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "0")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 1 || r["TEST"] != "$TEST_ABC" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "1")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 1 || r["TEST"] != "1" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	os.Setenv("TEST_ABC", "$OTHER_TEST")
+	os.Setenv("OTHER_TEST", "$ANOTHER_TEST")
+	os.Setenv("ANOTHER_TEST", "2")
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "1")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 1 || r["TEST"] != "$OTHER_TEST" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "2")
+	ins["OTHER_FIRST"] = "2"
+	ins["OTHER_OTHER"] = "$ANOTHER_TEST|$TEST_ABC|$OTHER_TEST"
+	ins["OTHER"] = "$OTHER_OTHER|$OTHER_FIRST"
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "4")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 4 || r["TEST"] != "2" || r["OTHER"] != "2|2|2|2" || r["OTHER_OTHER"] != "2|2|2" {
+		t.Errorf("invalid expand: %v", r)
+	}
+}
