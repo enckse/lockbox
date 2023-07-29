@@ -141,3 +141,17 @@ func TestIsUnset(t *testing.T) {
 		t.Error("found unset var")
 	}
 }
+
+func TestEnviron(t *testing.T) {
+	os.Clearenv()
+	e := config.Environ()
+	if len(e) != 0 {
+		t.Error("invalid environ")
+	}
+	os.Setenv("LOCKBOX_1", "1")
+	os.Setenv("LOCKBOX_2", "2")
+	e = config.Environ()
+	if len(e) != 2 || fmt.Sprintf("%v", e) != "[LOCKBOX_1=1 LOCKBOX_2=2]" {
+		t.Errorf("invalid environ: %v", e)
+	}
+}

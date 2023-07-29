@@ -54,6 +54,8 @@ const (
 	TOTPOnceCommand = "once"
 	// EnvDefaultsCommand will display the default env variables, not those set
 	EnvDefaultsCommand = "defaults"
+	// EnvShortCommand will output the set environment variables
+	EnvShortCommand = "short"
 	// BashCommand is the command to generate bash completions
 	BashCommand = "bash"
 	// BashDefaultsCommand will generate environment agnostic completions

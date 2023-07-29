@@ -31,6 +31,8 @@ type (
 		JSONCommand         string
 		HelpCommand         string
 		HelpAdvancedCommand string
+		EnvShortCommand     string
+		EnvCommand          string
 	}
 )
 
@@ -51,9 +53,11 @@ func GenerateCompletions(isBash, defaults bool) ([]string, error) {
 		MultiLineCommand:    MultiLineCommand,
 		JSONCommand:         JSONCommand,
 		HelpCommand:         HelpCommand,
+		EnvCommand:          EnvCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
+		EnvShortCommand:     EnvShortCommand,
 		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
 		Options:             []string{MultiLineCommand, EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},

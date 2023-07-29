@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -317,4 +318,16 @@ func IsUnset(k, v string) (bool, error) {
 		return true, os.Unsetenv(k)
 	}
 	return false, nil
+}
+
+// Environ will list the current environment keys
+func Environ() []string {
+	var results []string
+	for _, k := range os.Environ() {
+		if strings.HasPrefix(k, prefixKey) {
+			results = append(results, k)
+		}
+	}
+	sort.Strings(results)
+	return results
 }

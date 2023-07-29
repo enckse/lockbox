@@ -67,6 +67,9 @@ func TestBashInfo(t *testing.T) {
 	if _, err = app.Info(&buf, "bash", []string{"test", "default"}); err.Error() != "invalid argument" {
 		t.Errorf("invalid error: %v", err)
 	}
+	if _, err = app.Info(&buf, "bash", []string{"short"}); err.Error() != "invalid argument" {
+		t.Errorf("invalid error: %v", err)
+	}
 }
 
 func TestEnvInfo(t *testing.T) {
@@ -92,6 +95,24 @@ func TestEnvInfo(t *testing.T) {
 	}
 	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid argument" {
 		t.Errorf("invalid error: %v", err)
+	}
+	os.Clearenv()
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "env", []string{"short"})
+	if ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if buf.String() != "" {
+		t.Error("something written")
+	}
+	os.Setenv("LOCKBOX_TEST", "1")
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "env", []string{"short"})
+	if !ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if buf.String() == "" {
+		t.Error("nothing written")
 	}
 }
 

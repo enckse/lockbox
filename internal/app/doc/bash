@@ -12,6 +12,9 @@ _{{ $.Executable }}() {
   else
     if [ "$COMP_CWORD" -eq 2 ]; then
       case ${COMP_WORDS[1]} in
+        "{{ $.EnvCommand }}")
+          opts="{{ $.EnvShortCommand }}"
+          ;;
         "{{ $.HelpCommand }}")
           opts="{{ $.HelpAdvancedCommand }}"
           ;;
