@@ -1,6 +1,7 @@
+# basic goreleaser configuration
+---
 archives:
-  -
-    replacements:
+  - replacements:
       amd64: x86_64
       darwin: Darwin
       linux: Linux
@@ -8,8 +9,7 @@ before:
   hooks:
     - "go mod download"
 builds:
-  -
-    env:
+  - env:
       - CGO_ENABLED=0
       - BUILDER=GoReleaser
     goos:
