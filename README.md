@@ -37,6 +37,8 @@ Use `lb help verbose` for additional information about options and environment v
 - zsh/bash (for completions)
 - amd64/arm64
 
+built binaries are available on the [releases page](https://github.com/enckse/lockbox/releases)
+
 ## usage
 
 ### clipboard
