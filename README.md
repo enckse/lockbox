@@ -30,6 +30,13 @@ LOCKBOX_STORE=/Users/alice/.passwords/secrets.kdbx
 
 Use `lb help verbose` for additional information about options and environment variables
 
+### supported systems
+
+`lb` should work on combinations of the following:
+- linux/macOS/WSL
+- zsh/bash (for completions)
+- amd64/arm64
+
 ## usage
 
 ### clipboard
