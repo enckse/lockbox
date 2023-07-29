@@ -37,10 +37,7 @@ var detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepat
 
 type (
 	// JSONOutputMode is the output mode definition
-	JSONOutputMode    string
-	environmentOutput struct {
-		showValues bool
-	}
+	JSONOutputMode string
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform  string
 	environmentBase struct {

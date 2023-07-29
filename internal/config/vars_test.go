@@ -101,7 +101,7 @@ func TestGetKey(t *testing.T) {
 
 func TestListVariables(t *testing.T) {
 	known := make(map[string]struct{})
-	for _, v := range config.ListEnvironmentVariables(false) {
+	for _, v := range config.ListEnvironmentVariables() {
 		trim := strings.Split(strings.TrimSpace(v), " ")[0]
 		if !strings.HasPrefix(trim, "LOCKBOX_") {
 			t.Errorf("invalid env: %s", v)

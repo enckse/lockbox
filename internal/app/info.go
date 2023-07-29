@@ -42,32 +42,27 @@ func info(command string, args []string) ([]string, error) {
 			return nil, err
 		}
 		return results, nil
-	case EnvCommand, BashCommand, ZshCommand:
-		defaultFlag := BashDefaultsCommand
-		secondFlag := ""
-		isEnv := command == EnvCommand
-		if isEnv {
-			defaultFlag = EnvDefaultsCommand
-			secondFlag = EnvShortCommand
+	case EnvCommand:
+		if len(args) != 0 {
+			return nil, errors.New("invalid env command")
 		}
-		defaults, short, err := getInfoDefault(args, defaultFlag, secondFlag)
+		return config.Environ(), nil
+	case BashCommand, ZshCommand:
+		defaultFlag := BashDefaultsCommand
+		if command == ZshCommand {
+			defaultFlag = ZshDefaultsCommand
+		}
+		defaults, err := getInfoDefault(args, defaultFlag)
 		if err != nil {
 			return nil, err
-		}
-		if isEnv {
-			if short {
-				return config.Environ(), nil
-			}
-			return config.ListEnvironmentVariables(!defaults), nil
 		}
 		return GenerateCompletions(command == BashCommand, defaults)
 	}
 	return nil, nil
 }
 
-func getInfoDefault(args []string, possibleArg, otherArg string) (bool, bool, error) {
+func getInfoDefault(args []string, possibleArg string) (bool, error) {
 	first := false
-	second := false
 	invalid := false
 	switch len(args) {
 	case 0:
@@ -78,16 +73,12 @@ func getInfoDefault(args []string, possibleArg, otherArg string) (bool, bool, er
 			first = true
 		} else {
 			invalid = true
-			if otherArg != "" && arg == otherArg {
-				invalid = false
-				second = true
-			}
 		}
 	default:
 		invalid = true
 	}
 	if invalid {
-		return false, false, errors.New("invalid argument")
+		return false, errors.New("invalid argument")
 	}
-	return first, second, nil
+	return first, nil
 }

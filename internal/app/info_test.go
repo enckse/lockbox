@@ -76,43 +76,25 @@ func TestEnvInfo(t *testing.T) {
 	os.Clearenv()
 	var buf bytes.Buffer
 	ok, err := app.Info(&buf, "env", []string{})
-	if !ok || err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if buf.String() == "" {
-		t.Error("nothing written")
-	}
-	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"defaults"})
-	if !ok || err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if buf.String() == "" {
-		t.Error("nothing written")
-	}
-	if _, err = app.Info(&buf, "env", []string{"default"}); err.Error() != "invalid argument" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid argument" {
-		t.Errorf("invalid error: %v", err)
-	}
-	os.Clearenv()
-	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"short"})
 	if ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() != "" {
-		t.Error("something written")
+		t.Error("nothing written")
 	}
 	os.Setenv("LOCKBOX_TEST", "1")
-	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"short"})
+	ok, err = app.Info(&buf, "env", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() == "" {
 		t.Error("nothing written")
+	}
+	if _, err = app.Info(&buf, "env", []string{"defaults"}); err.Error() != "invalid env command" {
+		t.Errorf("invalid error: %v", err)
+	}
+	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid env command" {
+		t.Errorf("invalid error: %v", err)
 	}
 }
 

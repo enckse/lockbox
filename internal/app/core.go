@@ -52,10 +52,6 @@ const (
 	TOTPListCommand = ListCommand
 	// TOTPOnceCommand will perform like a normal totp request but not refresh
 	TOTPOnceCommand = "once"
-	// EnvDefaultsCommand will display the default env variables, not those set
-	EnvDefaultsCommand = "defaults"
-	// EnvShortCommand will output the set environment variables
-	EnvShortCommand = "short"
 	// BashCommand is the command to generate bash completions
 	BashCommand = "bash"
 	// BashDefaultsCommand will generate environment agnostic completions
@@ -213,7 +209,7 @@ func Usage(verbose bool) ([]string, error) {
 		}
 		results = append(results, strings.Split(strings.TrimSpace(doc), "\n")...)
 		results = append(results, "")
-		results = append(results, config.ListEnvironmentVariables(false)...)
+		results = append(results, config.ListEnvironmentVariables()...)
 	}
 	return append(usage, results...), nil
 }

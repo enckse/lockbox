@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"net/url"
-	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -150,16 +149,12 @@ func GetKey() ([]byte, error) {
 	return b, nil
 }
 
-// ListEnvironmentVariables will print information about env variables and potential/set values
-func ListEnvironmentVariables(showValues bool) []string {
-	out := environmentOutput{showValues: showValues}
+// ListEnvironmentVariables will print information about env variables
+func ListEnvironmentVariables() []string {
 	var results []string
 	for _, item := range []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig} {
 		env := item.self()
 		value, allow := item.values()
-		if out.showValues {
-			value = os.Getenv(env.key)
-		}
 		if len(value) == 0 {
 			value = "(unset)"
 		}
@@ -169,9 +164,10 @@ func ListEnvironmentVariables(showValues bool) []string {
 		if r != "" {
 			requirement = r
 		}
-		text := fmt.Sprintf("\n%s\n  %s\n\n  requirement: %s\n  value: %s\n  options: %s\n", env.key, description, requirement, value, strings.Join(allow, "|"))
+		text := fmt.Sprintf("\n%s\n  %s\n\n  requirement: %s\n  default: %s\n  options: %s\n", env.key, description, requirement, value, strings.Join(allow, "|"))
 		results = append(results, text)
 	}
+	sort.Strings(results)
 	return results
 }
 

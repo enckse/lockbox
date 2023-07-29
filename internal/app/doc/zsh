@@ -15,11 +15,6 @@ _{{ $.Executable }}() {
     ;;
     *)
       case $words[2] in
-        "{{ $.EnvCommand }}")
-          if [ "$len" -eq 3 ]; then
-            compadd "$@" "{{ $.EnvShortCommand }}"
-          fi
-        ;;
         "{{ $.HelpCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" "{{ $.HelpAdvancedCommand }}"
