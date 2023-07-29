@@ -84,8 +84,7 @@ func TestParseWindows(t *testing.T) {
 }
 
 func TestNewEnvFiles(t *testing.T) {
-	os.Setenv("LOCKBOX_ENV", "")
-	os.Setenv("HOME", "test")
+	os.Setenv("LOCKBOX_ENV", "none")
 	f, err := config.NewEnvFiles()
 	if len(f) != 0 || err != nil {
 		t.Errorf("invalid files: %v %v", f, err)
@@ -95,6 +94,7 @@ func TestNewEnvFiles(t *testing.T) {
 	if len(f) != 1 || f[0] != "test" || err != nil {
 		t.Errorf("invalid files: %v %v", f, err)
 	}
+	os.Setenv("HOME", "test")
 	os.Setenv("LOCKBOX_ENV", "detect")
 	f, err = config.NewEnvFiles()
 	if len(f) != 2 || err != nil {

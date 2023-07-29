@@ -192,7 +192,7 @@ if [ -z "$1" ]; then
 fi
 
 _unset
-unset LOCKBOX_ENV
+export LOCKBOX_ENV="none"
 mkdir -p "$DATA"
 find "$DATA" -type f -delete
 

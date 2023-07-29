@@ -19,6 +19,7 @@ const (
 	yes                  = "yes"
 	no                   = "no"
 	detectEnvironment    = "detect"
+	noEnvironment        = "none"
 	envFile              = "lockbox.env"
 	// MacOSPlatform is the macos indicator for platform
 	MacOSPlatform = "macos"
@@ -283,7 +284,7 @@ func ParseColorWindow(windowString string) ([]ColorWindow, error) {
 // it will also set the environment to empty for the caller
 func NewEnvFiles() ([]string, error) {
 	v := EnvConfig.Get()
-	if v == "" {
+	if v == "" || v == noEnvironment {
 		return []string{}, nil
 	}
 	EnvConfig.Set("")

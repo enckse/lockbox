@@ -19,7 +19,7 @@ const (
 	plainKeyMode         = "plaintext"
 	commandKeyMode       = "command"
 	commandArgsExample   = "[cmd args...]"
-	fileExample          = "file"
+	fileExample          = "<file>"
 	detectedValue        = "(detected)"
 	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
@@ -64,7 +64,7 @@ var (
 	// EnvStore is the location of the keepass file/store
 	EnvStore = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "STORE", desc: "directory to the database file", requirement: "must be set"}, canDefault: false, allowed: []string{fileExample}}
 	// EnvHookDir is the directory of hooks to execute
-	EnvHookDir = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "HOOKDIR", desc: "the path to hooks to execute on actions against the database"}, allowed: []string{"directory"}, canDefault: true, defaultValue: ""}
+	EnvHookDir = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "HOOKDIR", desc: "the path to hooks to execute on actions against the database"}, allowed: []string{"<directory>"}, canDefault: true, defaultValue: ""}
 	// EnvClipCopy allows overriding the clipboard copy command
 	EnvClipCopy = EnvironmentCommand{environmentBase: environmentBase{key: clipBaseEnv + "COPY", desc: "override the detected platform copy command"}}
 	// EnvClipPaste allows overriding the clipboard paste command
@@ -82,7 +82,7 @@ var (
 	envKeyMode    = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: "how to retrieve the database store password"}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
 	envKey        = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("the database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 	// EnvConfig is the location of the config file to read environment variables from
-	EnvConfig = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("allows setting a specific file of environment variables\nfor lockbox to read and use as configuration values (an '.env' file)\nthe keyword '%s' will search for a file in the following paths,\nmatching the first:\n%v", detectEnvironment, detectEnvironmentPaths)}, canDefault: false, allowed: []string{detectEnvironment, fileExample}}
+	EnvConfig = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("allows setting a specific file of environment variables\nfor lockbox to read and use as configuration values (an '.env' file).\nthe keyword '%s' will disable this functionality\nthe keyword '%s' will search for a file in the following paths\nin user's home directory\nmatching the first:\n%v", noEnvironment, detectEnvironment, detectEnvironmentPaths)}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
 )
 
 // GetReKey will get the rekey environment settings
