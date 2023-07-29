@@ -357,7 +357,25 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	}
 	result := inputs
 	for cycles > 0 {
-		result = expandParsed(result)
+		expanded := expandParsed(result)
+		if len(expanded) == len(result) {
+			same := true
+			for k, v := range expanded {
+				val, ok := result[k]
+				if !ok {
+					same = false
+					break
+				}
+				if val != v {
+					same = false
+					break
+				}
+			}
+			if same {
+				return expanded, nil
+			}
+		}
+		result = expanded
 		cycles--
 	}
 	return result, nil

@@ -198,7 +198,7 @@ func TestExpandParsed(t *testing.T) {
 	ins["OTHER_FIRST"] = "2"
 	ins["OTHER_OTHER"] = "$ANOTHER_TEST|$TEST_ABC|$OTHER_TEST"
 	ins["OTHER"] = "$OTHER_OTHER|$OTHER_FIRST"
-	os.Setenv("LOCKBOX_ENV_EXPANDS", "4")
+	os.Setenv("LOCKBOX_ENV_EXPANDS", "20")
 	r, err = config.ExpandParsed(ins)
 	if err != nil || len(r) != 4 || r["TEST"] != "2" || r["OTHER"] != "2|2|2|2" || r["OTHER_OTHER"] != "2|2|2" {
 		t.Errorf("invalid expand: %v", r)
