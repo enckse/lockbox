@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/enckse/lockbox/internal/config"
@@ -23,6 +25,14 @@ func Info(w io.Writer, command string, args []string) (bool, error) {
 	return false, nil
 }
 
+func exeName() (string, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Base(exe), nil
+}
+
 func info(command string, args []string) ([]string, error) {
 	switch command {
 	case HelpCommand:
@@ -37,7 +47,11 @@ func info(command string, args []string) ([]string, error) {
 				return nil, errors.New("invalid help option")
 			}
 		}
-		results, err := Usage(isAdvanced)
+		exe, err := exeName()
+		if err != nil {
+			return nil, err
+		}
+		results, err := Usage(isAdvanced, exe)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +70,11 @@ func info(command string, args []string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		return GenerateCompletions(command == BashCommand, defaults)
+		exe, err := exeName()
+		if err != nil {
+			return nil, err
+		}
+		return GenerateCompletions(command == BashCommand, defaults, exe)
 	}
 	return nil, nil
 }

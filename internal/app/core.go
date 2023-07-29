@@ -2,6 +2,7 @@
 package app
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/template"
 
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/config"
@@ -89,6 +91,19 @@ type (
 		args []string
 		tx   *backend.Transaction
 	}
+	// Documentation is how documentation segments are templated
+	Documentation struct {
+		Executable    string
+		MoveCommand   string
+		RemoveCommand string
+		ReKeyCommand  string
+		ReKey         struct {
+			Store   string
+			KeyFile string
+			Key     string
+			KeyMode string
+		}
+	}
 )
 
 // NewDefaultCommand creates a new app command
@@ -161,20 +176,8 @@ func commandText(args, name, desc string) string {
 	return fmt.Sprintf("  %-15s %-10s    %s", name, arguments, desc)
 }
 
-func exeName() (string, error) {
-	n, err := os.Executable()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Base(n), nil
-}
-
 // Usage return usage information
-func Usage(verbose bool) ([]string, error) {
-	name, err := exeName()
-	if err != nil {
-		return nil, err
-	}
+func Usage(verbose bool, exe string) ([]string, error) {
 	var results []string
 	results = append(results, command(BashCommand, "", "generate user environment bash completion"))
 	results = append(results, subCommand(BashCommand, BashDefaultsCommand, "", "generate default bash completion"))
@@ -200,18 +203,40 @@ func Usage(verbose bool) ([]string, error) {
 	results = append(results, command(ZshCommand, "", "generate user environment zsh completion"))
 	results = append(results, subCommand(ZshCommand, ZshDefaultsCommand, "", "generate default zsh completion"))
 	sort.Strings(results)
-	usage := []string{fmt.Sprintf("%s usage:", name)}
+	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {
 		results = append(results, "")
 		doc, err := readDoc("details")
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, strings.Split(strings.TrimSpace(doc), "\n")...)
+		t, err := template.New("d").Parse(doc)
+		if err != nil {
+			return nil, err
+		}
+		document := Documentation{
+			Executable:    filepath.Base(exe),
+			MoveCommand:   MoveCommand,
+			RemoveCommand: RemoveCommand,
+			ReKeyCommand:  ReKeyCommand,
+		}
+		document.ReKey.Store = setDocFlag(config.ReKeyStoreFlag)
+		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)
+		document.ReKey.KeyMode = setDocFlag(config.ReKeyKeyModeFlag)
+		document.ReKey.KeyFile = setDocFlag(config.ReKeyKeyModeFlag)
+		var buf bytes.Buffer
+		if err := t.Execute(&buf, document); err != nil {
+			return nil, err
+		}
+		results = append(results, strings.Split(strings.TrimSpace(buf.String()), "\n")...)
 		results = append(results, "")
 		results = append(results, config.ListEnvironmentVariables()...)
 	}
 	return append(usage, results...), nil
+}
+
+func setDocFlag(f string) string {
+	return fmt.Sprintf("-%s=", f)
 }
 
 func readDoc(doc string) (string, error) {

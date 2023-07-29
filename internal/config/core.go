@@ -31,6 +31,14 @@ const (
 	// WindowsLinuxPlatform for WSL subsystems
 	WindowsLinuxPlatform = "wsl"
 	unknownPlatform      = ""
+	// ReKeyStoreFlag is the flag used for rekey to set the store
+	ReKeyStoreFlag = "store"
+	// ReKeyKeyFileFlag is the flag used for rekey to set the keyfile
+	ReKeyKeyFileFlag = "keyfile"
+	// ReKeyKeyFlag is the flag used for rekey to set the key
+	ReKeyKeyFlag = "key"
+	// ReKeyKeyModeFlag is the flag used for rekey to set the key mode
+	ReKeyKeyModeFlag = "keymode"
 )
 
 var detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}

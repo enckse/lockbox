@@ -1,30 +1,30 @@
 [database]
-While 'lb' uses a kdbx file (version 4), it is opinionated about how to store
-data within the file. This means 'lb' should be the only way a user normally
+While '{{ $.Executable }}' uses a kdbx file (version 4), it is opinionated about how to store
+data within the file. This means '{{ $.Executable }}' should be the only way a user normally
 interacts with or changes the underlying database. However as the file is a 
 normal kdbx file format (e.g. can be opened in tools supporting the format) it
 is possible to use the database in those applications, just take caution when
-changing it outside of 'lb' usage. If a database not normally used by 'lb' is
-to be used by 'lb', try using the various readonly settings to control
+changing it outside of '{{ $.Executable }}' usage. If a database not normally used by '{{ $.Executable }}' is
+to be used by '{{ $.Executable }}', try using the various readonly settings to control
 interactions.
 
 [globs]
-The 'rm' and 'mv' command can handle a simplistic glob if it is at the END
+The '{{ $.RemoveCommand }}' and '{{ $.MoveCommand }}' command can handle a simplistic glob if it is at the END
 of the path. This allows for bulk-removal of entries at multiple levels.
 Confirmation will still be required for removal (matching entries will be
 listed).
 
-For 'mv' the destination must NOT be an entry but the final destination
+For '{{ $.MoveCommand }}' the destination must NOT be an entry but the final destination
 location for all matched entries. Overwriting is not allowed by moving
 via glob and moving via globs can ONLY be done via leaf level globs.
 
 Examples:
 
-lb rm path/to/leaf/dir/*
+{{ $.Executable }} {{ $.RemoveCommand }} path/to/leaf/dir/*
 
-lb rm path/to/*
+{{ $.Executable }} {{ $.RemoveCommand }} path/to/*
 
-lb mv path/to/* new/path/
+{{ $.Executable }} {{ $.MoveCommand }} path/to/* new/path/
 
 [clipboard]
 By default clipboard commands are detected via determing the platform and 
@@ -32,17 +32,19 @@ utilizing default commands to interact with (copy to/paste to) the clipboard.
 These settings can be overriden via environment variables.
 
 [totp]
-By default 'lb' tries to use some reasonable defaults to setup/manage oauth
+By default '{{ $.Executable }}' tries to use some reasonable defaults to setup/manage oauth
 token inputs and displaying of code outputs. Many of these settings can be
 changed via environment variables.
 
 [rekey]
-The password store can have the key (and file) changed via the 'rekey'
-subcommand. This command requires a '-store' value and some combination
-of '-key=', '-keymode=', and '-keyfile=' depending on the new database
+The password store can have the key (and file) changed via the '{{ $.ReKeyCommand }}'
+subcommand. This command requires a '{{ $.ReKey.Store }}' value and some combination
+of '{{ $.ReKey.Key }}', '{{ $.ReKey.KeyMode }}', and '{{ $.ReKey.KeyFile }}' depending on the new database
 credential preferences. The settings correspond to the 'LOCKBOX_'
-settings normally used when running `lb`.
+settings normally used when running `{{ $.Executable }}`.
+
+Note that is an advanced feature and should be used with caution/backups/etc.
 
 [environment variables]
 
-The following environment variables can alter how 'lb' works.
+The following environment variables can alter how '{{ $.Executable }}' works.

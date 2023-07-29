@@ -87,10 +87,10 @@ var (
 // GetReKey will get the rekey environment settings
 func GetReKey(args []string) ([]string, error) {
 	set := flag.NewFlagSet("rekey", flag.ExitOnError)
-	store := set.String("store", "", "new store")
-	key := set.String("key", "", "new key")
-	keyFile := set.String("keyfile", "", "new keyfile")
-	keyMode := set.String("keymode", "", "new keymode")
+	store := set.String(ReKeyStoreFlag, "", "new store")
+	key := set.String(ReKeyKeyFlag, "", "new key")
+	keyFile := set.String(ReKeyKeyFileFlag, "", "new keyfile")
+	keyMode := set.String(ReKeyKeyModeFlag, "", "new keymode")
 	if err := set.Parse(args); err != nil {
 		return nil, err
 	}

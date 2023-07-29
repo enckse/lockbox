@@ -35,13 +35,9 @@ type (
 )
 
 // GenerateCompletions handles creating shell completion outputs
-func GenerateCompletions(isBash, defaults bool) ([]string, error) {
-	name, err := exeName()
-	if err != nil {
-		return nil, err
-	}
+func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 	c := Completions{
-		Executable:          name,
+		Executable:          exe,
 		InsertCommand:       InsertCommand,
 		RemoveCommand:       RemoveCommand,
 		TOTPSubCommands:     []string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand},
@@ -54,8 +50,8 @@ func GenerateCompletions(isBash, defaults bool) ([]string, error) {
 		HelpAdvancedCommand: HelpAdvancedCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
-		DoList:              fmt.Sprintf("%s %s", name, ListCommand),
-		DoTOTPList:          fmt.Sprintf("%s %s %s", name, TOTPCommand, TOTPListCommand),
+		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
+		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 		Options:             []string{MultiLineCommand, EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 	}
 	isReadOnly := false
