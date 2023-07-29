@@ -194,6 +194,10 @@ fi
 
 _unset
 export LOCKBOX_ENV="none"
+if ! ${LB_BINARY} help >/dev/null; then
+  echo "help unavailable by default...fatal"
+  exit 1
+fi
 mkdir -p "$DATA"
 find "$DATA" -type f -delete
 
