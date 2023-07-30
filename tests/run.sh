@@ -194,6 +194,10 @@ fi
 
 _unset
 export LOCKBOX_ENV="none"
+if [ ! -x "${LB_BINARY}" ]; then
+  echo "binary missing?"
+  exit 1
+fi
 if ! ${LB_BINARY} help >/dev/null; then
   echo "help unavailable by default...fatal"
   exit 1

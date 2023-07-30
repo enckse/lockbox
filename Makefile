@@ -14,9 +14,11 @@ endif
 	go build $(GOFLAGS) -ldflags "-X main.version=$(VERSION)" -o $@ cmd/main.go
 
 unittests:
-	$(VARS) go test -v ./...
+	$(VARS) go test ./...
 
-check: $(TARGET) unittests
+check: unittests runs
+
+runs: $(TARGET)
 	$(VARS) make -C tests
 
 clean:
