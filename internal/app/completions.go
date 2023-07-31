@@ -52,7 +52,7 @@ func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
-		Options:             []string{MultiLineCommand, EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
+		Options:             []string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 	}
 	isReadOnly := false
 	isClip := true
@@ -86,7 +86,7 @@ func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 		c.TOTPSubCommands = append(c.TOTPSubCommands, TOTPClipCommand)
 	}
 	if !c.ReadOnly {
-		c.Options = append(c.Options, MoveCommand, RemoveCommand, InsertCommand)
+		c.Options = append(c.Options, MoveCommand, RemoveCommand, InsertCommand, MultiLineCommand)
 		c.TOTPSubCommands = append(c.TOTPSubCommands, TOTPInsertCommand)
 	}
 	if c.CanTOTP {
