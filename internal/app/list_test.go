@@ -2,18 +2,30 @@ package app_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/backend"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
+func testFile() string {
+	dir := "testdata"
+	file := filepath.Join(dir, "test.kdbx")
+	if !platform.PathExists(dir) {
+		os.Mkdir(dir, 0o755)
+	}
+	return file
+}
+
 func fullSetup(t *testing.T, keep bool) *backend.Transaction {
+	file := testFile()
 	if !keep {
-		os.Remove("test.kdbx")
+		os.Remove(file)
 	}
 	os.Setenv("LOCKBOX_READONLY", "no")
-	os.Setenv("LOCKBOX_STORE", "test.kdbx")
+	os.Setenv("LOCKBOX_STORE", file)
 	os.Setenv("LOCKBOX_KEY", "test")
 	os.Setenv("LOCKBOX_KEYFILE", "")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")

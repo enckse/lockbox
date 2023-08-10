@@ -23,7 +23,8 @@ runs: $(TARGET)
 
 clean:
 	@rm -rf $(BUILD) tests/bin
-	@find internal/ -type f -name "*.kdbx" -delete
+	@find internal/ -type f -wholename "*testdata*" -delete
+	@find internal/ -type d -empty -delete
 
 .runci:
 	rm -rf .git

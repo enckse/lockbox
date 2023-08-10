@@ -8,12 +8,13 @@ import (
 )
 
 func TestConv(t *testing.T) {
+	fullSetup(t, false)
 	c := newMockCommand(t)
 	if err := app.Conv(c); err.Error() != "conv requires a file" {
 		t.Errorf("invalid error: %v", err)
 	}
 	c.buf = bytes.Buffer{}
-	c.args = []string{"test.kdbx"}
+	c.args = []string{testFile()}
 	if err := app.Conv(c); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

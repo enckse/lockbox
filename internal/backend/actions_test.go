@@ -3,17 +3,32 @@ package backend_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/backend"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
+const (
+	testDir = "testdata"
+)
+
+func testFile(name string) string {
+	file := filepath.Join(testDir, name)
+	if !platform.PathExists(testDir) {
+		os.Mkdir(testDir, 0o755)
+	}
+	return file
+}
+
 func fullSetup(t *testing.T, keep bool) *backend.Transaction {
+	file := testFile("test.kdbx")
 	if !keep {
-		os.Remove("test.kdbx")
+		os.Remove(file)
 	}
 	os.Setenv("LOCKBOX_READONLY", "no")
-	os.Setenv("LOCKBOX_STORE", "test.kdbx")
+	os.Setenv("LOCKBOX_STORE", file)
 	os.Setenv("LOCKBOX_KEY", "test")
 	os.Setenv("LOCKBOX_KEYFILE", "")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
@@ -29,16 +44,18 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 
 func TestKeyFile(t *testing.T) {
 	os.Clearenv()
-	os.Remove("keyfile_test.kdbx")
+	file := testFile("keyfile_test.kdbx")
+	keyFile := testFile("file.key")
+	os.Remove(file)
 	os.Setenv("LOCKBOX_READONLY", "no")
-	os.Setenv("LOCKBOX_STORE", "keyfile_test.kdbx")
+	os.Setenv("LOCKBOX_STORE", file)
 	os.Setenv("LOCKBOX_KEY", "test")
-	os.Setenv("LOCKBOX_KEYFILE", "file.key.kdbx")
+	os.Setenv("LOCKBOX_KEYFILE", keyFile)
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_TOTP", "totp")
 	os.Setenv("LOCKBOX_HOOKDIR", "")
 	os.Setenv("LOCKBOX_SET_MODTIME", "")
-	os.WriteFile("file.key.kdbx", []byte("test"), 0o644)
+	os.WriteFile(keyFile, []byte("test"), 0o644)
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -253,15 +270,17 @@ func TestKeyAndOrKeyFile(t *testing.T) {
 
 func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 	os.Clearenv()
-	os.Remove("keyorkeyfile_test.kdbx")
-	os.Setenv("LOCKBOX_STORE", "keyorkeyfile_test.kdbx")
+	file := testFile("keyorkeyfile.kdbx")
+	os.Remove(file)
+	os.Setenv("LOCKBOX_STORE", file)
 	if key {
 		os.Setenv("LOCKBOX_KEY", "test")
 		os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	}
 	if keyFile {
-		os.Setenv("LOCKBOX_KEYFILE", "keyfileor.key.kdbx")
-		os.WriteFile("keyfileor.key.kdbx", []byte("test"), 0o644)
+		key := testFile("keyfileor.key")
+		os.Setenv("LOCKBOX_KEYFILE", key)
+		os.WriteFile(key, []byte("test"), 0o644)
 	}
 	tr, err := backend.NewTransaction()
 	if err != nil {

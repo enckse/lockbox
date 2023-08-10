@@ -25,7 +25,7 @@ func TestHooks(t *testing.T) {
 	if _, err := backend.NewHook("b", backend.InsertAction); err.Error() != "hook directory does NOT exist" {
 		t.Errorf("wrong error: %v", err)
 	}
-	testPath := "hooks.kdbx"
+	testPath := filepath.Join("testdata", "hooks.kdbx")
 	os.RemoveAll(testPath)
 	if err := os.MkdirAll(testPath, 0o755); err != nil {
 		t.Errorf("failed, mkdir: %v", err)

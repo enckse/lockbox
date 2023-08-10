@@ -39,11 +39,12 @@ func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
 }
 
 func fullTOTPSetup(t *testing.T, keep bool) *backend.Transaction {
+	file := testFile()
 	if !keep {
-		os.Remove("test.kdbx")
+		os.Remove(file)
 	}
 	os.Setenv("LOCKBOX_READONLY", "no")
-	os.Setenv("LOCKBOX_STORE", "test.kdbx")
+	os.Setenv("LOCKBOX_STORE", file)
 	os.Setenv("LOCKBOX_KEY", "test")
 	os.Setenv("LOCKBOX_KEYFILE", "")
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
