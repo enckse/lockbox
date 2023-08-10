@@ -151,11 +151,11 @@ func getPathName(entry gokeepasslib.Entry) string {
 	return entry.GetTitle()
 }
 
-func value(key string, value string) gokeepasslib.ValueData {
+func value(key, value string) gokeepasslib.ValueData {
 	return gokeepasslib.ValueData{Key: key, Value: gokeepasslib.V{Content: value}}
 }
 
-func protectedValue(key string, value string) gokeepasslib.ValueData {
+func protectedValue(key, value string) gokeepasslib.ValueData {
 	return gokeepasslib.ValueData{
 		Key:   key,
 		Value: gokeepasslib.V{Content: value, Protected: wrappers.NewBoolWrapper(true)},
