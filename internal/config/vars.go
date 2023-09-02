@@ -136,7 +136,7 @@ func GetKey() ([]byte, error) {
 		cmd := exec.Command(parts[0], parts[1:]...)
 		b, err := cmd.Output()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("key command failed: %w", err)
 		}
 		data = b
 	case plainKeyMode:
