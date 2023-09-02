@@ -8,6 +8,7 @@ CLIP_COPY="$DATA/clip.copy"
 CLIP_PASTE="$DATA/clip.paste"
 
 _execute() {
+  local oldmode oldkey
   export LOCKBOX_HOOKDIR=""
   export LOCKBOX_STORE="${DATA}/passwords.kdbx"
   export LOCKBOX_TOTP=totp
@@ -16,6 +17,21 @@ _execute() {
   export LOCKBOX_KEYMODE=plaintext
   export LOCKBOX_JSON_DATA_HASH_LENGTH=0
   echo test2 |${LB_BINARY} insert keys/k/one2
+  oldmode="$LOCKBOX_KEYMODE"
+  oldkey="$LOCKBOX_KEY"
+  if [ "$oldkey" != "" ]; then
+    export LOCKBOX_INTERACTIVE=yes
+    export LOCKBOX_KEYMODE=interactive
+    export LOCKBOX_KEY=""
+  else
+    printf "password: "
+  fi
+  echo "$oldkey" | ${LB_BINARY} ls 2>/dev/null
+  if [ "$oldkey" != "" ]; then
+    export LOCKBOX_INTERACTIVE=no
+    export LOCKBOX_KEYMODE="$oldmode"
+    export LOCKBOX_KEY="$oldkey"
+  fi
   echo test |${LB_BINARY} insert keys/k/one
   echo test |${LB_BINARY} insert key/a/one
   echo test |${LB_BINARY} insert keys/k/one

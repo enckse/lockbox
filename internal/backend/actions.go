@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/platform"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -34,7 +35,11 @@ func (t *Transaction) act(cb action) error {
 	if err != nil {
 		return err
 	}
-	k := string(key)
+	useKey, err := platform.ReadKey(key, platform.ReadInteractivePassword)
+	if err != nil {
+		return err
+	}
+	k := string(useKey)
 	file := config.EnvKeyFile.Get()
 	if !t.exists {
 		if err := create(t.file, k, file); err != nil {

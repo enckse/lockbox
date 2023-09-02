@@ -16,6 +16,7 @@ const (
 	prefixKey            = "LOCKBOX_"
 	clipBaseEnv          = prefixKey + "CLIP_"
 	plainKeyMode         = "plaintext"
+	interactiveKeyMode   = "interactive"
 	commandKeyMode       = "command"
 	commandArgsExample   = "[cmd args...]"
 	fileExample          = "<file>"
@@ -81,7 +82,7 @@ var (
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "Override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code."}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
 	// EnvConfig is the location of the config file to read environment variables from
 	EnvConfig        = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("Allows setting a specific file of environment variables for lockbox\nto read and use as configuration values (an '.env' file). The keyword\n'%s' will disable this functionality the keyword '%s' will search\nfor a file in the following paths in user's home directory matching\nthe first file found.\n\ndefault search paths:\n%v\n\nNote that this setting is not output as part of the environment.", noEnvironment, detectEnvironment, detectEnvironmentPaths)}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
-	envKeyMode       = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: "How to retrieve the database store password."}, allowed: []string{commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
+	envKeyMode       = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: "How to retrieve the database store password."}, allowed: []string{commandKeyMode, plainKeyMode, interactiveKeyMode}, canDefault: true, defaultValue: commandKeyMode}
 	envKey           = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password.", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 	envConfigExpands = EnvironmentInt{environmentBase: environmentBase{key: EnvConfig.key + "_EXPANDS", desc: "The maximum number of times to expand the input env to resolve variables,\nset to 0 to disable expansion. This value can NOT be an expansion itself\nif set in the env config file."}, shortDesc: "max expands", allowZero: true, defaultValue: 20}
 )
@@ -121,13 +122,27 @@ func GetReKey(args []string) ([]string, error) {
 }
 
 // GetKey will get the encryption key setup for lb
-func GetKey() ([]byte, error) {
+func GetKey() (*Key, error) {
 	useKey := envKey.Get()
+	keyMode := envKeyMode.Get()
+	if keyMode == interactiveKeyMode {
+		isInteractive, err := EnvInteractive.Get()
+		if err != nil {
+			return nil, err
+		}
+		if !isInteractive {
+			return nil, errors.New("interactive key mode requested in non-interactive mode")
+		}
+		if useKey != "" {
+			return nil, errors.New("key can NOT be set in interactive mode")
+		}
+		return &Key{}, nil
+	}
 	if useKey == "" {
 		return nil, nil
 	}
 	var data []byte
-	switch envKeyMode.Get() {
+	switch keyMode {
 	case commandKeyMode:
 		parts, err := shlex(useKey)
 		if err != nil {
@@ -148,7 +163,7 @@ func GetKey() ([]byte, error) {
 	if len(b) == 0 {
 		return nil, errors.New("key is empty")
 	}
-	return b, nil
+	return &Key{key: b}, nil
 }
 
 // ListEnvironmentVariables will print information about env variables

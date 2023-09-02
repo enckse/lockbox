@@ -227,3 +227,10 @@ func TestExpandParsed(t *testing.T) {
 		t.Errorf("invalid expand: %v", r)
 	}
 }
+
+func TestKey(t *testing.T) {
+	k := config.Key{}
+	if !k.Interactive() || k.Key() != nil {
+		t.Error("should be interactive without data")
+	}
+}
