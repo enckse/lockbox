@@ -2,6 +2,7 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -11,12 +12,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/muesli/reflow/wordwrap"
 	"mvdan.cc/sh/v3/shell"
 )
 
 const (
 	colorWindowDelimiter = ","
 	colorWindowSpan      = ":"
+	exampleColorWindow   = "start" + colorWindowSpan + "end"
 	yes                  = "yes"
 	no                   = "no"
 	detectEnvironment    = "detect"
@@ -41,7 +44,10 @@ const (
 	ReKeyKeyModeFlag = "keymode"
 )
 
-var detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}
+var (
+	detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}
+	exampleColorWindows    = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
+)
 
 type (
 	// JSONOutputMode is the output mode definition
@@ -415,4 +421,39 @@ func expandParsed(inputs map[string]string) map[string]string {
 		})
 	}
 	return result
+}
+
+// Wrap performs simple block text word wrapping
+func Wrap(indent uint, in string) string {
+	var sections []string
+	var cur []string
+	for _, line := range strings.Split(strings.TrimSpace(in), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			if len(cur) > 0 {
+				sections = append(sections, strings.Join(cur, " "))
+				cur = []string{}
+			}
+			continue
+		}
+		cur = append(cur, line)
+	}
+	if len(cur) > 0 {
+		sections = append(sections, strings.Join(cur, " "))
+	}
+	var out bytes.Buffer
+	indenting := ""
+	var cnt uint
+	for cnt < indent {
+		indenting = fmt.Sprintf("%s ", indenting)
+		cnt++
+	}
+	indenture := int(80 - indent)
+	for _, s := range sections {
+		for _, line := range strings.Split(wordwrap.String(s, indenture), "\n") {
+			fmt.Fprintf(&out, "%s%s\n", indenting, line)
+		}
+		fmt.Fprint(&out, "\n")
+	}
+	return out.String()
 }

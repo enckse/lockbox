@@ -16,7 +16,6 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
-	"github.com/muesli/reflow/wordwrap"
 )
 
 const (
@@ -268,28 +267,7 @@ func processDoc(header, file string, doc Documentation) (string, error) {
 	if err := t.Execute(&buf, doc); err != nil {
 		return "", err
 	}
-	var sections []string
-	var cur []string
-	for _, line := range strings.Split(strings.TrimSpace(buf.String()), "\n") {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			if len(cur) > 0 {
-				sections = append(sections, strings.Join(cur, " "))
-				cur = []string{}
-			}
-			continue
-		}
-		cur = append(cur, line)
-	}
-	if len(cur) > 0 {
-		sections = append(sections, strings.Join(cur, " "))
-	}
-	var out bytes.Buffer
-	fmt.Fprintf(&out, "%s\n", header)
-	for _, s := range sections {
-		fmt.Fprintf(&out, "%s\n\n", wordwrap.String(s, 80))
-	}
-	return out.String(), nil
+	return fmt.Sprintf("%s\n%s", header, config.Wrap(0, buf.String())), nil
 }
 
 func setDocFlag(f string) string {
