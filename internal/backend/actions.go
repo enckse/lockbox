@@ -31,7 +31,7 @@ func (t *Transaction) act(cb action) error {
 	if !t.valid {
 		return errors.New("invalid transaction")
 	}
-	key, err := config.GetKey()
+	key, err := config.GetKey(false)
 	if err != nil {
 		return err
 	}

@@ -79,40 +79,51 @@ func TestTOTP(t *testing.T) {
 func TestGetKey(t *testing.T) {
 	os.Setenv("LOCKBOX_KEY", "aaa")
 	os.Setenv("LOCKBOX_KEYMODE", "lak;jfea")
-	if k, err := config.GetKey(); err.Error() != "unknown keymode" || k != nil {
+	if k, err := config.GetKey(false); err.Error() != "unknown keymode" || k != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
 	os.Setenv("LOCKBOX_KEY", "")
-	if k, err := config.GetKey(); err != nil || k != nil {
+	if k, err := config.GetKey(false); err != nil || k != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_KEY", "key")
-	k, err := config.GetKey()
+	k, err := config.GetKey(false)
 	if err != nil || k == nil || string(k.Key()) != "key" || k.Interactive() {
+		t.Error("invalid key retrieval")
+	}
+	os.Setenv("LOCKBOX_KEY", "key")
+	k, err = config.GetKey(true)
+	if err != nil || k == nil || len(k.Key()) != 1 || k.Key()[0] != 0 || k.Interactive() {
 		t.Error("invalid key retrieval")
 	}
 	os.Setenv("LOCKBOX_KEYMODE", "command")
 	os.Setenv("LOCKBOX_KEY", "invalid command text is long and invalid via shlex")
-	if k, err := config.GetKey(); err == nil || k != nil {
+	if k, err := config.GetKey(false); err == nil || k != nil {
 		t.Error("should have failed")
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
 	os.Setenv("LOCKBOX_KEYMODE", "interactive")
 	os.Setenv("LOCKBOX_KEY", "")
-	if k, err := config.GetKey(); err != nil || k == nil || !k.Interactive() {
+	if k, err := config.GetKey(false); err != nil || k == nil || !k.Interactive() {
+		t.Errorf("invalid error: %v", err)
+	}
+	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
+	os.Setenv("LOCKBOX_KEYMODE", "interactive")
+	os.Setenv("LOCKBOX_KEY", "")
+	if k, err := config.GetKey(true); err != nil || k == nil || !k.Interactive() {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "no")
 	os.Setenv("LOCKBOX_KEYMODE", "interactive")
 	os.Setenv("LOCKBOX_KEY", "")
-	if k, err := config.GetKey(); err == nil || err.Error() != "interactive key mode requested in non-interactive mode" || k != nil {
+	if k, err := config.GetKey(false); err == nil || err.Error() != "interactive key mode requested in non-interactive mode" || k != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_INTERACTIVE", "yes")
 	os.Setenv("LOCKBOX_KEYMODE", "interactive")
 	os.Setenv("LOCKBOX_KEY", "aaa")
-	if k, err := config.GetKey(); err == nil || err.Error() != "key can NOT be set in interactive mode" || k != nil {
+	if k, err := config.GetKey(false); err == nil || err.Error() != "key can NOT be set in interactive mode" || k != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 }

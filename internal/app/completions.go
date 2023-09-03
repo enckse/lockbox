@@ -81,7 +81,7 @@ func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 		if noTOTP {
 			isTOTP = false
 		}
-		k, err := config.GetKey()
+		k, err := config.GetKey(true)
 		if err != nil {
 			return nil, err
 		}

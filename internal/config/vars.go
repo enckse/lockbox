@@ -122,7 +122,7 @@ func GetReKey(args []string) ([]string, error) {
 }
 
 // GetKey will get the encryption key setup for lb
-func GetKey() (*Key, error) {
+func GetKey(dryrun bool) (*Key, error) {
 	useKey := envKey.Get()
 	keyMode := envKeyMode.Get()
 	if keyMode == interactiveKeyMode {
@@ -140,6 +140,9 @@ func GetKey() (*Key, error) {
 	}
 	if useKey == "" {
 		return nil, nil
+	}
+	if dryrun {
+		return &Key{key: []byte{0}}, nil
 	}
 	var data []byte
 	switch keyMode {
