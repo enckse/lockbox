@@ -49,7 +49,7 @@ Note that is an advanced feature and should be used with caution/backups/etc.
 Completions are available for certain shells and, by default, assume all
 features of `{{ $.Executable }}` are enabled and available. When changing certain environment
 flags it may be useful to change the completion profile to more closely match
-the restricted command options, run `{{ $.Executable }} <shell> help` for information
+the restricted command options, run `{{ $.Executable }} <shell> {{ $.ShellHelpCommand }}` for information
 on how best to alter completion outputs.
 
 [environment variables]

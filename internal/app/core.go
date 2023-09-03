@@ -92,11 +92,12 @@ type (
 	}
 	// Documentation is how documentation segments are templated
 	Documentation struct {
-		Executable    string
-		MoveCommand   string
-		RemoveCommand string
-		ReKeyCommand  string
-		ReKey         struct {
+		Executable       string
+		MoveCommand      string
+		RemoveCommand    string
+		ReKeyCommand     string
+		ShellHelpCommand string
+		ReKey            struct {
 			Store   string
 			KeyFile string
 			Key     string
@@ -215,10 +216,11 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			return nil, err
 		}
 		document := Documentation{
-			Executable:    filepath.Base(exe),
-			MoveCommand:   MoveCommand,
-			RemoveCommand: RemoveCommand,
-			ReKeyCommand:  ReKeyCommand,
+			Executable:       filepath.Base(exe),
+			MoveCommand:      MoveCommand,
+			RemoveCommand:    RemoveCommand,
+			ReKeyCommand:     ReKeyCommand,
+			ShellHelpCommand: CompletionHelpCommand,
 		}
 		document.ReKey.Store = setDocFlag(config.ReKeyStoreFlag)
 		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)
