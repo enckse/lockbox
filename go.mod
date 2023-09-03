@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/aymanbagabas/go-osc52 v1.2.2
 	github.com/hashicorp/go-envparse v0.1.0
+	github.com/muesli/reflow v0.3.0
 	github.com/pquerna/otp v1.4.0
 	github.com/tobischo/gokeepasslib/v3 v3.5.1
 	mvdan.cc/sh/v3 v3.7.0
@@ -14,6 +15,8 @@ require (
 	github.com/aead/argon2 v0.0.0-20180111183520-a87724528b07 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
 	github.com/boombuler/barcode v1.0.1 // indirect
+	github.com/mattn/go-runewidth v0.0.12 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 )

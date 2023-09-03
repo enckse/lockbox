@@ -4,6 +4,7 @@ package app
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"github.com/enckse/lockbox/internal/backend"
 	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/platform"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 const (
@@ -71,6 +73,8 @@ const (
 	JSONCommand = "json"
 	// ZshCommand is the command to generate zsh completions
 	ZshCommand = "zsh"
+	docDir     = "doc"
+	textFile   = ".txt"
 )
 
 //go:embed doc/*
@@ -207,14 +211,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {
 		results = append(results, "")
-		doc, err := readDoc("details")
-		if err != nil {
-			return nil, err
-		}
-		t, err := template.New("d").Parse(doc)
-		if err != nil {
-			return nil, err
-		}
 		document := Documentation{
 			Executable:       filepath.Base(exe),
 			MoveCommand:      MoveCommand,
@@ -226,10 +222,32 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)
 		document.ReKey.KeyMode = setDocFlag(config.ReKeyKeyModeFlag)
 		document.ReKey.KeyFile = setDocFlag(config.ReKeyKeyModeFlag)
-		var buf bytes.Buffer
-		if err := t.Execute(&buf, document); err != nil {
+		files, err := docs.ReadDir(docDir)
+		if err != nil {
 			return nil, err
 		}
+		var buf bytes.Buffer
+		var env string
+		for _, f := range files {
+			n := f.Name()
+			if !strings.HasSuffix(n, textFile) {
+				continue
+			}
+			header := fmt.Sprintf("[%s]", strings.TrimSuffix(filepath.Base(n), textFile))
+			s, err := processDoc(header, n, document)
+			if err != nil {
+				return nil, err
+			}
+			if header == "[environment]" {
+				env = s
+			} else {
+				buf.WriteString(s)
+			}
+		}
+		if env == "" {
+			return nil, errors.New("no environment header configured")
+		}
+		buf.WriteString(env)
 		results = append(results, strings.Split(strings.TrimSpace(buf.String()), "\n")...)
 		results = append(results, "")
 		results = append(results, config.ListEnvironmentVariables()...)
@@ -237,12 +255,49 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	return append(usage, results...), nil
 }
 
+func processDoc(header, file string, doc Documentation) (string, error) {
+	b, err := readDoc(file)
+	if err != nil {
+		return "", err
+	}
+	t, err := template.New("d").Parse(string(b))
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, doc); err != nil {
+		return "", err
+	}
+	var sections []string
+	var cur []string
+	for _, line := range strings.Split(strings.TrimSpace(buf.String()), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			if len(cur) > 0 {
+				sections = append(sections, strings.Join(cur, " "))
+				cur = []string{}
+			}
+			continue
+		}
+		cur = append(cur, line)
+	}
+	if len(cur) > 0 {
+		sections = append(sections, strings.Join(cur, " "))
+	}
+	var out bytes.Buffer
+	fmt.Fprintf(&out, "%s\n", header)
+	for _, s := range sections {
+		fmt.Fprintf(&out, "%s\n\n", wordwrap.String(s, 80))
+	}
+	return out.String(), nil
+}
+
 func setDocFlag(f string) string {
 	return fmt.Sprintf("-%s=", f)
 }
 
 func readDoc(doc string) (string, error) {
-	b, err := docs.ReadFile(filepath.Join("doc", doc))
+	b, err := docs.ReadFile(filepath.Join(docDir, doc))
 	if err != nil {
 		return "", err
 	}

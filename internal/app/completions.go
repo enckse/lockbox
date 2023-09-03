@@ -161,17 +161,17 @@ export %s=<unknown>
 		CompletionEnv:       fmt.Sprintf("$%s", config.EnvironmentCompletionKey),
 	}
 
-	using, err := readDoc("zsh")
+	using, err := readDoc("zsh.sh")
 	if err != nil {
 		return nil, err
 	}
 	if isBash {
-		using, err = readDoc("bash")
+		using, err = readDoc("bash.sh")
 		if err != nil {
 			return nil, err
 		}
 	}
-	shellScript, err := readDoc("shell")
+	shellScript, err := readDoc("shell.sh")
 	if err != nil {
 		return nil, err
 	}

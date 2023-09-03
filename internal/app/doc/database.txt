@@ -1,0 +1,8 @@
+While '{{ $.Executable }}' uses a kdbx file (version 4), it is opinionated about how to store
+data within the file. This means '{{ $.Executable }}' should be the only way a user normally
+interacts with or changes the underlying database. However as the file is a 
+normal kdbx file format (e.g. can be opened in tools supporting the format) it
+is possible to use the database in those applications, just take caution when
+changing it outside of '{{ $.Executable }}' usage. If a database not normally used by '{{ $.Executable }}' is
+to be used by '{{ $.Executable }}', try using the various readonly settings to control
+interactions.

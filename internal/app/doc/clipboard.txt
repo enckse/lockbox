@@ -1,0 +1,3 @@
+By default clipboard commands are detected via determing the platform and 
+utilizing default commands to interact with (copy to/paste to) the clipboard.
+These settings can be overriden via environment variables.

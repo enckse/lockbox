@@ -1,0 +1,7 @@
+The password store can have the key (and file) changed via the '{{ $.ReKeyCommand }}'
+subcommand. This command requires that '{{ $.ReKey.Store }}' is set and
+a combination of new key settings are configured via '{{ $.ReKey.Key }}', '{{ $.ReKey.KeyMode }}', and '{{ $.ReKey.KeyFile }}' depending on the new database
+credential preferences. The settings correspond to the 'LOCKBOX_'
+settings normally used when running `{{ $.Executable }}`.
+
+Note that is an advanced feature and should be used with caution/backups/etc.

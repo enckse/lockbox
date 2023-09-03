@@ -1,0 +1,16 @@
+The '{{ $.RemoveCommand }}' and '{{ $.MoveCommand }}' command can handle a simplistic glob if it is at the END
+of the path. This allows for bulk-removal of entries at multiple levels.
+Confirmation will still be required for removal (matching entries will be
+listed).
+
+For '{{ $.MoveCommand }}' the destination must NOT be an entry but the final destination
+location for all matched entries. Overwriting is not allowed by moving
+via glob and moving via globs can ONLY be done via leaf level globs.
+
+Examples:
+
+{{ $.Executable }} {{ $.RemoveCommand }} path/to/leaf/dir/*
+
+{{ $.Executable }} {{ $.RemoveCommand }} path/to/*
+
+{{ $.Executable }} {{ $.MoveCommand }} path/to/* new/path/
