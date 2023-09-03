@@ -111,8 +111,9 @@ func (k Key) Read(ask AskPassword) (string, error) {
 		}
 		useKey = string(b)
 	}
-	if strings.TrimSpace(useKey) == "" {
+	key := strings.TrimSpace(useKey)
+	if strings.TrimSpace(key) == "" {
 		return "", errors.New("key is empty")
 	}
-	return useKey, nil
+	return key, nil
 }

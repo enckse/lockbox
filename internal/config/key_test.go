@@ -145,7 +145,7 @@ func TestPlainKey(t *testing.T) {
 		return "", nil
 	}
 	val, err := k.Read(fxn)
-	if err != nil || val != "  test " {
+	if err != nil || val != "test" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
