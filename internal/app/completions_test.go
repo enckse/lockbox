@@ -51,6 +51,14 @@ func testCompletion(t *testing.T, bash bool) {
 	if fmt.Sprintf("%v", n) == fmt.Sprintf("%v", v) {
 		t.Errorf("invalid result, should filter")
 	}
+	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "DEFAULT")
+	d, err := app.GenerateCompletions(bash, false, "lb")
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if fmt.Sprintf("%v", d) == fmt.Sprintf("%v", v) || fmt.Sprintf("%v", d) == fmt.Sprintf("%v", n) {
+		t.Errorf("invalid result, should filter")
+	}
 }
 
 func TestProfileDisplay(t *testing.T) {
