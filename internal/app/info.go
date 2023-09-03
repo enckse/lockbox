@@ -62,14 +62,22 @@ func info(command string, args []string) ([]string, error) {
 		}
 		return config.Environ(), nil
 	case BashCommand, ZshCommand:
-		if len(args) != 0 {
+		if len(args) > 1 {
 			return nil, fmt.Errorf("invalid %s command", command)
+		}
+		isHelp := false
+		if len(args) == 1 {
+			if args[0] == CompletionHelpCommand {
+				isHelp = true
+			} else {
+				return nil, fmt.Errorf("invalid %s subcommand", command)
+			}
 		}
 		exe, err := exeName()
 		if err != nil {
 			return nil, err
 		}
-		return GenerateCompletions(command == BashCommand, exe)
+		return GenerateCompletions(command == BashCommand, isHelp, exe)
 	}
 	return nil, nil
 }

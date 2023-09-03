@@ -17,6 +17,10 @@ const (
 	fileExample          = "<file>"
 	detectedValue        = "<detected>"
 	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
+	askProfile           = "ask"
+	roProfile            = "readonly"
+	noTOTPProfile        = "nototp"
+	noClipProfile        = "noclip"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
 	// JSONDataOutputHash means output data is hashed
@@ -80,7 +84,7 @@ var (
 	// EnvConfig is the location of the config file to read environment variables from
 	EnvConfig = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("Allows setting a specific file of environment variables for lockbox\nto read and use as configuration values (an '.env' file). The keyword\n'%s' will disable this functionality the keyword '%s' will search\nfor a file in the following paths in user's home directory matching\nthe first file found.\n\ndefault search paths:\n%v\n\nNote that this setting is not output as part of the environment.", noEnvironment, detectEnvironment, detectEnvironmentPaths)}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
 	// EnvCompletion is the completion method to use
-	EnvCompletion    = EnvironmentString{environmentBase: environmentBase{key: EnvironmentCompletionKey, desc: "Use to select the non-default completions,\nplease review the generated shell completion files for more information.", requirement: "must be exported via a shell variable"}, canDefault: false}
+	EnvCompletion    = EnvironmentString{environmentBase: environmentBase{key: EnvironmentCompletionKey, desc: "Use to select the non-default completions,\nplease review the shell completion help for more information.", requirement: "must be exported via a shell variable"}, canDefault: false}
 	envKeyMode       = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: fmt.Sprintf("How to retrieve the database store password.\nSet to '%s' when only using a key file\nSet to '%s' to ignore the set key value", noKeyMode, IgnoreKeyMode), whenUnset: string(DefaultKeyMode)}, allowed: []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)}, canDefault: true, defaultValue: ""}
 	envKey           = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password.", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 	envConfigExpands = EnvironmentInt{environmentBase: environmentBase{key: EnvConfig.key + "_EXPANDS", desc: "The maximum number of times to expand the input env to resolve variables,\nset to 0 to disable expansion. This value can NOT be an expansion itself\nif set in the env config file."}, shortDesc: "max expands", allowZero: true, defaultValue: 20}
@@ -184,4 +188,73 @@ func ParseJSONOutput() (JSONOutputMode, error) {
 		return JSONDataOutputRaw, nil
 	}
 	return JSONDataOutputBlank, fmt.Errorf("invalid JSON output mode: %s", val)
+}
+
+func newProfile(keys []string) CompletionProfile {
+	p := CompletionProfile{}
+	p.Clip = true
+	p.List = true
+	p.TOTP = true
+	p.Write = true
+	name := ""
+	sort.Strings(keys)
+	var e []string
+	for _, k := range keys {
+		name = fmt.Sprintf("%s%s-", name, k)
+		switch k {
+		case askProfile:
+			e = append(e, envKeyMode.KeyValue(string(askKeyMode)))
+			p.List = false
+		case noTOTPProfile:
+			e = append(e, EnvNoTOTP.KeyValue(yes))
+			p.TOTP = false
+		case noClipProfile:
+			e = append(e, EnvNoClip.KeyValue(yes))
+			p.Clip = false
+		case roProfile:
+			e = append(e, EnvReadOnly.KeyValue(yes))
+			p.Write = false
+		}
+	}
+	sort.Strings(e)
+	p.Env = e
+	p.Name = strings.TrimSuffix(name, "-")
+	return p
+}
+
+func generateProfiles(keys []string) map[string]CompletionProfile {
+	m := make(map[string]CompletionProfile)
+	if len(keys) == 0 {
+		return m
+	}
+	p := newProfile(keys)
+	m[p.Name] = p
+	for _, cur := range keys {
+		var subset []string
+		for _, key := range keys {
+			if key == cur {
+				continue
+			}
+			subset = append(subset, key)
+		}
+
+		for _, p := range generateProfiles(subset) {
+			m[p.Name] = p
+		}
+	}
+	return m
+}
+
+// LoadCompletionProfiles will generate known completion profile with backing env information
+func LoadCompletionProfiles() []CompletionProfile {
+	loaded := generateProfiles([]string{noClipProfile, roProfile, noTOTPProfile, askProfile})
+	var profiles []CompletionProfile
+	for _, v := range loaded {
+		profiles = append(profiles, v)
+	}
+	sort.Slice(profiles, func(i, j int) bool {
+		return strings.Compare(profiles[i].Name, profiles[j].Name) < 0
+	})
+	profiles = append(profiles, CompletionProfile{Clip: true, Write: true, TOTP: true, List: true, Default: true})
+	return profiles
 }

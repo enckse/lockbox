@@ -4,7 +4,6 @@ package app
 import (
 	"bytes"
 	"fmt"
-	"sort"
 	"strings"
 	"text/template"
 
@@ -37,20 +36,13 @@ type (
 	// Profile is a completion profile
 	Profile struct {
 		Name      string
-		Comment   string
 		CanClip   bool
 		CanTOTP   bool
 		CanList   bool
 		ReadOnly  bool
 		IsDefault bool
+		env       []string
 	}
-)
-
-const (
-	askProfile    = "ask"
-	roProfile     = "readonly"
-	noTOTPProfile = "nototp"
-	noClipProfile = "noclip"
 )
 
 // Env will get the environment settable value to use this profile
@@ -75,7 +67,7 @@ func (p Profile) Options() []string {
 
 // Display is the profile display name
 func (p Profile) Display() string {
-	return strings.Join(strings.Split(strings.ToUpper(p.Name), "-")[2:], "-")
+	return strings.Join(strings.Split(strings.ToUpper(p.Name), "-")[1:], "-")
 }
 
 // TOTPSubCommands are the list of sub commands for TOTP within the profile
@@ -90,67 +82,51 @@ func (p Profile) TOTPSubCommands() []string {
 	return totp
 }
 
-func newProfile(exe string, keys []string) Profile {
-	p := Profile{}
-	p.CanClip = true
-	p.CanList = true
-	p.CanTOTP = true
-	p.ReadOnly = false
-	name := "profile-"
-	sort.Strings(keys)
-	var comments []string
-	for _, k := range keys {
-		name = fmt.Sprintf("%s%s-", name, k)
-		switch k {
-		case askProfile:
-			comments = append(comments, "ask key mode = on")
-			p.CanList = false
-		case noTOTPProfile:
-			comments = append(comments, "totp = off")
-			p.CanTOTP = false
-		case noClipProfile:
-			comments = append(comments, "clipboard = off")
-			p.CanClip = false
-		case roProfile:
-			comments = append(comments, "readonly = on")
-			p.ReadOnly = true
+func loadProfiles(exe string) []Profile {
+	profiles := config.LoadCompletionProfiles()
+	var res []Profile
+	for _, p := range profiles {
+		name := p.Name
+		if p.Default {
+			name = "default"
 		}
+		n := Profile{Name: fmt.Sprintf("_%s-%s", exe, name)}
+		n.CanClip = p.Clip
+		n.CanList = p.List
+		n.CanTOTP = p.TOTP
+		n.ReadOnly = !p.Write
+		n.IsDefault = p.Default
+		n.env = p.Env
+		res = append(res, n)
 	}
-	sort.Strings(comments)
-	p.Name = newCompletionName(exe, strings.TrimSuffix(name, "-"))
-	p.Comment = fmt.Sprintf("# - %s", strings.Join(comments, "\n# - "))
-	return p
-}
-
-func generateProfiles(exe string, keys []string) map[string]Profile {
-	m := make(map[string]Profile)
-	if len(keys) == 0 {
-		return m
-	}
-	p := newProfile(exe, keys)
-	m[p.Name] = p
-	for _, cur := range keys {
-		var subset []string
-		for _, key := range keys {
-			if key == cur {
-				continue
-			}
-			subset = append(subset, key)
-		}
-
-		for _, p := range generateProfiles(exe, subset) {
-			m[p.Name] = p
-		}
-	}
-	return m
-}
-
-func newCompletionName(exe, name string) string {
-	return fmt.Sprintf("_%s-%s", exe, name)
+	return res
 }
 
 // GenerateCompletions handles creating shell completion outputs
-func GenerateCompletions(isBash bool, exe string) ([]string, error) {
+func GenerateCompletions(isBash, isHelp bool, exe string) ([]string, error) {
+	if isHelp {
+		var h []string
+		for _, p := range loadProfiles(exe) {
+			if p.IsDefault {
+				continue
+			}
+			text := fmt.Sprintf("export %s\n  - filtered completions\n  - useful when:\n", p.Env())
+			for idx, e := range p.env {
+				if idx > 0 {
+					text = fmt.Sprintf("%s      and\n", text)
+				}
+				text = fmt.Sprintf("%s    %s\n", text, e)
+			}
+			h = append(h, text)
+		}
+		h = append(h, strings.TrimSpace(fmt.Sprintf(`
+%s is not set
+unset %s
+export %s=<unknown>
+  - default completions
+`, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey)))
+		return h, nil
+	}
 	c := Completions{
 		Executable:          exe,
 		InsertCommand:       InsertCommand,
@@ -168,6 +144,7 @@ func GenerateCompletions(isBash bool, exe string) ([]string, error) {
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 		CompletionEnv:       fmt.Sprintf("$%s", config.EnvironmentCompletionKey),
 	}
+
 	using, err := readDoc("zsh")
 	if err != nil {
 		return nil, err
@@ -182,17 +159,13 @@ func GenerateCompletions(isBash bool, exe string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	profiles := generateProfiles(exe, []string{noClipProfile, roProfile, noTOTPProfile, askProfile})
-	profileObjects := []Profile{}
-	for _, v := range profiles {
-		profileObjects = append(profileObjects, v)
+	c.Profiles = loadProfiles(exe)
+	for _, p := range c.Profiles {
+		if p.IsDefault {
+			c.DefaultProfile = p
+			break
+		}
 	}
-	sort.Slice(profileObjects, func(i, j int) bool {
-		return strings.Compare(profileObjects[i].Name, profileObjects[j].Name) < 0
-	})
-	c.Profiles = append(c.Profiles, profileObjects...)
-	c.DefaultProfile = Profile{IsDefault: true, CanClip: true, CanTOTP: true, CanList: true, ReadOnly: false, Name: newCompletionName(exe, "default")}
-	c.Profiles = append(c.Profiles, c.DefaultProfile)
 	shell, err := templateScript(shellScript, c)
 	if err != nil {
 		return nil, err

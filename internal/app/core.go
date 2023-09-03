@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	completionHelpDesc = "display shell completion help"
 	// TOTPCommand is the parent of totp and by defaults generates a rotating token
 	TOTPCommand = "totp"
 	// ConvCommand handles text conversion of the data store
@@ -56,6 +57,8 @@ const (
 	TOTPOnceCommand = "once"
 	// BashCommand is the command to generate bash completions
 	BashCommand = "bash"
+	// CompletionHelpCommand outputs completion help information
+	CompletionHelpCommand = "help"
 	// ReKeyCommand will rekey the underlying database
 	ReKeyCommand = "rekey"
 	// MultiLineCommand handles multi-line inserts (when not piped)
@@ -176,6 +179,7 @@ func commandText(args, name, desc string) string {
 func Usage(verbose bool, exe string) ([]string, error) {
 	var results []string
 	results = append(results, command(BashCommand, "", "generate user environment bash completion"))
+	results = append(results, subCommand(BashCommand, CompletionHelpCommand, "", completionHelpDesc))
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
@@ -197,6 +201,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPShowCommand, "entry", "show the totp entry"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	results = append(results, command(ZshCommand, "", "generate user environment zsh completion"))
+	results = append(results, subCommand(ZshCommand, CompletionHelpCommand, "", completionHelpDesc))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {

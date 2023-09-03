@@ -7,7 +7,7 @@ import (
 )
 
 func TestBashCompletion(t *testing.T) {
-	v, err := app.GenerateCompletions(true, "lb")
+	v, err := app.GenerateCompletions(true, false, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -17,7 +17,7 @@ func TestBashCompletion(t *testing.T) {
 }
 
 func TestZshCompletion(t *testing.T) {
-	v, err := app.GenerateCompletions(false, "lb")
+	v, err := app.GenerateCompletions(false, false, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -28,14 +28,14 @@ func TestZshCompletion(t *testing.T) {
 
 func TestProfileDisplay(t *testing.T) {
 	p := app.Profile{Name: "_abc-test-awera-zzz"}
-	if p.Display() != "AWERA-ZZZ" {
-		t.Error("invalid display")
+	if p.Display() != "TEST-AWERA-ZZZ" {
+		t.Errorf("invalid display: %s", p.Display())
 	}
 }
 
 func TestProfileEnv(t *testing.T) {
 	p := app.Profile{Name: "_abc-test-awera-zzz"}
-	if p.Env() != "LOCKBOX_COMPLETION_FUNCTION=AWERA-ZZZ" {
+	if p.Env() != "LOCKBOX_COMPLETION_FUNCTION=TEST-AWERA-ZZZ" {
 		t.Error("invalid env")
 	}
 }
