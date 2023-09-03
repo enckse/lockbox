@@ -21,7 +21,7 @@ _execute() {
   oldkey="$LOCKBOX_KEY"
   if [ "$oldkey" != "" ]; then
     export LOCKBOX_INTERACTIVE=yes
-    export LOCKBOX_KEYMODE=interactive
+    export LOCKBOX_KEYMODE=ask
     export LOCKBOX_KEY=""
   else
     printf "password: "
