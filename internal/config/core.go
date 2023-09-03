@@ -91,21 +91,7 @@ type (
 		Start int
 		End   int
 	}
-	// Key is a wrapper to help manage the returned key
-	Key struct {
-		key []byte
-	}
 )
-
-// Interactive indicates if the key requires interactive input
-func (e *Key) Interactive() bool {
-	return e.key == nil
-}
-
-// Key returns the key data
-func (e *Key) Key() []byte {
-	return e.key
-}
 
 func shlex(in string) ([]string, error) {
 	return shell.Fields(in, os.Getenv)
