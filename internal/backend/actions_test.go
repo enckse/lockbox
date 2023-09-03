@@ -276,6 +276,8 @@ func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 	if key {
 		os.Setenv("LOCKBOX_KEY", "test")
 		os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	} else {
+		os.Setenv("LOCKBOX_KEYMODE", "none")
 	}
 	if keyFile {
 		key := testFile("keyfileor.key")

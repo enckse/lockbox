@@ -14,7 +14,11 @@ _execute() {
   export LOCKBOX_TOTP=totp
   export LOCKBOX_INTERACTIVE=no
   export LOCKBOX_READONLY=no
-  export LOCKBOX_KEYMODE=plaintext
+  if [ "$LOCKBOX_KEY" == "" ]; then
+    export LOCKBOX_KEYMODE=none
+  else
+    export LOCKBOX_KEYMODE=plaintext
+  fi
   export LOCKBOX_JSON_DATA_HASH_LENGTH=0
   echo test2 |${LB_BINARY} insert keys/k/one2
   oldmode="$LOCKBOX_KEYMODE"
@@ -125,8 +129,9 @@ _config() {
 }
 
 _invalid() {
-  local keyfile oldkey oldkeyfile
+  local keyfile oldkey oldkeyfile oldmode
   oldkey="$LOCKBOX_KEY"
+  oldmode="$LOCKBOX_KEYMODE"
   oldkeyfile="$LOCKBOX_KEYFILE"
   if [ -n "$LOCKBOX_KEYFILE" ]; then
     export LOCKBOX_KEYFILE=""
@@ -138,9 +143,13 @@ _invalid() {
     echo "invalid" > "$keyfile"
     export LOCKBOX_KEYFILE="$keyfile"
   fi
+  if [ "$oldmode" == "none" ]; then
+    export LOCKBOX_KEYMODE="plaintext"
+  fi
   ${LB_BINARY} ls
   export LOCKBOX_KEYFILE="$oldkeyfile"
   export LOCKBOX_KEY="$oldkey"
+  export LOCKBOX_KEYMODE="$oldmode"
 }
 
 _rekey() {

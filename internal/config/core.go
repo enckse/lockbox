@@ -52,6 +52,7 @@ type (
 		key         string
 		desc        string
 		requirement string
+		whenUnset   string
 	}
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {

@@ -13,9 +13,6 @@ import (
 const (
 	prefixKey            = "LOCKBOX_"
 	clipBaseEnv          = prefixKey + "CLIP_"
-	plainKeyMode         = "plaintext"
-	askKeyMode           = "ask"
-	commandKeyMode       = "command"
 	commandArgsExample   = "[cmd args...]"
 	fileExample          = "<file>"
 	detectedValue        = "<detected>"
@@ -80,7 +77,7 @@ var (
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "Override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code."}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
 	// EnvConfig is the location of the config file to read environment variables from
 	EnvConfig        = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("Allows setting a specific file of environment variables for lockbox\nto read and use as configuration values (an '.env' file). The keyword\n'%s' will disable this functionality the keyword '%s' will search\nfor a file in the following paths in user's home directory matching\nthe first file found.\n\ndefault search paths:\n%v\n\nNote that this setting is not output as part of the environment.", noEnvironment, detectEnvironment, detectEnvironmentPaths)}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
-	envKeyMode       = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: "How to retrieve the database store password."}, allowed: []string{askKeyMode, commandKeyMode, plainKeyMode}, canDefault: true, defaultValue: commandKeyMode}
+	envKeyMode       = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: fmt.Sprintf("How to retrieve the database store password.\nSet to '%s' when only using a key file\nSet to '%s' to ignore the set key value", noKeyMode, IgnoreKeyMode), whenUnset: string(DefaultKeyMode)}, allowed: []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)}, canDefault: true, defaultValue: ""}
 	envKey           = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password.", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 	envConfigExpands = EnvironmentInt{environmentBase: environmentBase{key: EnvConfig.key + "_EXPANDS", desc: "The maximum number of times to expand the input env to resolve variables,\nset to 0 to disable expansion. This value can NOT be an expansion itself\nif set in the env config file."}, shortDesc: "max expands", allowZero: true, defaultValue: 20}
 )
@@ -127,6 +124,9 @@ func ListEnvironmentVariables() []string {
 		value, allow := item.values()
 		if len(value) == 0 {
 			value = "(unset)"
+			if env.whenUnset != "" {
+				value = env.whenUnset
+			}
 		}
 		description := strings.ReplaceAll(env.desc, "\n", "\n  ")
 		requirement := "optional/default"

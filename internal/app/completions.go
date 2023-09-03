@@ -79,11 +79,11 @@ func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 		if noTOTP {
 			isTOTP = false
 		}
-		k, err := config.GetKey(true)
+		k, err := config.NewKey(config.IgnoreKeyMode)
 		if err != nil {
 			return nil, err
 		}
-		if k != nil && k.Interactive() {
+		if k.Ask() {
 			c.CanList = false
 		}
 	}

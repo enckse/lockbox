@@ -9,14 +9,10 @@ import (
 	"os"
 	"strings"
 	"syscall"
-
-	"github.com/enckse/lockbox/internal/config"
 )
 
 type (
 	stdinReaderFunc func(string) (bool, error)
-	// PasswordReader is for input password handling (stdin) as a db key
-	PasswordReader func() (string, error)
 )
 
 func termEcho(on bool) {
@@ -69,28 +65,6 @@ func GetUserInputPassword(piping, multiLine bool) ([]byte, error) {
 		return nil, errors.New("password can NOT be empty")
 	}
 	return []byte(password), nil
-}
-
-// ReadKey will attempt to resolve a key (if interactive) for the platform
-func ReadKey(key *config.Key, fxn PasswordReader) (string, error) {
-	if fxn == nil {
-		return "", errors.New("invalid function given")
-	}
-	if key == nil {
-		return "", nil
-	}
-	useKey := string(key.Key())
-	if key.Interactive() {
-		read, err := fxn()
-		if err != nil {
-			return "", err
-		}
-		if len(read) == 0 {
-			return "", errors.New("interactive password can NOT be empty")
-		}
-		useKey = read
-	}
-	return useKey, nil
 }
 
 // ReadInteractivePassword will prompt for a single password for unlocking

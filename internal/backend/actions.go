@@ -31,15 +31,14 @@ func (t *Transaction) act(cb action) error {
 	if !t.valid {
 		return errors.New("invalid transaction")
 	}
-	key, err := config.GetKey(false)
+	key, err := config.NewKey(config.DefaultKeyMode)
 	if err != nil {
 		return err
 	}
-	useKey, err := platform.ReadKey(key, platform.ReadInteractivePassword)
+	k, err := key.Read(platform.ReadInteractivePassword)
 	if err != nil {
 		return err
 	}
-	k := string(useKey)
 	file := config.EnvKeyFile.Get()
 	if !t.exists {
 		if err := create(t.file, k, file); err != nil {

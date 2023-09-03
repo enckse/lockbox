@@ -9,66 +9,110 @@ import (
 )
 
 type (
+	// KeyModeType are valid ways to get the key
+	KeyModeType string
+	// AskPassword is a function to prompt for passwords (when required)
+	AskPassword func() (string, error)
 	// Key is a wrapper to help manage the returned key
 	Key struct {
-		key []byte
+		inputKey string
+		mode     KeyModeType
+		valid    bool
 	}
 )
 
-// Interactive indicates if the key requires interactive input
-func (e *Key) Interactive() bool {
-	return e.key == nil
-}
+const (
+	plainKeyMode KeyModeType = "plaintext"
+	askKeyMode   KeyModeType = "ask"
+	noKeyMode    KeyModeType = "none"
+	// IgnoreKeyMode will ignore the value set in the key (acts like no key)
+	IgnoreKeyMode  KeyModeType = "ignore"
+	commandKeyMode KeyModeType = "command"
+	// DefaultKeyMode is the default operating keymode if NOT set
+	DefaultKeyMode = commandKeyMode
+)
 
-// Key returns the key data
-func (e *Key) Key() []byte {
-	return e.key
-}
-
-// GetKey will get the encryption key setup for lb
-func GetKey(dryrun bool) (*Key, error) {
+// NewKey will create a new key
+func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	useKey := envKey.Get()
 	keyMode := envKeyMode.Get()
-	if keyMode == askKeyMode {
+	if keyMode == "" {
+		keyMode = string(defaultKeyModeType)
+	}
+	requireEmptyKey := false
+	switch keyMode {
+	case string(IgnoreKeyMode):
+		return Key{mode: IgnoreKeyMode, inputKey: "", valid: true}, nil
+	case string(noKeyMode):
+		requireEmptyKey = true
+	case string(commandKeyMode), string(plainKeyMode):
+	case string(askKeyMode):
 		isInteractive, err := EnvInteractive.Get()
 		if err != nil {
-			return nil, err
+			return Key{}, err
 		}
 		if !isInteractive {
-			return nil, errors.New("ask key mode requested in non-interactive mode")
+			return Key{}, errors.New("ask key mode requested in non-interactive mode")
 		}
-		if useKey != "" {
-			return nil, errors.New("key can NOT be set in ask key mode")
+		requireEmptyKey = true
+	default:
+		return Key{}, fmt.Errorf("unknown key mode: %s", keyMode)
+	}
+	isEmpty := strings.TrimSpace(useKey) == ""
+	if requireEmptyKey {
+		if !isEmpty {
+			return Key{}, errors.New("key can NOT be set in this key mode")
 		}
-		return &Key{}, nil
+	} else {
+		if isEmpty {
+			return Key{}, errors.New("key MUST be set in this key mode")
+		}
 	}
-	if useKey == "" {
-		return nil, nil
+	return Key{mode: KeyModeType(keyMode), inputKey: useKey, valid: true}, nil
+}
+
+func (k Key) empty() bool {
+	return k.valid && len(k.inputKey) == 0
+}
+
+// Ask will indicate if prompting is required to get the key
+func (k Key) Ask() bool {
+	return k.valid && k.mode == askKeyMode
+}
+
+// Read will read the key as configured by the mode
+func (k Key) Read(ask AskPassword) (string, error) {
+	if ask == nil {
+		return "", errors.New("invalid function given")
 	}
-	if dryrun {
-		return &Key{key: []byte{0}}, nil
+	if !k.valid {
+		return "", errors.New("invalid key given")
 	}
-	var data []byte
-	switch keyMode {
+	if k.empty() && !k.Ask() {
+		return "", nil
+	}
+	useKey := k.inputKey
+	switch k.mode {
+	case askKeyMode:
+		read, err := ask()
+		if err != nil {
+			return "", err
+		}
+		useKey = read
 	case commandKeyMode:
 		parts, err := shlex(useKey)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		cmd := exec.Command(parts[0], parts[1:]...)
 		b, err := cmd.Output()
 		if err != nil {
-			return nil, fmt.Errorf("key command failed: %w", err)
+			return "", fmt.Errorf("key command failed: %w", err)
 		}
-		data = b
-	case plainKeyMode:
-		data = []byte(useKey)
-	default:
-		return nil, errors.New("unknown keymode")
+		useKey = string(b)
 	}
-	b := []byte(strings.TrimSpace(string(data)))
-	if len(b) == 0 {
-		return nil, errors.New("key is empty")
+	if strings.TrimSpace(useKey) == "" {
+		return "", errors.New("key is empty")
 	}
-	return &Key{key: b}, nil
+	return useKey, nil
 }
