@@ -21,7 +21,7 @@ _{{ $.Executable }}() {
           fi
         ;;
 {{- if not $.ReadOnly }}
-        "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}")
+        "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
@@ -51,7 +51,7 @@ _{{ $.Executable }}() {
           esac
         ;;
 {{- end}}
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi

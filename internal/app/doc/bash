@@ -16,11 +16,8 @@ _{{ $.Executable }}() {
           opts="{{ $.HelpAdvancedCommand }}"
           ;;
 {{- if not $.ReadOnly }}
-        "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}")
+        "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
           opts="$opts $({{ $.DoList }})"
-          ;;
-        "{{ $.MoveCommand }}")
-          opts=$({{ $.DoList }})
           ;;
 {{- end}}
 {{- if $.CanTOTP }}
@@ -31,7 +28,7 @@ _{{ $.Executable }}() {
 {{- end}}
           ;;
 {{- end}}
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" {{ if not $.ReadOnly }}| "{{ $.RemoveCommand }}" {{end}} {{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
           opts=$({{ $.DoList }})
           ;;
       esac
