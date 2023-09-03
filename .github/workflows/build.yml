@@ -20,7 +20,7 @@ jobs:
       - name: "deps"
         run: apk add go make git bash
       - name: "build"
-        run: make .runci
+        run: make check VERSION=${GITHUB_SHA}
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
@@ -28,10 +28,10 @@ jobs:
       - name: "deps"
         run: sudo apt-get install -y golang
       - name: "build"
-        run: make .runci
+        run: make check VERSION=${GITHUB_SHA}
   macos-build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: "build"
-        run: make .runci
+        run: make check VERSION=${GITHUB_SHA}

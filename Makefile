@@ -2,6 +2,7 @@ BUILD   := bin/
 TARGET  := $(BUILD)lb
 VERSION ?= $(shell git log -n 1 --format=%h)
 VARS    := LOCKBOX_ENV=none
+DESTDIR := /usr/local/bin/
 
 all: $(TARGET)
 
@@ -26,6 +27,5 @@ clean:
 	@find internal/ -type f -wholename "*testdata*" -delete
 	@find internal/ -type d -empty -delete
 
-.runci:
-	rm -rf .git
-	make build check VERSION=$(GITHUB_SHA)
+install:
+	install -m755 $(TARGET) $(DESTDIR)lb
