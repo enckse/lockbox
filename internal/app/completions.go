@@ -9,6 +9,10 @@ import (
 	"github.com/enckse/lockbox/internal/config"
 )
 
+const (
+	noList = "echo \"\""
+)
+
 type (
 	// Completions handles the inputs to completions for templating
 	Completions struct {
@@ -76,6 +80,14 @@ func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 		}
 		if noTOTP {
 			isTOTP = false
+		}
+		k, err := config.GetKey()
+		if err != nil {
+			return nil, err
+		}
+		if k != nil && k.Interactive() {
+			c.DoList = noList
+			c.DoTOTPList = noList
 		}
 	}
 	c.CanClip = isClip
