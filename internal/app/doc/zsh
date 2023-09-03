@@ -21,6 +21,7 @@ _{{ $.Executable }}() {
           fi
         ;;
 {{- if not $.ReadOnly }}
+{{- if $.CanList }}
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
@@ -34,12 +35,14 @@ _{{ $.Executable }}() {
           esac
         ;;
 {{- end}}
+{{- end}}
 {{- if $.CanTOTP }}
         "{{ $.TOTPCommand }}")
           case "$len" in
             3)
               compadd "$@" {{ $.TOTPListCommand }}{{ range $key, $value := .TOTPSubCommands }} {{ $value }}{{ end }}
             ;;
+{{- if $.CanList }}
             4)
               case $words[3] in
 {{- range $key, $value := .TOTPSubCommands }}
@@ -48,14 +51,17 @@ _{{ $.Executable }}() {
                 ;;
 {{- end}}
               esac
+{{- end}}
           esac
         ;;
 {{- end}}
+{{- if $.CanList }}
         "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
         ;;
+{{- end}}
       esac
   esac
 }

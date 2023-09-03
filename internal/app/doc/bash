@@ -16,9 +16,11 @@ _{{ $.Executable }}() {
           opts="{{ $.HelpAdvancedCommand }}"
           ;;
 {{- if not $.ReadOnly }}
+{{- if $.CanList }}
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
           opts="$opts $({{ $.DoList }})"
           ;;
+{{- end}}
 {{- end}}
 {{- if $.CanTOTP }}
         "{{ $.TOTPCommand }}")
@@ -28,10 +30,13 @@ _{{ $.Executable }}() {
 {{- end}}
           ;;
 {{- end}}
+{{- if $.CanList }}
         "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
           opts=$({{ $.DoList }})
           ;;
+{{- end}}
       esac
+{{- if $.CanList }}
     else
       if [ "$COMP_CWORD" -eq 3 ]; then
         case "${COMP_WORDS[1]}" in
@@ -53,6 +58,7 @@ _{{ $.Executable }}() {
 {{- end}}
         esac
       fi
+{{- end}}
     fi
     if [ -n "$opts" ]; then
       # shellcheck disable=SC2207

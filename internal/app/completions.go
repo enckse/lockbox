@@ -9,16 +9,13 @@ import (
 	"github.com/enckse/lockbox/internal/config"
 )
 
-const (
-	noList = "echo \"\""
-)
-
 type (
 	// Completions handles the inputs to completions for templating
 	Completions struct {
 		Options             []string
 		CanClip             bool
 		CanTOTP             bool
+		CanList             bool
 		ReadOnly            bool
 		InsertCommand       string
 		TOTPSubCommands     []string
@@ -41,6 +38,7 @@ type (
 // GenerateCompletions handles creating shell completion outputs
 func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 	c := Completions{
+		CanList:             true,
 		Executable:          exe,
 		InsertCommand:       InsertCommand,
 		RemoveCommand:       RemoveCommand,
@@ -86,8 +84,7 @@ func GenerateCompletions(isBash, defaults bool, exe string) ([]string, error) {
 			return nil, err
 		}
 		if k != nil && k.Interactive() {
-			c.DoList = noList
-			c.DoTOTPList = noList
+			c.CanList = false
 		}
 	}
 	c.CanClip = isClip
