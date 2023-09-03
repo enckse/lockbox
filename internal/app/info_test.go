@@ -53,21 +53,13 @@ func TestBashInfo(t *testing.T) {
 	if buf.String() == "" {
 		t.Error("nothing written")
 	}
-	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "bash", []string{"defaults"})
-	if !ok || err != nil {
+	if _, err = app.Info(&buf, "bash", []string{"defaults"}); err.Error() != "invalid bash command" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
-		t.Error("nothing written")
-	}
-	if _, err = app.Info(&buf, "bash", []string{"default"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "bash", []string{"test", "default"}); err.Error() != "invalid bash command" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err = app.Info(&buf, "bash", []string{"test", "default"}); err.Error() != "invalid argument" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "bash", []string{"short"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "bash", []string{"short"}); err.Error() != "invalid bash command" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -108,18 +100,10 @@ func TestZshInfo(t *testing.T) {
 	if buf.String() == "" {
 		t.Error("nothing written")
 	}
-	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "zsh", []string{"defaults"})
-	if !ok || err != nil {
+	if _, err = app.Info(&buf, "zsh", []string{"defaults"}); err.Error() != "invalid zsh command" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
-		t.Error("nothing written")
-	}
-	if _, err = app.Info(&buf, "zsh", []string{"default"}); err.Error() != "invalid argument" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "zsh", []string{"test", "default"}); err.Error() != "invalid argument" {
+	if _, err = app.Info(&buf, "zsh", []string{"test", "default"}); err.Error() != "invalid zsh command" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

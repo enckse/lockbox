@@ -1,93 +1,81 @@
 package app_test
 
 import (
-	"fmt"
-	"os"
-	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
 )
 
-func TestGenerateCompletions(t *testing.T) {
-	testCompletions(t, true)
-	testCompletions(t, false)
-}
-
-func generate(keys []string, bash bool, t *testing.T) (string, string) {
-	os.Setenv("LOCKBOX_NOTOTP", "")
-	os.Setenv("LOCKBOX_READONLY", "")
-	os.Setenv("LOCKBOX_NOCLIP", "")
-	os.Setenv("LOCKBOX_KEYMODE", "")
-	key := "bash"
-	if !bash {
-		key = "zsh"
-	}
-	for _, k := range keys {
-		use := "yes"
-		if k == "KEYMODE" {
-			use = "ask"
-		}
-		os.Setenv(fmt.Sprintf("LOCKBOX_%s", k), use)
-		key = fmt.Sprintf("%s-%s", key, strings.ToLower(k))
-	}
-	v, err := app.GenerateCompletions(bash, false, "lb")
+func TestBashCompletion(t *testing.T) {
+	v, err := app.GenerateCompletions(true, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(v) != 1 {
 		t.Errorf("invalid result")
 	}
-	return key, v[0]
 }
 
-func generateTest(keys []string, bash bool, t *testing.T) map[string]string {
-	r := make(map[string]string)
-	if len(keys) == 0 {
-		return r
+func TestZshCompletion(t *testing.T) {
+	v, err := app.GenerateCompletions(false, "lb")
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
 	}
-	k, v := generate(keys, bash, t)
-	r[k] = v
-	for _, cur := range keys {
-		var subset []string
-		for _, key := range keys {
-			if key == cur {
-				continue
-			}
-			subset = append(subset, key)
-		}
-
-		for k, v := range generateTest(subset, bash, t) {
-			r[k] = v
-		}
+	if len(v) != 1 {
+		t.Errorf("invalid result")
 	}
-	return r
 }
 
-func testCompletions(t *testing.T, bash bool) {
-	m := make(map[string]string)
-	defaults, _ := app.GenerateCompletions(bash, true, "lb")
-	m["defaults"] = defaults[0]
-	for k, v := range generateTest([]string{"NOTOTP", "READONLY", "NOCLIP", "KEYMODE"}, true, t) {
-		m[k] = v
+func TestProfileDisplay(t *testing.T) {
+	p := app.Profile{Name: "_abc-test-awera-zzz"}
+	if p.Display() != "AWERA-ZZZ" {
+		t.Error("invalid display")
 	}
-	os.Setenv("LOCKBOX_KEYMODE", "")
-	os.Setenv("LOCKBOX_READONLY", "")
-	os.Setenv("LOCKBOX_NOCLIP", "")
-	os.Setenv("LOCKBOX_NOTOTP", "")
-	defaultsToo, _ := app.GenerateCompletions(bash, false, "lb")
-	if defaultsToo[0] != defaults[0] || len(defaultsToo) != 1 || len(defaults) != 1 {
-		t.Error("defaults should match env defaults/invalid defaults detected")
+}
+
+func TestProfileEnv(t *testing.T) {
+	p := app.Profile{Name: "_abc-test-awera-zzz"}
+	if p.Env() != "LOCKBOX_COMPLETION_FUNCTION=AWERA-ZZZ" {
+		t.Error("invalid env")
 	}
-	for k, v := range m {
-		fmt.Println(k)
-		for kOther, vOther := range m {
-			if kOther == k {
-				continue
-			}
-			if vOther == v {
-				t.Errorf("found overlapping completion: %s == %s", k, kOther)
-			}
-		}
+}
+
+func TestProfileOptions(t *testing.T) {
+	p := app.Profile{Name: "_abc-test-awera-zzz"}
+	p.CanClip = true
+	p.CanTOTP = true
+	if len(p.Options()) != 12 {
+		t.Errorf("invalid options: %v", p.Options())
+	}
+	p.CanClip = false
+	if len(p.Options()) != 11 {
+		t.Errorf("invalid options: %v", p.Options())
+	}
+	p.CanClip = true
+	p.CanTOTP = false
+	if len(p.Options()) != 11 {
+		t.Errorf("invalid options: %v", p.Options())
+	}
+	p.CanTOTP = true
+	p.ReadOnly = true
+	if len(p.Options()) != 8 {
+		t.Errorf("invalid options: %v", p.Options())
+	}
+}
+
+func TestProfileTOTPSubOptions(t *testing.T) {
+	p := app.Profile{Name: "_abc-test-awera-zzz"}
+	p.CanClip = true
+	if len(p.TOTPSubCommands()) != 5 {
+		t.Errorf("invalid options: %v", p.TOTPSubCommands())
+	}
+	p.CanClip = false
+	if len(p.TOTPSubCommands()) != 4 {
+		t.Errorf("invalid options: %v", p.TOTPSubCommands())
+	}
+	p.CanClip = true
+	p.ReadOnly = true
+	if len(p.TOTPSubCommands()) != 4 {
+		t.Errorf("invalid options: %v", p.TOTPSubCommands())
 	}
 }

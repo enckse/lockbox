@@ -62,41 +62,14 @@ func info(command string, args []string) ([]string, error) {
 		}
 		return config.Environ(), nil
 	case BashCommand, ZshCommand:
-		defaultFlag := BashDefaultsCommand
-		if command == ZshCommand {
-			defaultFlag = ZshDefaultsCommand
-		}
-		defaults, err := getInfoDefault(args, defaultFlag)
-		if err != nil {
-			return nil, err
+		if len(args) != 0 {
+			return nil, fmt.Errorf("invalid %s command", command)
 		}
 		exe, err := exeName()
 		if err != nil {
 			return nil, err
 		}
-		return GenerateCompletions(command == BashCommand, defaults, exe)
+		return GenerateCompletions(command == BashCommand, exe)
 	}
 	return nil, nil
-}
-
-func getInfoDefault(args []string, possibleArg string) (bool, error) {
-	first := false
-	invalid := false
-	switch len(args) {
-	case 0:
-		break
-	case 1:
-		arg := args[0]
-		if arg == possibleArg {
-			first = true
-		} else {
-			invalid = true
-		}
-	default:
-		invalid = true
-	}
-	if invalid {
-		return false, errors.New("invalid argument")
-	}
-	return first, nil
 }

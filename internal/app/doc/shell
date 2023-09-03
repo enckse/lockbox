@@ -1,0 +1,25 @@
+# the default profile
+# {{ $.DefaultProfile.Env }}
+
+{{- range $idx, $profile := $.Profiles }}
+{{ if not $profile.IsDefault }}
+# settings:
+{{ $profile.Comment }}
+# {{ $profile.Env }}
+{{- end}}
+{{- end}}
+
+_{{ $.Executable }}() {
+  case "{{ $.CompletionEnv }}" in
+{{- range $idx, $profile := $.Profiles }}
+{{- if not $profile.IsDefault }}
+    "{{ $profile.Display }}")
+      {{ $profile.Name }}
+      ;;
+{{- end}}
+{{- end}}
+    *)
+      {{ $.DefaultProfile.Name }} 
+      ;;
+  esac
+}

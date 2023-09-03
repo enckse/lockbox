@@ -25,10 +25,12 @@ const (
 	JSONDataOutputBlank JSONOutputMode = "empty"
 	// JSONDataOutputRaw means the RAW (unencrypted) value is displayed
 	JSONDataOutputRaw JSONOutputMode = "plaintext"
+	// EnvironmentCompletionKey controls which completion function to use
+	EnvironmentCompletionKey = prefixKey + "COMPLETION_FUNCTION"
 )
 
 var (
-	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands}
+	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands, EnvCompletion}
 	// Platforms represent the platforms that lockbox understands to run on
 	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
@@ -76,7 +78,9 @@ var (
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{key: EnvTOTPToken.key + "_FORMAT", desc: "Override the otpauth url used to store totp tokens. It must have ONE format\nstring ('%s') to insert the totp base code."}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
 	// EnvConfig is the location of the config file to read environment variables from
-	EnvConfig        = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("Allows setting a specific file of environment variables for lockbox\nto read and use as configuration values (an '.env' file). The keyword\n'%s' will disable this functionality the keyword '%s' will search\nfor a file in the following paths in user's home directory matching\nthe first file found.\n\ndefault search paths:\n%v\n\nNote that this setting is not output as part of the environment.", noEnvironment, detectEnvironment, detectEnvironmentPaths)}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
+	EnvConfig = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "ENV", desc: fmt.Sprintf("Allows setting a specific file of environment variables for lockbox\nto read and use as configuration values (an '.env' file). The keyword\n'%s' will disable this functionality the keyword '%s' will search\nfor a file in the following paths in user's home directory matching\nthe first file found.\n\ndefault search paths:\n%v\n\nNote that this setting is not output as part of the environment.", noEnvironment, detectEnvironment, detectEnvironmentPaths)}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
+	// EnvCompletion is the completion method to use
+	EnvCompletion    = EnvironmentString{environmentBase: environmentBase{key: EnvironmentCompletionKey, desc: "Use to select the non-default completions,\nplease review the generated shell completion files for more information.", requirement: "must be exported via a shell variable"}, canDefault: false}
 	envKeyMode       = EnvironmentString{environmentBase: environmentBase{key: prefixKey + "KEYMODE", requirement: "must be set to a valid mode when using a key", desc: fmt.Sprintf("How to retrieve the database store password.\nSet to '%s' when only using a key file\nSet to '%s' to ignore the set key value", noKeyMode, IgnoreKeyMode), whenUnset: string(DefaultKeyMode)}, allowed: []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)}, canDefault: true, defaultValue: ""}
 	envKey           = EnvironmentString{environmentBase: environmentBase{requirement: requiredKeyOrKeyFile, key: prefixKey + "KEY", desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode)\nto retrieve the database password.", plainKeyMode, commandKeyMode)}, allowed: []string{commandArgsExample, "password"}, canDefault: false}
 	envConfigExpands = EnvironmentInt{environmentBase: environmentBase{key: EnvConfig.key + "_EXPANDS", desc: "The maximum number of times to expand the input env to resolve variables,\nset to 0 to disable expansion. This value can NOT be an expansion itself\nif set in the env config file."}, shortDesc: "max expands", allowZero: true, defaultValue: 20}

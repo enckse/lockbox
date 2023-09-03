@@ -1,6 +1,10 @@
 #compdef _{{ $.Executable }} {{ $.Executable }}
- 
-_{{ $.Executable }}() { 
+
+{{ $.Shell }}
+
+{{- range $idx, $profile := $.Profiles }}
+
+{{ $profile.Name }}() {
   local curcontext="$curcontext" state len
   typeset -A opt_args
 
@@ -11,7 +15,7 @@ _{{ $.Executable }}() {
   len=${#words[@]}
   case $state in
     main)
-      _arguments '1:main:({{ range $idx, $value := $.Options }}{{ if gt $idx 0}} {{ end }}{{ $value }}{{ end }})'
+      _arguments '1:main:({{ range $idx, $value := $profile.Options }}{{ if gt $idx 0}} {{ end }}{{ $value }}{{ end }})'
     ;;
     *)
       case $words[2] in
@@ -20,8 +24,8 @@ _{{ $.Executable }}() {
             compadd "$@" "{{ $.HelpAdvancedCommand }}"
           fi
         ;;
-{{- if not $.ReadOnly }}
-{{- if $.CanList }}
+{{- if not $profile.ReadOnly }}
+{{- if $profile.CanList }}
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
@@ -36,13 +40,13 @@ _{{ $.Executable }}() {
         ;;
 {{- end}}
 {{- end}}
-{{- if $.CanTOTP }}
+{{- if $profile.CanTOTP }}
         "{{ $.TOTPCommand }}")
           case "$len" in
             3)
               compadd "$@" {{ $.TOTPListCommand }}{{ range $key, $value := .TOTPSubCommands }} {{ $value }}{{ end }}
             ;;
-{{- if $.CanList }}
+{{- if $profile.CanList }}
             4)
               case $words[3] in
 {{- range $key, $value := .TOTPSubCommands }}
@@ -55,8 +59,8 @@ _{{ $.Executable }}() {
           esac
         ;;
 {{- end}}
-{{- if $.CanList }}
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+{{- if $profile.CanList }}
+        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $profile.CanClip }} | "{{ $.ClipCommand }}" {{end}})
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
@@ -65,3 +69,4 @@ _{{ $.Executable }}() {
       esac
   esac
 }
+{{- end}}
