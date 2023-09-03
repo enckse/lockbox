@@ -1,28 +1,55 @@
 package app_test
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
 )
 
-func TestBashCompletion(t *testing.T) {
-	v, err := app.GenerateCompletions(true, false, "lb")
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if len(v) != 1 {
-		t.Errorf("invalid result")
-	}
+func TestCompletions(t *testing.T) {
+	testCompletion(t, true)
+	testCompletion(t, false)
 }
 
-func TestZshCompletion(t *testing.T) {
-	v, err := app.GenerateCompletions(false, false, "lb")
+func testCompletion(t *testing.T, bash bool) {
+	v, err := app.GenerateCompletions(bash, true, "lb")
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if len(v) < 2 {
+		t.Errorf("invalid result")
+	}
+	defer os.Clearenv()
+	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "A")
+	o, err := app.GenerateCompletions(bash, true, "lb")
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if len(o) < 2 || len(o) != len(v) {
+		t.Errorf("invalid result")
+	}
+	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "")
+	v, err = app.GenerateCompletions(bash, false, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(v) != 1 {
 		t.Errorf("invalid result")
+	}
+	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "ZZZ")
+	_, err = app.GenerateCompletions(bash, false, "lb")
+	if err == nil || err.Error() != "no profiles loaded, invalid environment setting?" {
+		t.Errorf("invalid error: %v", err)
+	}
+	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "NOCLIP-READONLY")
+	n, err := app.GenerateCompletions(bash, false, "lb")
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if fmt.Sprintf("%v", n) == fmt.Sprintf("%v", v) {
+		t.Errorf("invalid result, should filter")
 	}
 }
 

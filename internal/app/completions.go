@@ -3,6 +3,7 @@ package app
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strings"
 	"text/template"
@@ -82,8 +83,10 @@ func (p Profile) TOTPSubCommands() []string {
 	return totp
 }
 
-func loadProfiles(exe string) []Profile {
+func loadProfiles(exe string, canFilter bool) []Profile {
 	profiles := config.LoadCompletionProfiles()
+	filter := config.EnvCompletion.Get()
+	hasFilter := filter != "" && canFilter
 	var res []Profile
 	for _, p := range profiles {
 		name := p.Name
@@ -97,6 +100,19 @@ func loadProfiles(exe string) []Profile {
 		n.ReadOnly = !p.Write
 		n.IsDefault = p.Default
 		n.env = p.Env
+		if hasFilter {
+			skipped := false
+			if p.Default {
+				skipped = filter != "DEFAULT"
+			} else {
+				if filter != n.Display() {
+					skipped = true
+				}
+			}
+			if skipped {
+				continue
+			}
+		}
 		res = append(res, n)
 	}
 	return res
@@ -106,7 +122,7 @@ func loadProfiles(exe string) []Profile {
 func GenerateCompletions(isBash, isHelp bool, exe string) ([]string, error) {
 	if isHelp {
 		var h []string
-		for _, p := range loadProfiles(exe) {
+		for _, p := range loadProfiles(exe, false) {
 			if p.IsDefault {
 				continue
 			}
@@ -159,11 +175,18 @@ export %s=<unknown>
 	if err != nil {
 		return nil, err
 	}
-	c.Profiles = loadProfiles(exe)
-	for _, p := range c.Profiles {
-		if p.IsDefault {
-			c.DefaultProfile = p
-			break
+	c.Profiles = loadProfiles(exe, true)
+	switch len(c.Profiles) {
+	case 0:
+		return nil, errors.New("no profiles loaded, invalid environment setting?")
+	case 1:
+		c.DefaultProfile = c.Profiles[0]
+	default:
+		for _, p := range c.Profiles {
+			if p.IsDefault {
+				c.DefaultProfile = p
+				break
+			}
 		}
 	}
 	shell, err := templateScript(shellScript, c)
