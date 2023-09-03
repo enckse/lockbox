@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/muesli/reflow/wordwrap"
 	"mvdan.cc/sh/v3/shell"
 )
 
@@ -450,10 +449,29 @@ func Wrap(indent uint, in string) string {
 	}
 	indenture := int(80 - indent)
 	for _, s := range sections {
-		for _, line := range strings.Split(wordwrap.String(s, indenture), "\n") {
+		for _, line := range strings.Split(wrap(s, indenture), "\n") {
 			fmt.Fprintf(&out, "%s%s\n", indenting, line)
 		}
 		fmt.Fprint(&out, "\n")
 	}
 	return out.String()
+}
+
+func wrap(in string, maxLength int) string {
+	var lines []string
+	var cur []string
+	for _, p := range strings.Split(in, " ") {
+		state := strings.Join(cur, " ")
+		l := len(p)
+		if len(state)+l >= maxLength {
+			lines = append(lines, strings.Join(cur, " "))
+			cur = []string{p}
+		} else {
+			cur = append(cur, p)
+		}
+	}
+	if len(cur) > 0 {
+		lines = append(lines, strings.Join(cur, " "))
+	}
+	return strings.Join(lines, "\n")
 }
