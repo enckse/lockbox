@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	clipBaseEnv          = "CLIP_"
 	commandArgsExample   = "[cmd args...]"
 	fileExample          = "<file>"
 	detectedValue        = "<detected>"
@@ -41,7 +40,8 @@ var (
 	// EnvClipMax gets the maximum clipboard time
 	EnvClipMax = EnvironmentInt{
 		environmentBase: environmentBase{
-			subKey: clipBaseEnv + "MAX",
+			subKey: "MAX",
+			cat:    clipCategory,
 			desc:   "Override the amount of time before totp clears the clipboard (seconds).",
 		},
 		shortDesc: "clipboard max time", allowZero: false, defaultValue: 45,
@@ -56,7 +56,8 @@ var (
 	}
 	// EnvClipOSC52 indicates if OSC52 clipboard mode is enabled
 	EnvClipOSC52 = EnvironmentBool{environmentBase: environmentBase{
-		subKey: clipBaseEnv + "OSC52",
+		subKey: "OSC52",
+		cat:    clipCategory,
 		desc:   "Enable OSC52 clipboard mode.",
 	}, defaultValue: false}
 	// EnvNoTOTP indicates if TOTP is disabled
@@ -92,7 +93,8 @@ var (
 	}, defaultValue: true}
 	// EnvMaxTOTP is the max TOTP time to run (default)
 	EnvMaxTOTP = EnvironmentInt{environmentBase: environmentBase{
-		subKey: EnvTOTPToken.subKey + "_MAX",
+		subKey: "MAX",
+		cat:    totpCategory,
 		desc:   "Time, in seconds, in which to show a TOTP token before automatically exiting.",
 	}, shortDesc: "max totp time", allowZero: false, defaultValue: 120}
 	// EnvTOTPToken is the leaf token to use to store TOTP tokens
@@ -117,17 +119,20 @@ var (
 	}, allowed: []string{"<directory>"}, canDefault: true, defaultValue: ""}
 	// EnvClipCopy allows overriding the clipboard copy command
 	EnvClipCopy = EnvironmentCommand{environmentBase: environmentBase{
-		subKey: clipBaseEnv + "COPY",
+		subKey: "COPY",
+		cat:    clipCategory,
 		desc:   "Override the detected platform copy command.",
 	}}
 	// EnvClipPaste allows overriding the clipboard paste command
 	EnvClipPaste = EnvironmentCommand{environmentBase: environmentBase{
-		subKey: clipBaseEnv + "PASTE",
+		subKey: "PASTE",
+		cat:    clipCategory,
 		desc:   "Override the detected platform paste command.",
 	}}
 	// EnvTOTPColorBetween handles terminal coloring for TOTP windows (seconds)
 	EnvTOTPColorBetween = EnvironmentString{environmentBase: environmentBase{
-		subKey: EnvTOTPToken.subKey + "_BETWEEN",
+		subKey: "BETWEEN",
+		cat:    totpCategory,
 		desc: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
 must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
 and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
@@ -152,7 +157,8 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 	}
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = EnvironmentFormatter{environmentBase: environmentBase{
-		subKey: EnvTOTPToken.subKey + "_FORMAT",
+		subKey: "FORMAT",
+		cat:    totpCategory,
 		desc:   "Override the otpauth url used to store totp tokens. It must have ONE format string ('%s') to insert the totp base code.",
 	}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."}
 	// EnvConfig is the location of the config file to read environment variables from

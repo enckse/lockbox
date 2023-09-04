@@ -41,6 +41,9 @@ const (
 	ReKeyKeyFlag = "key"
 	// ReKeyKeyModeFlag is the flag used for rekey to set the key mode
 	ReKeyKeyModeFlag = "keymode"
+	// sub categories
+	clipCategory keyCategory = "CLIP_"
+	totpCategory keyCategory = "TOTP_"
 )
 
 var (
@@ -49,12 +52,14 @@ var (
 )
 
 type (
+	keyCategory string
 	// JSONOutputMode is the output mode definition
 	JSONOutputMode string
 	// SystemPlatform represents the platform lockbox is running on.
 	SystemPlatform  string
 	environmentBase struct {
 		subKey      string
+		cat         keyCategory
 		desc        string
 		requirement string
 		whenUnset   string
@@ -126,7 +131,7 @@ func environOrDefault(envKey, defaultValue string) string {
 }
 
 func (e environmentBase) key() string {
-	return fmt.Sprintf("LOCKBOX_%s", e.subKey)
+	return fmt.Sprintf("LOCKBOX_%s%s", string(e.cat), e.subKey)
 }
 
 // Get will get the boolean value for the setting
