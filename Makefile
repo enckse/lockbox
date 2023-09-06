@@ -2,7 +2,7 @@ BUILD   := bin/
 TARGET  := $(BUILD)lb
 VERSION ?= $(shell git log -n 1 --format=%h)
 VARS    := LOCKBOX_ENV=none
-DESTDIR := /usr/local/bin/
+DESTDIR := /usr/local/bin
 
 all: $(TARGET)
 
@@ -28,4 +28,4 @@ clean:
 	@find internal/ -type d -empty -delete
 
 install:
-	install -m755 $(TARGET) $(DESTDIR)lb
+	install -m755 $(TARGET) $(DESTDIR)/lb
