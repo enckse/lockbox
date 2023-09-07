@@ -14,6 +14,7 @@ import (
 	"github.com/enckse/lockbox/internal/platform"
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
+	"mpldr.codes/ansi"
 )
 
 var (
@@ -105,10 +106,6 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if !interactive && clip {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
-	coloring, err := platform.NewTerminal(platform.Red)
-	if err != nil {
-		return err
-	}
 	entity, err := opts.app.Transaction().Get(backend.NewPath(args.Entry, args.token), backend.SecretValue)
 	if err != nil {
 		return err
@@ -159,6 +156,10 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
+	allowColor, err := canColor()
+	if err != nil {
+		return err
+	}
 	for {
 		if !first {
 			time.Sleep(500 * time.Millisecond)
@@ -180,27 +181,30 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		if err != nil {
 			return err
 		}
-		startColor := ""
-		endColor := ""
-		for _, when := range colorRules {
-			if left < when.End && left >= when.Start {
-				startColor = coloring.Start
-				endColor = coloring.End
+		isColor := false
+		if allowColor {
+			for _, when := range colorRules {
+				if left < when.End && left >= when.Start {
+					isColor = true
+				}
 			}
 		}
 		leftString := fmt.Sprintf("%d", left)
 		if len(leftString) < 2 {
 			leftString = "0" + leftString
 		}
-		expires := fmt.Sprintf("%s%s (%s)%s", startColor, now.Format("15:04:05"), leftString, endColor)
-		outputs := []string{expires}
+		txt := fmt.Sprintf("%s (%s)", now.Format("15:04:05"), leftString)
+		if isColor {
+			txt = ansi.Red(txt)
+		}
+		outputs := []string{txt}
 		if !clip {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", args.Entry, code))
 			if !once {
 				outputs = append(outputs, "-> CTRL+C to exit")
 			}
 		} else {
-			fmt.Fprintf(writer, "-> %s\n", expires)
+			fmt.Fprintf(writer, "-> %s\n", txt)
 			return clipboard.CopyTo(code)
 		}
 		if !once {
@@ -286,4 +290,20 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 		}
 	}
 	return opts, nil
+}
+
+func canColor() (bool, error) {
+	interactive, err := config.EnvInteractive.Get()
+	if err != nil {
+		return false, err
+	}
+	colors := interactive
+	if colors {
+		isColored, err := config.EnvNoColor.Get()
+		if err != nil {
+			return false, err
+		}
+		colors = !isColored
+	}
+	return colors, nil
 }
