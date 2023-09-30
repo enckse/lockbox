@@ -6,6 +6,9 @@ CLIP_WAIT=1
 CLIP_TRIES=3
 CLIP_COPY="$DATA/clip.copy"
 CLIP_PASTE="$DATA/clip.paste"
+PASS_TEST="password"
+KEYF_TEST="keyfile"
+BOTH_TEST="both"
 
 _execute() {
   local oldmode oldkey
@@ -212,9 +215,19 @@ _evaluate() {
   exit "$state"
 }
 
+_runall() {
+  local t code
+  code=0
+  for t in "$PASS_TEST" "$KEYF_TEST" "$BOTH_TEST"; do
+    if ! "$0" "$t"; then
+      code=1
+    fi
+  done
+  exit "$code"
+}
+
 if [ -z "$1" ]; then
-  echo "no test given"
-  exit 1
+  _runall
 fi
 
 _unset
@@ -233,11 +246,11 @@ find "$DATA" -type f -delete
 export LOCKBOX_KEYFILE=""
 export LOCKBOX_KEY=""
 VALID=0
-if [ "$1" == "password" ] || [ "$1" == "both" ]; then
+if [ "$1" == "$PASS_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
   VALID=1
   export LOCKBOX_KEY="testingkey"
 fi
-if [ "$1" == "keyfile" ] || [ "$1" == "both" ]; then
+if [ "$1" == "$KEYF_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
   VALID=1
   KEYFILE="$DATA/test.key"
   echo "thisisatest" > "$KEYFILE"

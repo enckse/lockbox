@@ -20,7 +20,7 @@ unittests:
 check: unittests runs
 
 runs: $(TARGET)
-	$(VARS) make -C tests
+	cd tests && $(VARS) ./run.sh
 
 clean:
 	@rm -rf $(BUILD) tests/bin
