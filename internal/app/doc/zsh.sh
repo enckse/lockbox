@@ -70,3 +70,5 @@
   esac
 }
 {{- end}}
+
+_compdef _lb lb
