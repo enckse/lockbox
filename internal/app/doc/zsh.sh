@@ -71,4 +71,4 @@
 }
 {{- end}}
 
-_compdef _lb lb
+compdef _lb lb
