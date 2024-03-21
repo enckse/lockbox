@@ -21,7 +21,7 @@ jobs:
             display: ubuntu
           - name: ubuntu-latest
             image: alpine:latest
-            deps: "apk add make git bash tar"
+            deps: "apk add make git"
             display: alpine
           - name: macos-latest
             image: null

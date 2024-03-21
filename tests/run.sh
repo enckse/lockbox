@@ -10,8 +10,54 @@ PASS_TEST="password"
 KEYF_TEST="keyfile"
 BOTH_TEST="both"
 
-_execute() {
-  local oldmode oldkey
+_unset() {
+  unset $(env | grep '^LOCKBOX' | cut -d "=" -f 1)
+}
+
+if [ -z "$1" ]; then
+  CODE=0
+  for TEST_RUN in "$PASS_TEST" "$KEYF_TEST" "$BOTH_TEST"; do
+    if ! "$0" "$TEST_RUN"; then
+      CODE=1
+    fi
+  done
+  exit $CODE
+fi
+
+_unset
+export LOCKBOX_ENV="none"
+if [ ! -x "${LB_BINARY}" ]; then
+  echo "binary missing?"
+  exit 1
+fi
+if ! ${LB_BINARY} help >/dev/null; then
+  echo "help unavailable by default...fatal"
+  exit 1
+fi
+mkdir -p "$DATA"
+find "$DATA" -type f -delete
+
+export LOCKBOX_KEYFILE=""
+export LOCKBOX_KEY=""
+VALID=0
+if [ "$1" == "$PASS_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
+  VALID=1
+  export LOCKBOX_KEY="testingkey"
+fi
+if [ "$1" == "$KEYF_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
+  VALID=1
+  KEYFILE="$DATA/test.key"
+  echo "thisisatest" > "$KEYFILE"
+  export LOCKBOX_KEYFILE="$KEYFILE"
+fi
+if [ "$VALID" -eq 0 ]; then
+  echo "invalid test"
+  exit 1
+fi
+
+LOGFILE="$DATA/actual.log"
+printf "%-10s ... " "$1"
+{
   export LOCKBOX_HOOKDIR=""
   export LOCKBOX_STORE="${DATA}/passwords.kdbx"
   export LOCKBOX_TOTP=totp
@@ -24,20 +70,20 @@ _execute() {
   fi
   export LOCKBOX_JSON_DATA_HASH_LENGTH=0
   echo test2 |${LB_BINARY} insert keys/k/one2
-  oldmode="$LOCKBOX_KEYMODE"
-  oldkey="$LOCKBOX_KEY"
-  if [ "$oldkey" != "" ]; then
+  OLDMODE="$LOCKBOX_KEYMODE"
+  OLDKEY="$LOCKBOX_KEY"
+  if [ "$OLDKEY" != "" ]; then
     export LOCKBOX_INTERACTIVE=yes
     export LOCKBOX_KEYMODE=ask
     export LOCKBOX_KEY=""
   else
     printf "password: "
   fi
-  echo "$oldkey" | ${LB_BINARY} ls 2>/dev/null
-  if [ "$oldkey" != "" ]; then
+  echo "$OLDKEY" | ${LB_BINARY} ls 2>/dev/null
+  if [ "$OLDKEY" != "" ]; then
     export LOCKBOX_INTERACTIVE=no
-    export LOCKBOX_KEYMODE="$oldmode"
-    export LOCKBOX_KEY="$oldkey"
+    export LOCKBOX_KEYMODE="$OLDMODE"
+    export LOCKBOX_KEY="$OLDKEY"
   fi
   echo test |${LB_BINARY} insert keys/k/one
   echo test |${LB_BINARY} insert key/a/one
@@ -105,66 +151,15 @@ _execute() {
   echo
   ${LB_BINARY} ls
   echo
-  _rekey 1
-  _clipboard
-  _invalid
-  _config
-}
-
-_unset() {
-  local i
-  for i in $(env | grep '^LOCKBOX' | cut -d "=" -f 1); do
-    unset "$i"
-  done
-}
-
-_config() {
-  {
-    echo "PLAINTEXT=text"
-    env | grep '^LOCKBOX' | sed 's/plaintext/$LOCKBOX_FAKE_TEST$PLAINTEXT/g'
-  } > "$ENV"
-  _unset
-  export LOCKBOX_FAKE_TEST=plain
-  export LOCKBOX_ENV="none"
-  ${LB_BINARY} ls
-  export LOCKBOX_ENV="$ENV"
-  ${LB_BINARY} ls
-}
-
-_invalid() {
-  local keyfile oldkey oldkeyfile oldmode
-  oldkey="$LOCKBOX_KEY"
-  oldmode="$LOCKBOX_KEYMODE"
-  oldkeyfile="$LOCKBOX_KEYFILE"
-  if [ -n "$LOCKBOX_KEYFILE" ]; then
-    export LOCKBOX_KEYFILE=""
-    if [ -z "$LOCKBOX_KEY" ]; then
-      export LOCKBOX_KEY="garbage"
-    fi
-  else
-    keyfile="$DATA/invalid.key"
-    echo "invalid" > "$keyfile"
-    export LOCKBOX_KEYFILE="$keyfile"
-  fi
-  if [ "$oldmode" == "none" ]; then
-    export LOCKBOX_KEYMODE="plaintext"
-  fi
-  ${LB_BINARY} ls
-  export LOCKBOX_KEYFILE="$oldkeyfile"
-  export LOCKBOX_KEY="$oldkey"
-  export LOCKBOX_KEYMODE="$oldmode"
-}
-
-_rekey() {
-  local rekey rekeyFile 
-  rekey="$LOCKBOX_STORE.rekey.kdbx"
-  rekeyFile=""
+  # rekeying
+  REKEY="$LOCKBOX_STORE.rekey.kdbx"
+  REKEYFILE=""
   export LOCKBOX_HOOKDIR=""
   if [ -n "$LOCKBOX_KEYFILE" ]; then
-    rekeyFile="$DATA/newkeyfile"
-    echo "thisisanewkey" > "$rekeyFile"
+    REKEYFILE="$DATA/newkeyfile"
+    echo "thisisanewkey" > "$REKEYFILE"
   fi
-  echo y |${LB_BINARY} rekey -store="$rekey" -key="newkey$1" -keymode="plaintext" -keyfile="$rekeyFile"
+  echo y |${LB_BINARY} rekey -store="$REKEY" -key="newkey$1" -keymode="plaintext" -keyfile="$REKEYFILE"
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2
@@ -175,89 +170,63 @@ _rekey() {
   export LOCKBOX_JSON_DATA=hash
   export LOCKBOX_JSON_DATA_HASH_LENGTH=3
   ${LB_BINARY} json k
-}
-
-_clipboard() {
-  local clipTries
+  # clipboard
   export LOCKBOX_CLIP_COPY="touch $CLIP_COPY"
   export LOCKBOX_CLIP_PASTE="touch $CLIP_PASTE"
   export LOCKBOX_CLIP_MAX=5
   ${LB_BINARY} clip keys/k/one2
-  clipTries="$CLIP_TRIES"
-  while [ "$clipTries" -gt 0 ] ; do
+  CLIP_PASSED=0
+  while [ "$CLIP_TRIES" -gt 0 ] ; do
     if [ -e "$CLIP_COPY" ] && [ -e "$CLIP_PASTE" ]; then
-      return
+      CLIP_PASSED=1
+      break
     fi
     sleep "$CLIP_WAIT"
-    clipTries=$((clipTries-1))
+    CLIP_TRIES=$((CLIP_TRIES-1))
   done
-  echo "clipboard test failed"
-}
-
-_logtest() {
-  _execute 2>&1 | \
-    sed 's/"modtime": "[0-9].*$/"modtime": "XXXX-XX-XX",/g' | \
-    sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g'
-}
-
-_evaluate() {
-  local logfile state result
-  logfile="$DATA/actual.log"
-  printf "%-10s ... " "$1"
-  _logtest > "$logfile"
-  state=0
-  result="passed"
-  if ! diff -u "$logfile" "expected.log"; then
-    result="failed"
-    state=1
+  if [ $CLIP_PASSED -eq 0 ]; then
+    echo "clipboard test failed"
   fi
-  printf "[%s]\n" "$result"
-  exit "$state"
-}
-
-_runall() {
-  local t code
-  code=0
-  for t in "$PASS_TEST" "$KEYF_TEST" "$BOTH_TEST"; do
-    if ! "$0" "$t"; then
-      code=1
+  # invalid settings
+  OLDKEY="$LOCKBOX_KEY"
+  OLDMODE="$LOCKBOX_KEYMODE"
+  OLDKEYFILE="$LOCKBOX_KEYFILE"
+  if [ -n "$LOCKBOX_KEYFILE" ]; then
+    export LOCKBOX_KEYFILE=""
+    if [ -z "$LOCKBOX_KEY" ]; then
+      export LOCKBOX_KEY="garbage"
     fi
-  done
-  exit "$code"
-}
-
-if [ -z "$1" ]; then
-  _runall
+  else
+    KEYFILE="$DATA/invalid.key"
+    echo "invalid" > "$KEYFILE"
+    export LOCKBOX_KEYFILE="$KEYFILE"
+  fi
+  if [ "$OLDMODE" == "none" ]; then
+    export LOCKBOX_KEYMODE="plaintext"
+  fi
+  ${LB_BINARY} ls
+  export LOCKBOX_KEYFILE="$OLDKEYFILE"
+  export LOCKBOX_KEY="$OLDKEY"
+  export LOCKBOX_KEYMODE="$OLDMODE"
+  # configuration
+  {
+    echo "PLAINTEXT=text"
+    env | grep '^LOCKBOX' | sed 's/plaintext/$LOCKBOX_FAKE_TEST$PLAINTEXT/g'
+  } > "$ENV"
+  _unset
+  export LOCKBOX_FAKE_TEST=plain
+  export LOCKBOX_ENV="none"
+  ${LB_BINARY} ls
+  export LOCKBOX_ENV="$ENV"
+  ${LB_BINARY} ls
+} 2>&1 | \
+  sed 's/"modtime": "[0-9].*$/"modtime": "XXXX-XX-XX",/g' | \
+  sed 's/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g' > "$LOGFILE"
+STATE=0
+RESULT="passed"
+if ! diff -u "$LOGFILE" "expected.log"; then
+  RESULT="failed"
+  STATE=1
 fi
-
-_unset
-export LOCKBOX_ENV="none"
-if [ ! -x "${LB_BINARY}" ]; then
-  echo "binary missing?"
-  exit 1
-fi
-if ! ${LB_BINARY} help >/dev/null; then
-  echo "help unavailable by default...fatal"
-  exit 1
-fi
-mkdir -p "$DATA"
-find "$DATA" -type f -delete
-
-export LOCKBOX_KEYFILE=""
-export LOCKBOX_KEY=""
-VALID=0
-if [ "$1" == "$PASS_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
-  VALID=1
-  export LOCKBOX_KEY="testingkey"
-fi
-if [ "$1" == "$KEYF_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
-  VALID=1
-  KEYFILE="$DATA/test.key"
-  echo "thisisatest" > "$KEYFILE"
-  export LOCKBOX_KEYFILE="$KEYFILE"
-fi
-if [ "$VALID" -eq 0 ]; then
-  echo "invalid test"
-  exit 1
-fi
-_evaluate "$1"
+printf "[%s]\n" "$RESULT"
+exit "$STATE"
