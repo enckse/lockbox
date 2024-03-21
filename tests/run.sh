@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 LB_BINARY=../bin/lb
 DATA="bin/$1"
 ENV="$DATA/env"
@@ -40,11 +40,11 @@ find "$DATA" -type f -delete
 export LOCKBOX_KEYFILE=""
 export LOCKBOX_KEY=""
 VALID=0
-if [ "$1" == "$PASS_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
+if [ "$1" = "$PASS_TEST" ] || [ "$1" = "$BOTH_TEST" ]; then
   VALID=1
   export LOCKBOX_KEY="testingkey"
 fi
-if [ "$1" == "$KEYF_TEST" ] || [ "$1" == "$BOTH_TEST" ]; then
+if [ "$1" = "$KEYF_TEST" ] || [ "$1" = "$BOTH_TEST" ]; then
   VALID=1
   KEYFILE="$DATA/test.key"
   echo "thisisatest" > "$KEYFILE"
@@ -63,7 +63,7 @@ printf "%-10s ... " "$1"
   export LOCKBOX_TOTP=totp
   export LOCKBOX_INTERACTIVE=no
   export LOCKBOX_READONLY=no
-  if [ "$LOCKBOX_KEY" == "" ]; then
+  if [ "$LOCKBOX_KEY" = "" ]; then
     export LOCKBOX_KEYMODE=none
   else
     export LOCKBOX_KEYMODE=plaintext
@@ -201,7 +201,7 @@ printf "%-10s ... " "$1"
     echo "invalid" > "$KEYFILE"
     export LOCKBOX_KEYFILE="$KEYFILE"
   fi
-  if [ "$OLDMODE" == "none" ]; then
+  if [ "$OLDMODE" = "none" ]; then
     export LOCKBOX_KEYMODE="plaintext"
   fi
   ${LB_BINARY} ls
