@@ -123,3 +123,29 @@ func TestZshInfo(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 }
+
+func TestFishInfo(t *testing.T) {
+	os.Clearenv()
+	var buf bytes.Buffer
+	ok, err := app.Info(&buf, "fish", []string{})
+	if !ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if buf.String() == "" {
+		t.Error("nothing written")
+	}
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "fish", []string{"help"})
+	if !ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if buf.String() == "" {
+		t.Error("nothing written")
+	}
+	if _, err = app.Info(&buf, "fish", []string{"defaults"}); err.Error() != "invalid fish subcommand" {
+		t.Errorf("invalid error: %v", err)
+	}
+	if _, err = app.Info(&buf, "fish", []string{"test", "default"}); err.Error() != "invalid fish command" {
+		t.Errorf("invalid error: %v", err)
+	}
+}

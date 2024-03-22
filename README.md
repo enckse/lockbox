@@ -34,7 +34,7 @@ Use `lb help verbose` for additional information about options and environment v
 
 `lb` should work on combinations of the following:
 - linux/macOS/WSL
-- zsh/bash (for completions)
+- zsh/bash/fish (for completions)
 - amd64/arm64
 
 ## usage

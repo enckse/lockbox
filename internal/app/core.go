@@ -72,6 +72,8 @@ const (
 	JSONCommand = "json"
 	// ZshCommand is the command to generate zsh completions
 	ZshCommand = "zsh"
+    // FishCommand is the command to generate fish completions
+    FishCommand = "fish"
 	docDir     = "doc"
 	textFile   = ".txt"
 )
@@ -206,6 +208,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(VersionCommand, "", "display version information"))
 	results = append(results, command(ZshCommand, "", "generate user environment zsh completion"))
 	results = append(results, subCommand(ZshCommand, CompletionHelpCommand, "", completionHelpDesc))
+	results = append(results, command(FishCommand, "", "generate user environment fish completion"))
+	results = append(results, subCommand(FishCommand, CompletionHelpCommand, "", completionHelpDesc))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {

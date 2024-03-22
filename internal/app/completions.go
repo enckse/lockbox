@@ -119,14 +119,14 @@ func loadProfiles(exe string, canFilter bool) []Profile {
 }
 
 // GenerateCompletions handles creating shell completion outputs
-func GenerateCompletions(isBash, isHelp bool, exe string) ([]string, error) {
+func GenerateCompletions(completionType string, isHelp bool, exe string) ([]string, error) {
 	if isHelp {
 		var h []string
 		for _, p := range loadProfiles(exe, false) {
 			if p.IsDefault {
 				continue
 			}
-			text := fmt.Sprintf("export %s\n  - filtered completions\n  - useful when:\n", p.Env())
+			text := fmt.Sprintf("when %s\n  - filtered completions\n  - useful when:\n", p.Env())
 			for idx, e := range p.env {
 				if idx > 0 {
 					text = fmt.Sprintf("%s      and\n", text)
@@ -138,7 +138,7 @@ func GenerateCompletions(isBash, isHelp bool, exe string) ([]string, error) {
 		h = append(h, strings.TrimSpace(fmt.Sprintf(`
 %s is not set
 unset %s
-export %s=<unknown>
+when %s=<unknown>
   - default completions
 `, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey)))
 		return h, nil
@@ -161,15 +161,9 @@ export %s=<unknown>
 		CompletionEnv:       fmt.Sprintf("$%s", config.EnvironmentCompletionKey),
 	}
 
-	using, err := readDoc("zsh.sh")
+	using, err := readDoc(fmt.Sprintf("%s.sh", completionType))
 	if err != nil {
 		return nil, err
-	}
-	if isBash {
-		using, err = readDoc("bash.sh")
-		if err != nil {
-			return nil, err
-		}
 	}
 	shellScript, err := readDoc("shell.sh")
 	if err != nil {

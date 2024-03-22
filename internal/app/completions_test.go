@@ -9,12 +9,13 @@ import (
 )
 
 func TestCompletions(t *testing.T) {
-	testCompletion(t, true)
-	testCompletion(t, false)
+	testCompletion(t, "bash")
+	testCompletion(t, "zsh")
+	testCompletion(t, "fish")
 }
 
-func testCompletion(t *testing.T, bash bool) {
-	v, err := app.GenerateCompletions(bash, true, "lb")
+func testCompletion(t *testing.T, completionMode string) {
+	v, err := app.GenerateCompletions(completionMode, true, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -23,7 +24,7 @@ func testCompletion(t *testing.T, bash bool) {
 	}
 	defer os.Clearenv()
 	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "A")
-	o, err := app.GenerateCompletions(bash, true, "lb")
+	o, err := app.GenerateCompletions(completionMode, true, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -31,7 +32,7 @@ func testCompletion(t *testing.T, bash bool) {
 		t.Errorf("invalid result")
 	}
 	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "")
-	v, err = app.GenerateCompletions(bash, false, "lb")
+	v, err = app.GenerateCompletions(completionMode, false, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -39,12 +40,12 @@ func testCompletion(t *testing.T, bash bool) {
 		t.Errorf("invalid result")
 	}
 	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "ZZZ")
-	_, err = app.GenerateCompletions(bash, false, "lb")
+	_, err = app.GenerateCompletions(completionMode, false, "lb")
 	if err == nil || err.Error() != "no profiles loaded, invalid environment setting?" {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "NOCLIP-READONLY")
-	n, err := app.GenerateCompletions(bash, false, "lb")
+	n, err := app.GenerateCompletions(completionMode, false, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -52,7 +53,7 @@ func testCompletion(t *testing.T, bash bool) {
 		t.Errorf("invalid result, should filter")
 	}
 	os.Setenv("LOCKBOX_COMPLETION_FUNCTION", "DEFAULT")
-	d, err := app.GenerateCompletions(bash, false, "lb")
+	d, err := app.GenerateCompletions(completionMode, false, "lb")
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

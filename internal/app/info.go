@@ -61,7 +61,7 @@ func info(command string, args []string) ([]string, error) {
 			return nil, errors.New("invalid env command")
 		}
 		return config.Environ(), nil
-	case BashCommand, ZshCommand:
+	case BashCommand, ZshCommand, FishCommand:
 		if len(args) > 1 {
 			return nil, fmt.Errorf("invalid %s command", command)
 		}
@@ -77,7 +77,7 @@ func info(command string, args []string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		return GenerateCompletions(command == BashCommand, isHelp, exe)
+		return GenerateCompletions(command, isHelp, exe)
 	}
 	return nil, nil
 }
