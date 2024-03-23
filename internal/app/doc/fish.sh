@@ -16,7 +16,7 @@ function {{ $profile.Name }}
   set -l totps {{ $.TOTPListCommand }}{{ range $key, $value := .TOTPSubCommands }} {{ $value }}{{ end }}
   complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and not __fish_seen_subcommand_from $totps" -a "$totps"
 {{- if $profile.CanList }}
-  complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps" -a "({{ $.DoTOTPList }})"
+complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoTOTPList }})"
 {{- end}}
 {{- end}}
 {{- if $profile.CanList }}
