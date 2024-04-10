@@ -72,10 +72,10 @@ const (
 	JSONCommand = "json"
 	// ZshCommand is the command to generate zsh completions
 	ZshCommand = "zsh"
-    // FishCommand is the command to generate fish completions
-    FishCommand = "fish"
-	docDir     = "doc"
-	textFile   = ".txt"
+	// FishCommand is the command to generate fish completions
+	FishCommand = "fish"
+	docDir      = "doc"
+	textFile    = ".txt"
 )
 
 //go:embed doc/*
