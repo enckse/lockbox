@@ -3,6 +3,7 @@ TARGET  := $(BUILD)lb
 VERSION ?= $(shell git log -n 1 --format=%h)
 VARS    := LOCKBOX_ENV=none
 DESTDIR := /usr/local/bin
+GOFLAGS := -ldflags=-linkmode=external -trimpath -buildmode=pie -mod=readonly -modcacherw -buildvcs=false
 GOOS    :=
 GOARCH  :=
 
