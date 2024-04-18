@@ -1,4 +1,4 @@
-BUILD   := bin/
+BUILD   := build/
 TARGET  := $(BUILD)lb
 VERSION ?= $(shell git log -n 1 --format=%h)
 VARS    := LOCKBOX_ENV=none
