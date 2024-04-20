@@ -40,19 +40,17 @@ func info(command string, args []string) ([]string, error) {
 			return nil, errors.New("invalid help command")
 		}
 		isAdvanced := false
-		exe, err := exeName()
-		if err != nil {
-			return nil, err
-		}
 		if len(args) == 1 {
 			switch args[0] {
 			case HelpAdvancedCommand:
 				isAdvanced = true
-			case HelpShellCommand:
-				return GenerateCompletions("", true, exe)
 			default:
 				return nil, errors.New("invalid help option")
 			}
+		}
+		exe, err := exeName()
+		if err != nil {
+			return nil, err
 		}
 		results, err := Usage(isAdvanced, exe)
 		if err != nil {
@@ -64,15 +62,31 @@ func info(command string, args []string) ([]string, error) {
 			return nil, errors.New("invalid env command")
 		}
 		return config.Environ(), nil
-	case BashCommand, ZshCommand, FishCommand:
-		if len(args) != 0 {
-			return nil, fmt.Errorf("invalid %s command", command)
-		}
+	case CompletionsCommand:
+		shell := ""
 		exe, err := exeName()
 		if err != nil {
 			return nil, err
 		}
-		return GenerateCompletions(command, false, exe)
+		switch len(args) {
+		case 0:
+			shell = filepath.Base(os.Getenv("SHELL"))
+		case 1:
+			sub := args[0]
+			if sub == CompletionsHelpCommand {
+				return GenerateCompletions("", true, exe)
+			}
+			shell = sub
+		default:
+			return nil, errors.New("invalid completions subcommand")
+		}
+		switch shell {
+		case CompletionsZshCommand, CompletionsBashCommand, CompletionsFishCommand:
+			break
+		default:
+			return nil, fmt.Errorf("unknown completion type: %s", shell)
+		}
+		return GenerateCompletions(shell, false, exe)
 	}
 	return nil, nil
 }

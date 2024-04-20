@@ -55,10 +55,12 @@ const (
 	TOTPListCommand = ListCommand
 	// TOTPOnceCommand will perform like a normal totp request but not refresh
 	TOTPOnceCommand = "once"
-	// BashCommand is the command to generate bash completions
-	BashCommand = "bash"
-	// HelpShellCommand is the help output about shell variables
-	HelpShellCommand = "shell"
+	// CompletionsBashCommand is the command to generate bash completions
+	CompletionsBashCommand = "bash"
+	// CompletionsCommand are used to generate shell completions
+	CompletionsCommand = "completions"
+	// CompletionsHelpCommand displays information about shell completions
+	CompletionsHelpCommand = "help"
 	// ReKeyCommand will rekey the underlying database
 	ReKeyCommand = "rekey"
 	// MultiLineCommand handles multi-line inserts (when not piped)
@@ -69,12 +71,12 @@ const (
 	TOTPInsertCommand = InsertCommand
 	// JSONCommand handles JSON outputs
 	JSONCommand = "json"
-	// ZshCommand is the command to generate zsh completions
-	ZshCommand = "zsh"
-	// FishCommand is the command to generate fish completions
-	FishCommand = "fish"
-	docDir      = "doc"
-	textFile    = ".txt"
+	// CompletionsZshCommand is the command to generate zsh completions
+	CompletionsZshCommand = "zsh"
+	// CompletionsFishCommand is the command to generate fish completions
+	CompletionsFishCommand = "fish"
+	docDir                 = "doc"
+	textFile               = ".txt"
 )
 
 //go:embed doc/*
@@ -96,13 +98,13 @@ type (
 	}
 	// Documentation is how documentation segments are templated
 	Documentation struct {
-		Executable       string
-		MoveCommand      string
-		RemoveCommand    string
-		ReKeyCommand     string
-		HelpCommand      string
-		HelpShellCommand string
-		ReKey            struct {
+		Executable             string
+		MoveCommand            string
+		RemoveCommand          string
+		ReKeyCommand           string
+		CompletionsCommand     string
+		CompletionsHelpCommand string
+		ReKey                  struct {
 			Store   string
 			KeyFile string
 			Key     string
@@ -184,12 +186,15 @@ func commandText(args, name, desc string) string {
 // Usage return usage information
 func Usage(verbose bool, exe string) ([]string, error) {
 	var results []string
-	results = append(results, command(BashCommand, "", "generate user environment bash completion"))
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
+	results = append(results, command(CompletionsCommand, "<shell>", "generate completions via auto-detection of shell"))
+	results = append(results, subCommand(CompletionsCommand, CompletionsBashCommand, "", "generate bash completions"))
+	results = append(results, subCommand(CompletionsCommand, CompletionsFishCommand, "", "generate fish completions"))
+	results = append(results, subCommand(CompletionsCommand, CompletionsHelpCommand, "", "show help information about completions"))
+	results = append(results, subCommand(CompletionsCommand, CompletionsZshCommand, "", "generate zsh completions"))
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
-	results = append(results, subCommand(HelpCommand, HelpShellCommand, "", "display shell variable help information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
 	results = append(results, command(JSONCommand, "filter", "display detailed information"))
 	results = append(results, command(ListCommand, "", "list entries"))
@@ -206,19 +211,17 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPMinimalCommand, "entry", "display the first generated code (no details)"))
 	results = append(results, subCommand(TOTPCommand, TOTPShowCommand, "entry", "show the totp entry"))
 	results = append(results, command(VersionCommand, "", "display version information"))
-	results = append(results, command(ZshCommand, "", "generate user environment zsh completion"))
-	results = append(results, command(FishCommand, "", "generate user environment fish completion"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {
 		results = append(results, "")
 		document := Documentation{
-			Executable:       filepath.Base(exe),
-			MoveCommand:      MoveCommand,
-			RemoveCommand:    RemoveCommand,
-			ReKeyCommand:     ReKeyCommand,
-			HelpShellCommand: HelpShellCommand,
-			HelpCommand:      HelpCommand,
+			Executable:             filepath.Base(exe),
+			MoveCommand:            MoveCommand,
+			RemoveCommand:          RemoveCommand,
+			ReKeyCommand:           ReKeyCommand,
+			CompletionsCommand:     CompletionsCommand,
+			CompletionsHelpCommand: CompletionsHelpCommand,
 		}
 		document.ReKey.Store = setDocFlag(config.ReKeyStoreFlag)
 		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)

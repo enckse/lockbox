@@ -17,7 +17,7 @@
     if [ "$COMP_CWORD" -eq 2 ]; then
       case ${COMP_WORDS[1]} in
         "{{ $.HelpCommand }}")
-          opts="{{ $.HelpAdvancedCommand }} {{ $.HelpShellCommand }}"
+          opts="{{ $.HelpAdvancedCommand }}"
           ;;
 {{- if not $profile.ReadOnly }}
 {{- if $profile.CanList }}

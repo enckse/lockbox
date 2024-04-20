@@ -122,7 +122,11 @@ func loadProfiles(exe string, canFilter bool) []Profile {
 // GenerateCompletions handles creating shell completion outputs
 func GenerateCompletions(completionType string, isHelp bool, exe string) ([]string, error) {
 	if isHelp {
-		var h []string
+		h := []string{"completions are available for:"}
+		for _, s := range []string{CompletionsBashCommand, CompletionsFishCommand, CompletionsZshCommand} {
+			h = append(h, fmt.Sprintf("  - %s", s))
+		}
+		h = append(h, "")
 		for _, p := range loadProfiles(exe, false) {
 			if p.IsDefault {
 				continue
@@ -155,7 +159,6 @@ when %s=<unknown>
 		JSONCommand:         JSONCommand,
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
-		HelpShellCommand:    HelpShellCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),

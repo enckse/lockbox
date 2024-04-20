@@ -3,6 +3,7 @@ package app_test
 import (
 	"bytes"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
@@ -41,36 +42,6 @@ func TestHelpInfo(t *testing.T) {
 	if _, err = app.Info(&buf, "help", []string{"verbose", "A"}); err.Error() != "invalid help command" {
 		t.Errorf("invalid error: %v", err)
 	}
-	old = buf.String()
-	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "help", []string{"shell"})
-	if !ok || err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if buf.String() == "" || old == buf.String() {
-		t.Error("nothing written")
-	}
-}
-
-func TestBashInfo(t *testing.T) {
-	os.Clearenv()
-	var buf bytes.Buffer
-	ok, err := app.Info(&buf, "bash", []string{})
-	if !ok || err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if buf.String() == "" {
-		t.Error("nothing written")
-	}
-	if _, err = app.Info(&buf, "bash", []string{"defaults"}); err.Error() != "invalid bash command" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "bash", []string{"test", "default"}); err.Error() != "invalid bash command" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "bash", []string{"short"}); err.Error() != "invalid bash command" {
-		t.Errorf("invalid error: %v", err)
-	}
 }
 
 func TestEnvInfo(t *testing.T) {
@@ -99,38 +70,54 @@ func TestEnvInfo(t *testing.T) {
 	}
 }
 
-func TestZshInfo(t *testing.T) {
-	os.Clearenv()
+func TestCompletionInfo(t *testing.T) {
+	defer os.Clearenv()
+	for k, v := range map[string]string{
+		"zsh":  "typeset -A opt_args",
+		"fish": "set -l commands",
+		"bash": "local cur opts",
+	} {
+		for _, b := range []bool{true, false} {
+			os.Clearenv()
+			sub := []string{k}
+			os.Setenv("SHELL", "invalid")
+			if b {
+				sub = []string{}
+				os.Setenv("SHELL", k)
+			}
+			var buf bytes.Buffer
+			ok, err := app.Info(&buf, "completions", sub)
+			if !ok || err != nil {
+				t.Errorf("invalid error: %v", err)
+			}
+			s := buf.String()
+			if s == "" {
+				t.Error("nothing written")
+			}
+			if !strings.Contains(s, v) {
+				t.Errorf("invalid completions for %s", k)
+			}
+		}
+	}
 	var buf bytes.Buffer
-	ok, err := app.Info(&buf, "zsh", []string{})
+	ok, err := app.Info(&buf, "completions", []string{"help"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
+	s := buf.String()
+	if s == "" {
 		t.Error("nothing written")
 	}
-	if _, err = app.Info(&buf, "zsh", []string{"defaults"}); err.Error() != "invalid zsh command" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "zsh", []string{"test", "default"}); err.Error() != "invalid zsh command" {
-		t.Errorf("invalid error: %v", err)
-	}
-}
 
-func TestFishInfo(t *testing.T) {
+	if _, err = app.Info(&buf, "completions", []string{"helps"}); err.Error() != "unknown completion type: helps" {
+		t.Errorf("invalid error: %v", err)
+	}
 	os.Clearenv()
-	var buf bytes.Buffer
-	ok, err := app.Info(&buf, "fish", []string{})
-	if !ok || err != nil {
+	os.Setenv("SHELL", "bad")
+	if _, err = app.Info(&buf, "completions", []string{}); err.Error() != "unknown completion type: bad" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
-		t.Error("nothing written")
-	}
-	if _, err = app.Info(&buf, "fish", []string{"help"}); err.Error() != "invalid fish command" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err = app.Info(&buf, "fish", []string{"test", "default"}); err.Error() != "invalid fish command" {
+	if _, err = app.Info(&buf, "completions", []string{"bash"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 }
