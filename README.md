@@ -97,6 +97,13 @@ To rekey (change password/keyfile) use the `rekey` command
 lb rekey -store=path/to/new/db.kdbx -key="mynewkey" -keymode="plaintext" -keyfile="my/new/keyfile"
 ```
 
+### completions
+
+generate shell specific completions (via auto-detect using `SHELL`)
+```
+lb completions
+```
+
 ## git integration
 
 To manage the `.kdbx` file in a git repository and see _actual_ text diffs add this to a `.gitconfig`
