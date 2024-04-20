@@ -34,6 +34,7 @@ type (
 		CompletionEnv       string
 		IsYes               string
 		DefaultProfile      Profile
+		IsFish              bool
 	}
 
 	// Profile is a completion profile
@@ -135,6 +136,7 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 		DefaultCompletion:   fmt.Sprintf("$%s", config.EnvDefaultCompletionKey),
 		IsYes:               config.YesValue,
+		IsFish:              completionType == CompletionsFishCommand,
 	}
 
 	using, err := readDoc(fmt.Sprintf("%s.sh", completionType))

@@ -26,17 +26,7 @@ end
 {{- end}}
 
 function {{ $.Executable }}-completions
-  if [ -z "{{ $.DefaultCompletion }}" ] || [ "{{ $.DefaultCompletion }}" != "{{ $.IsYes }}" ]
-{{- range $idx, $prof := $.Profiles }}
-{{- if not $prof.IsDefault }}
-    if {{ $prof.Conditional }}
-      {{ $prof.Name }}
-      return
-    end
-{{- end}}
-{{- end}}
-  end
-  {{ $.DefaultProfile.Name }} 
+  {{ $.Shell }}
 end
 
 {{ $.Executable }}-completions
