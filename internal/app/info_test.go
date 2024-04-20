@@ -99,25 +99,17 @@ func TestCompletionInfo(t *testing.T) {
 			}
 		}
 	}
-	var buf bytes.Buffer
-	ok, err := app.Info(&buf, "completions", []string{"help"})
-	if !ok || err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	s := buf.String()
-	if s == "" {
-		t.Error("nothing written")
-	}
 
-	if _, err = app.Info(&buf, "completions", []string{"helps"}); err.Error() != "unknown completion type: helps" {
+	var buf bytes.Buffer
+	if _, err := app.Info(&buf, "completions", []string{"helps"}); err.Error() != "unknown completion type: helps" {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Clearenv()
 	os.Setenv("SHELL", "bad")
-	if _, err = app.Info(&buf, "completions", []string{}); err.Error() != "unknown completion type: bad" {
+	if _, err := app.Info(&buf, "completions", []string{}); err.Error() != "unknown completion type: bad" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err = app.Info(&buf, "completions", []string{"bash"}); err != nil {
+	if _, err := app.Info(&buf, "completions", []string{"bash"}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 }

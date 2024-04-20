@@ -59,8 +59,6 @@ const (
 	CompletionsBashCommand = "bash"
 	// CompletionsCommand are used to generate shell completions
 	CompletionsCommand = "completions"
-	// CompletionsHelpCommand displays information about shell completions
-	CompletionsHelpCommand = "help"
 	// ReKeyCommand will rekey the underlying database
 	ReKeyCommand = "rekey"
 	// MultiLineCommand handles multi-line inserts (when not piped)
@@ -101,13 +99,13 @@ type (
 	}
 	// Documentation is how documentation segments are templated
 	Documentation struct {
-		Executable             string
-		MoveCommand            string
-		RemoveCommand          string
-		ReKeyCommand           string
-		CompletionsCommand     string
-		CompletionsHelpCommand string
-		ReKey                  struct {
+		Executable         string
+		MoveCommand        string
+		RemoveCommand      string
+		ReKeyCommand       string
+		CompletionsCommand string
+		CompletionsEnv     string
+		ReKey              struct {
 			Store   string
 			KeyFile string
 			Key     string
@@ -191,7 +189,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	var results []string
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
 	results = append(results, command(CompletionsCommand, "<shell>", "generate completions via auto-detection"))
-	results = append(results, subCommand(CompletionsCommand, CompletionsHelpCommand, "", "show help information for completions"))
 	for _, c := range completionTypes {
 		results = append(results, subCommand(CompletionsCommand, c, "", fmt.Sprintf("generate %s completions", c)))
 	}
@@ -219,12 +216,12 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	if verbose {
 		results = append(results, "")
 		document := Documentation{
-			Executable:             filepath.Base(exe),
-			MoveCommand:            MoveCommand,
-			RemoveCommand:          RemoveCommand,
-			ReKeyCommand:           ReKeyCommand,
-			CompletionsCommand:     CompletionsCommand,
-			CompletionsHelpCommand: CompletionsHelpCommand,
+			Executable:         filepath.Base(exe),
+			MoveCommand:        MoveCommand,
+			RemoveCommand:      RemoveCommand,
+			ReKeyCommand:       ReKeyCommand,
+			CompletionsCommand: CompletionsCommand,
+			CompletionsEnv:     config.EnvDefaultCompletionKey,
 		}
 		document.ReKey.Store = setDocFlag(config.ReKeyStoreFlag)
 		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)

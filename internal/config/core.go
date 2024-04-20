@@ -44,6 +44,8 @@ const (
 	// sub categories
 	clipCategory keyCategory = "CLIP_"
 	totpCategory keyCategory = "TOTP_"
+	// YesValue are yes (on) values
+	YesValue = yes
 )
 
 var (

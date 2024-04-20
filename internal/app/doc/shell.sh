@@ -1,18 +1,13 @@
 _{{ $.Executable }}() {
-{{- if eq (len $.Profiles) 1 }}
+  if [ -z "{{ $.DefaultCompletion }}" ] || [ "{{ $.DefaultCompletion }}" != "{{ $.IsYes }}" ]; then
+    {{- range $idx, $prof := $.Profiles }}
+    {{- if not $prof.IsDefault }}
+      if {{ $prof.Conditional }}; then
+        {{ $prof.Name }}
+        return
+      fi
+    {{- end }}
+    {{- end }}
+  fi
   {{ $.DefaultProfile.Name }}
-{{- else}}
-  case "{{ $.CompletionEnv }}" in
-{{- range $idx, $profile := $.Profiles }}
-{{- if not $profile.IsDefault }}
-    "{{ $profile.Display }}")
-      {{ $profile.Name }}
-      ;;
-{{- end}}
-{{- end}}
-    *)
-      {{ $.DefaultProfile.Name }} 
-      ;;
-  esac
-{{- end}}
 }

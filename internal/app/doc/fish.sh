@@ -26,19 +26,15 @@ end
 {{- end}}
 
 function {{ $.Executable }}-completions
-{{- if eq (len $.Profiles) 1 }}
-  {{ $.DefaultProfile.Name }}
-{{- else}}
-{{- range $idx, $profile := $.Profiles }}
-{{- if not $profile.IsDefault }}
-  if [ "{{ $.CompletionEnv }}" = "{{ $profile.Display }}" ]
-    {{ $profile.Name }}
+{{- range $idx, $prof := $.Profiles }}
+{{- if not $prof.IsDefault }}
+  if {{ $prof.Conditional }}
+    {{ $prof.Name }}
     return
   end
 {{- end}}
 {{- end}}
   {{ $.DefaultProfile.Name }} 
-{{- end}}
 end
 
 {{ $.Executable }}-completions

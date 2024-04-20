@@ -30,7 +30,7 @@ const (
 )
 
 var (
-	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands, EnvCompletion}
+	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands, EnvDefaultCompletion}
 	// Platforms represent the platforms that lockbox understands to run on
 	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
@@ -81,6 +81,16 @@ var (
 		},
 		defaultValue: false,
 	}
+	// EnvDefaultCompletion disable completion detection
+	EnvDefaultCompletion = EnvironmentBool{
+		environmentBase: environmentBase{
+			subKey: "DEFAULT_COMPLETION",
+			desc:   "Use the default completion set (disable detection).",
+		},
+		defaultValue: false,
+	}
+	// EnvDefaultCompletionKey is the key for default completion handling
+	EnvDefaultCompletionKey = EnvDefaultCompletion.key()
 	// EnvNoColor indicates if color outputs are disabled
 	EnvNoColor = EnvironmentBool{environmentBase: environmentBase{
 		subKey: "NOCOLOR",
@@ -172,15 +182,7 @@ paths: %v
 
 Note that this setting is not output as part of the environment.`, noEnvironment, detectEnvironment, detectEnvironmentPaths),
 	}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}}
-	// EnvCompletion is the completion method to use
-	EnvCompletion = EnvironmentString{environmentBase: environmentBase{
-		subKey:      "COMPLETION_FUNCTION",
-		desc:        "Use to select the non-default completions, please review the shell completion help for more information.",
-		requirement: "must be exported via a shell variable",
-	}, canDefault: false}
-	// EnvironmentCompletionKey is the underlying key for managing completion functions
-	EnvironmentCompletionKey = EnvCompletion.key()
-	envKeyMode               = EnvironmentString{
+	envKeyMode = EnvironmentString{
 		environmentBase: environmentBase{
 			subKey: "KEYMODE", requirement: "must be set to a valid mode when using a key",
 			desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
@@ -303,6 +305,10 @@ func ParseJSONOutput() (JSONOutputMode, error) {
 	return JSONDataOutputBlank, fmt.Errorf("invalid JSON output mode: %s", val)
 }
 
+func exportProfileKeyValue(e environmentBase, val string) string {
+	return fmt.Sprintf("\"$%s\" = \"%s\"", e.key(), val)
+}
+
 func newProfile(keys []string) CompletionProfile {
 	p := CompletionProfile{}
 	p.Clip = true
@@ -316,16 +322,16 @@ func newProfile(keys []string) CompletionProfile {
 		name = fmt.Sprintf("%s%s-", name, k)
 		switch k {
 		case askProfile:
-			e = append(e, envKeyMode.KeyValue(string(askKeyMode)))
+			e = append(e, exportProfileKeyValue(envKeyMode.environmentBase, string(askKeyMode)))
 			p.List = false
 		case noTOTPProfile:
-			e = append(e, EnvNoTOTP.KeyValue(yes))
+			e = append(e, exportProfileKeyValue(EnvNoTOTP.environmentBase, yes))
 			p.TOTP = false
 		case noClipProfile:
-			e = append(e, EnvNoClip.KeyValue(yes))
+			e = append(e, exportProfileKeyValue(EnvNoClip.environmentBase, yes))
 			p.Clip = false
 		case roProfile:
-			e = append(e, EnvReadOnly.KeyValue(yes))
+			e = append(e, exportProfileKeyValue(EnvReadOnly.environmentBase, yes))
 			p.Write = false
 		}
 	}

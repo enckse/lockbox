@@ -72,11 +72,7 @@ func info(command string, args []string) ([]string, error) {
 		case 0:
 			shell = filepath.Base(os.Getenv("SHELL"))
 		case 1:
-			sub := args[0]
-			if sub == CompletionsHelpCommand {
-				return GenerateCompletions("", true, exe)
-			}
-			shell = sub
+			shell = args[0]
 		default:
 			return nil, errors.New("invalid completions subcommand")
 		}
@@ -86,7 +82,7 @@ func info(command string, args []string) ([]string, error) {
 		default:
 			return nil, fmt.Errorf("unknown completion type: %s", shell)
 		}
-		return GenerateCompletions(shell, false, exe)
+		return GenerateCompletions(shell, exe)
 	}
 	return nil, nil
 }

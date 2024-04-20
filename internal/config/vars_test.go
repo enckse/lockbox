@@ -65,6 +65,10 @@ func TestIsNoClip(t *testing.T) {
 	checkYesNo("LOCKBOX_NOCLIP", t, config.EnvNoClip, false)
 }
 
+func TestDefaultCompletions(t *testing.T) {
+	checkYesNo("LOCKBOX_DEFAULT_COMPLETION", t, config.EnvDefaultCompletion, false)
+}
+
 func TestTOTP(t *testing.T) {
 	os.Setenv("LOCKBOX_TOTP", "abc")
 	if config.EnvTOTPToken.Get() != "abc" {

@@ -1,5 +1,4 @@
-Completions are available for certain shells and, by default, assume all
-features of `{{ $.Executable }}` are enabled and available. When changing certain environment
-flags it may be useful to change the completion profile to more closely match
-the restricted command options, run `{{ $.Executable }} {{ $.CompletionsCommand }} {{ $.CompletionsHelpCommand }}` for information
-on how best to alter completion outputs.
+Completions are available for certain shells and detect available completions
+determined by other environment settings. Completion command detection can be
+disabled by setting {{ $.CompletionsEnv }}. Generation of completions are
+handled by `{{ $.Executable }} {{ $.CompletionsCommand }}`

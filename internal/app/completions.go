@@ -3,7 +3,6 @@ package app
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -27,31 +26,27 @@ type (
 		DoList              string
 		Executable          string
 		JSONCommand         string
+		DefaultCompletion   string
 		HelpCommand         string
 		HelpAdvancedCommand string
-		HelpShellCommand    string
 		Profiles            []Profile
-		DefaultProfile      Profile
 		Shell               string
 		CompletionEnv       string
+		IsYes               string
+		DefaultProfile      Profile
 	}
 
 	// Profile is a completion profile
 	Profile struct {
-		Name      string
-		CanClip   bool
-		CanTOTP   bool
-		CanList   bool
-		ReadOnly  bool
-		IsDefault bool
-		env       []string
+		Name        string
+		CanClip     bool
+		CanTOTP     bool
+		CanList     bool
+		ReadOnly    bool
+		IsDefault   bool
+		Conditional string
 	}
 )
-
-// Env will get the environment settable value to use this profile
-func (p Profile) Env() string {
-	return fmt.Sprintf("%s=%s", config.EnvironmentCompletionKey, p.Display())
-}
 
 // Options will list the profile options
 func (p Profile) Options() []string {
@@ -68,11 +63,6 @@ func (p Profile) Options() []string {
 	return opts
 }
 
-// Display is the profile display name
-func (p Profile) Display() string {
-	return strings.Join(strings.Split(strings.ToUpper(p.Name), "-")[1:], "-")
-}
-
 // TOTPSubCommands are the list of sub commands for TOTP within the profile
 func (p Profile) TOTPSubCommands() []string {
 	totp := []string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand}
@@ -85,11 +75,10 @@ func (p Profile) TOTPSubCommands() []string {
 	return totp
 }
 
-func loadProfiles(exe string, canFilter bool) []Profile {
+func loadProfiles(exe string) []Profile {
 	profiles := config.LoadCompletionProfiles()
-	filter := config.EnvCompletion.Get()
-	hasFilter := filter != "" && canFilter
-	var res []Profile
+	conditionals := make(map[int][]Profile)
+	maxCount := 0
 	for _, p := range profiles {
 		name := p.Name
 		if p.Default {
@@ -101,54 +90,31 @@ func loadProfiles(exe string, canFilter bool) []Profile {
 		n.CanTOTP = p.TOTP
 		n.ReadOnly = !p.Write
 		n.IsDefault = p.Default
-		n.env = p.Env
-		if hasFilter {
-			skipped := false
-			if p.Default {
-				skipped = filter != "DEFAULT"
-			} else {
-				if filter != n.Display() {
-					skipped = true
-				}
-			}
-			if skipped {
-				continue
-			}
+		var sub []string
+		for _, e := range p.Env {
+			sub = append(sub, fmt.Sprintf("[ %s ]", e))
 		}
-		res = append(res, n)
+		n.Conditional = strings.Join(sub, " && ")
+		count := len(p.Env)
+		val := conditionals[count]
+		conditionals[count] = append(val, n)
+		if count > maxCount {
+			maxCount = count
+		}
+	}
+	var res []Profile
+	for maxCount >= 0 {
+		val, ok := conditionals[maxCount]
+		if ok {
+			res = append(res, val...)
+		}
+		maxCount--
 	}
 	return res
 }
 
 // GenerateCompletions handles creating shell completion outputs
-func GenerateCompletions(completionType string, isHelp bool, exe string) ([]string, error) {
-	if isHelp {
-		h := []string{"completions are available for:"}
-		for _, s := range completionTypes {
-			h = append(h, fmt.Sprintf("  - %s", s))
-		}
-		h = append(h, "")
-		for _, p := range loadProfiles(exe, false) {
-			if p.IsDefault {
-				continue
-			}
-			text := fmt.Sprintf("when %s\n  - filtered completions\n  - useful when:\n", p.Env())
-			for idx, e := range p.env {
-				if idx > 0 {
-					text = fmt.Sprintf("%s      and\n", text)
-				}
-				text = fmt.Sprintf("%s    %s\n", text, e)
-			}
-			h = append(h, text)
-		}
-		h = append(h, strings.TrimSpace(fmt.Sprintf(`
-%s is not set
-unset %s
-when %s=<unknown>
-  - default completions
-`, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey)))
-		return h, nil
-	}
+func GenerateCompletions(completionType, exe string) ([]string, error) {
 	if !slices.Contains(completionTypes, completionType) {
 		return nil, fmt.Errorf("unknown completion request: %s", completionType)
 	}
@@ -167,7 +133,8 @@ when %s=<unknown>
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
-		CompletionEnv:       fmt.Sprintf("$%s", config.EnvironmentCompletionKey),
+		DefaultCompletion:   fmt.Sprintf("$%s", config.EnvDefaultCompletionKey),
+		IsYes:               config.YesValue,
 	}
 
 	using, err := readDoc(fmt.Sprintf("%s.sh", completionType))
@@ -178,18 +145,11 @@ when %s=<unknown>
 	if err != nil {
 		return nil, err
 	}
-	c.Profiles = loadProfiles(exe, true)
-	switch len(c.Profiles) {
-	case 0:
-		return nil, errors.New("no profiles loaded, invalid environment setting?")
-	case 1:
-		c.DefaultProfile = c.Profiles[0]
-	default:
-		for _, p := range c.Profiles {
-			if p.IsDefault {
-				c.DefaultProfile = p
-				break
-			}
+	c.Profiles = loadProfiles(exe)
+	for _, p := range c.Profiles {
+		if p.IsDefault {
+			c.DefaultProfile = p
+			break
 		}
 	}
 	shell, err := templateScript(shellScript, c)
