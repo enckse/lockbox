@@ -28,6 +28,7 @@ type (
 		JSONCommand         string
 		HelpCommand         string
 		HelpAdvancedCommand string
+		HelpShellCommand    string
 		Profiles            []Profile
 		DefaultProfile      Profile
 		Shell               string
@@ -154,6 +155,7 @@ when %s=<unknown>
 		JSONCommand:         JSONCommand,
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
+		HelpShellCommand:    HelpShellCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),

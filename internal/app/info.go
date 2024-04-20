@@ -40,16 +40,19 @@ func info(command string, args []string) ([]string, error) {
 			return nil, errors.New("invalid help command")
 		}
 		isAdvanced := false
-		if len(args) == 1 {
-			if args[0] == HelpAdvancedCommand {
-				isAdvanced = true
-			} else {
-				return nil, errors.New("invalid help option")
-			}
-		}
 		exe, err := exeName()
 		if err != nil {
 			return nil, err
+		}
+		if len(args) == 1 {
+			switch args[0] {
+			case HelpAdvancedCommand:
+				isAdvanced = true
+			case HelpShellCommand:
+				return GenerateCompletions("", true, exe)
+			default:
+				return nil, errors.New("invalid help option")
+			}
 		}
 		results, err := Usage(isAdvanced, exe)
 		if err != nil {
@@ -62,22 +65,14 @@ func info(command string, args []string) ([]string, error) {
 		}
 		return config.Environ(), nil
 	case BashCommand, ZshCommand, FishCommand:
-		if len(args) > 1 {
+		if len(args) != 0 {
 			return nil, fmt.Errorf("invalid %s command", command)
-		}
-		isHelp := false
-		if len(args) == 1 {
-			if args[0] == CompletionHelpCommand {
-				isHelp = true
-			} else {
-				return nil, fmt.Errorf("invalid %s subcommand", command)
-			}
 		}
 		exe, err := exeName()
 		if err != nil {
 			return nil, err
 		}
-		return GenerateCompletions(command, isHelp, exe)
+		return GenerateCompletions(command, false, exe)
 	}
 	return nil, nil
 }

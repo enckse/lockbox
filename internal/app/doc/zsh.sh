@@ -21,6 +21,7 @@
       case $words[2] in
         "{{ $.HelpCommand }}")
           if [ "$len" -eq 3 ]; then
+            compadd "$@" "{{ $.HelpShellCommand }}"
             compadd "$@" "{{ $.HelpAdvancedCommand }}"
           fi
         ;;

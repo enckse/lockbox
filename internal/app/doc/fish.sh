@@ -5,7 +5,7 @@ complete -c {{ $.Executable }} -f
 function {{ $profile.Name }}
   set -l commands {{ range $idx, $value := $profile.Options }}{{ if gt $idx 0}} {{ end }}{{ $value }}{{ end }}
   complete -c {{ $.Executable }} -n "not __fish_seen_subcommand_from $commands" -a "$commands"
-  complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.HelpCommand }}; and test (count (commandline -opc)) -lt 3" -a "{{ $.HelpAdvancedCommand }}"
+  complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.HelpCommand }}; and test (count (commandline -opc)) -lt 3" -a "{{ $.HelpAdvancedCommand }} {{ $.HelpShellCommand }}"
 {{- if not $profile.ReadOnly }}
 {{- if $profile.CanList }}
   complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.InsertCommand }} {{ $.MultiLineCommand }} {{ $.RemoveCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList }})"
