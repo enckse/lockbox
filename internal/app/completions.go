@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -123,7 +124,7 @@ func loadProfiles(exe string, canFilter bool) []Profile {
 func GenerateCompletions(completionType string, isHelp bool, exe string) ([]string, error) {
 	if isHelp {
 		h := []string{"completions are available for:"}
-		for _, s := range []string{CompletionsBashCommand, CompletionsFishCommand, CompletionsZshCommand} {
+		for _, s := range completionTypes {
 			h = append(h, fmt.Sprintf("  - %s", s))
 		}
 		h = append(h, "")
@@ -147,6 +148,9 @@ when %s=<unknown>
   - default completions
 `, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey, config.EnvironmentCompletionKey)))
 		return h, nil
+	}
+	if !slices.Contains(completionTypes, completionType) {
+		return nil, fmt.Errorf("unknown completion request: %s", completionType)
 	}
 	c := Completions{
 		Executable:          exe,

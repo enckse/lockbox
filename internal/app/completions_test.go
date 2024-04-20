@@ -12,6 +12,9 @@ func TestCompletions(t *testing.T) {
 	testCompletion(t, "bash")
 	testCompletion(t, "zsh")
 	testCompletion(t, "fish")
+	if _, err := app.GenerateCompletions("invalid", false, "lb"); err.Error() != "unknown completion request: invalid" {
+		t.Errorf("invalid error: %v", err)
+	}
 }
 
 func testCompletion(t *testing.T, completionMode string) {

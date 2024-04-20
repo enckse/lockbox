@@ -79,8 +79,11 @@ const (
 	textFile               = ".txt"
 )
 
-//go:embed doc/*
-var docs embed.FS
+var (
+	//go:embed doc/*
+	docs            embed.FS
+	completionTypes = []string{CompletionsBashCommand, CompletionsFishCommand, CompletionsZshCommand}
+)
 
 type (
 	// CommandOptions define how commands operate as an application
@@ -180,18 +183,18 @@ func commandText(args, name, desc string) string {
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
-	return fmt.Sprintf("  %-15s %-10s    %s", name, arguments, desc)
+	return fmt.Sprintf("  %-18s %-10s    %s", name, arguments, desc)
 }
 
 // Usage return usage information
 func Usage(verbose bool, exe string) ([]string, error) {
 	var results []string
 	results = append(results, command(ClipCommand, "entry", "copy the entry's value into the clipboard"))
-	results = append(results, command(CompletionsCommand, "<shell>", "generate completions via auto-detection of shell"))
-	results = append(results, subCommand(CompletionsCommand, CompletionsBashCommand, "", "generate bash completions"))
-	results = append(results, subCommand(CompletionsCommand, CompletionsFishCommand, "", "generate fish completions"))
-	results = append(results, subCommand(CompletionsCommand, CompletionsHelpCommand, "", "show help information about completions"))
-	results = append(results, subCommand(CompletionsCommand, CompletionsZshCommand, "", "generate zsh completions"))
+	results = append(results, command(CompletionsCommand, "<shell>", "generate completions via auto-detection"))
+	results = append(results, subCommand(CompletionsCommand, CompletionsHelpCommand, "", "show help information for completions"))
+	for _, c := range completionTypes {
+		results = append(results, subCommand(CompletionsCommand, c, "", fmt.Sprintf("generate %s completions", c)))
+	}
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
@@ -208,7 +211,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, subCommand(TOTPCommand, TOTPInsertCommand, "entry", "insert a new totp entry into the store"))
 	results = append(results, subCommand(TOTPCommand, TOTPListCommand, "", "list entries with totp settings"))
 	results = append(results, subCommand(TOTPCommand, TOTPOnceCommand, "entry", "display the first generated code"))
-	results = append(results, subCommand(TOTPCommand, TOTPMinimalCommand, "entry", "display the first generated code (no details)"))
+	results = append(results, subCommand(TOTPCommand, TOTPMinimalCommand, "entry", "display one generated code (no details)"))
 	results = append(results, subCommand(TOTPCommand, TOTPShowCommand, "entry", "show the totp entry"))
 	results = append(results, command(VersionCommand, "", "display version information"))
 	sort.Strings(results)
