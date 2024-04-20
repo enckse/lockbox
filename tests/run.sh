@@ -1,6 +1,6 @@
 #!/bin/sh
 LB_BINARY=../build/lb
-DATA="bin/$1"
+DATA="testdata/$1"
 ENV="$DATA/env"
 CLIP_WAIT=1
 CLIP_TRIES=3
