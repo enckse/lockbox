@@ -26,7 +26,7 @@ runs: $(TARGET)
 	cd tests && $(VARS) ./run.sh
 
 clean:
-	@rm -rf $(BUILD) tests/bin
+	@rm -rf $(BUILD) tests/testdata
 	@find internal/ -type f -wholename "*testdata*" -delete
 	@find internal/ -type d -empty -delete
 
