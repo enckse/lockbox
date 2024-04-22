@@ -1,4 +1,5 @@
 BUILD   := build/
+TESTDIR := internal/ tests/
 TARGET  := $(BUILD)lb
 VERSION ?= $(shell git log -n 1 --format=%h)
 VARS    := LOCKBOX_ENV=none
@@ -26,9 +27,9 @@ runs: $(TARGET)
 	cd tests && $(VARS) ./run.sh
 
 clean:
-	@rm -rf $(BUILD) tests/testdata
-	@find internal/ -type f -wholename "*testdata*" -delete
-	@find internal/ -type d -empty -delete
+	@rm -rf $(BUILD)
+	@find $(TESTDIR) -type f -wholename "*testdata*" -delete
+	@find $(TESTDIR) -type d -empty -delete
 
 install:
 	install -m755 $(TARGET) $(DESTDIR)/lb
