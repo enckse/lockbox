@@ -1,14 +1,14 @@
 module github.com/enckse/lockbox
 
-go 1.21.6
+go 1.22.0
 
-toolchain go1.21.8
+toolchain go1.22.2
 
 require (
 	github.com/aymanbagabas/go-osc52 v1.2.2
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/pquerna/otp v1.4.0
-	github.com/tobischo/gokeepasslib/v3 v3.5.3
+	github.com/tobischo/gokeepasslib/v3 v3.6.0
 	mpldr.codes/ansi v1.5.0
 	mvdan.cc/sh/v3 v3.8.0
 )
