@@ -5,9 +5,6 @@ VERSION ?= $(shell git log -n 1 --format=%h)
 VARS    := LOCKBOX_ENV=none
 DESTDIR := /usr/local/bin
 GOFLAGS := -trimpath -buildmode=pie -mod=readonly -modcacherw -buildvcs=false
-LDFLAGS :=
-GOOS    :=
-GOARCH  :=
 
 all: $(TARGET)
 
@@ -17,7 +14,7 @@ $(TARGET): cmd/main.go internal/**/*.go  go.* internal/app/doc/*
 ifeq ($(VERSION),)
 	$(error version not set)
 endif
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o $@ cmd/main.go
+	go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o $@ cmd/main.go
 
 unittests:
 	$(VARS) go test ./...
