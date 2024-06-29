@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/app"
 )
 
 func TestShowClip(t *testing.T) {

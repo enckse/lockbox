@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/config"
-	"github.com/enckse/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/platform"
 )
 
 type (

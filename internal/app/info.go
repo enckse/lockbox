@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config"
 )
 
 // Info will report help/bash/env details

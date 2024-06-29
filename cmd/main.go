@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enckse/lockbox/internal/app"
-	"github.com/enckse/lockbox/internal/config"
-	"github.com/enckse/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/platform"
 	env "github.com/hashicorp/go-envparse"
 )
 

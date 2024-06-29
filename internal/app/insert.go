@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/backend"
 )
 
 type (

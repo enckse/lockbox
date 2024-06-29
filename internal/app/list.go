@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/enckse/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/backend"
 )
 
 // List will list/find entries

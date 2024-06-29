@@ -8,7 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/enckse/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config"
 )
 
 type (

@@ -3,7 +3,7 @@ package backend_test
 import (
 	"testing"
 
-	"github.com/enckse/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/backend"
 )
 
 func TestLoad(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/backend"
 )
 
 func TestHooks(t *testing.T) {

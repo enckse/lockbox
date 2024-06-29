@@ -4,7 +4,7 @@ Lockbox
 A [pass](https://www.passwordstore.org/) inspired password manager that uses a system
 keyring or command for password input over using a GPG key and uses a keepass database as the backing data store.
 
-[![build](https://github.com/enckse/lockbox/actions/workflows/build.yml/badge.svg)](https://github.com/enckse/lockbox/actions/workflows/build.yml)
+[![build](https://github.com/seanenck/lockbox/actions/workflows/build.yml/badge.svg)](https://github.com/seanenck/lockbox/actions/workflows/build.yml)
 
 # usage
 

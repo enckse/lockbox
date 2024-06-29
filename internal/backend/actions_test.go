@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/platform"
 )
 
 const (

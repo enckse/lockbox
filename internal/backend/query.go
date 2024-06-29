@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 

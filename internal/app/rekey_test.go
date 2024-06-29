@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/app"
-	"github.com/enckse/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/backend"
 )
 
 type (

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config"
 )
 
 func TestPlatformSet(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/app"
 )
 
 func TestCompletions(t *testing.T) {

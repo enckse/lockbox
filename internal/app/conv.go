@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/backend"
 )
 
 // Conv will convert 1-N files

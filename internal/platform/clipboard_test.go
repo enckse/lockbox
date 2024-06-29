@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/enckse/lockbox/internal/config"
-	"github.com/enckse/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/platform"
 )
 
 func TestNoClipboard(t *testing.T) {

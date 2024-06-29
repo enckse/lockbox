@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	osc "github.com/aymanbagabas/go-osc52"
-	"github.com/enckse/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config"
 )
 
 type (

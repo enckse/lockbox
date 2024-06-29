@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/backend"
-	"github.com/enckse/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config"
 )
 
 type (
