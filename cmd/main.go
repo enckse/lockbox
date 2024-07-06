@@ -10,10 +10,11 @@ import (
 	"strings"
 	"time"
 
+	env "github.com/hashicorp/go-envparse"
+
 	"github.com/seanenck/lockbox/internal/app"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform"
-	env "github.com/hashicorp/go-envparse"
 )
 
 var version string

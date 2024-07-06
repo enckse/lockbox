@@ -9,11 +9,12 @@ import (
 	"strings"
 	"time"
 
+	coreotp "github.com/pquerna/otp"
+	otp "github.com/pquerna/otp/totp"
+
 	"github.com/seanenck/lockbox/internal/backend"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform"
-	coreotp "github.com/pquerna/otp"
-	otp "github.com/pquerna/otp/totp"
 	"mpldr.codes/ansi"
 )
 
