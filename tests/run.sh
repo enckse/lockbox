@@ -11,6 +11,7 @@ KEYF_TEST="keyfile"
 BOTH_TEST="both"
 
 _unset() {
+  # shellcheck disable=SC2046
   unset $(env | grep '^LOCKBOX' | cut -d "=" -f 1)
 }
 
@@ -211,6 +212,7 @@ printf "%-10s ... " "$1"
   # configuration
   {
     echo "PLAINTEXT=text"
+    # shellcheck disable=SC2016
     env | grep '^LOCKBOX' | sed 's/plaintext/$LOCKBOX_FAKE_TEST$PLAINTEXT/g'
   } > "$ENV"
   _unset
