@@ -15,7 +15,6 @@ import (
 	"github.com/seanenck/lockbox/internal/backend"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform"
-	"mpldr.codes/ansi"
 )
 
 var (
@@ -196,7 +195,9 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		}
 		txt := fmt.Sprintf("%s (%s)", now.Format("15:04:05"), leftString)
 		if isColor {
-			txt = ansi.Red(txt)
+			if _, noColor := os.LookupEnv("NO_COLOR"); !noColor {
+				txt = fmt.Sprintf("\x1b[31m%s\x1b[39m", txt)
+			}
 		}
 		outputs := []string{txt}
 		if !clip {
