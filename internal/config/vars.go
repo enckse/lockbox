@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -376,4 +377,24 @@ func LoadCompletionProfiles() []CompletionProfile {
 	})
 	profiles = append(profiles, CompletionProfile{Clip: true, Write: true, TOTP: true, List: true, Default: true})
 	return profiles
+}
+
+// CanColor indicates if colorized output is allowed (or disabled)
+func CanColor() (bool, error) {
+	if _, noColor := os.LookupEnv("NO_COLOR"); noColor {
+		return false, nil
+	}
+	interactive, err := EnvInteractive.Get()
+	if err != nil {
+		return false, err
+	}
+	colors := interactive
+	if colors {
+		isColored, err := EnvNoColor.Get()
+		if err != nil {
+			return false, err
+		}
+		colors = !isColored
+	}
+	return colors, nil
 }

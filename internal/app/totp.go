@@ -156,7 +156,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
-	allowColor, err := canColor()
+	allowColor, err := config.CanColor()
 	if err != nil {
 		return err
 	}
@@ -195,9 +195,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		}
 		txt := fmt.Sprintf("%s (%s)", now.Format("15:04:05"), leftString)
 		if isColor {
-			if _, noColor := os.LookupEnv("NO_COLOR"); !noColor {
-				txt = fmt.Sprintf("\x1b[31m%s\x1b[39m", txt)
-			}
+			txt = fmt.Sprintf("\x1b[31m%s\x1b[39m", txt)
 		}
 		outputs := []string{txt}
 		if !clip {
@@ -292,20 +290,4 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 		}
 	}
 	return opts, nil
-}
-
-func canColor() (bool, error) {
-	interactive, err := config.EnvInteractive.Get()
-	if err != nil {
-		return false, err
-	}
-	colors := interactive
-	if colors {
-		isColored, err := config.EnvNoColor.Get()
-		if err != nil {
-			return false, err
-		}
-		colors = !isColored
-	}
-	return colors, nil
 }

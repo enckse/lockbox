@@ -307,3 +307,31 @@ func TestLoadCompletionProfiles(t *testing.T) {
 		}
 	}
 }
+
+func TestCanColor(t *testing.T) {
+	defer os.Clearenv()
+	os.Clearenv()
+	if can, _ := config.CanColor(); !can {
+		t.Error("should be able to color")
+	}
+	for raw, expect := range map[string]bool{
+		"INTERACTIVE": true,
+		"NOCOLOR":     false,
+	} {
+		os.Clearenv()
+		key := fmt.Sprintf("LOCKBOX_%s", raw)
+		os.Setenv(key, "yes")
+		if can, _ := config.CanColor(); can != expect {
+			t.Errorf("expect != actual: %s", key)
+		}
+		os.Setenv(key, "no")
+		if can, _ := config.CanColor(); can == expect {
+			t.Errorf("expect == actual: %s", key)
+		}
+	}
+	os.Clearenv()
+	os.Setenv("NO_COLOR", "1")
+	if can, _ := config.CanColor(); can {
+		t.Error("should NOT be able to color")
+	}
+}
