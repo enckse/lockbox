@@ -19,10 +19,10 @@ func TestRemove(t *testing.T) {
 	}
 	m.confirmed = false
 	m.args = []string{"tzzzest/test2/test1"}
-	if err := app.Remove(m); err.Error() != "unable to remove: no entities given" {
+	if err := app.Remove(m); err.Error() != "no entities matching: tzzzest/test2/test1" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if !m.confirmed {
+	if m.confirmed {
 		t.Error("no remove")
 	}
 	m.confirmed = false

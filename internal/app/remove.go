@@ -19,6 +19,9 @@ func Remove(cmd CommandOptions) error {
 	if err != nil {
 		return err
 	}
+	if len(existings) == 0 {
+		return fmt.Errorf("no entities matching: %s", deleting)
+	}
 	w := cmd.Writer()
 	if len(existings) > 1 {
 		postfixRemove = "ies"

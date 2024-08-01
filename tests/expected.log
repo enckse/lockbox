@@ -60,7 +60,7 @@ XXXXXX
 }
 delete entry? (y/N) 
 delete entry? (y/N) 
-delete entry? (y/N) unable to remove: no entities given
+no entities matching: test/k/one
 
 
 multiple moves can only be done at a leaf level
