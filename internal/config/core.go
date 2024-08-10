@@ -41,11 +41,19 @@ const (
 	ReKeyKeyFlag = "key"
 	// ReKeyKeyModeFlag is the flag used for rekey to set the key mode
 	ReKeyKeyModeFlag = "keymode"
+	// ReKeyModModeFlag indicates how to control modtime inserts
+	ReKeyModModeFlag = "modtime"
 	// sub categories
 	clipCategory keyCategory = "CLIP_"
 	totpCategory keyCategory = "TOTP_"
 	// YesValue are yes (on) values
 	YesValue = yes
+	// ReKeyModModeSkip will skip modtime import issues
+	ReKeyModModeSkip = "skip"
+	// ReKeyModModeNone will not attempt to import modtimes at all
+	ReKeyModModeNone = "none"
+	// ReKeyModModeError will error on modtime import issues
+	ReKeyModModeError = "error"
 )
 
 var (
@@ -113,6 +121,11 @@ type (
 		Name    string
 		Env     []string
 		Default bool
+	}
+	// ReKeyArgs are the arguments for rekeying
+	ReKeyArgs struct {
+		Env     []string
+		ModMode string
 	}
 )
 

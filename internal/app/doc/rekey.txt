@@ -2,6 +2,10 @@ The password store can have the key (and file) changed via the '{{ $.ReKeyComman
 subcommand. This command requires that '{{ $.ReKey.Store }}' is set and
 a combination of new key settings are configured via '{{ $.ReKey.Key }}', '{{ $.ReKey.KeyMode }}', and '{{ $.ReKey.KeyFile }}' depending on the new database
 credential preferences. The settings correspond to the 'LOCKBOX_'
-settings normally used when running `{{ $.Executable }}`.
+settings normally used when running `{{ $.Executable }}`. Additionally 
+'{{ $.ReKey.ModMode }}' can be set to `{{ $.ReKey.ModModes.Skip }}` to skip
+modtime issues, `{{ $.ReKey.ModModes.None }}` to disable modtime imports, or
+`{{ $.ReKey.ModModes.Error }}` to ignore missing modification times (the
+default).
 
 Note that is an advanced feature and should be used with caution/backups/etc.

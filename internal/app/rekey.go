@@ -91,13 +91,25 @@ func ReKey(cmd CommandOptions, r Keyer) error {
 		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", path); err != nil {
 			return err
 		}
-		modTime := strings.TrimSpace(entry.ModTime)
-		if modTime == "" {
-			return errors.New("did not read modtime")
+		var modTime string
+		if vars.ModMode != config.ReKeyModModeNone {
+			modTime = strings.TrimSpace(entry.ModTime)
+			if modTime == "" {
+				switch vars.ModMode {
+				case config.ReKeyModModeSkip:
+				case config.ReKeyModModeError:
+					return errors.New("did not read modtime")
+				default:
+					return errors.New("unknown modtime control")
+				}
+			}
 		}
+
 		var insertEnv []string
-		insertEnv = append(insertEnv, vars...)
-		insertEnv = append(insertEnv, config.EnvModTime.KeyValue(modTime))
+		insertEnv = append(insertEnv, vars.Env...)
+		if modTime != "" {
+			insertEnv = append(insertEnv, config.EnvModTime.KeyValue(modTime))
+		}
 		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: []byte(entry.Data)}); err != nil {
 			return err
 		}

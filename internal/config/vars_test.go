@@ -107,19 +107,29 @@ func TestReKey(t *testing.T) {
 	if err == nil || !strings.HasPrefix(err.Error(), "missing required arguments for rekey") {
 		t.Errorf("failed: %v", err)
 	}
+	_, err = config.GetReKey([]string{"-store", "abc", "-key", "aaa", "-modtime", "xyz"})
+	if err == nil || !strings.HasPrefix(err.Error(), "unknown modtime setting for import: xyz") {
+		t.Errorf("failed: %v", err)
+	}
 	out, err := config.GetReKey([]string{"-store", "abc", "-key", "aaa"})
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEY=aaa LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
+	if fmt.Sprintf("%v", out.Env) != "[LOCKBOX_KEY=aaa LOCKBOX_KEYFILE= LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
 		t.Errorf("invalid env: %v", out)
 	}
-	out, err = config.GetReKey([]string{"-store", "abc", "-keyfile", "aaa"})
+	if out.ModMode != "error" {
+		t.Errorf("invalid modtime setting: %v", out)
+	}
+	out, err = config.GetReKey([]string{"-store", "abc", "-keyfile", "aaa", "-modtime", "none"})
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if fmt.Sprintf("%v", out) != "[LOCKBOX_KEY= LOCKBOX_KEYFILE=aaa LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
+	if fmt.Sprintf("%v", out.Env) != "[LOCKBOX_KEY= LOCKBOX_KEYFILE=aaa LOCKBOX_KEYMODE= LOCKBOX_STORE=abc]" {
 		t.Errorf("invalid env: %v", out)
+	}
+	if out.ModMode != "none" {
+		t.Errorf("invalid modtime setting: %v", out)
 	}
 	os.Setenv("LOCKBOX_KEY_NEW", "")
 	os.Setenv("LOCKBOX_STORE_NEW", "")

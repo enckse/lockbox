@@ -106,10 +106,16 @@ type (
 		CompletionsCommand string
 		CompletionsEnv     string
 		ReKey              struct {
-			Store   string
-			KeyFile string
-			Key     string
-			KeyMode string
+			Store    string
+			KeyFile  string
+			Key      string
+			KeyMode  string
+			ModMode  string
+			ModModes struct {
+				Skip  string
+				Error string
+				None  string
+			}
 		}
 	}
 )
@@ -227,6 +233,10 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)
 		document.ReKey.KeyMode = setDocFlag(config.ReKeyKeyModeFlag)
 		document.ReKey.KeyFile = setDocFlag(config.ReKeyKeyModeFlag)
+		document.ReKey.ModMode = setDocFlag(config.ReKeyModModeFlag)
+		document.ReKey.ModModes.None = config.ReKeyModModeNone
+		document.ReKey.ModModes.Skip = config.ReKeyModModeSkip
+		document.ReKey.ModModes.Error = config.ReKeyModModeError
 		files, err := docs.ReadDir(docDir)
 		if err != nil {
 			return nil, err

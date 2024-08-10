@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -207,14 +208,19 @@ This value can NOT be an expansion itself.`,
 )
 
 // GetReKey will get the rekey environment settings
-func GetReKey(args []string) ([]string, error) {
+func GetReKey(args []string) (ReKeyArgs, error) {
 	set := flag.NewFlagSet("rekey", flag.ExitOnError)
 	store := set.String(ReKeyStoreFlag, "", "new store")
 	key := set.String(ReKeyKeyFlag, "", "new key")
 	keyFile := set.String(ReKeyKeyFileFlag, "", "new keyfile")
 	keyMode := set.String(ReKeyKeyModeFlag, "", "new keymode")
+	modSetting := set.String(ReKeyModModeFlag, ReKeyModModeError, "import setting for modtime")
 	if err := set.Parse(args); err != nil {
-		return nil, err
+		return ReKeyArgs{}, err
+	}
+	mod := *modSetting
+	if !slices.Contains([]string{ReKeyModModeError, ReKeyModModeSkip, ReKeyModModeNone}, mod) {
+		return ReKeyArgs{}, fmt.Errorf("unknown modtime setting for import: %s", mod)
 	}
 	type keyer struct {
 		env EnvironmentString
@@ -234,10 +240,10 @@ func GetReKey(args []string) ([]string, error) {
 		out = append(out, k.env.KeyValue(k.in))
 	}
 	if !inStore.has || (!inKey.has && !inKeyFile.has) {
-		return nil, fmt.Errorf("missing required arguments for rekey:\n  -help for information on the flags or the lockbox help documentation for detailed usage")
+		return ReKeyArgs{}, fmt.Errorf("missing required arguments for rekey:\n  -help for information on the flags or the lockbox help documentation for detailed usage")
 	}
 	sort.Strings(out)
-	return out, nil
+	return ReKeyArgs{Env: out, ModMode: mod}, nil
 }
 
 // ListEnvironmentVariables will print information about env variables
