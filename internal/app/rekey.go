@@ -10,8 +10,7 @@ import (
 type (
 	// KeyerOptions defines how rekeying happens
 	KeyerOptions interface {
-		CommandOptions
-		IsPipe() bool
+		UserInputOptions
 		Password() (string, error)
 		ReadLine() (string, error)
 	}

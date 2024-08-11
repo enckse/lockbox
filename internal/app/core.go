@@ -92,6 +92,12 @@ type (
 		Writer() io.Writer
 	}
 
+	// UserInputOptions handle user inputs (e.g. password entry)
+	UserInputOptions interface {
+		CommandOptions
+		IsPipe() bool
+	}
+
 	// DefaultCommand is the default CLI app type for actual execution
 	DefaultCommand struct {
 		args []string

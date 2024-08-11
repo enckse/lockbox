@@ -14,8 +14,7 @@ type (
 	InsertMode uint
 	// InsertOptions are functions required for insert
 	InsertOptions interface {
-		CommandOptions
-		IsPipe() bool
+		UserInputOptions
 		Input(bool, bool) ([]byte, error)
 	}
 )
