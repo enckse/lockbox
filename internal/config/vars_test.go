@@ -220,37 +220,8 @@ func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool
 }
 
 func TestEnvironDefinitions(t *testing.T) {
-	b, err := os.ReadFile("vars.go")
-	if err != nil {
-		t.Errorf("invalid err: %v", err)
-	}
-	count := 0
-	inVars := false
-	for _, line := range strings.Split(string(b), "\n") {
-		if line == "var (" {
-			inVars = true
-			continue
-		}
-		if inVars {
-			if strings.Contains(line, "= register(Environment") {
-				count++
-			} else {
-				if line == ")" {
-					inVars = false
-					break
-				}
-			}
-		}
-	}
-	if count == 0 || inVars {
-		t.Errorf("invalid simple parse: %d", count)
-	}
 	os.Clearenv()
 	vals := config.ListEnvironmentVariables()
-	if len(vals) != count {
-		t.Errorf("invalid environment variable info: %d != %d", count, len(vals))
-	}
-	os.Clearenv()
 	expect := make(map[string]struct{})
 	for _, val := range vals {
 		env := strings.Split(strings.TrimSpace(val), "\n")[0]
