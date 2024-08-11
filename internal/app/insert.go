@@ -12,11 +12,6 @@ import (
 type (
 	// InsertMode changes how inserts are handled
 	InsertMode uint
-	// InsertOptions are functions required for insert
-	InsertOptions interface {
-		UserInputOptions
-		Input(bool, bool) ([]byte, error)
-	}
 )
 
 const (
@@ -29,7 +24,7 @@ const (
 )
 
 // Insert will execute an insert
-func Insert(cmd InsertOptions, mode InsertMode) error {
+func Insert(cmd UserInputOptions, mode InsertMode) error {
 	t := cmd.Transaction()
 	args := cmd.Args()
 	if len(args) != 1 {

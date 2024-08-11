@@ -96,6 +96,7 @@ type (
 	UserInputOptions interface {
 		CommandOptions
 		IsPipe() bool
+		Input(bool, bool) ([]byte, error)
 	}
 
 	// DefaultCommand is the default CLI app type for actual execution

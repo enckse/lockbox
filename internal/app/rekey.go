@@ -1,44 +1,11 @@
 package app
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/seanenck/lockbox/internal/config"
 )
 
-type (
-	// KeyerOptions defines how rekeying happens
-	KeyerOptions interface {
-		UserInputOptions
-		Password() (string, error)
-		ReadLine() (string, error)
-	}
-)
-
-func getNewPassword(pipe bool, text, against string, r KeyerOptions) (string, error) {
-	if pipe {
-		val, err := r.ReadLine()
-		if err != nil {
-			return "", err
-		}
-		return val, nil
-	}
-	fmt.Printf("%s ", text)
-	p, err := r.Password()
-	if err != nil {
-		return "", err
-	}
-	if against != "" {
-		if p != against {
-			return "", errors.New("rekey passwords do not match")
-		}
-	}
-	return p, nil
-}
-
 // ReKey handles entry rekeying
-func ReKey(cmd KeyerOptions) error {
+func ReKey(cmd UserInputOptions) error {
 	args := cmd.Args()
 	vars, err := config.GetReKey(args)
 	if err != nil {
@@ -52,21 +19,11 @@ func ReKey(cmd KeyerOptions) error {
 	}
 	var pass string
 	if !vars.NoKey {
-		first, err := getNewPassword(piping, "new", "", cmd)
+		p, err := cmd.Input(piping, false)
 		if err != nil {
 			return err
 		}
-		if !piping {
-			fmt.Println()
-			if _, err := getNewPassword(piping, "verify", first, cmd); err != nil {
-				return err
-			}
-			fmt.Println()
-		}
-		pass = first
-		if pass == "" {
-			return errors.New("password required but not given")
-		}
+		pass = string(p)
 	}
 	return cmd.Transaction().ReKey(pass, vars.KeyFile)
 }

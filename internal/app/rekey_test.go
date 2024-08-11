@@ -11,13 +11,12 @@ import (
 
 type (
 	mockKeyer struct {
-		pass       string
-		secondPass string
-		confirm    bool
-		args       []string
-		buf        bytes.Buffer
-		t          *testing.T
-		pipe       bool
+		pass    string
+		confirm bool
+		args    []string
+		buf     bytes.Buffer
+		t       *testing.T
+		pipe    bool
 	}
 )
 
@@ -33,15 +32,8 @@ func (m *mockKeyer) Args() []string {
 	return m.args
 }
 
-func (m *mockKeyer) ReadLine() (string, error) {
-	return m.Password()
-}
-
-func (m *mockKeyer) Password() (string, error) {
-	p := m.pass
-	m.pass = m.secondPass
-	m.secondPass = ""
-	return p, nil
+func (m *mockKeyer) Input(pipe, multi bool) ([]byte, error) {
+	return []byte(m.pass), nil
 }
 
 func (m *mockKeyer) IsPipe() bool {
@@ -59,15 +51,11 @@ func TestReKey(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	mock.confirm = true
-	if err := app.ReKey(mock); err == nil || err.Error() != "password required but not given" {
+	mock.pipe = false
+	if err := app.ReKey(mock); err == nil || err.Error() != "key and/or keyfile must be set" {
 		t.Errorf("invalid error: %v", err)
 	}
 	mock.pass = "abc"
-	if err := app.ReKey(mock); err == nil || err.Error() != "rekey passwords do not match" {
-		t.Errorf("invalid error: %v", err)
-	}
-	mock.pass = "xyz"
-	mock.secondPass = "xyz"
 	if err := app.ReKey(mock); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -77,7 +65,7 @@ func TestReKeyPipe(t *testing.T) {
 	newMockCommand(t)
 	mock := &mockKeyer{}
 	mock.pipe = true
-	if err := app.ReKey(mock); err == nil || err.Error() != "password required but not given" {
+	if err := app.ReKey(mock); err == nil || err.Error() != "key and/or keyfile must be set" {
 		t.Errorf("invalid error: %v", err)
 	}
 	mock.pass = "abc"
