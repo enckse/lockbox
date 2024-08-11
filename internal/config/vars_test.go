@@ -232,7 +232,7 @@ func TestEnvironDefinitions(t *testing.T) {
 			continue
 		}
 		if inVars {
-			if strings.Contains(line, "= Environment") {
+			if strings.Contains(line, "= register(Environment") {
 				count++
 			} else {
 				if line == ")" {

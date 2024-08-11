@@ -47,6 +47,7 @@ const (
 var (
 	detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}
 	exampleColorWindows    = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
+	registry               = []printer{}
 )
 
 type (
@@ -486,4 +487,9 @@ func wrap(in string, maxLength int) string {
 		lines = append(lines, strings.Join(cur, " "))
 	}
 	return strings.Join(lines, "\n")
+}
+
+func register[T printer](obj T) T {
+	registry = append(registry, obj)
+	return obj
 }
