@@ -1,118 +1,71 @@
 package app
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
 
-	"github.com/seanenck/lockbox/internal/backend"
 	"github.com/seanenck/lockbox/internal/config"
 )
 
 type (
-	// Keyer defines how rekeying happens
-	Keyer interface {
-		JSON() (map[string]backend.JSON, error)
-		Insert(ReKeyEntry) error
-	}
-	// ReKeyEntry is an entry that is being rekeyed
-	ReKeyEntry struct {
-		Path string
-		Env  []string
-		Data []byte
-	}
-	// DefaultKeyer is the default keyer for the application
-	DefaultKeyer struct {
-		exe string
+	// KeyerOptions defines how rekeying happens
+	KeyerOptions interface {
+		CommandOptions
+		IsPipe() bool
+		Password() (string, error)
+		ReadLine() (string, error)
 	}
 )
 
-// NewDefaultKeyer initializes the default keyer
-func NewDefaultKeyer() (DefaultKeyer, error) {
-	exe, err := os.Executable()
+func getNewPassword(pipe bool, against string, r KeyerOptions) (string, error) {
+	if pipe {
+		val, err := r.ReadLine()
+		if err != nil {
+			return "", err
+		}
+		return val, nil
+	}
+	fmt.Print("new ")
+	p, err := r.Password()
 	if err != nil {
-		return DefaultKeyer{}, err
+		return "", err
 	}
-	return DefaultKeyer{exe: exe}, nil
-}
-
-// JSON will get the JSON backing entries
-func (r DefaultKeyer) JSON() (map[string]backend.JSON, error) {
-	out, err := exec.Command(r.exe, JSONCommand).Output()
-	if err != nil {
-		return nil, err
+	if against != "" {
+		if p != against {
+			return "", errors.New("rekey passwords do not match")
+		}
 	}
-	var j map[string]backend.JSON
-	if err := json.Unmarshal(out, &j); err != nil {
-		return nil, err
-	}
-	return j, nil
-}
-
-// Insert will insert the rekeying entry
-func (r DefaultKeyer) Insert(entry ReKeyEntry) error {
-	cmd := exec.Command(r.exe, InsertCommand, entry.Path)
-	cmd.Env = append(os.Environ(), entry.Env...)
-	in, err := cmd.StdinPipe()
-	if nil != err {
-		return err
-	}
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	go func() {
-		defer in.Close()
-		in.Write(entry.Data)
-	}()
-	return cmd.Run()
+	return p, nil
 }
 
 // ReKey handles entry rekeying
-func ReKey(cmd CommandOptions, r Keyer) error {
+func ReKey(cmd KeyerOptions) error {
 	args := cmd.Args()
 	vars, err := config.GetReKey(args)
 	if err != nil {
 		return err
 	}
-	if !cmd.Confirm("proceed with rekey") {
-		return nil
+	piping := cmd.IsPipe()
+	if !piping {
+		if !cmd.Confirm("proceed with rekey") {
+			return nil
+		}
 	}
-	if err := config.EnvJSONDataOutput.Set(string(config.JSONDataOutputRaw)); err != nil {
-		return err
-	}
-	entries, err := r.JSON()
-	if err != nil {
-		return err
-	}
-	writer := cmd.Writer()
-	for path, entry := range entries {
-		if _, err := fmt.Fprintf(writer, "rekeying: %s\n", path); err != nil {
+	var pass string
+	if !vars.NoKey {
+		first, err := getNewPassword(piping, "", cmd)
+		if err != nil {
 			return err
 		}
-		var modTime string
-		if vars.ModMode != config.ReKeyModModeNone {
-			modTime = strings.TrimSpace(entry.ModTime)
-			if modTime == "" {
-				switch vars.ModMode {
-				case config.ReKeyModModeSkip:
-				case config.ReKeyModModeError:
-					return errors.New("did not read modtime")
-				default:
-					return errors.New("unknown modtime control")
-				}
+		if !piping {
+			if _, err := getNewPassword(piping, first, cmd); err != nil {
+				return err
 			}
 		}
-
-		var insertEnv []string
-		insertEnv = append(insertEnv, vars.Env...)
-		if modTime != "" {
-			insertEnv = append(insertEnv, config.EnvModTime.KeyValue(modTime))
-		}
-		if err := r.Insert(ReKeyEntry{Path: path, Env: insertEnv, Data: []byte(entry.Data)}); err != nil {
-			return err
+		pass = first
+		if pass == "" {
+			return errors.New("password required but not given")
 		}
 	}
-	return nil
+	return cmd.Transaction().ReKey(pass, vars.KeyFile)
 }

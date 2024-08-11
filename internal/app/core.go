@@ -106,16 +106,8 @@ type (
 		CompletionsCommand string
 		CompletionsEnv     string
 		ReKey              struct {
-			Store    string
-			KeyFile  string
-			Key      string
-			KeyMode  string
-			ModMode  string
-			ModModes struct {
-				Skip  string
-				Error string
-				None  string
-			}
+			KeyFile string
+			NoKey   string
 		}
 	}
 )
@@ -167,6 +159,16 @@ func (a *DefaultCommand) SetArgs(args ...string) {
 // IsPipe will indicate if we're receiving pipe input
 func (a *DefaultCommand) IsPipe() bool {
 	return platform.IsInputFromPipe()
+}
+
+// ReadLine handles a single stdin read
+func (a DefaultCommand) ReadLine() (string, error) {
+	return platform.Stdin(true)
+}
+
+// Password is how a keyer gets the user's password for rekey
+func (a DefaultCommand) Password() (string, error) {
+	return platform.ReadInteractivePassword()
 }
 
 // Input will read user input
@@ -229,14 +231,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			CompletionsCommand: CompletionsCommand,
 			CompletionsEnv:     config.EnvDefaultCompletionKey,
 		}
-		document.ReKey.Store = setDocFlag(config.ReKeyStoreFlag)
-		document.ReKey.Key = setDocFlag(config.ReKeyKeyFlag)
-		document.ReKey.KeyMode = setDocFlag(config.ReKeyKeyModeFlag)
-		document.ReKey.KeyFile = setDocFlag(config.ReKeyKeyModeFlag)
-		document.ReKey.ModMode = setDocFlag(config.ReKeyModModeFlag)
-		document.ReKey.ModModes.None = config.ReKeyModModeNone
-		document.ReKey.ModModes.Skip = config.ReKeyModModeSkip
-		document.ReKey.ModModes.Error = config.ReKeyModModeError
+		document.ReKey.KeyFile = setDocFlag(config.ReKeyKeyFileFlag)
+		document.ReKey.NoKey = config.ReKeyNoKeyFlag
 		files, err := docs.ReadDir(docDir)
 		if err != nil {
 			return nil, err

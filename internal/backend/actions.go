@@ -83,6 +83,18 @@ func (t *Transaction) act(cb action) error {
 	return err
 }
 
+// ReKey will change the credentials on a database
+func (t *Transaction) ReKey(pass, keyFile string) error {
+	creds, err := getCredentials(pass, keyFile)
+	if err != nil {
+		return err
+	}
+	return t.change(func(c Context) error {
+		c.db.Credentials = creds
+		return nil
+	})
+}
+
 func (t *Transaction) change(cb action) error {
 	if t.readonly {
 		return errors.New("unable to alter database in readonly mode")

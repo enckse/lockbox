@@ -300,3 +300,27 @@ func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 		}
 	}
 }
+
+func TestReKey(t *testing.T) {
+	os.Clearenv()
+	f := "rekey_test.kdbx"
+	file := testFile(f)
+	defer os.Remove(filepath.Join(testDir, f))
+	os.Setenv("LOCKBOX_READONLY", "no")
+	os.Setenv("LOCKBOX_STORE", file)
+	os.Setenv("LOCKBOX_KEY", "test")
+	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	os.Setenv("LOCKBOX_TOTP", "totp")
+	os.Setenv("LOCKBOX_HOOKDIR", "")
+	os.Setenv("LOCKBOX_SET_MODTIME", "")
+	tr, err := backend.NewTransaction()
+	if err != nil {
+		t.Errorf("failed: %v", err)
+	}
+	if err := tr.ReKey("", ""); err == nil || err.Error() != "key and/or keyfile must be set" {
+		t.Errorf("no error: %v", err)
+	}
+	if err := tr.ReKey("abc", ""); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+}

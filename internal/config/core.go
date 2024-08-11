@@ -33,27 +33,15 @@ const (
 	// WindowsLinuxPlatform for WSL subsystems
 	WindowsLinuxPlatform = "wsl"
 	unknownPlatform      = ""
-	// ReKeyStoreFlag is the flag used for rekey to set the store
-	ReKeyStoreFlag = "store"
 	// ReKeyKeyFileFlag is the flag used for rekey to set the keyfile
 	ReKeyKeyFileFlag = "keyfile"
-	// ReKeyKeyFlag is the flag used for rekey to set the key
-	ReKeyKeyFlag = "key"
-	// ReKeyKeyModeFlag is the flag used for rekey to set the key mode
-	ReKeyKeyModeFlag = "keymode"
-	// ReKeyModModeFlag indicates how to control modtime inserts
-	ReKeyModModeFlag = "modtime"
+	// ReKeyNoKeyFlag indicates no key is used for rekeying (e.g. keyfile only)
+	ReKeyNoKeyFlag = "nokey"
 	// sub categories
 	clipCategory keyCategory = "CLIP_"
 	totpCategory keyCategory = "TOTP_"
 	// YesValue are yes (on) values
 	YesValue = yes
-	// ReKeyModModeSkip will skip modtime import issues
-	ReKeyModModeSkip = "skip"
-	// ReKeyModModeNone will not attempt to import modtimes at all
-	ReKeyModModeNone = "none"
-	// ReKeyModModeError will error on modtime import issues
-	ReKeyModModeError = "error"
 )
 
 var (
@@ -124,8 +112,8 @@ type (
 	}
 	// ReKeyArgs are the arguments for rekeying
 	ReKeyArgs struct {
-		Env     []string
-		ModMode string
+		NoKey   bool
+		KeyFile string
 	}
 )
 

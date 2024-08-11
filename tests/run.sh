@@ -153,14 +153,22 @@ printf "%-10s ... " "$1"
   ${LB_BINARY} ls
   echo
   # rekeying
-  REKEY="$LOCKBOX_STORE.rekey.kdbx"
-  REKEYFILE=""
+  REKEY_ARGS=""
+  NEWKEY="newkey$1"
   export LOCKBOX_HOOKDIR=""
   if [ -n "$LOCKBOX_KEYFILE" ]; then
     REKEYFILE="$DATA/newkeyfile"
+    REKEY_ARGS="-keyfile $REKEYFILE"
     echo "thisisanewkey" > "$REKEYFILE"
+    if [ -z "$LOCKBOX_KEY" ]; then
+      REKEY_ARGS="$REKEY_ARGS -nokey"
+      NEWKEY=""
+    fi
   fi
-  echo y |${LB_BINARY} rekey -store="$REKEY" -key="newkey$1" -keymode="plaintext" -keyfile="$REKEYFILE"
+  # shellcheck disable=SC2086
+  echo "$NEWKEY" | ${LB_BINARY} rekey $REKEY_ARGS
+  export LOCKBOX_KEY="$NEWKEY"
+  export LOCKBOX_KEYFILE="$REKEYFILE"
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2

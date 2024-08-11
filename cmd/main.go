@@ -97,11 +97,7 @@ func run() error {
 	}
 	switch command {
 	case app.ReKeyCommand:
-		keyer, err := app.NewDefaultKeyer()
-		if err != nil {
-			return err
-		}
-		return app.ReKey(p, keyer)
+		return app.ReKey(p)
 	case app.ListCommand:
 		return app.List(p)
 	case app.MoveCommand:

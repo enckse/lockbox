@@ -2,11 +2,11 @@
 package config
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/url"
 	"os"
-	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -210,40 +210,17 @@ This value can NOT be an expansion itself.`,
 // GetReKey will get the rekey environment settings
 func GetReKey(args []string) (ReKeyArgs, error) {
 	set := flag.NewFlagSet("rekey", flag.ExitOnError)
-	store := set.String(ReKeyStoreFlag, "", "new store")
-	key := set.String(ReKeyKeyFlag, "", "new key")
 	keyFile := set.String(ReKeyKeyFileFlag, "", "new keyfile")
-	keyMode := set.String(ReKeyKeyModeFlag, "", "new keymode")
-	modSetting := set.String(ReKeyModModeFlag, ReKeyModModeError, "import setting for modtime")
+	noKey := set.Bool(ReKeyNoKeyFlag, false, "disable password/key credential")
 	if err := set.Parse(args); err != nil {
 		return ReKeyArgs{}, err
 	}
-	mod := *modSetting
-	if !slices.Contains([]string{ReKeyModModeError, ReKeyModModeSkip, ReKeyModModeNone}, mod) {
-		return ReKeyArgs{}, fmt.Errorf("unknown modtime setting for import: %s", mod)
+	noPass := *noKey
+	file := *keyFile
+	if strings.TrimSpace(file) == "" && noPass {
+		return ReKeyArgs{}, errors.New("a key or keyfile must be passed for rekey")
 	}
-	type keyer struct {
-		env EnvironmentString
-		has bool
-		in  string
-	}
-	check := func(in string, e EnvironmentString) keyer {
-		val := strings.TrimSpace(in)
-		return keyer{has: val != "", env: e, in: in}
-	}
-	inStore := check(*store, EnvStore)
-	inKey := check(*key, envKey)
-	inKeyFile := check(*keyFile, EnvKeyFile)
-	inKeyMode := check(*keyMode, envKeyMode)
-	var out []string
-	for _, k := range []keyer{inStore, inKey, inKeyFile, inKeyMode} {
-		out = append(out, k.env.KeyValue(k.in))
-	}
-	if !inStore.has || (!inKey.has && !inKeyFile.has) {
-		return ReKeyArgs{}, fmt.Errorf("missing required arguments for rekey:\n  -help for information on the flags or the lockbox help documentation for detailed usage")
-	}
-	sort.Strings(out)
-	return ReKeyArgs{Env: out, ModMode: mod}, nil
+	return ReKeyArgs{KeyFile: file, NoKey: noPass}, nil
 }
 
 // ListEnvironmentVariables will print information about env variables
