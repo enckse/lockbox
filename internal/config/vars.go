@@ -203,10 +203,10 @@ Note that this setting is not output as part of the environment.`, noEnvironment
 		environmentBase: environmentBase{
 			subKey: "KEYMODE", requirement: "must be set to a valid mode when using a key",
 			desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
-Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode), whenUnset: string(DefaultKeyMode),
+Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		},
 		allowed:    []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
-		canDefault: true, defaultValue: "",
+		canDefault: true, defaultValue: string(DefaultKeyMode),
 	})
 	envKey = environmentRegister(EnvironmentString{environmentBase: environmentBase{
 		requirement: requiredKeyOrKeyFile, subKey: "KEY",
@@ -246,9 +246,6 @@ func ListEnvironmentVariables() []string {
 		value, allow := item.values()
 		if len(value) == 0 {
 			value = "(unset)"
-			if env.whenUnset != "" {
-				value = env.whenUnset
-			}
 		}
 		description := Wrap(2, env.desc)
 		requirement := "optional/default"
