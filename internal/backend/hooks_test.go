@@ -10,6 +10,7 @@ import (
 )
 
 func TestHooks(t *testing.T) {
+	defer os.Clearenv()
 	os.Setenv("LOCKBOX_HOOKDIR", "")
 	h, err := backend.NewHook("a", backend.InsertAction)
 	if err != nil {
@@ -57,6 +58,14 @@ func TestHooks(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	if err := h.Run(backend.HookPre); strings.Contains("fork/exec", err.Error()) {
+		t.Errorf("wrong error: %v", err)
+	}
+	os.Setenv("LOCKBOX_NOHOOKS", "yes")
+	h, err = backend.NewHook("a", backend.InsertAction)
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if err := h.Run(backend.HookPre); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 }

@@ -45,6 +45,10 @@ func TestColorSetting(t *testing.T) {
 	checkYesNo("LOCKBOX_NOCOLOR", t, config.EnvNoColor, false)
 }
 
+func TestNoHook(t *testing.T) {
+	checkYesNo("LOCKBOX_NOHOOKS", t, config.EnvNoHooks, false)
+}
+
 func TestInteractiveSetting(t *testing.T) {
 	checkYesNo("LOCKBOX_INTERACTIVE", t, config.EnvInteractive, true)
 }
@@ -93,7 +97,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 25 {
+	if l != 26 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }

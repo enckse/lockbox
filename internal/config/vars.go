@@ -32,7 +32,7 @@ const (
 )
 
 var (
-	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands, EnvDefaultCompletion}
+	registry = []printer{EnvStore, envKeyMode, envKey, EnvNoClip, EnvNoColor, EnvInteractive, EnvReadOnly, EnvTOTPToken, EnvFormatTOTP, EnvMaxTOTP, EnvTOTPColorBetween, EnvClipPaste, EnvClipCopy, EnvClipMax, EnvPlatform, EnvNoTOTP, EnvHookDir, EnvClipOSC52, EnvKeyFile, EnvModTime, EnvJSONDataOutput, EnvHashLength, EnvConfig, envConfigExpands, EnvDefaultCompletion, EnvNoHooks}
 	// Platforms represent the platforms that lockbox understands to run on
 	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
@@ -97,6 +97,11 @@ var (
 	EnvNoColor = EnvironmentBool{environmentBase: environmentBase{
 		subKey: "NOCOLOR",
 		desc:   "Disable terminal colors.",
+	}, defaultValue: false}
+	// EnvNoHooks disables hooks
+	EnvNoHooks = EnvironmentBool{environmentBase: environmentBase{
+		subKey: "NOHOOKS",
+		desc:   "Disable hooks",
 	}, defaultValue: false}
 	// EnvInteractive indicates if operating in interactive mode
 	EnvInteractive = EnvironmentBool{environmentBase: environmentBase{

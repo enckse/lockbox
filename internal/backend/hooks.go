@@ -33,6 +33,13 @@ const (
 
 // NewHook will create a new hook type
 func NewHook(path string, a ActionMode) (Hook, error) {
+	disabled, err := config.EnvNoHooks.Get()
+	if err != nil {
+		return Hook{}, err
+	}
+	if disabled {
+		return Hook{enabled: false}, nil
+	}
 	if strings.TrimSpace(path) == "" {
 		return Hook{}, errors.New("empty path is not allowed for hooks")
 	}
@@ -62,10 +69,13 @@ func (h Hook) Run(mode HookMode) error {
 	if !h.enabled {
 		return nil
 	}
+	env := os.Environ()
+	env = append(env, config.EnvNoHooks.KeyValue(config.YesValue))
 	for _, s := range h.scripts {
 		c := exec.Command(s, string(mode), string(h.mode), h.path)
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
+		c.Env = env
 		if err := c.Run(); err != nil {
 			return err
 		}
