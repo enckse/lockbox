@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -24,14 +25,6 @@ const (
 	detectEnvironment    = "detect"
 	noEnvironment        = "none"
 	envFile              = "lockbox.env"
-	// MacOSPlatform is the macos indicator for platform
-	MacOSPlatform = "macos"
-	// LinuxWaylandPlatform for linux+wayland
-	LinuxWaylandPlatform = "linux-wayland"
-	// LinuxXPlatform for linux+X
-	LinuxXPlatform = "linux-x"
-	// WindowsLinuxPlatform for WSL subsystems
-	WindowsLinuxPlatform = "wsl"
 	unknownPlatform      = ""
 	// ReKeyKeyFileFlag is the flag used for rekey to set the keyfile
 	ReKeyKeyFileFlag = "keyfile"
@@ -47,7 +40,7 @@ const (
 var (
 	detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}
 	exampleColorWindows    = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
-	registry               = []printer{}
+	registeredEnv          = []printer{}
 )
 
 type (
@@ -115,6 +108,13 @@ type (
 	ReKeyArgs struct {
 		NoKey   bool
 		KeyFile string
+	}
+	// PlatformTypes defines systems lockbox is known to run on or can run on
+	PlatformTypes struct {
+		MacOSPlatform        SystemPlatform
+		LinuxWaylandPlatform SystemPlatform
+		LinuxXPlatform       SystemPlatform
+		WindowsLinuxPlatform SystemPlatform
 	}
 )
 
@@ -267,18 +267,18 @@ func NewPlatform() (SystemPlatform, error) {
 	parts := strings.Split(raw, " ")
 	switch parts[0] {
 	case "darwin":
-		return MacOSPlatform, nil
+		return Platforms.MacOSPlatform, nil
 	case "linux":
 		if strings.Contains(raw, "microsoft-standard-wsl") {
-			return WindowsLinuxPlatform, nil
+			return Platforms.WindowsLinuxPlatform, nil
 		}
 		if strings.TrimSpace(getExpand("WAYLAND_DISPLAY")) == "" {
 			if strings.TrimSpace(getExpand("DISPLAY")) == "" {
 				return unknownPlatform, errors.New("unable to detect linux clipboard mode")
 			}
-			return LinuxXPlatform, nil
+			return Platforms.LinuxXPlatform, nil
 		}
-		return LinuxWaylandPlatform, nil
+		return Platforms.LinuxWaylandPlatform, nil
 	}
 	return unknownPlatform, errors.New("unable to detect clipboard mode")
 }
@@ -358,7 +358,7 @@ func IsUnset(k, v string) (bool, error) {
 func Environ() []string {
 	var results []string
 	for _, k := range os.Environ() {
-		for _, r := range registry {
+		for _, r := range registeredEnv {
 			key := r.self().key()
 			if key == EnvConfig.key() {
 				continue
@@ -490,6 +490,26 @@ func wrap(in string, maxLength int) string {
 }
 
 func environmentRegister[T printer](obj T) T {
-	registry = append(registry, obj)
+	registeredEnv = append(registeredEnv, obj)
+	return obj
+}
+
+// List will get the displayable list of platforms
+func (p PlatformTypes) List() []string {
+	v := reflect.ValueOf(p)
+	var vals []string
+	for i := 0; i < v.NumField(); i++ {
+		vals = append(vals, string(v.Field(i).Interface().(SystemPlatform)))
+	}
+	sort.Strings(vals)
+	return vals
+}
+
+func newPlatformsTypes() PlatformTypes {
+	obj := PlatformTypes{}
+	obj.MacOSPlatform = "macos"
+	obj.LinuxWaylandPlatform = "linux-wayland"
+	obj.LinuxXPlatform = "linux-x"
+	obj.WindowsLinuxPlatform = "wsl"
 	return obj
 }

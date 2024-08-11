@@ -32,8 +32,8 @@ const (
 )
 
 var (
-	// Platforms represent the platforms that lockbox understands to run on
-	Platforms = []string{MacOSPlatform, WindowsLinuxPlatform, LinuxXPlatform, LinuxWaylandPlatform}
+	// Platforms are the known platforms for lockbox
+	Platforms = newPlatformsTypes()
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string
@@ -122,7 +122,7 @@ var (
 	EnvPlatform = environmentRegister(EnvironmentString{environmentBase: environmentBase{
 		subKey: "PLATFORM",
 		desc:   "Override the detected platform.",
-	}, defaultValue: detectedValue, allowed: Platforms, canDefault: false})
+	}, defaultValue: detectedValue, allowed: Platforms.List(), canDefault: false})
 	// EnvStore is the location of the keepass file/store
 	EnvStore = environmentRegister(EnvironmentString{environmentBase: environmentBase{
 		subKey: "STORE",
@@ -230,7 +230,7 @@ func GetReKey(args []string) (ReKeyArgs, error) {
 // ListEnvironmentVariables will print information about env variables
 func ListEnvironmentVariables() []string {
 	var results []string
-	for _, item := range registry {
+	for _, item := range registeredEnv {
 		env := item.self()
 		value, allow := item.values()
 		if len(value) == 0 {

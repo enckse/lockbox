@@ -65,16 +65,16 @@ func NewClipboard() (Clipboard, error) {
 	var copying []string
 	var pasting []string
 	switch sys {
-	case config.MacOSPlatform:
+	case config.Platforms.MacOSPlatform:
 		copying = []string{"pbcopy"}
 		pasting = []string{"pbpaste"}
-	case config.LinuxXPlatform:
+	case config.Platforms.LinuxXPlatform:
 		copying = []string{"xclip"}
 		pasting = []string{"xclip", "-o"}
-	case config.LinuxWaylandPlatform:
+	case config.Platforms.LinuxWaylandPlatform:
 		copying = []string{"wl-copy"}
 		pasting = []string{"wl-paste"}
-	case config.WindowsLinuxPlatform:
+	case config.Platforms.WindowsLinuxPlatform:
 		copying = []string{"clip.exe"}
 		pasting = []string{"powershell.exe", "-command", "Get-Clipboard"}
 	default:

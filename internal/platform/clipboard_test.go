@@ -22,7 +22,7 @@ func TestNoClipboard(t *testing.T) {
 func TestMaxTime(t *testing.T) {
 	os.Setenv("LOCKBOX_NOCLIP", "no")
 	os.Setenv("LOCKBOX_CLIP_OSC52", "no")
-	os.Setenv("LOCKBOX_PLATFORM", string(config.LinuxWaylandPlatform))
+	os.Setenv("LOCKBOX_PLATFORM", string(config.Platforms.LinuxWaylandPlatform))
 	os.Setenv("LOCKBOX_CLIP_MAX", "")
 	c, err := platform.NewClipboard()
 	if err != nil {
@@ -55,7 +55,7 @@ func TestClipboardInstances(t *testing.T) {
 	os.Setenv("LOCKBOX_NOCLIP", "no")
 	os.Setenv("LOCKBOX_CLIP_MAX", "")
 	os.Setenv("LOCKBOX_CLIP_OSC52", "no")
-	for _, item := range config.Platforms {
+	for _, item := range config.Platforms.List() {
 		os.Setenv("LOCKBOX_PLATFORM", item)
 		_, err := platform.NewClipboard()
 		if err != nil {
@@ -80,7 +80,7 @@ func TestOSC52(t *testing.T) {
 func TestArgsOverride(t *testing.T) {
 	os.Setenv("LOCKBOX_CLIP_PASTE", "abc xyz 111")
 	os.Setenv("LOCKBOX_CLIP_OSC52", "no")
-	os.Setenv("LOCKBOX_PLATFORM", string(config.WindowsLinuxPlatform))
+	os.Setenv("LOCKBOX_PLATFORM", string(config.Platforms.WindowsLinuxPlatform))
 	c, _ := platform.NewClipboard()
 	cmd, args, ok := c.Args(true)
 	if cmd != "clip.exe" || len(args) != 0 || !ok {

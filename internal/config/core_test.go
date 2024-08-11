@@ -10,7 +10,7 @@ import (
 )
 
 func TestPlatformSet(t *testing.T) {
-	if len(config.Platforms) != 4 {
+	if len(config.Platforms.List()) != 4 {
 		t.Error("invalid platform set")
 	}
 }
@@ -48,7 +48,7 @@ func TestKeyValue(t *testing.T) {
 }
 
 func TestNewPlatform(t *testing.T) {
-	for _, item := range config.Platforms {
+	for _, item := range config.Platforms.List() {
 		os.Setenv("LOCKBOX_PLATFORM", item)
 		s, err := config.NewPlatform()
 		if err != nil {
