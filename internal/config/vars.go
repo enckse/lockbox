@@ -23,12 +23,8 @@ const (
 	noClipProfile        = "noclip"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
-	// JSONDataOutputHash means output data is hashed
-	JSONDataOutputHash JSONOutputMode = "hash"
-	// JSONDataOutputBlank means an empty entry is set
-	JSONDataOutputBlank JSONOutputMode = "empty"
-	// JSONDataOutputRaw means the RAW (unencrypted) value is displayed
-	JSONDataOutputRaw JSONOutputMode = "plaintext"
+	/*
+	 */
 )
 
 var (
@@ -38,6 +34,17 @@ var (
 		LinuxWaylandPlatform: "linux-wayland",
 		LinuxXPlatform:       "linux-x",
 		WindowsLinuxPlatform: "wsl",
+	}
+	// ReKeyFlags are the CLI argument flags for rekey handling
+	ReKeyFlags = struct {
+		KeyFile string
+		NoKey   string
+	}{"keyfile", "nokey"}
+	// JSONOutputs are the JSON data output types for exporting/output of values
+	JSONOutputs = JSONOutputTypes{
+		Hash:  "hash",
+		Blank: "empty",
+		Raw:   "plaintext",
 	}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
@@ -67,7 +74,7 @@ var (
 			environmentDefault: newDefaultedEnvironment(0,
 				environmentBase{
 					subKey: EnvJSONDataOutput.subKey + "_HASH_LENGTH",
-					desc:   fmt.Sprintf("Maximum hash string length the JSON output should contain when '%s' mode is set for JSON output.", JSONDataOutputHash),
+					desc:   fmt.Sprintf("Maximum hash string length the JSON output should contain when '%s' mode is set for JSON output.", JSONOutputs.Hash),
 				}),
 			shortDesc: "hash length",
 			allowZero: true,
@@ -254,13 +261,13 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 	// EnvJSONDataOutput controls how JSON is output in the 'data' field
 	EnvJSONDataOutput = environmentRegister(
 		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment(string(JSONDataOutputHash),
+			environmentDefault: newDefaultedEnvironment(string(JSONOutputs.Hash),
 				environmentBase{
 					subKey: "JSON_DATA",
-					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", JSONDataOutputRaw),
+					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", JSONOutputs.Raw),
 				}),
 			canDefault: true,
-			allowed:    []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)},
+			allowed:    JSONOutputs.List(),
 		})
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = environmentRegister(EnvironmentFormatter{environmentBase: environmentBase{
@@ -325,8 +332,8 @@ This value can NOT be an expansion itself.`,
 // GetReKey will get the rekey environment settings
 func GetReKey(args []string) (ReKeyArgs, error) {
 	set := flag.NewFlagSet("rekey", flag.ExitOnError)
-	keyFile := set.String(ReKeyKeyFileFlag, "", "new keyfile")
-	noKey := set.Bool(ReKeyNoKeyFlag, false, "disable password/key credential")
+	keyFile := set.String(ReKeyFlags.KeyFile, "", "new keyfile")
+	noKey := set.Bool(ReKeyFlags.NoKey, false, "disable password/key credential")
 	if err := set.Parse(args); err != nil {
 		return ReKeyArgs{}, err
 	}
@@ -389,16 +396,12 @@ func formatterTOTP(key, value string) string {
 
 // ParseJSONOutput handles detecting the JSON output mode
 func ParseJSONOutput() (JSONOutputMode, error) {
-	val := strings.ToLower(strings.TrimSpace(EnvJSONDataOutput.Get()))
-	switch JSONOutputMode(val) {
-	case JSONDataOutputHash:
-		return JSONDataOutputHash, nil
-	case JSONDataOutputBlank:
-		return JSONDataOutputBlank, nil
-	case JSONDataOutputRaw:
-		return JSONDataOutputRaw, nil
+	val := JSONOutputMode(strings.ToLower(strings.TrimSpace(EnvJSONDataOutput.Get())))
+	switch val {
+	case JSONOutputs.Hash, JSONOutputs.Blank, JSONOutputs.Raw:
+		return val, nil
 	}
-	return JSONDataOutputBlank, fmt.Errorf("invalid JSON output mode: %s", val)
+	return JSONOutputs.Blank, fmt.Errorf("invalid JSON output mode: %s", val)
 }
 
 func exportProfileKeyValue(e environmentBase, val string) string {

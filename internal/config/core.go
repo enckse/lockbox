@@ -26,10 +26,6 @@ const (
 	noEnvironment        = "none"
 	envFile              = "lockbox.env"
 	unknownPlatform      = ""
-	// ReKeyKeyFileFlag is the flag used for rekey to set the keyfile
-	ReKeyKeyFileFlag = "keyfile"
-	// ReKeyNoKeyFlag indicates no key is used for rekeying (e.g. keyfile only)
-	ReKeyNoKeyFlag = "nokey"
 	// sub categories
 	clipCategory keyCategory = "CLIP_"
 	totpCategory keyCategory = "TOTP_"
@@ -115,6 +111,12 @@ type (
 		LinuxWaylandPlatform SystemPlatform
 		LinuxXPlatform       SystemPlatform
 		WindowsLinuxPlatform SystemPlatform
+	}
+	// JSONOutputTypes indicate how JSON data can be exported for values
+	JSONOutputTypes struct {
+		Hash  JSONOutputMode
+		Blank JSONOutputMode
+		Raw   JSONOutputMode
 	}
 )
 
@@ -486,12 +488,21 @@ func environmentRegister[T printer](obj T) T {
 	return obj
 }
 
-// List will get the displayable list of platforms
+// List will list the platform types on the struct
 func (p PlatformTypes) List() []string {
+	return listFields[SystemPlatform](p)
+}
+
+// List will list the output modes on the struct
+func (p JSONOutputTypes) List() []string {
+	return listFields[JSONOutputMode](p)
+}
+
+func listFields[T SystemPlatform | JSONOutputMode](p any) []string {
 	v := reflect.ValueOf(p)
 	var vals []string
 	for i := 0; i < v.NumField(); i++ {
-		vals = append(vals, string(v.Field(i).Interface().(SystemPlatform)))
+		vals = append(vals, fmt.Sprintf("%v", v.Field(i).Interface().(T)))
 	}
 	sort.Strings(vals)
 	return vals

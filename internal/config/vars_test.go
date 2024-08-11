@@ -146,22 +146,22 @@ func TestFormatTOTP(t *testing.T) {
 func TestParseJSONMode(t *testing.T) {
 	defer os.Clearenv()
 	m, err := config.ParseJSONOutput()
-	if m != config.JSONDataOutputHash || err != nil {
+	if m != config.JSONOutputs.Hash || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA", "hAsH ")
 	m, err = config.ParseJSONOutput()
-	if m != config.JSONDataOutputHash || err != nil {
+	if m != config.JSONOutputs.Hash || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA", "EMPTY")
 	m, err = config.ParseJSONOutput()
-	if m != config.JSONDataOutputBlank || err != nil {
+	if m != config.JSONOutputs.Blank || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA", " PLAINtext ")
 	m, err = config.ParseJSONOutput()
-	if m != config.JSONDataOutputRaw || err != nil {
+	if m != config.JSONOutputs.Raw || err != nil {
 		t.Error("invalid mode read")
 	}
 	os.Setenv("LOCKBOX_JSON_DATA", "a")

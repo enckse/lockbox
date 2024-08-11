@@ -159,7 +159,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 	if isSort {
 		sort.Strings(keys)
 	}
-	jsonMode := config.JSONDataOutputBlank
+	jsonMode := config.JSONOutputs.Blank
 	if args.Values == JSONValue {
 		m, err := config.ParseJSONOutput()
 		if err != nil {
@@ -168,7 +168,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 		jsonMode = m
 	}
 	var hashLength int
-	if jsonMode == config.JSONDataOutputHash {
+	if jsonMode == config.JSONOutputs.Hash {
 		hashLength, err = config.EnvHashLength.Get()
 		if err != nil {
 			return nil, err
@@ -190,9 +190,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			case JSONValue:
 				data := ""
 				switch jsonMode {
-				case config.JSONDataOutputRaw:
+				case config.JSONOutputs.Raw:
 					data = val
-				case config.JSONDataOutputHash:
+				case config.JSONOutputs.Hash:
 					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 					if hashLength > 0 && len(data) > hashLength {
 						data = data[0:hashLength]

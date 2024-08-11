@@ -238,8 +238,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			CompletionsCommand: CompletionsCommand,
 			CompletionsEnv:     config.EnvDefaultCompletionKey,
 		}
-		document.ReKey.KeyFile = setDocFlag(config.ReKeyKeyFileFlag)
-		document.ReKey.NoKey = config.ReKeyNoKeyFlag
+		document.ReKey.KeyFile = setDocFlag(config.ReKeyFlags.KeyFile)
+		document.ReKey.NoKey = config.ReKeyFlags.NoKey
 		files, err := docs.ReadDir(docDir)
 		if err != nil {
 			return nil, err
