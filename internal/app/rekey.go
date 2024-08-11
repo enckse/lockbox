@@ -58,9 +58,11 @@ func ReKey(cmd KeyerOptions) error {
 			return err
 		}
 		if !piping {
+			fmt.Println()
 			if _, err := getNewPassword(piping, first, cmd); err != nil {
 				return err
 			}
+			fmt.Println()
 		}
 		pass = first
 		if pass == "" {
