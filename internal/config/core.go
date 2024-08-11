@@ -283,14 +283,6 @@ func NewPlatform() (SystemPlatform, error) {
 	return unknownPlatform, errors.New("unable to detect clipboard mode")
 }
 
-func toString(windows []ColorWindow) string {
-	var results []string
-	for _, w := range windows {
-		results = append(results, fmt.Sprintf("%d%s%d", w.Start, colorWindowSpan, w.End))
-	}
-	return strings.Join(results, colorWindowDelimiter)
-}
-
 // ParseColorWindow will handle parsing a window of colors for TOTP operations
 func ParseColorWindow(windowString string) ([]ColorWindow, error) {
 	var rules []ColorWindow
@@ -503,13 +495,4 @@ func (p PlatformTypes) List() []string {
 	}
 	sort.Strings(vals)
 	return vals
-}
-
-func newPlatformsTypes() PlatformTypes {
-	obj := PlatformTypes{}
-	obj.MacOSPlatform = "macos"
-	obj.LinuxWaylandPlatform = "linux-wayland"
-	obj.LinuxXPlatform = "linux-x"
-	obj.WindowsLinuxPlatform = "wsl"
-	return obj
 }

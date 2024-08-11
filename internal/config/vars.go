@@ -33,11 +33,22 @@ const (
 
 var (
 	// Platforms are the known platforms for lockbox
-	Platforms = newPlatformsTypes()
+	Platforms = PlatformTypes{
+		MacOSPlatform:        "macos",
+		LinuxWaylandPlatform: "linux-wayland",
+		LinuxXPlatform:       "linux-x",
+		WindowsLinuxPlatform: "wsl",
+	}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string
-	TOTPDefaultBetween = toString(TOTPDefaultColorWindow)
+	TOTPDefaultBetween = func() string {
+		var results []string
+		for _, w := range TOTPDefaultColorWindow {
+			results = append(results, fmt.Sprintf("%d%s%d", w.Start, colorWindowSpan, w.End))
+		}
+		return strings.Join(results, colorWindowDelimiter)
+	}()
 	// EnvClipMax gets the maximum clipboard time
 	EnvClipMax = environmentRegister(EnvironmentInt{
 		environmentBase: environmentBase{
