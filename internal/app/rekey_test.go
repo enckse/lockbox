@@ -32,7 +32,7 @@ func (m *mockKeyer) Args() []string {
 	return m.args
 }
 
-func (m *mockKeyer) Input(pipe, multi bool) ([]byte, error) {
+func (m *mockKeyer) Input(bool) ([]byte, error) {
 	return []byte(m.pass), nil
 }
 

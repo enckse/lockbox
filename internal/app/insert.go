@@ -43,7 +43,7 @@ func Insert(cmd UserInputOptions, mode InsertMode) error {
 			}
 		}
 	}
-	password, err := cmd.Input(isPipe, mode == MultiLineInsert)
+	password, err := cmd.Input(!isPipe && mode != MultiLineInsert)
 	if err != nil {
 		return fmt.Errorf("invalid input: %w", err)
 	}

@@ -46,9 +46,9 @@ func termEcho(on bool) {
 }
 
 // GetUserInputPassword will read the user's input from stdin via multiple means.
-func GetUserInputPassword(piping, multiLine bool) ([]byte, error) {
+func GetUserInputPassword(interactive bool) ([]byte, error) {
 	var password string
-	if !multiLine && !piping {
+	if interactive {
 		input, err := confirmInputsMatch()
 		if err != nil {
 			return nil, err

@@ -12,12 +12,12 @@ import (
 
 type (
 	mockInsert struct {
-		command *mockCommand
-		noTOTP  func() (bool, error)
-		input   func(bool, bool) ([]byte, error)
-		pipe    func() bool
-		token   func() string
-		isMulti bool
+		command     *mockCommand
+		noTOTP      func() (bool, error)
+		input       func() ([]byte, error)
+		pipe        func() bool
+		token       func() string
+		interactive bool
 	}
 )
 
@@ -35,9 +35,9 @@ func (m *mockInsert) IsPipe() bool {
 	return m.pipe()
 }
 
-func (m *mockInsert) Input(pipe, multi bool) ([]byte, error) {
-	m.isMulti = multi
-	return m.input(pipe, multi)
+func (m *mockInsert) Input(interactive bool) ([]byte, error) {
+	m.interactive = interactive
+	return m.input()
 }
 
 func (m *mockInsert) Args() []string {
@@ -67,7 +67,7 @@ func TestInsertDo(t *testing.T) {
 	}
 	m.command.args = []string{"test/test2"}
 	m.command.confirm = false
-	m.input = func(bool, bool) ([]byte, error) {
+	m.input = func() ([]byte, error) {
 		return nil, errors.New("failure")
 	}
 	m.command.buf = bytes.Buffer{}
@@ -81,7 +81,7 @@ func TestInsertDo(t *testing.T) {
 	if err := app.Insert(m, app.SingleLineInsert); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.input = func(bool, bool) ([]byte, error) {
+	m.input = func() ([]byte, error) {
 		return []byte("TEST"), nil
 	}
 	m.command.confirm = true
@@ -119,22 +119,23 @@ func TestInsertDo(t *testing.T) {
 	if m.command.buf.String() != "" {
 		t.Error("invalid insert")
 	}
-	m.isMulti = false
+	m.interactive = false
 	m.command.confirm = true
 	m.command.buf = bytes.Buffer{}
 	m.command.args = []string{"test/test2/test1"}
 	if err := app.Insert(m, app.SingleLineInsert); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if m.command.buf.String() == "" || m.isMulti {
+	if m.command.buf.String() == "" || !m.interactive {
 		t.Error("invalid insert")
 	}
+	m.interactive = false
 	m.command.buf = bytes.Buffer{}
 	m.command.args = []string{"test/test2/test1"}
 	if err := app.Insert(m, app.MultiLineInsert); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if m.command.buf.String() == "" || !m.isMulti {
+	if m.command.buf.String() == "" || m.interactive {
 		t.Error("invalid insert")
 	}
 }
