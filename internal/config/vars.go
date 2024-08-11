@@ -50,100 +50,159 @@ var (
 		return strings.Join(results, colorWindowDelimiter)
 	}()
 	// EnvClipMax gets the maximum clipboard time
-	EnvClipMax = environmentRegister(EnvironmentInt{
-		environmentBase: environmentBase{
-			subKey: "MAX",
-			cat:    clipCategory,
-			desc:   "Override the amount of time before totp clears the clipboard (seconds).",
-		},
-		shortDesc: "clipboard max time", allowZero: false, defaultValue: 45,
-	})
+	EnvClipMax = environmentRegister(
+		EnvironmentInt{
+			environmentDefault: newDefaultedEnvironment(45,
+				environmentBase{
+					subKey: "MAX",
+					cat:    clipCategory,
+					desc:   "Override the amount of time before totp clears the clipboard (seconds).",
+				}),
+			shortDesc: "clipboard max time",
+			allowZero: false,
+		})
 	// EnvHashLength handles the hashing output length
-	EnvHashLength = environmentRegister(EnvironmentInt{
-		environmentBase: environmentBase{
-			subKey: EnvJSONDataOutput.subKey + "_HASH_LENGTH",
-			desc:   fmt.Sprintf("Maximum hash string length the JSON output should contain when '%s' mode is set for JSON output.", JSONDataOutputHash),
-		},
-		shortDesc: "hash length", allowZero: true, defaultValue: 0,
-	})
+	EnvHashLength = environmentRegister(
+		EnvironmentInt{
+			environmentDefault: newDefaultedEnvironment(0,
+				environmentBase{
+					subKey: EnvJSONDataOutput.subKey + "_HASH_LENGTH",
+					desc:   fmt.Sprintf("Maximum hash string length the JSON output should contain when '%s' mode is set for JSON output.", JSONDataOutputHash),
+				}),
+			shortDesc: "hash length",
+			allowZero: true,
+		})
 	// EnvClipOSC52 indicates if OSC52 clipboard mode is enabled
-	EnvClipOSC52 = environmentRegister(EnvironmentBool{environmentBase: environmentBase{
-		subKey: "OSC52",
-		cat:    clipCategory,
-		desc:   "Enable OSC52 clipboard mode.",
-	}, defaultValue: false})
+	EnvClipOSC52 = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "OSC52",
+					cat:    clipCategory,
+					desc:   "Enable OSC52 clipboard mode.",
+				}),
+		})
 	// EnvNoTOTP indicates if TOTP is disabled
-	EnvNoTOTP = environmentRegister(EnvironmentBool{
-		environmentBase: environmentBase{
-			subKey: "NOTOTP",
-			desc:   "Disable TOTP integrations.",
-		},
-		defaultValue: false,
-	})
+	EnvNoTOTP = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "NOTOTP",
+					desc:   "Disable TOTP integrations.",
+				}),
+		})
 	// EnvReadOnly indicates if in read-only mode
-	EnvReadOnly = environmentRegister(EnvironmentBool{environmentBase: environmentBase{
-		subKey: "READONLY",
-		desc:   "Operate in readonly mode.",
-	}, defaultValue: false})
+	EnvReadOnly = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "READONLY",
+					desc:   "Operate in readonly mode.",
+				}),
+		})
 	// EnvNoClip indicates clipboard functionality is off
-	EnvNoClip = environmentRegister(EnvironmentBool{
-		environmentBase: environmentBase{
-			subKey: "NOCLIP",
-			desc:   "Disable clipboard operations.",
-		},
-		defaultValue: false,
-	})
+	EnvNoClip = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "NOCLIP",
+					desc:   "Disable clipboard operations.",
+				}),
+		})
 	// EnvDefaultCompletion disable completion detection
-	EnvDefaultCompletion = environmentRegister(EnvironmentBool{
-		environmentBase: environmentBase{
-			subKey: "DEFAULT_COMPLETION",
-			desc:   "Use the default completion set (disable detection).",
-		},
-		defaultValue: false,
-	})
+	EnvDefaultCompletion = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "DEFAULT_COMPLETION",
+					desc:   "Use the default completion set (disable detection).",
+				}),
+		})
 	// EnvDefaultCompletionKey is the key for default completion handling
 	EnvDefaultCompletionKey = EnvDefaultCompletion.key()
 	// EnvNoColor indicates if color outputs are disabled
-	EnvNoColor = environmentRegister(EnvironmentBool{environmentBase: environmentBase{
-		subKey: "NOCOLOR",
-		desc:   "Disable terminal colors.",
-	}, defaultValue: false})
+	EnvNoColor = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "NOCOLOR",
+					desc:   "Disable terminal colors.",
+				}),
+		})
 	// EnvNoHooks disables hooks
-	EnvNoHooks = environmentRegister(EnvironmentBool{environmentBase: environmentBase{
-		subKey: "NOHOOKS",
-		desc:   "Disable hooks",
-	}, defaultValue: false})
+	EnvNoHooks = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "NOHOOKS",
+					desc:   "Disable hooks",
+				}),
+		})
 	// EnvInteractive indicates if operating in interactive mode
-	EnvInteractive = environmentRegister(EnvironmentBool{environmentBase: environmentBase{
-		subKey: "INTERACTIVE",
-		desc:   "Enable interactive mode.",
-	}, defaultValue: true})
+	EnvInteractive = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(true,
+				environmentBase{
+					subKey: "INTERACTIVE",
+					desc:   "Enable interactive mode.",
+				}),
+		})
 	// EnvMaxTOTP is the max TOTP time to run (default)
-	EnvMaxTOTP = environmentRegister(EnvironmentInt{environmentBase: environmentBase{
-		subKey: "MAX",
-		cat:    totpCategory,
-		desc:   "Time, in seconds, in which to show a TOTP token before automatically exiting.",
-	}, shortDesc: "max totp time", allowZero: false, defaultValue: 120})
+	EnvMaxTOTP = environmentRegister(
+		EnvironmentInt{
+			environmentDefault: newDefaultedEnvironment(120,
+				environmentBase{
+					subKey: "MAX",
+					cat:    totpCategory,
+					desc:   "Time, in seconds, in which to show a TOTP token before automatically exiting.",
+				}),
+			shortDesc: "max totp time",
+			allowZero: false,
+		})
 	// EnvTOTPToken is the leaf token to use to store TOTP tokens
-	EnvTOTPToken = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "TOTP",
-		desc:   "Attribute name to store TOTP tokens within the database.",
-	}, allowed: []string{"<string>"}, canDefault: true, defaultValue: "totp"})
+	EnvTOTPToken = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("totp",
+				environmentBase{
+					subKey: "TOTP",
+					desc:   "Attribute name to store TOTP tokens within the database.",
+				}),
+			allowed:    []string{"<string>"},
+			canDefault: true,
+		})
 	// EnvPlatform is the platform that the application is running on
-	EnvPlatform = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "PLATFORM",
-		desc:   "Override the detected platform.",
-	}, defaultValue: detectedValue, allowed: Platforms.List(), canDefault: false})
+	EnvPlatform = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment(detectedValue,
+				environmentBase{
+					subKey: "PLATFORM",
+					desc:   "Override the detected platform.",
+				}),
+			allowed:    Platforms.List(),
+			canDefault: false,
+		})
 	// EnvStore is the location of the keepass file/store
-	EnvStore = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "STORE",
-		desc:   "Directory to the database file.", requirement: "must be set",
-	}, canDefault: false, allowed: []string{fileExample}})
+	EnvStore = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					subKey: "STORE",
+					desc:   "Directory to the database file.", requirement: "must be set",
+				}),
+			canDefault: false,
+			allowed:    []string{fileExample},
+		})
 	// EnvHookDir is the directory of hooks to execute
-	EnvHookDir = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "HOOKDIR",
-		desc:   "The path to hooks to execute on actions against the database.",
-	}, allowed: []string{"<directory>"}, canDefault: true, defaultValue: ""})
+	EnvHookDir = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					subKey: "HOOKDIR",
+					desc:   "The path to hooks to execute on actions against the database.",
+				}),
+			allowed:    []string{"<directory>"},
+			canDefault: true,
+		})
 	// EnvClipCopy allows overriding the clipboard copy command
 	EnvClipCopy = environmentRegister(EnvironmentCommand{environmentBase: environmentBase{
 		subKey: "COPY",
@@ -157,31 +216,52 @@ var (
 		desc:   "Override the detected platform paste command.",
 	}})
 	// EnvTOTPColorBetween handles terminal coloring for TOTP windows (seconds)
-	EnvTOTPColorBetween = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "BETWEEN",
-		cat:    totpCategory,
-		desc: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
+	EnvTOTPColorBetween = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment(TOTPDefaultBetween,
+				environmentBase{
+					subKey: "BETWEEN",
+					cat:    totpCategory,
+					desc: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
 must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
 and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
-	}, canDefault: true, defaultValue: TOTPDefaultBetween, allowed: exampleColorWindows})
+				}),
+			canDefault: true,
+			allowed:    exampleColorWindows,
+		})
 	// EnvKeyFile is an keyfile for the database
-	EnvKeyFile = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "KEYFILE", requirement: requiredKeyOrKeyFile,
-		desc: "A keyfile to access/protect the database.",
-	}, allowed: []string{"keyfile"}, canDefault: true, defaultValue: ""})
+	EnvKeyFile = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					subKey: "KEYFILE", requirement: requiredKeyOrKeyFile,
+					desc: "A keyfile to access/protect the database.",
+				}),
+			allowed:    []string{"keyfile"},
+			canDefault: true,
+		})
 	// EnvModTime is modtime override ability for entries
-	EnvModTime = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "SET_MODTIME",
-		desc:   fmt.Sprintf("Input modification time to set for the entry\n\nExpected format: %s.", ModTimeFormat),
-	}, canDefault: true, defaultValue: "", allowed: []string{"modtime"}})
+	EnvModTime = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					subKey: "SET_MODTIME",
+					desc:   fmt.Sprintf("Input modification time to set for the entry\n\nExpected format: %s.", ModTimeFormat),
+				}),
+			canDefault: true,
+			allowed:    []string{"modtime"},
+		})
 	// EnvJSONDataOutput controls how JSON is output in the 'data' field
-	EnvJSONDataOutput = environmentRegister(EnvironmentString{
-		environmentBase: environmentBase{
-			subKey: "JSON_DATA",
-			desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", JSONDataOutputRaw),
-		}, canDefault: true, defaultValue: string(JSONDataOutputHash),
-		allowed: []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)},
-	})
+	EnvJSONDataOutput = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment(string(JSONDataOutputHash),
+				environmentBase{
+					subKey: "JSON_DATA",
+					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", JSONDataOutputRaw),
+				}),
+			canDefault: true,
+			allowed:    []string{string(JSONDataOutputRaw), string(JSONDataOutputHash), string(JSONDataOutputBlank)},
+		})
 	// EnvFormatTOTP supports formatting the TOTP tokens for generation of tokens
 	EnvFormatTOTP = environmentRegister(EnvironmentFormatter{environmentBase: environmentBase{
 		subKey: "FORMAT",
@@ -189,37 +269,57 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 		desc:   "Override the otpauth url used to store totp tokens. It must have ONE format string ('%s') to insert the totp base code.",
 	}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."})
 	// EnvConfig is the location of the config file to read environment variables from
-	EnvConfig = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		subKey: "ENV",
-		desc: fmt.Sprintf(`Allows setting a specific file of environment variables for lockbox to read and use as
+	EnvConfig = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment(detectEnvironment,
+				environmentBase{
+					subKey: "ENV",
+					desc: fmt.Sprintf(`Allows setting a specific file of environment variables for lockbox to read and use as
 configuration values (an '.env' file). The keyword '%s' will disable this functionality and the keyword '%s' will
 search for a file in the following paths in the user's home directory matching the first file found.
 
 paths: %v
 
 Note that this setting is not output as part of the environment.`, noEnvironment, detectEnvironment, detectEnvironmentPaths),
-	}, canDefault: true, defaultValue: detectEnvironment, allowed: []string{detectEnvironment, fileExample, noEnvironment}})
-	envKeyMode = environmentRegister(EnvironmentString{
-		environmentBase: environmentBase{
-			subKey: "KEYMODE", requirement: "must be set to a valid mode when using a key",
-			desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
+				}),
+			canDefault: true,
+			allowed:    []string{detectEnvironment, fileExample, noEnvironment},
+		})
+	envKeyMode = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment(string(DefaultKeyMode),
+				environmentBase{
+					subKey: "KEYMODE", requirement: "must be set to a valid mode when using a key",
+					desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
 Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
-		},
-		allowed:    []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
-		canDefault: true, defaultValue: string(DefaultKeyMode),
-	})
-	envKey = environmentRegister(EnvironmentString{environmentBase: environmentBase{
-		requirement: requiredKeyOrKeyFile, subKey: "KEY",
-		desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
-			plainKeyMode,
-			commandKeyMode),
-	}, allowed: []string{commandArgsExample, "password"}, canDefault: false})
-	envConfigExpands = environmentRegister(EnvironmentInt{environmentBase: environmentBase{
-		subKey: EnvConfig.subKey + "_EXPANDS",
-		desc: `The maximum number of times to expand the input env to resolve variables (set to 0 to disable expansion).
+				}),
+			allowed:    []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
+			canDefault: true,
+		})
+	envKey = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					requirement: requiredKeyOrKeyFile, subKey: "KEY",
+					desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
+						plainKeyMode,
+						commandKeyMode),
+				}),
+			allowed:    []string{commandArgsExample, "password"},
+			canDefault: false,
+		})
+	envConfigExpands = environmentRegister(
+		EnvironmentInt{
+			environmentDefault: newDefaultedEnvironment(20,
+				environmentBase{
+					subKey: EnvConfig.subKey + "_EXPANDS",
+					desc: `The maximum number of times to expand the input env to resolve variables (set to 0 to disable expansion).
 
 This value can NOT be an expansion itself.`,
-	}, shortDesc: "max expands", allowZero: true, defaultValue: 20})
+				}),
+			shortDesc: "max expands",
+			allowZero: true,
+		})
 )
 
 // GetReKey will get the rekey environment settings

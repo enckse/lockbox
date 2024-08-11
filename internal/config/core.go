@@ -55,24 +55,25 @@ type (
 		desc        string
 		requirement string
 	}
+	environmentDefault[T any] struct {
+		environmentBase
+		defaultValue T
+	}
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {
-		environmentBase
-		defaultValue int
-		allowZero    bool
-		shortDesc    string
+		environmentDefault[int]
+		allowZero bool
+		shortDesc string
 	}
 	// EnvironmentBool are environment settings that are booleans
 	EnvironmentBool struct {
-		environmentBase
-		defaultValue bool
+		environmentDefault[bool]
 	}
 	// EnvironmentString are string-based settings
 	EnvironmentString struct {
-		environmentBase
-		canDefault   bool
-		defaultValue string
-		allowed      []string
+		environmentDefault[string]
+		canDefault bool
+		allowed    []string
 	}
 	// EnvironmentCommand are settings that are parsed as shell commands
 	EnvironmentCommand struct {
@@ -494,4 +495,11 @@ func (p PlatformTypes) List() []string {
 	}
 	sort.Strings(vals)
 	return vals
+}
+
+func newDefaultedEnvironment[T any](val T, base environmentBase) environmentDefault[T] {
+	obj := environmentDefault[T]{}
+	obj.environmentBase = base
+	obj.defaultValue = val
+	return obj
 }
