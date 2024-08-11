@@ -16,7 +16,7 @@ type (
 	}
 )
 
-func getNewPassword(pipe bool, against string, r KeyerOptions) (string, error) {
+func getNewPassword(pipe bool, text, against string, r KeyerOptions) (string, error) {
 	if pipe {
 		val, err := r.ReadLine()
 		if err != nil {
@@ -24,7 +24,7 @@ func getNewPassword(pipe bool, against string, r KeyerOptions) (string, error) {
 		}
 		return val, nil
 	}
-	fmt.Print("new ")
+	fmt.Printf("%s ", text)
 	p, err := r.Password()
 	if err != nil {
 		return "", err
@@ -52,13 +52,13 @@ func ReKey(cmd KeyerOptions) error {
 	}
 	var pass string
 	if !vars.NoKey {
-		first, err := getNewPassword(piping, "", cmd)
+		first, err := getNewPassword(piping, "new", "", cmd)
 		if err != nil {
 			return err
 		}
 		if !piping {
 			fmt.Println()
-			if _, err := getNewPassword(piping, first, cmd); err != nil {
+			if _, err := getNewPassword(piping, "verify", first, cmd); err != nil {
 				return err
 			}
 			fmt.Println()
