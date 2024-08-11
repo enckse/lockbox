@@ -223,7 +223,9 @@ func TestEnvironDefinitions(t *testing.T) {
 	os.Clearenv()
 	vals := config.ListEnvironmentVariables()
 	expect := make(map[string]struct{})
+	found := false
 	for _, val := range vals {
+		found = true
 		env := strings.Split(strings.TrimSpace(val), "\n")[0]
 		if !strings.HasPrefix(env, "LOCKBOX_") {
 			t.Errorf("invalid env var: %s", env)
@@ -233,6 +235,9 @@ func TestEnvironDefinitions(t *testing.T) {
 		}
 		os.Setenv(env, "test")
 		expect[env] = struct{}{}
+	}
+	if !found {
+		t.Errorf("no environment variables found?")
 	}
 	read := config.Environ()
 	if len(read) != len(expect) {

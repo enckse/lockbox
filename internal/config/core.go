@@ -489,7 +489,7 @@ func wrap(in string, maxLength int) string {
 	return strings.Join(lines, "\n")
 }
 
-func register[T printer](obj T) T {
+func environmentRegister[T printer](obj T) T {
 	registry = append(registry, obj)
 	return obj
 }
