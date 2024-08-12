@@ -9,9 +9,14 @@ import (
 	"github.com/seanenck/lockbox/internal/config"
 )
 
-func TestPlatformSet(t *testing.T) {
-	if len(config.Platforms.List()) != 4 {
-		t.Error("invalid platform set")
+func TestList(t *testing.T) {
+	for obj, cnt := range map[interface{ List() []string }]int{
+		config.Platforms:   4,
+		config.JSONOutputs: 3,
+	} {
+		if len(obj.List()) != cnt {
+			t.Errorf("invalid list result: %v", obj)
+		}
 	}
 }
 
