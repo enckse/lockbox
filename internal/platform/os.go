@@ -11,10 +11,6 @@ import (
 	"syscall"
 )
 
-type (
-	stdinReaderFunc func(string) (bool, error)
-)
-
 func termEcho(on bool) {
 	// Common settings and variables for both stty calls.
 	attrs := syscall.ProcAttr{
@@ -98,15 +94,6 @@ func confirmInputsMatch() (string, error) {
 	return first, nil
 }
 
-// Stdin will get one (or more) lines of stdin as a string.
-func Stdin(one bool) (string, error) {
-	b, err := read(one)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(b)), nil
-}
-
 // IsInputFromPipe will indicate if connected to stdin pipe.
 func IsInputFromPipe() bool {
 	fileInfo, _ := os.Stdin.Stat()
@@ -123,41 +110,25 @@ func ConfirmYesNoPrompt(prompt string) (bool, error) {
 	return resp == "Y" || resp == "y", nil
 }
 
-func readFunc(reader stdinReaderFunc) error {
-	if reader == nil {
-		return errors.New("invalid reader, nil")
-	}
+// Stdin will get one (or more) lines of stdin as a string.
+func Stdin(one bool) (string, error) {
+	var b bytes.Buffer
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		ok, err := reader(scanner.Text())
-		if err != nil {
-			return err
+		if _, err := b.WriteString(scanner.Text()); err != nil {
+			return "", err
 		}
-		if !ok {
+		if _, err := b.WriteString("\n"); err != nil {
+			return "", err
+		}
+		if one {
 			break
 		}
 	}
-	return scanner.Err()
-}
-
-func read(one bool) ([]byte, error) {
-	var b bytes.Buffer
-	err := readFunc(func(line string) (bool, error) {
-		if _, err := b.WriteString(line); err != nil {
-			return false, err
-		}
-		if _, err := b.WriteString("\n"); err != nil {
-			return false, err
-		}
-		if one {
-			return false, nil
-		}
-		return true, nil
-	})
-	if err != nil {
-		return nil, err
+	if err := scanner.Err(); err != nil {
+		return "", err
 	}
-	return b.Bytes(), nil
+	return strings.TrimSpace(b.String()), nil
 }
 
 // PathExists indicates whether a path exists (true) or not (false)
