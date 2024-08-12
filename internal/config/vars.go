@@ -193,8 +193,9 @@ var (
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					subKey: "STORE",
-					desc:   "Directory to the database file.", requirement: "must be set",
+					subKey:      "STORE",
+					desc:        "Directory to the database file.",
+					requirement: "must be set",
 				}),
 			canDefault: false,
 			allowed:    []string{fileExample},
@@ -241,8 +242,9 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					subKey: "KEYFILE", requirement: requiredKeyOrKeyFile,
-					desc: "A keyfile to access/protect the database.",
+					subKey:      "KEYFILE",
+					requirement: requiredKeyOrKeyFile,
+					desc:        "A keyfile to access/protect the database.",
 				}),
 			allowed:    []string{"keyfile"},
 			canDefault: true,
@@ -296,7 +298,8 @@ Note that this setting is not output as part of the environment.`, noEnvironment
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(string(DefaultKeyMode),
 				environmentBase{
-					subKey: "KEYMODE", requirement: "must be set to a valid mode when using a key",
+					subKey:      "KEYMODE",
+					requirement: "must be set to a valid mode when using a key",
 					desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
 Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				}),
@@ -307,7 +310,8 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					requirement: requiredKeyOrKeyFile, subKey: "KEY",
+					requirement: requiredKeyOrKeyFile,
+					subKey:      "KEY",
 					desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
 						plainKeyMode,
 						commandKeyMode),
