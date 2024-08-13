@@ -96,7 +96,7 @@ lb totp clip token
 
 To rekey (change password/keyfile) use the `rekey` command
 ```
-lb rekey -store=path/to/new/db.kdbx -key="mynewkey" -keymode="plaintext" -keyfile="my/new/keyfile"
+lb rekey -keyfile="my/new/keyfile"
 ```
 
 ### completions
