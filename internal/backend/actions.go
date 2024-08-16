@@ -182,11 +182,11 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 }
 
 // Move will move a src object to a dst location
-func (t *Transaction) Move(src QueryEntity, dst string) error {
-	if strings.TrimSpace(src.Path) == "" {
+func (t *Transaction) Move(src TransactionEntity, dst string) error {
+	if strings.TrimSpace(src.path) == "" {
 		return errors.New("empty path not allowed")
 	}
-	if strings.TrimSpace(src.Value) == "" {
+	if strings.TrimSpace(src.value) == "" {
 		return errors.New("empty secret not allowed")
 	}
 	mod := config.EnvModTime.Get()
@@ -202,22 +202,22 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 	if err != nil {
 		return err
 	}
-	sOffset, sTitle, err := splitComponents(src.Path)
+	sOffset, sTitle, err := splitComponents(src.path)
 	if err != nil {
 		return err
 	}
 	action := MoveAction
-	if dst == src.Path {
+	if dst == src.path {
 		action = InsertAction
 	}
-	hook, err := NewHook(src.Path, action)
+	hook, err := NewHook(src.path, action)
 	if err != nil {
 		return err
 	}
 	if err := hook.Run(HookPre); err != nil {
 		return err
 	}
-	multi := len(strings.Split(strings.TrimSpace(src.Value), "\n")) > 1
+	multi := len(strings.Split(strings.TrimSpace(src.value), "\n")) > 1
 	err = t.change(func(c Context) error {
 		c.removeEntity(sOffset, sTitle)
 		if action == MoveAction {
@@ -229,7 +229,7 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 		if multi {
 			field = notesKey
 		}
-		v := src.Value
+		v := src.value
 		ok, err := isTOTP(dTitle)
 		if err != nil {
 			return err
@@ -254,19 +254,19 @@ func (t *Transaction) Move(src QueryEntity, dst string) error {
 
 // Insert is a move to the same location
 func (t *Transaction) Insert(path, val string) error {
-	return t.Move(QueryEntity{Path: path, Value: val}, path)
+	return t.Move(TransactionEntity{path: path, value: val}, path)
 }
 
 // Remove will remove a single entity
-func (t *Transaction) Remove(entity *QueryEntity) error {
+func (t *Transaction) Remove(entity *TransactionEntity) error {
 	if entity == nil {
 		return errors.New("entity is empty/invalid")
 	}
-	return t.RemoveAll([]QueryEntity{*entity})
+	return t.RemoveAll([]TransactionEntity{*entity})
 }
 
 // RemoveAll handles removing elements
-func (t *Transaction) RemoveAll(entities []QueryEntity) error {
+func (t *Transaction) RemoveAll(entities []TransactionEntity) error {
 	if len(entities) == 0 {
 		return errors.New("no entities given")
 	}
@@ -278,11 +278,11 @@ func (t *Transaction) RemoveAll(entities []QueryEntity) error {
 	removals := []removal{}
 	hasHooks := false
 	for _, entity := range entities {
-		offset, title, err := splitComponents(entity.Path)
+		offset, title, err := splitComponents(entity.path)
 		if err != nil {
 			return err
 		}
-		hook, err := NewHook(entity.Path, RemoveAction)
+		hook, err := NewHook(entity.path, RemoveAction)
 		if err != nil {
 			return err
 		}

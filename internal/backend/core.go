@@ -43,7 +43,17 @@ type (
 		Value   string
 		backing gokeepasslib.Entry
 	}
+	// TransactionEntity objects alter the database entities
+	TransactionEntity struct {
+		path  string
+		value string
+	}
 )
+
+// Transaction will convert a query entity to a transaction entity
+func (e QueryEntity) Transaction() TransactionEntity {
+	return TransactionEntity{path: e.Path, value: e.Value}
+}
 
 // Load will load a kdbx file for transactions
 func Load(file string) (*Transaction, error) {

@@ -1,6 +1,7 @@
 package backend_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/backend"
@@ -27,6 +28,14 @@ func TestIsDirectory(t *testing.T) {
 	}
 	if backend.IsDirectory("/a") {
 		t.Error("invalid directory detection")
+	}
+}
+
+func TestQueryToTransaction(t *testing.T) {
+	q := backend.QueryEntity{Path: "abc", Value: "xyz"}
+	tx := q.Transaction()
+	if fmt.Sprintf("%v", tx) != "{abc xyz}" {
+		t.Errorf("invalid transaction: %v", tx)
 	}
 }
 
