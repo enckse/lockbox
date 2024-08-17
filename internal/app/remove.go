@@ -4,8 +4,6 @@ package app
 import (
 	"errors"
 	"fmt"
-
-	"github.com/seanenck/lockbox/internal/backend"
 )
 
 // Remove will remove an entry
@@ -34,14 +32,7 @@ func Remove(cmd CommandOptions) error {
 		fmt.Fprintln(w, "")
 	}
 	if cmd.Confirm(fmt.Sprintf("delete entr%s", postfixRemove)) {
-		removals := func() []backend.TransactionEntity {
-			var tx []backend.TransactionEntity
-			for _, e := range existings {
-				tx = append(tx, e.Transaction())
-			}
-			return tx
-		}()
-		if err := t.RemoveAll(removals); err != nil {
+		if err := t.RemoveAll(existings); err != nil {
 			return fmt.Errorf("unable to remove: %w", err)
 		}
 	}

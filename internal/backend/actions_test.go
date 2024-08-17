@@ -97,7 +97,10 @@ func TestMove(t *testing.T) {
 	setup(t)
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
 	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
-	if err := fullSetup(t, true).Move(backend.QueryEntity{Path: backend.NewPath("test", "test2", "test3"), Value: "abc"}.Transaction(), backend.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(nil, ""); err == nil || err.Error() != "source entity is not set" {
+		t.Errorf("no error: %v", err)
+	}
+	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test3"), Value: "abc"}, backend.NewPath("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err := fullSetup(t, true).Get(backend.NewPath("test1", "test2", "test3"), backend.SecretValue)
@@ -107,7 +110,7 @@ func TestMove(t *testing.T) {
 	if q.Value != "abc" {
 		t.Errorf("invalid retrieval")
 	}
-	if err := fullSetup(t, true).Move(backend.QueryEntity{Path: backend.NewPath("test", "test2", "test1"), Value: "test"}.Transaction(), backend.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test1"), Value: "test"}, backend.NewPath("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err = fullSetup(t, true).Get(backend.NewPath("test1", "test2", "test3"), backend.SecretValue)
@@ -176,10 +179,10 @@ func TestRemoves(t *testing.T) {
 	if err := setup(t).Remove(nil); err.Error() != "entity is empty/invalid" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Remove(&backend.TransactionEntity{}); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Remove(&backend.Entity{}); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
-	tx := backend.QueryEntity{Path: backend.NewPath("test1", "test2", "test3")}.Transaction()
+	tx := backend.Entity{Path: backend.NewPath("test1", "test2", "test3")}
 	if err := setup(t).Remove(&tx); err.Error() != "failed to remove entity" {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -187,14 +190,14 @@ func TestRemoves(t *testing.T) {
 	for _, i := range []string{"test1", "test2"} {
 		fullSetup(t, true).Insert(backend.NewPath(i, i, i), "pass")
 	}
-	tx = backend.QueryEntity{Path: backend.NewPath("test1", "test1", "test1")}.Transaction()
+	tx = backend.Entity{Path: backend.NewPath("test1", "test1", "test1")}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := check(t, backend.NewPath("test2", "test2", "test2")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.QueryEntity{Path: backend.NewPath("test2", "test2", "test2")}.Transaction()
+	tx = backend.Entity{Path: backend.NewPath("test2", "test2", "test2")}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -202,35 +205,35 @@ func TestRemoves(t *testing.T) {
 	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
 		fullSetup(t, true).Insert(i, "pass")
 	}
-	tx = backend.QueryEntity{Path: "test/test/test3"}.Transaction()
+	tx = backend.Entity{Path: "test/test/test3"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.QueryEntity{Path: "test/test/test1"}.Transaction()
+	tx = backend.Entity{Path: "test/test/test1"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.QueryEntity{Path: "test/test1/test5"}.Transaction()
+	tx = backend.Entity{Path: "test/test1/test5"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.QueryEntity{Path: "test/test1/test2"}.Transaction()
+	tx = backend.Entity{Path: "test/test1/test2"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := check(t, backend.NewPath("test", "test", "test2")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.QueryEntity{Path: "test/test/test2"}.Transaction()
+	tx = backend.Entity{Path: "test/test/test2"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -240,14 +243,14 @@ func TestRemoveAlls(t *testing.T) {
 	if err := setup(t).RemoveAll(nil); err.Error() != "no entities given" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).RemoveAll([]backend.TransactionEntity{}); err.Error() != "no entities given" {
+	if err := setup(t).RemoveAll([]backend.Entity{}); err.Error() != "no entities given" {
 		t.Errorf("wrong error: %v", err)
 	}
 	setup(t)
 	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
 		fullSetup(t, true).Insert(i, "pass")
 	}
-	if err := fullSetup(t, true).RemoveAll([]backend.TransactionEntity{backend.QueryEntity{Path: "test/test/test3"}.Transaction(), backend.QueryEntity{Path: "test/test/test1"}.Transaction()}); err != nil {
+	if err := fullSetup(t, true).RemoveAll([]backend.Entity{{Path: "test/test/test3"}, {Path: "test/test/test1"}}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {

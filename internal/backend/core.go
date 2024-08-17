@@ -27,7 +27,7 @@ const (
 
 type (
 	// QuerySeq2 wraps the iteration for query entities
-	QuerySeq2 iter.Seq2[QueryEntity, error]
+	QuerySeq2 iter.Seq2[Entity, error]
 	// Transaction handles the overall operation of the transaction
 	Transaction struct {
 		valid    bool
@@ -40,23 +40,12 @@ type (
 	Context struct {
 		db *gokeepasslib.Database
 	}
-	// QueryEntity is the result of a query
-	QueryEntity struct {
-		Path    string
-		Value   string
-		backing gokeepasslib.Entry
-	}
-	// TransactionEntity objects alter the database entities
-	TransactionEntity struct {
-		path  string
-		value string
+	// Entity are database objects from results and transactional changes
+	Entity struct {
+		Path  string
+		Value string
 	}
 )
-
-// Transaction will convert a query entity to a transaction entity
-func (e QueryEntity) Transaction() TransactionEntity {
-	return TransactionEntity{path: e.Path, value: e.Value}
-}
 
 // Load will load a kdbx file for transactions
 func Load(file string) (*Transaction, error) {
@@ -186,7 +175,7 @@ func NewPath(segments ...string) string {
 }
 
 // Directory gets the offset location of the entry without the 'name'
-func (e QueryEntity) Directory() string {
+func (e Entity) Directory() string {
 	return Directory(e.Path)
 }
 
@@ -219,8 +208,8 @@ func IsDirectory(path string) bool {
 }
 
 // Collect will create a slice from an iterable set of query sequence results
-func (s QuerySeq2) Collect() ([]QueryEntity, error) {
-	var entities []QueryEntity
+func (s QuerySeq2) Collect() ([]Entity, error) {
+	var entities []Entity
 	for entity, err := range s {
 		if err != nil {
 			return nil, err

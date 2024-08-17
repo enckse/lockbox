@@ -55,7 +55,7 @@ const (
 )
 
 // MatchPath will try to match 1 or more elements (more elements when globbing)
-func (t *Transaction) MatchPath(path string) ([]QueryEntity, error) {
+func (t *Transaction) MatchPath(path string) ([]Entity, error) {
 	if !strings.HasSuffix(path, isGlob) {
 		e, err := t.Get(path, BlankValue)
 		if err != nil {
@@ -64,7 +64,7 @@ func (t *Transaction) MatchPath(path string) ([]QueryEntity, error) {
 		if e == nil {
 			return nil, nil
 		}
-		return []QueryEntity{*e}, nil
+		return []Entity{*e}, nil
 	}
 	prefix := strings.TrimSuffix(path, isGlob)
 	if strings.HasSuffix(prefix, pathSep) {
@@ -74,7 +74,7 @@ func (t *Transaction) MatchPath(path string) ([]QueryEntity, error) {
 }
 
 // Get will request a singular entity
-func (t *Transaction) Get(path string, mode ValueMode) (*QueryEntity, error) {
+func (t *Transaction) Get(path string, mode ValueMode) (*Entity, error) {
 	_, _, err := splitComponents(path)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.
 	}
 }
 
-func (t *Transaction) queryCollect(args QueryOptions) ([]QueryEntity, error) {
+func (t *Transaction) queryCollect(args QueryOptions) ([]Entity, error) {
 	e, err := t.QueryCallback(args)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	if args.Mode == noneMode {
 		return nil, errors.New("no query mode specified")
 	}
-	var entities []QueryEntity
+	type entity struct {
+		path    string
+		backing gokeepasslib.Entry
+	}
+	var entities []entity
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
@@ -152,10 +156,10 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					}
 				}
 			}
-			obj := QueryEntity{backing: entry, Path: path}
+			obj := entity{backing: entry, path: path}
 			if isSort && len(entities) > 0 {
-				i, _ := slices.BinarySearchFunc(entities, obj, func(i, j QueryEntity) int {
-					return strings.Compare(i.Path, j.Path)
+				i, _ := slices.BinarySearchFunc(entities, obj, func(i, j entity) int {
+					return strings.Compare(i.path, j.path)
 				})
 				entities = slices.Insert(entities, i, obj)
 			} else {
@@ -185,9 +189,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 			return nil, err
 		}
 	}
-	return func(yield func(QueryEntity, error) bool) {
+	return func(yield func(Entity, error) bool) {
 		for _, item := range entities {
-			entity := QueryEntity{Path: item.Path}
+			entity := Entity{Path: item.path}
 			var err error
 			if args.Values != BlankValue {
 				val := getValue(item.backing, notesKey)

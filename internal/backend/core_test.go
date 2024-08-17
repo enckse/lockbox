@@ -2,7 +2,6 @@ package backend_test
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/backend"
@@ -29,14 +28,6 @@ func TestIsDirectory(t *testing.T) {
 	}
 	if backend.IsDirectory("/a") {
 		t.Error("invalid directory detection")
-	}
-}
-
-func TestQueryToTransaction(t *testing.T) {
-	q := backend.QueryEntity{Path: "abc", Value: "xyz"}
-	tx := q.Transaction()
-	if fmt.Sprintf("%v", tx) != "{abc xyz}" {
-		t.Errorf("invalid transaction: %v", tx)
 	}
 }
 
@@ -83,19 +74,19 @@ func TestDirectory(t *testing.T) {
 }
 
 func TestEntityDir(t *testing.T) {
-	q := backend.QueryEntity{Path: backend.NewPath("abc", "xyz")}
+	q := backend.Entity{Path: backend.NewPath("abc", "xyz")}
 	if q.Directory() != "abc" {
 		t.Error("invalid query directory")
 	}
-	q = backend.QueryEntity{Path: backend.NewPath("abc", "xyz", "111")}
+	q = backend.Entity{Path: backend.NewPath("abc", "xyz", "111")}
 	if q.Directory() != "abc/xyz" {
 		t.Error("invalid query directory")
 	}
-	q = backend.QueryEntity{Path: ""}
+	q = backend.Entity{Path: ""}
 	if q.Directory() != "" {
 		t.Error("invalid query directory")
 	}
-	q = backend.QueryEntity{Path: backend.NewPath("abc")}
+	q = backend.Entity{Path: backend.NewPath("abc")}
 	if q.Directory() != "" {
 		t.Error("invalid query directory")
 	}
@@ -115,23 +106,23 @@ func TestNewSuffix(t *testing.T) {
 }
 
 func generateTestSeq(hasError, extra bool) backend.QuerySeq2 {
-	return func(yield func(backend.QueryEntity, error) bool) {
-		if !yield(backend.QueryEntity{}, nil) {
+	return func(yield func(backend.Entity, error) bool) {
+		if !yield(backend.Entity{}, nil) {
 			return
 		}
-		if !yield(backend.QueryEntity{}, nil) {
+		if !yield(backend.Entity{}, nil) {
 			return
 		}
 		if hasError {
-			if !yield(backend.QueryEntity{}, errors.New("test collect error")) {
+			if !yield(backend.Entity{}, errors.New("test collect error")) {
 				return
 			}
 		}
-		if !yield(backend.QueryEntity{}, nil) {
+		if !yield(backend.Entity{}, nil) {
 			return
 		}
 		if extra {
-			if !yield(backend.QueryEntity{}, nil) {
+			if !yield(backend.Entity{}, nil) {
 				return
 			}
 		}

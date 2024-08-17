@@ -156,7 +156,7 @@ func TestValueModes(t *testing.T) {
 	}
 }
 
-func testCollect(t *testing.T, count int, seq backend.QuerySeq2) []backend.QueryEntity {
+func testCollect(t *testing.T, count int, seq backend.QuerySeq2) []backend.Entity {
 	collected, err := seq.Collect()
 	if err != nil {
 		t.Errorf("invalid collect error: %v", err)

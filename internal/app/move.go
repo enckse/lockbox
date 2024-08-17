@@ -98,5 +98,5 @@ func (r moveRequest) do(dryRun bool) error {
 	if dryRun {
 		return nil
 	}
-	return tx.Move(srcExists.Transaction(), r.dst)
+	return tx.Move(srcExists, r.dst)
 }
