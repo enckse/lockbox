@@ -4,8 +4,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -67,18 +65,14 @@ const (
 func NewDefaultTOTPOptions(app CommandOptions) TOTPOptions {
 	return TOTPOptions{
 		app:           app,
-		Clear:         clear,
+		Clear:         clearFunc,
 		IsInteractive: config.EnvInteractive.Get,
 		IsNoTOTP:      config.EnvNoTOTP.Get,
 	}
 }
 
-func clear() {
-	cmd := exec.Command("clear")
-	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("unable to clear screen: %v\n", err)
-	}
+func clearFunc() {
+	fmt.Print("\033[H\033[2J")
 }
 
 func colorWhenRules() ([]config.ColorWindow, error) {
