@@ -152,7 +152,15 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					}
 				}
 			}
-			entities = append(entities, QueryEntity{backing: entry, Path: path})
+			obj := QueryEntity{backing: entry, Path: path}
+			if isSort && len(entities) > 0 {
+				i, _ := slices.BinarySearchFunc(entities, obj, func(i, j QueryEntity) int {
+					return strings.Compare(i.Path, j.Path)
+				})
+				entities = slices.Insert(entities, i, obj)
+			} else {
+				entities = append(entities, obj)
+			}
 		})
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()
@@ -161,11 +169,6 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	})
 	if err != nil {
 		return nil, err
-	}
-	if isSort {
-		slices.SortFunc(entities, func(i, j QueryEntity) int {
-			return strings.Compare(i.Path, j.Path)
-		})
 	}
 	jsonMode := config.JSONOutputs.Blank
 	if args.Values == JSONValue {
