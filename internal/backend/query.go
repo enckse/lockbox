@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/seanenck/lockbox/internal/config"
@@ -121,8 +121,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	if args.Mode == noneMode {
 		return nil, errors.New("no query mode specified")
 	}
-	entities := make(map[string]QueryEntity)
-	var keys []string
+	var entities []QueryEntity
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
@@ -153,8 +152,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					}
 				}
 			}
-			entities[path] = QueryEntity{backing: entry}
-			keys = append(keys, path)
+			entities = append(entities, QueryEntity{backing: entry, Path: path})
 		})
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()
@@ -165,7 +163,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		return nil, err
 	}
 	if isSort {
-		sort.Strings(keys)
+		slices.SortFunc(entities, func(i, j QueryEntity) int {
+			return strings.Compare(i.Path, j.Path)
+		})
 	}
 	jsonMode := config.JSONOutputs.Blank
 	if args.Values == JSONValue {
@@ -183,41 +183,36 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		}
 	}
 	return func(yield func(QueryEntity, error) bool) {
-		for _, k := range keys {
-			entity := QueryEntity{Path: k}
+		for _, item := range entities {
+			entity := QueryEntity{Path: item.Path}
 			var err error
 			if args.Values != BlankValue {
-				e, ok := entities[k]
-				if ok {
-					val := getValue(e.backing, notesKey)
-					if strings.TrimSpace(val) == "" {
-						val = e.backing.GetPassword()
-					}
-					switch args.Values {
-					case JSONValue:
-						data := ""
-						switch jsonMode {
-						case config.JSONOutputs.Raw:
-							data = val
-						case config.JSONOutputs.Hash:
-							data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
-							if hashLength > 0 && len(data) > hashLength {
-								data = data[0:hashLength]
-							}
+				val := getValue(item.backing, notesKey)
+				if strings.TrimSpace(val) == "" {
+					val = item.backing.GetPassword()
+				}
+				switch args.Values {
+				case JSONValue:
+					data := ""
+					switch jsonMode {
+					case config.JSONOutputs.Raw:
+						data = val
+					case config.JSONOutputs.Hash:
+						data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+						if hashLength > 0 && len(data) > hashLength {
+							data = data[0:hashLength]
 						}
-						t := getValue(e.backing, modTimeKey)
-						s := JSON{ModTime: t, Data: data}
-						m, jErr := json.Marshal(s)
-						if jErr == nil {
-							entity.Value = string(m)
-						} else {
-							err = jErr
-						}
-					case SecretValue:
-						entity.Value = val
 					}
-				} else {
-					err = errors.New("failed to read entity back from map")
+					t := getValue(item.backing, modTimeKey)
+					s := JSON{ModTime: t, Data: data}
+					m, jErr := json.Marshal(s)
+					if jErr == nil {
+						entity.Value = string(m)
+					} else {
+						err = jErr
+					}
+				case SecretValue:
+					entity.Value = val
 				}
 			}
 			if !yield(entity, err) {
