@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"iter"
 	"sort"
 	"strings"
 
@@ -114,18 +113,11 @@ func (t *Transaction) queryCollect(args QueryOptions) ([]QueryEntity, error) {
 	if err != nil {
 		return nil, err
 	}
-	var entities []QueryEntity
-	for entity := range e {
-		if entity.Error != nil {
-			return nil, entity.Error
-		}
-		entities = append(entities, entity.QueryEntity)
-	}
-	return entities, nil
+	return e.Collect()
 }
 
 // QueryCallback will retrieve a query based on setting
-func (t *Transaction) QueryCallback(args QueryOptions) (iter.Seq[QuerySeq], error) {
+func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	if args.Mode == noneMode {
 		return nil, errors.New("no query mode specified")
 	}
@@ -190,10 +182,10 @@ func (t *Transaction) QueryCallback(args QueryOptions) (iter.Seq[QuerySeq], erro
 			return nil, err
 		}
 	}
-	return func(yield func(QuerySeq) bool) {
+	return func(yield func(QueryEntity, error) bool) {
 		for _, k := range keys {
-			entity := QuerySeq{}
-			entity.Path = k
+			entity := QueryEntity{Path: k}
+			var err error
 			if args.Values != BlankValue {
 				e, ok := entities[k]
 				if ok {
@@ -215,20 +207,20 @@ func (t *Transaction) QueryCallback(args QueryOptions) (iter.Seq[QuerySeq], erro
 						}
 						t := getValue(e.backing, modTimeKey)
 						s := JSON{ModTime: t, Data: data}
-						m, err := json.Marshal(s)
-						if err == nil {
+						m, jErr := json.Marshal(s)
+						if jErr == nil {
 							entity.Value = string(m)
 						} else {
-							entity.Error = err
+							err = jErr
 						}
 					case SecretValue:
 						entity.Value = val
 					}
 				} else {
-					entity.Error = errors.New("failed to read entity back from map")
+					err = errors.New("failed to read entity back from map")
 				}
 			}
-			if !yield(entity) {
+			if !yield(entity, err) {
 				return
 			}
 		}

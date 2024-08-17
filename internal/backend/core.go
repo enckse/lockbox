@@ -4,6 +4,7 @@ package backend
 import (
 	"errors"
 	"fmt"
+	"iter"
 	"os"
 	"strings"
 
@@ -25,6 +26,8 @@ const (
 )
 
 type (
+	// QuerySeq2 wraps the iteration for query entities
+	QuerySeq2 iter.Seq2[QueryEntity, error]
 	// Transaction handles the overall operation of the transaction
 	Transaction struct {
 		valid    bool
@@ -42,10 +45,6 @@ type (
 		Path    string
 		Value   string
 		backing gokeepasslib.Entry
-	}
-	QuerySeq struct {
-		QueryEntity
-		Error error
 	}
 	// TransactionEntity objects alter the database entities
 	TransactionEntity struct {
@@ -217,4 +216,16 @@ func getValue(e gokeepasslib.Entry, key string) string {
 // IsDirectory will indicate if a path looks like a group/directory
 func IsDirectory(path string) bool {
 	return strings.HasSuffix(path, pathSep)
+}
+
+// Collect will create a slice from an iterable set of query sequence results
+func (s QuerySeq2) Collect() ([]QueryEntity, error) {
+	var entities []QueryEntity
+	for entity, err := range s {
+		if err != nil {
+			return nil, err
+		}
+		entities = append(entities, entity)
+	}
+	return entities, nil
 }

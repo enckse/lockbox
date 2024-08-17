@@ -238,9 +238,9 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 			return err
 		}
 		writer := opts.app.Writer()
-		for entry := range e {
-			if entry.Error != nil {
-				return entry.Error
+		for entry, err := range e {
+			if err != nil {
+				return err
 			}
 			fmt.Fprintf(writer, "%s\n", entry.Directory())
 		}

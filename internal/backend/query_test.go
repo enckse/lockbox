@@ -2,7 +2,6 @@ package backend_test
 
 import (
 	"encoding/json"
-	"iter"
 	"os"
 	"strings"
 	"testing"
@@ -157,13 +156,13 @@ func TestValueModes(t *testing.T) {
 	}
 }
 
-func testCollect(t *testing.T, count int, seq iter.Seq[backend.QuerySeq]) []backend.QueryEntity {
-	var collected []backend.QueryEntity
-	for item := range seq {
-		if item.Error != nil {
-			t.Errorf("unexpected error: %v", item.Error)
-		}
-		collected = append(collected, item.QueryEntity)
+func testCollect(t *testing.T, count int, seq backend.QuerySeq2) []backend.QueryEntity {
+	collected, err := seq.Collect()
+	if err != nil {
+		t.Errorf("invalid collect error: %v", err)
+	}
+	if len(collected) != count {
+		t.Errorf("unexpected entity count: %d", count)
 	}
 	return collected
 }

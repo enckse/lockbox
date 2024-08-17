@@ -20,9 +20,9 @@ func List(cmd CommandOptions) error {
 		return err
 	}
 	w := cmd.Writer()
-	for f := range e {
-		if f.Error != nil {
-			return f.Error
+	for f, err := range e {
+		if err != nil {
+			return err
 		}
 		fmt.Fprintf(w, "%s\n", f.Path)
 	}

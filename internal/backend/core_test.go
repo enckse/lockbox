@@ -1,6 +1,7 @@
 package backend_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -110,5 +111,46 @@ func TestNewPath(t *testing.T) {
 func TestNewSuffix(t *testing.T) {
 	if backend.NewSuffix("test") != "/test" {
 		t.Error("invalid suffix")
+	}
+}
+
+func generateTestSeq(hasError, extra bool) backend.QuerySeq2 {
+	return func(yield func(backend.QueryEntity, error) bool) {
+		if !yield(backend.QueryEntity{}, nil) {
+			return
+		}
+		if !yield(backend.QueryEntity{}, nil) {
+			return
+		}
+		if hasError {
+			if !yield(backend.QueryEntity{}, errors.New("test collect error")) {
+				return
+			}
+		}
+		if !yield(backend.QueryEntity{}, nil) {
+			return
+		}
+		if extra {
+			if !yield(backend.QueryEntity{}, nil) {
+				return
+			}
+		}
+	}
+}
+
+func TestQuerySeq2Collect(t *testing.T) {
+	seq := generateTestSeq(true, true)
+	if _, err := seq.Collect(); err == nil || err.Error() != "test collect error" {
+		t.Errorf("invalid error: %v", err)
+	}
+	seq = generateTestSeq(false, false)
+	c, err := seq.Collect()
+	if err != nil || len(c) != 3 {
+		t.Errorf("invalid collect: %v %v %d", c, err, len(c))
+	}
+	seq = generateTestSeq(false, true)
+	c, err = seq.Collect()
+	if err != nil || len(c) != 4 {
+		t.Errorf("invalid collect: %v %v %d", c, err, len(c))
 	}
 }
