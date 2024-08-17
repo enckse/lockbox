@@ -43,6 +43,10 @@ type (
 		Value   string
 		backing gokeepasslib.Entry
 	}
+	QuerySeq struct {
+		QueryEntity
+		Error error
+	}
 	// TransactionEntity objects alter the database entities
 	TransactionEntity struct {
 		path  string

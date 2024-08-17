@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"iter"
 	"sort"
 	"strings"
 
@@ -70,7 +71,7 @@ func (t *Transaction) MatchPath(path string) ([]QueryEntity, error) {
 	if strings.HasSuffix(prefix, pathSep) {
 		return nil, errors.New("invalid match criteria, too many path separators")
 	}
-	return t.QueryCallback(QueryOptions{Mode: PrefixMode, Criteria: prefix + pathSep, Values: BlankValue})
+	return t.queryCollect(QueryOptions{Mode: PrefixMode, Criteria: prefix + pathSep, Values: BlankValue})
 }
 
 // Get will request a singular entity
@@ -79,7 +80,7 @@ func (t *Transaction) Get(path string, mode ValueMode) (*QueryEntity, error) {
 	if err != nil {
 		return nil, err
 	}
-	e, err := t.QueryCallback(QueryOptions{Mode: ExactMode, Criteria: path, Values: mode})
+	e, err := t.queryCollect(QueryOptions{Mode: ExactMode, Criteria: path, Values: mode})
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +109,23 @@ func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.
 	}
 }
 
+func (t *Transaction) queryCollect(args QueryOptions) ([]QueryEntity, error) {
+	e, err := t.QueryCallback(args)
+	if err != nil {
+		return nil, err
+	}
+	var entities []QueryEntity
+	for entity := range e {
+		if entity.Error != nil {
+			return nil, entity.Error
+		}
+		entities = append(entities, entity.QueryEntity)
+	}
+	return entities, nil
+}
+
 // QueryCallback will retrieve a query based on setting
-func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
+func (t *Transaction) QueryCallback(args QueryOptions) (iter.Seq[QuerySeq], error) {
 	if args.Mode == noneMode {
 		return nil, errors.New("no query mode specified")
 	}
@@ -174,42 +190,47 @@ func (t *Transaction) QueryCallback(args QueryOptions) ([]QueryEntity, error) {
 			return nil, err
 		}
 	}
-	var results []QueryEntity
-	for _, k := range keys {
-		entity := QueryEntity{Path: k}
-		if args.Values != BlankValue {
-			e, ok := entities[k]
-			if !ok {
-				return nil, errors.New("failed to read entity back from map")
-			}
-			val := getValue(e.backing, notesKey)
-			if strings.TrimSpace(val) == "" {
-				val = e.backing.GetPassword()
-			}
-			switch args.Values {
-			case JSONValue:
-				data := ""
-				switch jsonMode {
-				case config.JSONOutputs.Raw:
-					data = val
-				case config.JSONOutputs.Hash:
-					data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
-					if hashLength > 0 && len(data) > hashLength {
-						data = data[0:hashLength]
+	return func(yield func(QuerySeq) bool) {
+		for _, k := range keys {
+			entity := QuerySeq{}
+			entity.Path = k
+			if args.Values != BlankValue {
+				e, ok := entities[k]
+				if ok {
+					val := getValue(e.backing, notesKey)
+					if strings.TrimSpace(val) == "" {
+						val = e.backing.GetPassword()
 					}
+					switch args.Values {
+					case JSONValue:
+						data := ""
+						switch jsonMode {
+						case config.JSONOutputs.Raw:
+							data = val
+						case config.JSONOutputs.Hash:
+							data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+							if hashLength > 0 && len(data) > hashLength {
+								data = data[0:hashLength]
+							}
+						}
+						t := getValue(e.backing, modTimeKey)
+						s := JSON{ModTime: t, Data: data}
+						m, err := json.Marshal(s)
+						if err == nil {
+							entity.Value = string(m)
+						} else {
+							entity.Error = err
+						}
+					case SecretValue:
+						entity.Value = val
+					}
+				} else {
+					entity.Error = errors.New("failed to read entity back from map")
 				}
-				t := getValue(e.backing, modTimeKey)
-				s := JSON{ModTime: t, Data: data}
-				m, err := json.Marshal(s)
-				if err != nil {
-					return nil, err
-				}
-				entity.Value = string(m)
-			case SecretValue:
-				entity.Value = val
+			}
+			if !yield(entity) {
+				return
 			}
 		}
-		results = append(results, entity)
-	}
-	return results, nil
+	}, nil
 }

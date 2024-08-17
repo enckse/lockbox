@@ -39,7 +39,10 @@ func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string)
 	}
 	hasFilter := len(filter) > 0
 	printed := false
-	for _, item := range e {
+	for item := range e {
+		if item.Error != nil {
+			return item.Error
+		}
 		if hasFilter {
 			if !strings.Contains(item.Path, filter) {
 				continue

@@ -2,6 +2,7 @@ package backend_test
 
 import (
 	"encoding/json"
+	"iter"
 	"os"
 	"strings"
 	"testing"
@@ -156,58 +157,59 @@ func TestValueModes(t *testing.T) {
 	}
 }
 
+func testCollect(t *testing.T, count int, seq iter.Seq[backend.QuerySeq]) []backend.QueryEntity {
+	var collected []backend.QueryEntity
+	for item := range seq {
+		if item.Error != nil {
+			t.Errorf("unexpected error: %v", item.Error)
+		}
+		collected = append(collected, item.QueryEntity)
+	}
+	return collected
+}
+
 func TestQueryCallback(t *testing.T) {
 	setupInserts(t)
 	if _, err := fullSetup(t, true).QueryCallback(backend.QueryOptions{}); err.Error() != "no query mode specified" {
 		t.Errorf("wrong error: %v", err)
 	}
-	res, err := fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ListMode})
+	seq, err := fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ListMode})
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(res) != 4 {
-		t.Error("invalid results: not enough")
-	}
+	res := testCollect(t, 4, seq)
 	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc" || res[2].Path != "test/test/abc1ak" || res[3].Path != "test/test/abcx" {
 		t.Errorf("invalid results: %v", res)
 	}
-	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.FindMode, Criteria: "1"})
+	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.FindMode, Criteria: "1"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(res) != 2 {
-		t.Error("invalid results: not enough")
-	}
+	res = testCollect(t, 2, seq)
 	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc1ak" {
 		t.Errorf("invalid results: %v", res)
 	}
-	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: "c"})
+	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: "c"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(res) != 2 {
-		t.Error("invalid results: not enough")
-	}
+	res = testCollect(t, 2, seq)
 	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc" {
 		t.Errorf("invalid results: %v", res)
 	}
-	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "test/test/abc"})
+	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "test/test/abc"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(res) != 1 {
-		t.Error("invalid results: not enough")
-	}
+	res = testCollect(t, 1, seq)
 	if res[0].Path != "test/test/abc" {
 		t.Errorf("invalid results: %v", res)
 	}
-	res, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abczzz"})
+	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abczzz"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if len(res) != 0 {
-		t.Error("invalid results: should be empty")
-	}
+	testCollect(t, 0, seq)
 }
 
 func TestSetModTime(t *testing.T) {
