@@ -22,11 +22,11 @@ type (
 )
 
 func newClipboard(copying, pasting []string) (Clipboard, error) {
-	max, err := config.EnvClipMax.Get()
+	maximum, err := config.EnvClipMax.Get()
 	if err != nil {
 		return Clipboard{}, err
 	}
-	return Clipboard{copying: copying, pasting: pasting, MaxTime: max, isOSC52: false}, nil
+	return Clipboard{copying: copying, pasting: pasting, MaxTime: maximum, isOSC52: false}, nil
 }
 
 // NewClipboard will retrieve the commands to use for clipboard operations.
