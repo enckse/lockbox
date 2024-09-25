@@ -3,6 +3,7 @@ package app
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"slices"
 	"strings"
@@ -48,6 +49,9 @@ type (
 		Conditional string
 	}
 )
+
+//go:embed shell/*
+var shell embed.FS
 
 // Options will list the profile options
 func (p Profile) Options() []string {
@@ -139,11 +143,11 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		IsFish:              completionType == CompletionsFishCommand,
 	}
 
-	using, err := readDoc(fmt.Sprintf("%s.sh", completionType))
+	using, err := readShell(completionType)
 	if err != nil {
 		return nil, err
 	}
-	shellScript, err := readDoc("shell.sh")
+	shellScript, err := readShell("shell")
 	if err != nil {
 		return nil, err
 	}
@@ -164,6 +168,10 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		return nil, err
 	}
 	return []string{s}, nil
+}
+
+func readShell(file string) (string, error) {
+	return readEmbedded(fmt.Sprintf("%s.sh", file), "shell", shell)
 }
 
 func templateScript(script string, c Completions) (string, error) {

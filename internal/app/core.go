@@ -274,7 +274,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 }
 
 func processDoc(header, file string, doc Documentation) (string, error) {
-	b, err := readDoc(file)
+	b, err := readEmbedded(file, docDir, docs)
 	if err != nil {
 		return "", err
 	}
@@ -293,8 +293,8 @@ func setDocFlag(f string) string {
 	return fmt.Sprintf("-%s=", f)
 }
 
-func readDoc(doc string) (string, error) {
-	b, err := docs.ReadFile(filepath.Join(docDir, doc))
+func readEmbedded(file, dir string, e embed.FS) (string, error) {
+	b, err := e.ReadFile(filepath.Join(dir, file))
 	if err != nil {
 		return "", err
 	}
