@@ -80,6 +80,12 @@ func TestGenerate(t *testing.T) {
 	os.Setenv("LOCKBOX_PWGEN_TITLE", "yes")
 	os.Setenv("LOCKBOX_PWGEN_WORDLIST", fmt.Sprintf("%s a a a a a a a a a a a a a a a", pwgenPath))
 	testPasswordGen(t, "A-A-A-A")
+	os.Setenv("LOCKBOX_PWGEN_CHARS", "bc")
+	os.Setenv("LOCKBOX_PWGEN_WORDLIST", fmt.Sprintf("%s abc abc abc abc abc aaa aaa aa a", pwgenPath))
+	testPasswordGen(t, "Bc-Bc-Bc-Bc")
+	os.Unsetenv("LOCKBOX_PWGEN_CHARS")
+	os.Setenv("LOCKBOX_PWGEN_WORDLIST", fmt.Sprintf("%s a a a a a a a a a a a a a a a", pwgenPath))
+	os.Setenv("LOCKBOX_PWGEN_TITLE", "no")
 	os.Setenv("LOCKBOX_PWGEN_TITLE", "no")
 	testPasswordGen(t, "a-a-a-a")
 	// NOTE: this allows templating below in golang

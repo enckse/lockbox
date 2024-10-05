@@ -390,6 +390,18 @@ This value can NOT be an expansion itself.`,
 					desc:   "Disable password generation.",
 				}),
 		})
+	// EnvPasswordGenChars allows for restricting which characters can be used
+	EnvPasswordGenChars = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					subKey: "CHARS",
+					cat:    genCategory,
+					desc:   "The set of allowed characters in output words (empty means any characters are allowed).",
+				}),
+			allowed:    []string{"<list of characters>"},
+			canDefault: true,
+		})
 )
 
 // GetReKey will get the rekey environment settings

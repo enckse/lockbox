@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os/exec"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -55,6 +56,14 @@ func GeneratePassword(cmd CommandOptions) error {
 	if err != nil {
 		return err
 	}
+	chars := config.EnvPasswordGenChars.Get()
+	hasChars := len(chars) > 0
+	var allowedChars []rune
+	if hasChars {
+		for _, c := range chars {
+			allowedChars = append(allowedChars, c)
+		}
+	}
 	caser := cases.Title(lang)
 	var choices []string
 	for _, line := range strings.Split(string(wordResults), "\n") {
@@ -63,6 +72,18 @@ func GeneratePassword(cmd CommandOptions) error {
 			continue
 		}
 		use := line
+		if hasChars {
+			res := ""
+			for _, c := range use {
+				if slices.Contains(allowedChars, c) {
+					res = fmt.Sprintf("%s%c", res, c)
+				}
+			}
+			if res == "" {
+				continue
+			}
+			use = res
+		}
 		if capitalize {
 			use = caser.String(use)
 		}
