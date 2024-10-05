@@ -329,42 +329,57 @@ This value can NOT be an expansion itself.`,
 			shortDesc: "max expands",
 			allowZero: true,
 		})
-	EnvPasswordGenLength = environmentRegister(
+	// EnvPasswordGenCount is the number of words that will be selected for password generation
+	EnvPasswordGenCount = environmentRegister(
 		EnvironmentInt{
-			environmentDefault: newDefaultedEnvironment(64,
+			environmentDefault: newDefaultedEnvironment(8,
 				environmentBase{
-					subKey: "LENGTH",
+					subKey: "COUNT",
 					cat:    genCategory,
-					desc:   "Minimum of length of the generated password. Once the number of combined words reaches this amount the password generation process will be compledted.",
+					desc:   "Number of words to select and include in the generated password.",
 				}),
-			shortDesc: "min password generation length",
+			shortDesc: "word count",
 			allowZero: false,
 		})
-	EnvPasswordGenCapitalize = environmentRegister(
+	// EnvPasswordGenTitle indicates if titling (e.g. uppercasing) will occur to words
+	EnvPasswordGenTitle = environmentRegister(
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					subKey: "CAPITALIZE",
+					subKey: "TITLE",
 					cat:    genCategory,
-					desc:   "Capitalize words during password generation.",
+					desc:   "Title words during password generation.",
 				}),
 		})
+	// EnvPasswordGenTemplate is the output template for controlling how output words are placed together
 	EnvPasswordGenTemplate = environmentRegister(
 		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment("{{range $idx, $val := .}}{{if $idx }}{{end}}{{ $val }}{{end}}",
+			environmentDefault: newDefaultedEnvironment("{{range $idx, $val := .}}{{if gt $idx 0}}-{{end}}{{ $val }}{{end}}",
 				environmentBase{
 					subKey: "TEMPLATE",
 					cat:    genCategory,
-					desc:   "The path to hooks to execute on actions against the database.",
+					desc:   "The go text template to use to format the chosen words into a password.",
 				}),
 			allowed:    []string{"<go template>"},
 			canDefault: true,
 		})
+	// EnvPasswordGenWordList is the command text to generate the word list
 	EnvPasswordGenWordList = environmentRegister(EnvironmentCommand{environmentBase: environmentBase{
 		subKey: "WORDLIST",
 		cat:    genCategory,
-		desc:   "Command to retrieve the word list to use for password generation.",
+		desc:   "Command to retrieve the word list to use for password generation (must be split by newline).",
 	}})
+	// EnvLanguage is the language to use for everything
+	EnvLanguage = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("en-US",
+				environmentBase{
+					subKey: "LANGUAGE",
+					desc:   "Language to run under.",
+				}),
+			allowed:    []string{"<language code>"},
+			canDefault: true,
+		})
 )
 
 // GetReKey will get the rekey environment settings

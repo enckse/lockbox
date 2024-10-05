@@ -69,6 +69,10 @@ func TestIsNoClip(t *testing.T) {
 	checkYesNo("LOCKBOX_NOCLIP", t, config.EnvNoClip, false)
 }
 
+func TestIsTitle(t *testing.T) {
+	checkYesNo("LOCKBOX_PWGEN_TITLE", t, config.EnvPasswordGenTitle, true)
+}
+
 func TestDefaultCompletions(t *testing.T) {
 	checkYesNo("LOCKBOX_DEFAULT_COMPLETION", t, config.EnvDefaultCompletion, false)
 }
@@ -97,7 +101,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 26 {
+	if l != 31 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
@@ -180,6 +184,10 @@ func TestHashLength(t *testing.T) {
 
 func TestMaxTOTP(t *testing.T) {
 	checkInt(config.EnvMaxTOTP, "LOCKBOX_TOTP_MAX", "max totp time", 120, false, t)
+}
+
+func TestWordCount(t *testing.T) {
+	checkInt(config.EnvPasswordGenCount, "LOCKBOX_PWGEN_COUNT", "word count", 8, false, t)
 }
 
 func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {

@@ -7,6 +7,7 @@ require (
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/pquerna/otp v1.4.0
 	github.com/tobischo/gokeepasslib/v3 v3.6.0
+	golang.org/x/text v0.19.0
 	mvdan.cc/sh/v3 v3.9.0
 )
 

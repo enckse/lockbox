@@ -126,6 +126,8 @@ func run() error {
 			return app.Insert(p, app.TOTPInsert)
 		}
 		return args.Do(app.NewDefaultTOTPOptions(p))
+	case app.PasswordGenerateCommand:
+		return app.GeneratePassword(p)
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}

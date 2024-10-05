@@ -29,6 +29,7 @@ const (
 	// sub categories
 	clipCategory keyCategory = "CLIP_"
 	totpCategory keyCategory = "TOTP_"
+	genCategory  keyCategory = "PWGEN_"
 	// YesValue are yes (on) values
 	YesValue = yes
 )

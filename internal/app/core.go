@@ -75,6 +75,8 @@ const (
 	CompletionsFishCommand = "fish"
 	docDir                 = "doc"
 	textFile               = ".txt"
+	// PasswordGenerateCommand is the command to do password generation
+	PasswordGenerateCommand = "pwgen"
 )
 
 var (
@@ -215,6 +217,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(ListCommand, "", "list entries"))
 	results = append(results, command(MoveCommand, "src dst", "move an entry from source to destination"))
 	results = append(results, command(MultiLineCommand, "entry", "insert a multiline entry into the store"))
+	results = append(results, command(PasswordGenerateCommand, "", "generate a password"))
 	results = append(results, command(ReKeyCommand, "", "rekey/reinitialize the database credentials"))
 	results = append(results, command(RemoveCommand, "entry", "remove an entry from the store"))
 	results = append(results, command(ShowCommand, "entry", "show the entry's value"))
