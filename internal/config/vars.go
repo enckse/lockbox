@@ -355,11 +355,11 @@ This value can NOT be an expansion itself.`,
 	// EnvPasswordGenTemplate is the output template for controlling how output words are placed together
 	EnvPasswordGenTemplate = environmentRegister(
 		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment(fmt.Sprintf("{{range %sidx, %sval := .}}{{if %sidx}}-{{end}}{{%sval}}{{end}}", TemplateVariable, TemplateVariable, TemplateVariable, TemplateVariable),
+			environmentDefault: newDefaultedEnvironment(fmt.Sprintf("{{range %si, %sval := .}}{{if %si}}-{{end}}{{%sval.Text}}{{end}}", TemplateVariable, TemplateVariable, TemplateVariable, TemplateVariable),
 				environmentBase{
 					subKey: "TEMPLATE",
 					cat:    genCategory,
-					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues).", TemplateVariable),
+					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues). Fields available are Text and Length (current length of all words)", TemplateVariable),
 				}),
 			allowed:    []string{"<go template>"},
 			canDefault: true,

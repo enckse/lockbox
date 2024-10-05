@@ -90,9 +90,9 @@ func TestGenerate(t *testing.T) {
 	testPasswordGen(t, "a-a-a-a")
 	// NOTE: this allows templating below in golang
 	os.Setenv("DOLLAR", "$")
-	os.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range ${DOLLAR}idx, ${DOLLAR}val := .}}{{if lt ${DOLLAR}idx 5}}-{{end}}{{ ${DOLLAR}val }}{{end}}")
-	testPasswordGen(t, "-a-a-a-a")
-	os.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val }}{{end}}")
+	os.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range ${DOLLAR}idx, ${DOLLAR}val := .}}{{if lt ${DOLLAR}idx 5}}-{{end}}{{ ${DOLLAR}val.Text }}{{ ${DOLLAR}val.Length }}{{end}}")
+	testPasswordGen(t, "-a0-a1-a2-a3")
+	os.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val.Text }}{{end}}")
 	testPasswordGen(t, "-a-a-a-a")
 	os.Unsetenv("LOCKBOX_PWGEN_TEMPLATE")
 	os.Setenv("LOCKBOX_PWGEN_TITLE", "yes")
