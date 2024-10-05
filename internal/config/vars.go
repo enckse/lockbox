@@ -23,8 +23,6 @@ const (
 	noClipProfile        = "noclip"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
-	/*
-	 */
 )
 
 var (
@@ -331,6 +329,42 @@ This value can NOT be an expansion itself.`,
 			shortDesc: "max expands",
 			allowZero: true,
 		})
+	EnvPasswordGenLength = environmentRegister(
+		EnvironmentInt{
+			environmentDefault: newDefaultedEnvironment(64,
+				environmentBase{
+					subKey: "LENGTH",
+					cat:    genCategory,
+					desc:   "Minimum of length of the generated password. Once the number of combined words reaches this amount the password generation process will be compledted.",
+				}),
+			shortDesc: "min password generation length",
+			allowZero: false,
+		})
+	EnvPasswordGenCapitalize = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(true,
+				environmentBase{
+					subKey: "CAPITALIZE",
+					cat:    genCategory,
+					desc:   "Capitalize words during password generation.",
+				}),
+		})
+	EnvPasswordGenTemplate = environmentRegister(
+		EnvironmentString{
+			environmentDefault: newDefaultedEnvironment("{{range $idx, $val := .}}{{if $idx }}{{end}}{{ $val }}{{end}}",
+				environmentBase{
+					subKey: "TEMPLATE",
+					cat:    genCategory,
+					desc:   "The path to hooks to execute on actions against the database.",
+				}),
+			allowed:    []string{"<go template>"},
+			canDefault: true,
+		})
+	EnvPasswordGenWordList = environmentRegister(EnvironmentCommand{environmentBase: environmentBase{
+		subKey: "WORDLIST",
+		cat:    genCategory,
+		desc:   "Command to retrieve the word list to use for password generation.",
+	}})
 )
 
 // GetReKey will get the rekey environment settings
