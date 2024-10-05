@@ -103,17 +103,26 @@ func GeneratePassword(cmd CommandOptions) error {
 			choices[n] = x
 		}
 	}
+	type position struct {
+		Start int
+		End   int
+	}
 	type word struct {
-		Text   string
-		Length int
+		Text     string
+		Position position
 	}
 	var selected []word
 	cnt := 0
 	totalLength := 0
 	for cnt < length {
-		w := word{choices[cnt], totalLength}
+		choice := choices[cnt]
+		textLength := len(choice)
+		pos := position{}
+		pos.Start = totalLength
+		pos.End = pos.Start + textLength
+		w := word{choices[cnt], pos}
 		selected = append(selected, w)
-		totalLength += len(w.Text)
+		totalLength += textLength
 		cnt++
 	}
 	tmpl, err := template.New("t").Parse(tmplString)

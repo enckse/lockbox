@@ -359,7 +359,7 @@ This value can NOT be an expansion itself.`,
 				environmentBase{
 					subKey: "TEMPLATE",
 					cat:    genCategory,
-					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues). Fields available are Text and Length (current length of all words)", TemplateVariable),
+					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues). Fields available are Text, Position.Start, and Position.End.", TemplateVariable),
 				}),
 			allowed:    []string{"<go template>"},
 			canDefault: true,
