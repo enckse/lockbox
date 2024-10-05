@@ -92,6 +92,8 @@ func TestGenerate(t *testing.T) {
 	os.Setenv("DOLLAR", "$")
 	os.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range ${DOLLAR}idx, ${DOLLAR}val := .}}{{if lt ${DOLLAR}idx 5}}-{{end}}{{ ${DOLLAR}val }}{{end}}")
 	testPasswordGen(t, "-a-a-a-a")
+	os.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val }}{{end}}")
+	testPasswordGen(t, "-a-a-a-a")
 	os.Unsetenv("LOCKBOX_PWGEN_TEMPLATE")
 	os.Setenv("LOCKBOX_PWGEN_TITLE", "yes")
 	os.Setenv("LOCKBOX_PWGEN_WORDLIST", fmt.Sprintf("%s abc axy axY aZZZ aoijafea aoiajfoea afaeoa", pwgenPath))

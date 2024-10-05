@@ -32,6 +32,8 @@ const (
 	genCategory  keyCategory = "PWGEN_"
 	// YesValue are yes (on) values
 	YesValue = yes
+	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
+	TemplateVariable = "[%]"
 )
 
 var (
