@@ -117,6 +117,9 @@ func GeneratePassword(cmd CommandOptions) error {
 	if err := tmpl.Execute(&buf, selected); err != nil {
 		return err
 	}
+	if _, err := buf.WriteString("\n"); err != nil {
+		return err
+	}
 	if _, err := cmd.Writer().Write(buf.Bytes()); err != nil {
 		return err
 	}

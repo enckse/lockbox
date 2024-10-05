@@ -62,7 +62,7 @@ func testPasswordGen(t *testing.T, expect string) {
 		t.Errorf("invalid error: %v", err)
 	}
 	s := m.buf.String()
-	if s != expect {
+	if s != fmt.Sprintf("%s\n", expect) {
 		t.Errorf("invalid generated: %s (expected: %s)", s, expect)
 	}
 }
