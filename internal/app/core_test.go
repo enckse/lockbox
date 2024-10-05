@@ -13,7 +13,7 @@ func TestUsage(t *testing.T) {
 		t.Errorf("invalid usage, out of date? %d", len(u))
 	}
 	u, _ = app.Usage(true, "lb")
-	if len(u) != 113 {
+	if len(u) != 114 {
 		t.Errorf("invalid verbose usage, out of date? %d", len(u))
 	}
 	for _, usage := range u {

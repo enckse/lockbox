@@ -69,6 +69,10 @@ func TestIsNoClip(t *testing.T) {
 	checkYesNo("LOCKBOX_NOCLIP", t, config.EnvNoClip, false)
 }
 
+func TestIsNoGeneratePassword(t *testing.T) {
+	checkYesNo("LOCKBOX_NOPWGEN", t, config.EnvNoPasswordGen, false)
+}
+
 func TestIsTitle(t *testing.T) {
 	checkYesNo("LOCKBOX_PWGEN_TITLE", t, config.EnvPasswordGenTitle, true)
 }
@@ -101,7 +105,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 31 {
+	if l != 32 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
@@ -267,7 +271,7 @@ func TestEnvironDefinitions(t *testing.T) {
 
 func TestLoadCompletionProfiles(t *testing.T) {
 	p := config.LoadCompletionProfiles()
-	if len(p) != 16 {
+	if len(p) != 32 {
 		t.Errorf("invalid completion count: %d", len(p))
 	}
 	exp := len(p) - 1

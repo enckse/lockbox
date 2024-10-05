@@ -93,13 +93,14 @@ type (
 	}
 	// CompletionProfile are shell completion definitions with backing environment information
 	CompletionProfile struct {
-		Clip    bool
-		TOTP    bool
-		List    bool
-		Write   bool
-		Name    string
-		Env     []string
-		Default bool
+		Clip     bool
+		TOTP     bool
+		List     bool
+		Write    bool
+		Name     string
+		Env      []string
+		Default  bool
+		Generate bool
 	}
 	// ReKeyArgs are the arguments for rekeying
 	ReKeyArgs struct {

@@ -16,6 +16,13 @@ import (
 
 // GeneratePassword generates a password
 func GeneratePassword(cmd CommandOptions) error {
+	ok, err := config.EnvNoPasswordGen.Get()
+	if err != nil {
+		return err
+	}
+	if ok {
+		return errors.New("password generation is disabled")
+	}
 	length, err := config.EnvPasswordGenCount.Get()
 	if err != nil {
 		return err

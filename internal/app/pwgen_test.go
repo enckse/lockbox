@@ -11,6 +11,7 @@ import (
 )
 
 func setupGenScript() string {
+	os.Clearenv()
 	const pwgenScript = "pwgen.sh"
 	pwgenPath := filepath.Join("testdata", pwgenScript)
 	os.WriteFile(pwgenPath, []byte(`#!/bin/sh
@@ -47,6 +48,10 @@ func TestGenerateError(t *testing.T) {
 	}
 	os.Setenv("LOCKBOX_PWGEN_WORDLIST", fmt.Sprintf("%s aloj 1", pwgenPath))
 	if err := app.GeneratePassword(m); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	os.Setenv("LOCKBOX_NOPWGEN", "yes")
+	if err := app.GeneratePassword(m); err == nil || err.Error() != "password generation is disabled" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

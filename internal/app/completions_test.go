@@ -51,6 +51,10 @@ func TestProfileOptions(t *testing.T) {
 	if len(p.Options()) != 8 {
 		t.Errorf("invalid options: %v", p.Options())
 	}
+	p.CanGenerate = true
+	if len(p.Options()) != 9 {
+		t.Errorf("invalid options: %v", p.Options())
+	}
 }
 
 func TestProfileTOTPSubOptions(t *testing.T) {

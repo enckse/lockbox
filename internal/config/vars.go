@@ -21,6 +21,7 @@ const (
 	roProfile            = "readonly"
 	noTOTPProfile        = "nototp"
 	noClipProfile        = "noclip"
+	noGenProfile         = "nopwgen"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
 )
@@ -380,6 +381,15 @@ This value can NOT be an expansion itself.`,
 			allowed:    []string{"<language code>"},
 			canDefault: true,
 		})
+	// EnvNoPasswordGen disables password generation.
+	EnvNoPasswordGen = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(false,
+				environmentBase{
+					subKey: "NOPWGEN",
+					desc:   "Disable password generation.",
+				}),
+		})
 )
 
 // GetReKey will get the rekey environment settings
@@ -467,6 +477,7 @@ func newProfile(keys []string) CompletionProfile {
 	p.List = true
 	p.TOTP = true
 	p.Write = true
+	p.Generate = true
 	name := ""
 	sort.Strings(keys)
 	var e []string
@@ -485,6 +496,9 @@ func newProfile(keys []string) CompletionProfile {
 		case roProfile:
 			e = append(e, exportProfileKeyValue(EnvReadOnly.environmentBase, yes))
 			p.Write = false
+		case noGenProfile:
+			e = append(e, exportProfileKeyValue(EnvNoPasswordGen.environmentBase, yes))
+			p.Generate = false
 		}
 	}
 	sort.Strings(e)
@@ -518,7 +532,7 @@ func generateProfiles(keys []string) map[string]CompletionProfile {
 
 // LoadCompletionProfiles will generate known completion profile with backing env information
 func LoadCompletionProfiles() []CompletionProfile {
-	loaded := generateProfiles([]string{noClipProfile, roProfile, noTOTPProfile, askProfile})
+	loaded := generateProfiles([]string{noClipProfile, roProfile, noTOTPProfile, askProfile, noGenProfile})
 	var profiles []CompletionProfile
 	for _, v := range loaded {
 		profiles = append(profiles, v)
@@ -526,7 +540,7 @@ func LoadCompletionProfiles() []CompletionProfile {
 	sort.Slice(profiles, func(i, j int) bool {
 		return strings.Compare(profiles[i].Name, profiles[j].Name) < 0
 	})
-	profiles = append(profiles, CompletionProfile{Clip: true, Write: true, TOTP: true, List: true, Default: true})
+	profiles = append(profiles, CompletionProfile{Generate: true, Clip: true, Write: true, TOTP: true, List: true, Default: true})
 	return profiles
 }
 

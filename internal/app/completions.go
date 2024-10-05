@@ -44,6 +44,7 @@ type (
 		CanClip     bool
 		CanTOTP     bool
 		CanList     bool
+		CanGenerate bool
 		ReadOnly    bool
 		IsDefault   bool
 		Conditional string
@@ -64,6 +65,9 @@ func (p Profile) Options() []string {
 	}
 	if p.CanTOTP {
 		opts = append(opts, TOTPCommand)
+	}
+	if p.CanGenerate {
+		opts = append(opts, PasswordGenerateCommand)
 	}
 	return opts
 }
@@ -95,6 +99,7 @@ func loadProfiles(exe string) []Profile {
 		n.CanTOTP = p.TOTP
 		n.ReadOnly = !p.Write
 		n.IsDefault = p.Default
+		n.CanGenerate = p.Generate
 		var sub []string
 		for _, e := range p.Env {
 			sub = append(sub, fmt.Sprintf("[ %s ]", e))
