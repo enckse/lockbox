@@ -14,8 +14,10 @@ function {{ $.Executable }}-completion
   complete -c {{ $.Executable }} -n "not __fish_seen_subcommand_from $commands" -a "$commands"
   complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.HelpCommand }}; and test (count (commandline -opc)) -lt 3" -a "{{ $.HelpAdvancedCommand }}"
   if {{ $.Conditionals.ReadOnly }}
-    complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.InsertCommand }} {{ $.MultiLineCommand }} {{ $.RemoveCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList }})"
-    complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.MoveCommand }}; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoList }})"
+    if {{ $.Conditionals.AskMode }}
+      complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.InsertCommand }} {{ $.MultiLineCommand }} {{ $.RemoveCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList }})"
+      complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.MoveCommand }}; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoList }})"
+    end
   end
   if {{ $.Conditionals.NoTOTP }}
     set -f totps ""
@@ -28,12 +30,18 @@ function {{ $.Executable }}-completion
     end
 {{- end }}
     complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and not __fish_seen_subcommand_from $totps" -a "$totps"
-    complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoTOTPList }})"
+    if {{ $.Conditionals.AskMode }}
+      complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoTOTPList }})"
+    end
   end
   if {{ $.Conditionals.NoClip }} 
-    complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.ClipCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList}})"
+    if {{ $.Conditionals.AskMode }}
+      complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.ClipCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList}})"
+    end
   end
-  complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.ShowCommand }} {{ $.JSONCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList}})"
+  if {{ $.Conditionals.AskMode }}
+    complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.ShowCommand }} {{ $.JSONCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList}})"
+  end
 end
 
 {{ $.Executable }}-completion

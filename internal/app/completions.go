@@ -34,6 +34,7 @@ type (
 			ReadOnly string
 			NoClip   string
 			NoTOTP   string
+			AskMode  string
 		}
 	}
 	// CompletionOption are conditional wrapped logic for options that may be disabled
@@ -41,26 +42,31 @@ type (
 		Conditional string
 		Key         string
 	}
+	shellPreparer interface {
+		ShellIsNotConditional(string) string
+	}
+	emptyShellPreparer struct{}
 )
 
 //go:embed shell/*
 var shell embed.FS
 
-func newConditional(left, right string) string {
-	return fmt.Sprintf("[ \"%s\" != \"%s\" ]", left, right)
+func (e emptyShellPreparer) ShellIsNotConditional(s string) string {
+	return fmt.Sprintf(config.ShellIsNotConditional, "1", s)
 }
 
-func newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
-	genOption := func(to []CompletionOption, command, left, right string) []CompletionOption {
-		conditional := newConditional(left, right)
-		return append(to, CompletionOption{conditional, command})
+func newGenOptions(defaults []string, kv map[string]shellPreparer) []CompletionOption {
+	genOption := func(to []CompletionOption, command string, prep shellPreparer, compareTo string) []CompletionOption {
+		val := prep.ShellIsNotConditional(compareTo)
+		return append(to, CompletionOption{val, command})
 	}
 	opt := []CompletionOption{}
+	emptyPrepare := emptyShellPreparer{}
 	for _, a := range defaults {
-		opt = genOption(opt, a, "1", "0")
+		opt = genOption(opt, a, emptyPrepare, "0")
 	}
 	for key, env := range kv {
-		opt = genOption(opt, key, fmt.Sprintf("$%s", env), config.YesValue)
+		opt = genOption(opt, key, env, config.YesValue)
 	}
 	return opt
 }
@@ -86,24 +92,25 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 	}
-	c.Conditionals.ReadOnly = newConditional(config.EnvReadOnly.Key(), config.YesValue)
-	c.Conditionals.NoClip = newConditional(config.EnvNoClip.Key(), config.YesValue)
-	c.Conditionals.NoTOTP = newConditional(config.EnvNoTOTP.Key(), config.YesValue)
+	c.Conditionals.ReadOnly = config.EnvReadOnly.ShellIsNotConditional(config.YesValue)
+	c.Conditionals.NoClip = config.EnvNoClip.ShellIsNotConditional(config.YesValue)
+	c.Conditionals.NoTOTP = config.EnvNoTOTP.ShellIsNotConditional(config.YesValue)
+	c.Conditionals.AskMode = config.KeyModeAskConditional()
 
 	c.Options = newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
-		map[string]string{
-			ClipCommand:             config.EnvNoClip.Key(),
-			TOTPCommand:             config.EnvNoTOTP.Key(),
-			MoveCommand:             config.EnvReadOnly.Key(),
-			RemoveCommand:           config.EnvReadOnly.Key(),
-			InsertCommand:           config.EnvReadOnly.Key(),
-			MultiLineCommand:        config.EnvReadOnly.Key(),
-			PasswordGenerateCommand: config.EnvNoPasswordGen.Key(),
+		map[string]shellPreparer{
+			ClipCommand:             config.EnvNoClip,
+			TOTPCommand:             config.EnvNoTOTP,
+			MoveCommand:             config.EnvReadOnly,
+			RemoveCommand:           config.EnvReadOnly,
+			InsertCommand:           config.EnvReadOnly,
+			MultiLineCommand:        config.EnvReadOnly,
+			PasswordGenerateCommand: config.EnvNoPasswordGen,
 		})
 	c.TOTPSubCommands = newGenOptions([]string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand},
-		map[string]string{
-			TOTPClipCommand:   config.EnvNoClip.Key(),
-			TOTPInsertCommand: config.EnvReadOnly.Key(),
+		map[string]shellPreparer{
+			TOTPClipCommand:   config.EnvNoClip,
+			TOTPInsertCommand: config.EnvReadOnly,
 		})
 	using, err := readShell(completionType)
 	if err != nil {

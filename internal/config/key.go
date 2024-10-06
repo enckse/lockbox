@@ -117,3 +117,8 @@ func (k Key) Read(ask AskPassword) (string, error) {
 	}
 	return key, nil
 }
+
+// KeyModeAskConditional will get the key mode for 'ask' as a shell conditional
+func KeyModeAskConditional() string {
+	return envKeyMode.ShellIsNotConditional(string(askKeyMode))
+}

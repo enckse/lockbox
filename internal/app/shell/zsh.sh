@@ -46,13 +46,17 @@ _{{ $.Executable }}() {
         ;;
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
           if [ "$len" -eq 3 ]; then
-            compadd "$@" $({{ $.DoList }})
+            if {{ $.Conditionals.AskMode }}; then
+              compadd "$@" $({{ $.DoList }})
+            fi
           fi
         ;;
         "{{ $.MoveCommand }}")
           case "$len" in
             3 | 4)
-              compadd "$@" $({{ $.DoList }})
+              if {{ $.Conditionals.AskMode }}; then
+                compadd "$@" $({{ $.DoList }})
+              fi
             ;;
           esac
         ;;
@@ -71,7 +75,9 @@ _{{ $.Executable }}() {
 {{- range $key, $value := .TOTPSubCommands }}
                 "{{ $value.Key }}")
                   if {{ $value.Conditional }}; then
-                    compadd "$@" $({{ $.DoTOTPList }})
+                    if {{ $.Conditionals.AskMode }}; then
+                      compadd "$@" $({{ $.DoTOTPList }})
+                    fi
                   fi
                 ;;
 {{- end}}
@@ -80,7 +86,9 @@ _{{ $.Executable }}() {
         ;;
         "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
           if [ "$len" -eq 3 ]; then
-            compadd "$@" $({{ $.DoList }})
+            if {{ $.Conditionals.AskMode }}; then
+              compadd "$@" $({{ $.DoList }})
+            fi
           fi
         ;;
       esac

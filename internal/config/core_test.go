@@ -52,10 +52,10 @@ func TestKeyValue(t *testing.T) {
 	}
 }
 
-func TestKey(t *testing.T) {
-	val := config.EnvStore.Key()
-	if val != "LOCKBOX_STORE" {
-		t.Errorf("invalid key")
+func TestShellConditional(t *testing.T) {
+	val := config.EnvStore.ShellIsNotConditional("x")
+	if val != `[ "$LOCKBOX_STORE" != "x" ]` {
+		t.Errorf("invalid conditiona: %s", val)
 	}
 }
 

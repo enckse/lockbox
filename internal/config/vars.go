@@ -120,7 +120,7 @@ var (
 				}),
 		})
 	// EnvDefaultCompletionKey is the key for default completion handling
-	EnvDefaultCompletionKey = EnvDefaultCompletion.Key()
+	EnvDefaultCompletionKey = EnvDefaultCompletion.key()
 	// EnvNoColor indicates if color outputs are disabled
 	EnvNoColor = environmentRegister(
 		EnvironmentBool{
@@ -430,7 +430,7 @@ func ListEnvironmentVariables() []string {
 		if r != "" {
 			requirement = r
 		}
-		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.Key(), description, requirement, value, strings.Join(allow, "|"))
+		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.key(), description, requirement, value, strings.Join(allow, "|"))
 		results = append(results, text)
 	}
 	sort.Strings(results)
