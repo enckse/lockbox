@@ -54,7 +54,7 @@ type (
 var shell embed.FS
 
 func (e emptyShellPreparer) ShellIsNotConditional(s string) string {
-	return fmt.Sprintf(config.ShellIsNotConditional, "1", s)
+	return config.ShellIsNotConditional("1", s)
 }
 
 func newGenOptions(defaults []string, kv map[string]shellPreparer) []CompletionOption {
@@ -97,7 +97,7 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 	c.Conditionals.Not.ReadOnly = config.EnvReadOnly.ShellIsNotConditional(config.YesValue)
 	c.Conditionals.Not.NoClip = config.EnvNoClip.ShellIsNotConditional(config.YesValue)
 	c.Conditionals.Not.NoTOTP = config.EnvNoTOTP.ShellIsNotConditional(config.YesValue)
-	c.Conditionals.Not.AskMode = config.KeyModeAskConditional()
+	c.Conditionals.Not.AskMode = config.KeyModeIsNotAskConditional()
 
 	c.Options = newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 		map[string]shellPreparer{

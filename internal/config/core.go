@@ -34,8 +34,6 @@ const (
 	YesValue = yes
 	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
 	TemplateVariable = "[%]"
-	// ShellIsNotConditional is the simple shell conditional statement used for env compares in any shell
-	ShellIsNotConditional = "[ \"%s\" != \"%s\" ]"
 )
 
 var (
@@ -510,7 +508,12 @@ func newDefaultedEnvironment[T any](val T, base environmentBase) environmentDefa
 	return obj
 }
 
-// ShellIsNotConditional will produces a shell-ready conditional statement
+// ShellIsNotConditional will produce a shell-ready conditional statement for an environment variable
 func (e environmentBase) ShellIsNotConditional(compareTo string) string {
-	return fmt.Sprintf(ShellIsNotConditional, fmt.Sprintf("$%s", e.key()), compareTo)
+	return ShellIsNotConditional(fmt.Sprintf("$%s", e.key()), compareTo)
+}
+
+// ShellIsNotConditional will produce a shell-ready conditional statement
+func ShellIsNotConditional(key, compareTo string) string {
+	return fmt.Sprintf("[ \"%s\" != \"%s\" ]", key, compareTo)
 }
