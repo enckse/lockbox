@@ -33,7 +33,7 @@ _{{ $.Executable }}() {
           opts="{{ $.HelpAdvancedCommand }}"
           ;;
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
-          if {{ $.Conditionals.AskMode }}; then
+          if {{ $.Conditionals.Not.AskMode }}; then
             opts="$opts $({{ $.DoList }})"
           fi
           ;;
@@ -46,7 +46,7 @@ _{{ $.Executable }}() {
 {{- end}}
           ;;
         "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
-          if {{ $.Conditionals.AskMode }}; then
+          if {{ $.Conditionals.Not.AskMode }}; then
             opts=$({{ $.DoList }})
           fi
           ;;
@@ -55,7 +55,7 @@ _{{ $.Executable }}() {
       if [ "$COMP_CWORD" -eq 3 ]; then
         case "$chosen" in
           "{{ $.MoveCommand }}")
-            if {{ $.Conditionals.AskMode }}; then
+            if {{ $.Conditionals.Not.AskMode }}; then
               opts=$({{ $.DoList }})
             fi
             ;;
@@ -64,7 +64,7 @@ _{{ $.Executable }}() {
 {{- range $key, $value := $.TOTPSubCommands }}
               "{{ $value.Key }}")
                 if {{ $value.Conditional }}; then
-                  if {{ $.Conditionals.AskMode }}; then
+                  if {{ $.Conditionals.Not.AskMode }}; then
                     opts=$({{ $.DoTOTPList }})
                   fi
                 fi

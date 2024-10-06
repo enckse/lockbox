@@ -31,10 +31,12 @@ type (
 		Options             []CompletionOption
 		TOTPSubCommands     []CompletionOption
 		Conditionals        struct {
-			ReadOnly string
-			NoClip   string
-			NoTOTP   string
-			AskMode  string
+			Not struct {
+				ReadOnly string
+				NoClip   string
+				NoTOTP   string
+				AskMode  string
+			}
 		}
 	}
 	// CompletionOption are conditional wrapped logic for options that may be disabled
@@ -92,10 +94,10 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 	}
-	c.Conditionals.ReadOnly = config.EnvReadOnly.ShellIsNotConditional(config.YesValue)
-	c.Conditionals.NoClip = config.EnvNoClip.ShellIsNotConditional(config.YesValue)
-	c.Conditionals.NoTOTP = config.EnvNoTOTP.ShellIsNotConditional(config.YesValue)
-	c.Conditionals.AskMode = config.KeyModeAskConditional()
+	c.Conditionals.Not.ReadOnly = config.EnvReadOnly.ShellIsNotConditional(config.YesValue)
+	c.Conditionals.Not.NoClip = config.EnvNoClip.ShellIsNotConditional(config.YesValue)
+	c.Conditionals.Not.NoTOTP = config.EnvNoTOTP.ShellIsNotConditional(config.YesValue)
+	c.Conditionals.Not.AskMode = config.KeyModeAskConditional()
 
 	c.Options = newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 		map[string]shellPreparer{
