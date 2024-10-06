@@ -71,8 +71,10 @@ const (
 	JSONCommand = "json"
 	// CompletionsZshCommand is the command to generate zsh completions
 	CompletionsZshCommand = "zsh"
-	docDir                = "doc"
-	textFile              = ".txt"
+	// CompletionsFishCommand is the command to generate fish completions
+	CompletionsFishCommand = "fish"
+	docDir                 = "doc"
+	textFile               = ".txt"
 	// PasswordGenerateCommand is the command to do password generation
 	PasswordGenerateCommand = "pwgen"
 )
@@ -80,7 +82,7 @@ const (
 var (
 	//go:embed doc/*
 	docs            embed.FS
-	completionTypes = []string{CompletionsBashCommand, CompletionsZshCommand}
+	completionTypes = []string{CompletionsBashCommand, CompletionsFishCommand, CompletionsZshCommand}
 )
 
 type (

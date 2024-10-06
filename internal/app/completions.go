@@ -31,6 +31,11 @@ type (
 		HelpAdvancedCommand string
 		Options             []CompletionOption
 		TOTPSubCommands     []CompletionOption
+		Conditionals        struct {
+			ReadOnly string
+			NoClip   string
+			NoTOTP   string
+		}
 	}
 	// CompletionOption are conditional wrapped logic for options that may be disabled
 	CompletionOption struct {
@@ -87,8 +92,10 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 	}
+	c.Conditionals.ReadOnly = newConditional(config.EnvReadOnly.Key(), config.YesValue)
+	c.Conditionals.NoClip = newConditional(config.EnvNoClip.Key(), config.YesValue)
+	c.Conditionals.NoTOTP = newConditional(config.EnvNoTOTP.Key(), config.YesValue)
 
-	// TOTPSubCommands:     []string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand, TOTPClipCommand, TOTPInsertCommand},
 	cmds := newGenOptions(
 		EnvCommand,
 		HelpCommand,
