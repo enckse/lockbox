@@ -90,19 +90,6 @@ func GeneratePassword(cmd CommandOptions) error {
 		}
 		choices = append(choices, use)
 	}
-	found := len(choices)
-	if found < length {
-		return errors.New("choices <= word count requested")
-	}
-	if found > 1 {
-		l := found - 1
-		for i := 0; i <= l; i++ {
-			n := rand.Intn(l)
-			x := choices[i]
-			choices[i] = choices[n]
-			choices[n] = x
-		}
-	}
 	type position struct {
 		Start int
 		End   int
@@ -111,17 +98,17 @@ func GeneratePassword(cmd CommandOptions) error {
 		Text     string
 		Position position
 	}
+	found := len(choices)
+	if found == 0 {
+		return errors.New("no sources given")
+	}
 	var selected []word
 	cnt := 0
 	totalLength := 0
 	for cnt < length {
-		choice := choices[cnt]
+		choice := choices[rand.Intn(found)]
 		textLength := len(choice)
-		pos := position{}
-		pos.Start = totalLength
-		pos.End = pos.Start + textLength
-		w := word{choices[cnt], pos}
-		selected = append(selected, w)
+		selected = append(selected, word{choice, position{totalLength, totalLength + textLength}})
 		totalLength += textLength
 		cnt++
 	}

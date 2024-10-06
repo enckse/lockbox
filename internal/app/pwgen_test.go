@@ -39,7 +39,7 @@ func TestGenerateError(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_PWGEN_WORDLIST", pwgenPath)
-	if err := app.GeneratePassword(m); err == nil || err.Error() != "choices <= word count requested" {
+	if err := app.GeneratePassword(m); err == nil || err.Error() != "no sources given" {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Setenv("LOCKBOX_PWGEN_WORDLIST", fmt.Sprintf("%s 1", pwgenPath))
