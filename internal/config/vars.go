@@ -17,11 +17,6 @@ const (
 	fileExample          = "<file>"
 	detectedValue        = "<detected>"
 	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
-	askProfile           = "ask"
-	roProfile            = "readonly"
-	noTOTPProfile        = "nototp"
-	noClipProfile        = "noclip"
-	noGenProfile         = "nopwgen"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat = time.RFC3339
 )
@@ -125,7 +120,7 @@ var (
 				}),
 		})
 	// EnvDefaultCompletionKey is the key for default completion handling
-	EnvDefaultCompletionKey = EnvDefaultCompletion.key()
+	EnvDefaultCompletionKey = EnvDefaultCompletion.Key()
 	// EnvNoColor indicates if color outputs are disabled
 	EnvNoColor = environmentRegister(
 		EnvironmentBool{
@@ -435,7 +430,7 @@ func ListEnvironmentVariables() []string {
 		if r != "" {
 			requirement = r
 		}
-		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.key(), description, requirement, value, strings.Join(allow, "|"))
+		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.Key(), description, requirement, value, strings.Join(allow, "|"))
 		results = append(results, text)
 	}
 	sort.Strings(results)
@@ -477,83 +472,6 @@ func ParseJSONOutput() (JSONOutputMode, error) {
 		return val, nil
 	}
 	return JSONOutputs.Blank, fmt.Errorf("invalid JSON output mode: %s", val)
-}
-
-func exportProfileKeyValue(e environmentBase, val string) string {
-	return fmt.Sprintf("\"$%s\" = \"%s\"", e.key(), val)
-}
-
-func newProfile(keys []string) CompletionProfile {
-	p := CompletionProfile{}
-	p.Clip = true
-	p.List = true
-	p.TOTP = true
-	p.Write = true
-	p.Generate = true
-	name := ""
-	sort.Strings(keys)
-	var e []string
-	for _, k := range keys {
-		name = fmt.Sprintf("%s%s-", name, k)
-		switch k {
-		case askProfile:
-			e = append(e, exportProfileKeyValue(envKeyMode.environmentBase, string(askKeyMode)))
-			p.List = false
-		case noTOTPProfile:
-			e = append(e, exportProfileKeyValue(EnvNoTOTP.environmentBase, yes))
-			p.TOTP = false
-		case noClipProfile:
-			e = append(e, exportProfileKeyValue(EnvNoClip.environmentBase, yes))
-			p.Clip = false
-		case roProfile:
-			e = append(e, exportProfileKeyValue(EnvReadOnly.environmentBase, yes))
-			p.Write = false
-		case noGenProfile:
-			e = append(e, exportProfileKeyValue(EnvNoPasswordGen.environmentBase, yes))
-			p.Generate = false
-		}
-	}
-	sort.Strings(e)
-	p.Env = e
-	p.Name = strings.TrimSuffix(name, "-")
-	return p
-}
-
-func generateProfiles(keys []string) map[string]CompletionProfile {
-	m := make(map[string]CompletionProfile)
-	if len(keys) == 0 {
-		return m
-	}
-	p := newProfile(keys)
-	m[p.Name] = p
-	for _, cur := range keys {
-		var subset []string
-		for _, key := range keys {
-			if key == cur {
-				continue
-			}
-			subset = append(subset, key)
-		}
-
-		for _, p := range generateProfiles(subset) {
-			m[p.Name] = p
-		}
-	}
-	return m
-}
-
-// LoadCompletionProfiles will generate known completion profile with backing env information
-func LoadCompletionProfiles() []CompletionProfile {
-	loaded := generateProfiles([]string{noClipProfile, roProfile, noTOTPProfile, askProfile, noGenProfile})
-	var profiles []CompletionProfile
-	for _, v := range loaded {
-		profiles = append(profiles, v)
-	}
-	sort.Slice(profiles, func(i, j int) bool {
-		return strings.Compare(profiles[i].Name, profiles[j].Name) < 0
-	})
-	profiles = append(profiles, CompletionProfile{Generate: true, Clip: true, Write: true, TOTP: true, List: true, Default: true})
-	return profiles
 }
 
 // CanColor indicates if colorized output is allowed (or disabled)

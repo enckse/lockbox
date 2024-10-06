@@ -77,7 +77,7 @@ func info(command string, args []string) ([]string, error) {
 			return nil, errors.New("invalid completions subcommand")
 		}
 		switch shell {
-		case CompletionsZshCommand, CompletionsBashCommand, CompletionsFishCommand:
+		case CompletionsZshCommand, CompletionsBashCommand:
 			break
 		default:
 			return nil, fmt.Errorf("unknown completion type: %s", shell)

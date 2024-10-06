@@ -1,11 +1,7 @@
 #compdef _{{ $.Executable }} {{ $.Executable }}
 
-{{ $.Shell }}
-
-{{- range $idx, $profile := $.Profiles }}
-
-{{ $profile.Name }}() {
-  local curcontext="$curcontext" state len
+_{{ $.Executable }}() {
+  local curcontext="$curcontext" state len chosen found args
   typeset -A opt_args
 
   _arguments \
@@ -15,17 +11,39 @@
   len=${#words[@]}
   case $state in
     main)
-      _arguments '1:main:({{ range $idx, $value := $profile.Options }}{{ if gt $idx 0}} {{ end }}{{ $value }}{{ end }})'
+      args=""
+{{- range $idx, $value := $.Options }}
+      if {{ $value.Conditional }}; then
+        if [ -n "$args" ]; then
+          args="$args "
+        fi
+        args="${args}{{ $value.Key }}"
+      fi
+{{- end }}
+      _arguments "1:main:($args)"
     ;;
     *)
-      case $words[2] in
+      if [ "$len" -lt 2 ]; then
+        return
+      fi
+      chosen=$words[2]
+      found=0
+{{- range $idx, $value := $.Options }}
+      if {{ $value.Conditional }}; then
+        if [[ "$chosen" == "{{ $value.Key }}" ]]; then
+          found=1
+        fi
+      fi
+{{- end }}
+      if [ "$found" -eq 0 ]; then
+        return
+      fi
+      case $chosen in
         "{{ $.HelpCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" "{{ $.HelpAdvancedCommand }}"
           fi
         ;;
-{{- if not $profile.ReadOnly }}
-{{- if $profile.CanList }}
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
@@ -38,37 +56,35 @@
             ;;
           esac
         ;;
-{{- end}}
-{{- end}}
-{{- if $profile.CanTOTP }}
         "{{ $.TOTPCommand }}")
           case "$len" in
             3)
-              compadd "$@" {{ $.TOTPListCommand }}{{ range $key, $value := .TOTPSubCommands }} {{ $value }}{{ end }}
+              compadd "$@" {{ $.TOTPListCommand }}
+{{- range $key, $value := .TOTPSubCommands }}
+              if {{ $value.Conditional }}; then
+                compadd "$@" {{ $value.Key }}
+              fi
+{{ end }}
             ;;
-{{- if $profile.CanList }}
             4)
               case $words[3] in
 {{- range $key, $value := .TOTPSubCommands }}
-                "{{ $value }}")
-                  compadd "$@" $({{ $.DoTOTPList }})
+                "{{ $value.Key }}")
+                  if {{ $value.Conditional }}; then
+                    compadd "$@" $({{ $.DoTOTPList }})
+                  fi
                 ;;
 {{- end}}
               esac
-{{- end}}
           esac
         ;;
-{{- end}}
-{{- if $profile.CanList }}
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $profile.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
         ;;
-{{- end}}
       esac
   esac
 }
-{{- end}}
 
-compdef _lb lb
+compdef _{{ $.Executable }} {{ $.Executable }}

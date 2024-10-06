@@ -10,7 +10,7 @@ all: $(TARGET)
 
 build: $(TARGET)
 
-$(TARGET): cmd/main.go internal/**/*.go  go.* internal/app/doc/*
+$(TARGET): cmd/main.go internal/**/*.go  go.* internal/app/doc/* internal/app/shell/*
 ifeq ($(VERSION),)
 	$(error version not set)
 endif

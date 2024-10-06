@@ -6,7 +6,6 @@ import (
 	"embed"
 	"fmt"
 	"slices"
-	"strings"
 	"text/template"
 
 	"github.com/seanenck/lockbox/internal/config"
@@ -30,97 +29,41 @@ type (
 		DefaultCompletion   string
 		HelpCommand         string
 		HelpAdvancedCommand string
-		Profiles            []Profile
-		Shell               string
-		CompletionEnv       string
-		IsYes               string
-		DefaultProfile      Profile
-		IsFish              bool
+		Options             []CompletionOption
+		TOTPSubCommands     []CompletionOption
 	}
-
-	// Profile is a completion profile
-	Profile struct {
-		Name        string
-		CanClip     bool
-		CanTOTP     bool
-		CanList     bool
-		CanGenerate bool
-		ReadOnly    bool
-		IsDefault   bool
+	// CompletionOption are conditional wrapped logic for options that may be disabled
+	CompletionOption struct {
 		Conditional string
+		Key         string
 	}
 )
 
 //go:embed shell/*
 var shell embed.FS
 
-// Options will list the profile options
-func (p Profile) Options() []string {
-	opts := []string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand}
-	if p.CanClip {
-		opts = append(opts, ClipCommand)
-	}
-	if !p.ReadOnly {
-		opts = append(opts, MoveCommand, RemoveCommand, InsertCommand, MultiLineCommand)
-	}
-	if p.CanTOTP {
-		opts = append(opts, TOTPCommand)
-	}
-	if p.CanGenerate {
-		opts = append(opts, PasswordGenerateCommand)
-	}
-	return opts
+func newConditional(left, right string) string {
+	return fmt.Sprintf("[ \"%s\" != \"%s\" ]", left, right)
 }
 
-// TOTPSubCommands are the list of sub commands for TOTP within the profile
-func (p Profile) TOTPSubCommands() []string {
-	totp := []string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand}
-	if p.CanClip {
-		totp = append(totp, TOTPClipCommand)
-	}
-	if !p.ReadOnly {
-		totp = append(totp, TOTPInsertCommand)
-	}
-	return totp
+func genOption(to []CompletionOption, command, left, right string) []CompletionOption {
+	conditional := newConditional(left, right)
+	return append(to, CompletionOption{conditional, command})
 }
 
-func loadProfiles(exe string) []Profile {
-	profiles := config.LoadCompletionProfiles()
-	conditionals := make(map[int][]Profile)
-	maxCount := 0
-	for _, p := range profiles {
-		name := p.Name
-		if p.Default {
-			name = "default"
-		}
-		n := Profile{Name: fmt.Sprintf("_%s-%s", exe, name)}
-		n.CanClip = p.Clip
-		n.CanList = p.List
-		n.CanTOTP = p.TOTP
-		n.ReadOnly = !p.Write
-		n.IsDefault = p.Default
-		n.CanGenerate = p.Generate
-		var sub []string
-		for _, e := range p.Env {
-			sub = append(sub, fmt.Sprintf("[ %s ]", e))
-		}
-		n.Conditional = strings.Join(sub, " && ")
-		count := len(p.Env)
-		val := conditionals[count]
-		conditionals[count] = append(val, n)
-		if count > maxCount {
-			maxCount = count
-		}
+func newGenOptions(defaults ...string) []CompletionOption {
+	opt := []CompletionOption{}
+	for _, a := range defaults {
+		opt = genOption(opt, a, "1", "0")
 	}
-	var res []Profile
-	for maxCount >= 0 {
-		val, ok := conditionals[maxCount]
-		if ok {
-			res = append(res, val...)
-		}
-		maxCount--
+	return opt
+}
+
+func genOptionKeyValues(to []CompletionOption, kv map[string]string) []CompletionOption {
+	for key, env := range kv {
+		to = genOption(to, key, fmt.Sprintf("$%s", env), config.YesValue)
 	}
-	return res
+	return to
 }
 
 // GenerateCompletions handles creating shell completion outputs
@@ -143,31 +86,37 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
-		DefaultCompletion:   fmt.Sprintf("$%s", config.EnvDefaultCompletionKey),
-		IsYes:               config.YesValue,
-		IsFish:              completionType == CompletionsFishCommand,
 	}
 
+	// TOTPSubCommands:     []string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand, TOTPClipCommand, TOTPInsertCommand},
+	cmds := newGenOptions(
+		EnvCommand,
+		HelpCommand,
+		ListCommand,
+		ShowCommand,
+		VersionCommand,
+		JSONCommand,
+	)
+	cmds = genOptionKeyValues(cmds, map[string]string{
+		ClipCommand:             config.EnvNoClip.Key(),
+		TOTPCommand:             config.EnvNoTOTP.Key(),
+		MoveCommand:             config.EnvReadOnly.Key(),
+		RemoveCommand:           config.EnvReadOnly.Key(),
+		InsertCommand:           config.EnvReadOnly.Key(),
+		MultiLineCommand:        config.EnvReadOnly.Key(),
+		PasswordGenerateCommand: config.EnvNoPasswordGen.Key(),
+	})
+	c.Options = cmds
+	totp := newGenOptions(TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand)
+	totp = genOptionKeyValues(totp, map[string]string{
+		TOTPClipCommand:   config.EnvNoClip.Key(),
+		TOTPInsertCommand: config.EnvReadOnly.Key(),
+	})
+	c.TOTPSubCommands = totp
 	using, err := readShell(completionType)
 	if err != nil {
 		return nil, err
 	}
-	shellScript, err := readShell("shell")
-	if err != nil {
-		return nil, err
-	}
-	c.Profiles = loadProfiles(exe)
-	for _, p := range c.Profiles {
-		if p.IsDefault {
-			c.DefaultProfile = p
-			break
-		}
-	}
-	shell, err := templateScript(shellScript, c)
-	if err != nil {
-		return nil, err
-	}
-	c.Shell = shell
 	s, err := templateScript(using, c)
 	if err != nil {
 		return nil, err

@@ -269,28 +269,6 @@ func TestEnvironDefinitions(t *testing.T) {
 	}
 }
 
-func TestLoadCompletionProfiles(t *testing.T) {
-	p := config.LoadCompletionProfiles()
-	if len(p) != 32 {
-		t.Errorf("invalid completion count: %d", len(p))
-	}
-	exp := len(p) - 1
-	for idx, prof := range p {
-		if prof.Default {
-			if idx != exp {
-				t.Error("profile defaulted incorrectly")
-			}
-			if prof.Name != "" {
-				t.Error("default profile is unnamed")
-			}
-		} else {
-			if len(prof.Env) == 0 {
-				t.Error("profile has no environment information")
-			}
-		}
-	}
-}
-
 func TestCanColor(t *testing.T) {
 	defer os.Clearenv()
 	os.Clearenv()

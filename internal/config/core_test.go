@@ -52,6 +52,13 @@ func TestKeyValue(t *testing.T) {
 	}
 }
 
+func TestKey(t *testing.T) {
+	val := config.EnvStore.Key()
+	if val != "LOCKBOX_STORE" {
+		t.Errorf("invalid key")
+	}
+}
+
 func TestNewPlatform(t *testing.T) {
 	for _, item := range config.Platforms.List() {
 		os.Setenv("LOCKBOX_PLATFORM", item)

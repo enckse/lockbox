@@ -74,7 +74,6 @@ func TestCompletionInfo(t *testing.T) {
 	defer os.Clearenv()
 	for k, v := range map[string]string{
 		"zsh":  "typeset -A opt_args",
-		"fish": "set -l commands",
 		"bash": "local cur opts",
 	} {
 		for _, b := range []bool{true, false} {

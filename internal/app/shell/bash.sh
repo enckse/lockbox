@@ -1,68 +1,71 @@
 # {{ $.Executable }} completion
 
-{{ $.Shell }}
-
-{{- range $idx, $profile := $.Profiles }}
-
-{{ $profile.Name }}() {
-  local cur opts
+_{{ $.Executable }}() {
+  local cur opts chosen found
   cur=${COMP_WORDS[COMP_CWORD]}
   if [ "$COMP_CWORD" -eq 1 ]; then
-{{- range $idx, $value := $profile.Options }}
-    opts="${opts}{{ $value }} "
+{{- range $idx, $value := $.Options }}
+    if {{ $value.Conditional }}; then
+      opts="${opts}{{ $value.Key }} "
+    fi
 {{- end}}
     # shellcheck disable=SC2207
     COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
   else
+    if [ "$COMP_CWORD" -lt 2 ]; then
+      return
+    fi
+    chosen=${COMP_WORDS[1]}
+    found=0
+{{- range $idx, $value := $.Options }}
+    if {{ $value.Conditional }}; then
+      if [ "$chosen" == "{{ $value.Key }}" ]; then
+        found=1
+      fi
+    fi
+{{- end}}
+    if [ "$found" -eq 0 ]; then
+      return
+    fi
     if [ "$COMP_CWORD" -eq 2 ]; then
-      case ${COMP_WORDS[1]} in
+      case "$chosen" in
         "{{ $.HelpCommand }}")
           opts="{{ $.HelpAdvancedCommand }}"
           ;;
-{{- if not $profile.ReadOnly }}
-{{- if $profile.CanList }}
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
           opts="$opts $({{ $.DoList }})"
           ;;
-{{- end}}
-{{- end}}
-{{- if $profile.CanTOTP }}
         "{{ $.TOTPCommand }}")
           opts="{{ $.TOTPListCommand }} "
 {{- range $key, $value := .TOTPSubCommands }}
-          opts="$opts {{ $value }}"
+          if {{ $value.Conditional }}; then
+            opts="$opts {{ $value.Key }}"
+          fi
 {{- end}}
           ;;
-{{- end}}
-{{- if $profile.CanList }}
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}"{{ if $profile.CanClip }} | "{{ $.ClipCommand }}" {{end}})
+        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
           opts=$({{ $.DoList }})
           ;;
-{{- end}}
       esac
-{{- if $profile.CanList }}
     else
       if [ "$COMP_CWORD" -eq 3 ]; then
-        case "${COMP_WORDS[1]}" in
-{{- if not $profile.ReadOnly }}
+        case "$chosen" in
           "{{ $.MoveCommand }}")
             opts=$({{ $.DoList }})
             ;;
-{{- end }}
-{{- if $profile.CanTOTP }}
           "{{ $.TOTPCommand }}")
             case "${COMP_WORDS[2]}" in
-{{- range $key, $value := $profile.TOTPSubCommands }}
-              "{{ $value }}")
-                opts=$({{ $.DoTOTPList }})
+{{- range $key, $value := $.TOTPSubCommands }}
+              "{{ $value.Key }}")
+                if {{ $value.Conditional }}; then
+                  opts=$({{ $.DoTOTPList }})
+                fi
                 ;;
 {{- end}}
             esac
             ;;
-{{- end}}
         esac
       fi
-{{- end}}
     fi
     if [ -n "$opts" ]; then
       # shellcheck disable=SC2207
@@ -70,6 +73,5 @@
     fi
   fi
 }
-{{- end}}
 
 complete -F _{{ $.Executable }} -o bashdefault {{ $.Executable }}
