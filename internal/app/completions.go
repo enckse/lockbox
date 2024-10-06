@@ -26,7 +26,6 @@ type (
 		DoList              string
 		Executable          string
 		JSONCommand         string
-		DefaultCompletion   string
 		HelpCommand         string
 		HelpAdvancedCommand string
 		Options             []CompletionOption
