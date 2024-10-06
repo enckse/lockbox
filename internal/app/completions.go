@@ -55,19 +55,15 @@ func genOption(to []CompletionOption, command, left, right string) []CompletionO
 	return append(to, CompletionOption{conditional, command})
 }
 
-func newGenOptions(defaults ...string) []CompletionOption {
+func newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
 	opt := []CompletionOption{}
 	for _, a := range defaults {
 		opt = genOption(opt, a, "1", "0")
 	}
-	return opt
-}
-
-func genOptionKeyValues(to []CompletionOption, kv map[string]string) []CompletionOption {
 	for key, env := range kv {
-		to = genOption(to, key, fmt.Sprintf("$%s", env), config.YesValue)
+		opt = genOption(opt, key, fmt.Sprintf("$%s", env), config.YesValue)
 	}
-	return to
+	return opt
 }
 
 // GenerateCompletions handles creating shell completion outputs
@@ -95,30 +91,21 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 	c.Conditionals.NoClip = newConditional(config.EnvNoClip.Key(), config.YesValue)
 	c.Conditionals.NoTOTP = newConditional(config.EnvNoTOTP.Key(), config.YesValue)
 
-	cmds := newGenOptions(
-		EnvCommand,
-		HelpCommand,
-		ListCommand,
-		ShowCommand,
-		VersionCommand,
-		JSONCommand,
-	)
-	cmds = genOptionKeyValues(cmds, map[string]string{
-		ClipCommand:             config.EnvNoClip.Key(),
-		TOTPCommand:             config.EnvNoTOTP.Key(),
-		MoveCommand:             config.EnvReadOnly.Key(),
-		RemoveCommand:           config.EnvReadOnly.Key(),
-		InsertCommand:           config.EnvReadOnly.Key(),
-		MultiLineCommand:        config.EnvReadOnly.Key(),
-		PasswordGenerateCommand: config.EnvNoPasswordGen.Key(),
-	})
-	c.Options = cmds
-	totp := newGenOptions(TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand)
-	totp = genOptionKeyValues(totp, map[string]string{
-		TOTPClipCommand:   config.EnvNoClip.Key(),
-		TOTPInsertCommand: config.EnvReadOnly.Key(),
-	})
-	c.TOTPSubCommands = totp
+	c.Options = newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
+		map[string]string{
+			ClipCommand:             config.EnvNoClip.Key(),
+			TOTPCommand:             config.EnvNoTOTP.Key(),
+			MoveCommand:             config.EnvReadOnly.Key(),
+			RemoveCommand:           config.EnvReadOnly.Key(),
+			InsertCommand:           config.EnvReadOnly.Key(),
+			MultiLineCommand:        config.EnvReadOnly.Key(),
+			PasswordGenerateCommand: config.EnvNoPasswordGen.Key(),
+		})
+	c.TOTPSubCommands = newGenOptions([]string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand},
+		map[string]string{
+			TOTPClipCommand:   config.EnvNoClip.Key(),
+			TOTPInsertCommand: config.EnvReadOnly.Key(),
+		})
 	using, err := readShell(completionType)
 	if err != nil {
 		return nil, err
