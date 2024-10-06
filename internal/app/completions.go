@@ -50,12 +50,11 @@ func newConditional(left, right string) string {
 	return fmt.Sprintf("[ \"%s\" != \"%s\" ]", left, right)
 }
 
-func genOption(to []CompletionOption, command, left, right string) []CompletionOption {
-	conditional := newConditional(left, right)
-	return append(to, CompletionOption{conditional, command})
-}
-
 func newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
+	genOption := func(to []CompletionOption, command, left, right string) []CompletionOption {
+		conditional := newConditional(left, right)
+		return append(to, CompletionOption{conditional, command})
+	}
 	opt := []CompletionOption{}
 	for _, a := range defaults {
 		opt = genOption(opt, a, "1", "0")
