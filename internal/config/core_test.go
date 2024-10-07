@@ -52,20 +52,6 @@ func TestKeyValue(t *testing.T) {
 	}
 }
 
-func TestShellIsNotConditionalEnv(t *testing.T) {
-	val := config.EnvStore.ShellIsNotConditional("x")
-	if val != `[ "$LOCKBOX_STORE" != "x" ]` {
-		t.Errorf("invalid conditiona: %s", val)
-	}
-}
-
-func TestShellIsNotConditional(t *testing.T) {
-	val := config.ShellIsNotConditional("y", "x")
-	if val != `[ "y" != "x" ]` {
-		t.Errorf("invalid conditiona: %s", val)
-	}
-}
-
 func TestNewPlatform(t *testing.T) {
 	for _, item := range config.Platforms.List() {
 		os.Setenv("LOCKBOX_PLATFORM", item)

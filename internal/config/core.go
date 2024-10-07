@@ -129,13 +129,13 @@ func environOrDefault(envKey, defaultValue string) string {
 	return val
 }
 
-func (e environmentBase) key() string {
+func (e environmentBase) Key() string {
 	return fmt.Sprintf("LOCKBOX_%s%s", string(e.cat), e.subKey)
 }
 
 // Get will get the boolean value for the setting
 func (e EnvironmentBool) Get() (bool, error) {
-	read := strings.ToLower(strings.TrimSpace(getExpand(e.key())))
+	read := strings.ToLower(strings.TrimSpace(getExpand(e.Key())))
 	switch read {
 	case no:
 		return false, nil
@@ -145,13 +145,13 @@ func (e EnvironmentBool) Get() (bool, error) {
 		return e.defaultValue, nil
 	}
 
-	return false, fmt.Errorf("invalid yes/no env value for %s", e.key())
+	return false, fmt.Errorf("invalid yes/no env value for %s", e.Key())
 }
 
 // Get will get the integer value for the setting
 func (e EnvironmentInt) Get() (int, error) {
 	val := e.defaultValue
-	use := getExpand(e.key())
+	use := getExpand(e.Key())
 	if use != "" {
 		i, err := strconv.Atoi(use)
 		if err != nil {
@@ -179,14 +179,14 @@ func (e EnvironmentInt) Get() (int, error) {
 // Get will read the string from the environment
 func (e EnvironmentString) Get() string {
 	if !e.canDefault {
-		return getExpand(e.key())
+		return getExpand(e.Key())
 	}
-	return environOrDefault(e.key(), e.defaultValue)
+	return environOrDefault(e.Key(), e.defaultValue)
 }
 
 // Get will read (and shlex) the value if set
 func (e EnvironmentCommand) Get() ([]string, error) {
-	value := environOrDefault(e.key(), "")
+	value := environOrDefault(e.Key(), "")
 	if strings.TrimSpace(value) == "" {
 		return nil, nil
 	}
@@ -195,24 +195,24 @@ func (e EnvironmentCommand) Get() ([]string, error) {
 
 // KeyValue will get the string representation of the key+value
 func (e environmentBase) KeyValue(value string) string {
-	return fmt.Sprintf("%s=%s", e.key(), value)
+	return fmt.Sprintf("%s=%s", e.Key(), value)
 }
 
 // Setenv will do an environment set for the value to key
 func (e environmentBase) Set(value string) error {
-	unset, err := IsUnset(e.key(), value)
+	unset, err := IsUnset(e.Key(), value)
 	if err != nil {
 		return err
 	}
 	if unset {
 		return nil
 	}
-	return os.Setenv(e.key(), value)
+	return os.Setenv(e.Key(), value)
 }
 
 // Get will retrieve the value with the formatted input included
 func (e EnvironmentFormatter) Get(value string) string {
-	return e.fxn(e.key(), value)
+	return e.fxn(e.Key(), value)
 }
 
 func (e EnvironmentString) values() (string, []string) {
@@ -346,8 +346,8 @@ func Environ() []string {
 	var results []string
 	for _, k := range os.Environ() {
 		for _, r := range registeredEnv {
-			key := r.self().key()
-			if key == EnvConfig.key() {
+			key := r.self().Key()
+			if key == EnvConfig.Key() {
 				continue
 			}
 			key = fmt.Sprintf("%s=", key)
@@ -371,7 +371,7 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	}
 	var err error
 	var cycles int
-	possibleCycles, ok := inputs[envConfigExpands.key()]
+	possibleCycles, ok := inputs[envConfigExpands.Key()]
 	if ok {
 		cycles, err = strconv.Atoi(possibleCycles)
 	} else {
@@ -506,14 +506,4 @@ func newDefaultedEnvironment[T any](val T, base environmentBase) environmentDefa
 	obj.environmentBase = base
 	obj.defaultValue = val
 	return obj
-}
-
-// ShellIsNotConditional will produce a shell-ready conditional statement for an environment variable
-func (e environmentBase) ShellIsNotConditional(compareTo string) string {
-	return ShellIsNotConditional(fmt.Sprintf("$%s", e.key()), compareTo)
-}
-
-// ShellIsNotConditional will produce a shell-ready conditional statement
-func ShellIsNotConditional(key, compareTo string) string {
-	return fmt.Sprintf("[ \"%s\" != \"%s\" ]", key, compareTo)
 }

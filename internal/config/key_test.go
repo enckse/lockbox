@@ -202,10 +202,3 @@ func TestCommandKey(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 }
-
-func TestKeyModeAskConditional(t *testing.T) {
-	val := config.KeyModeIsNotAskConditional()
-	if val != `[ "$LOCKBOX_KEYMODE" != "ask" ]` {
-		t.Errorf("invalid value: %s", val)
-	}
-}

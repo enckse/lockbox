@@ -23,8 +23,9 @@ type (
 
 const (
 	plainKeyMode KeyModeType = "plaintext"
-	askKeyMode   KeyModeType = "ask"
-	noKeyMode    KeyModeType = "none"
+	// AskKeyMode is the mode in which the user is prompted for key input (each time)
+	AskKeyMode KeyModeType = "ask"
+	noKeyMode  KeyModeType = "none"
 	// IgnoreKeyMode will ignore the value set in the key (acts like no key)
 	IgnoreKeyMode  KeyModeType = "ignore"
 	commandKeyMode KeyModeType = "command"
@@ -35,7 +36,7 @@ const (
 // NewKey will create a new key
 func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	useKey := envKey.Get()
-	keyMode := envKeyMode.Get()
+	keyMode := EnvKeyMode.Get()
 	if keyMode == "" {
 		keyMode = string(defaultKeyModeType)
 	}
@@ -46,7 +47,7 @@ func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	case string(noKeyMode):
 		requireEmptyKey = true
 	case string(commandKeyMode), string(plainKeyMode):
-	case string(askKeyMode):
+	case string(AskKeyMode):
 		isInteractive, err := EnvInteractive.Get()
 		if err != nil {
 			return Key{}, err
@@ -77,7 +78,7 @@ func (k Key) empty() bool {
 
 // Ask will indicate if prompting is required to get the key
 func (k Key) Ask() bool {
-	return k.valid && k.mode == askKeyMode
+	return k.valid && k.mode == AskKeyMode
 }
 
 // Read will read the key as configured by the mode
@@ -93,7 +94,7 @@ func (k Key) Read(ask AskPassword) (string, error) {
 	}
 	useKey := k.inputKey
 	switch k.mode {
-	case askKeyMode:
+	case AskKeyMode:
 		read, err := ask()
 		if err != nil {
 			return "", err
@@ -116,9 +117,4 @@ func (k Key) Read(ask AskPassword) (string, error) {
 		return "", errors.New("key is empty")
 	}
 	return key, nil
-}
-
-// KeyModeIsNotAskConditional will get the key mode for 'ask' as a shell conditional
-func KeyModeIsNotAskConditional() string {
-	return envKeyMode.ShellIsNotConditional(string(askKeyMode))
 }

@@ -120,7 +120,7 @@ var (
 				}),
 		})
 	// EnvDefaultCompletionKey is the key for default completion handling
-	EnvDefaultCompletionKey = EnvDefaultCompletion.key()
+	EnvDefaultCompletionKey = EnvDefaultCompletion.Key()
 	// EnvNoColor indicates if color outputs are disabled
 	EnvNoColor = environmentRegister(
 		EnvironmentBool{
@@ -288,7 +288,8 @@ Note that this setting is not output as part of the environment.`, noEnvironment
 			canDefault: true,
 			allowed:    []string{detectEnvironment, fileExample, noEnvironment},
 		})
-	envKeyMode = environmentRegister(
+	// EnvKeyMode is the variable for indicating the keymode used to get the key
+	EnvKeyMode = environmentRegister(
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(string(DefaultKeyMode),
 				environmentBase{
@@ -297,7 +298,7 @@ Note that this setting is not output as part of the environment.`, noEnvironment
 					desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
 Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				}),
-			allowed:    []string{string(askKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
+			allowed:    []string{string(AskKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
 			canDefault: true,
 		})
 	envKey = environmentRegister(
@@ -430,7 +431,7 @@ func ListEnvironmentVariables() []string {
 		if r != "" {
 			requirement = r
 		}
-		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.key(), description, requirement, value, strings.Join(allow, "|"))
+		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.Key(), description, requirement, value, strings.Join(allow, "|"))
 		results = append(results, text)
 	}
 	sort.Strings(results)
