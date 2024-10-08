@@ -135,7 +135,11 @@ func (e environmentBase) Key() string {
 
 // Get will get the boolean value for the setting
 func (e EnvironmentBool) Get() (bool, error) {
-	read := strings.ToLower(strings.TrimSpace(getExpand(e.Key())))
+	return parseStringYesNo(e, getExpand(e.Key()))
+}
+
+func parseStringYesNo(e EnvironmentBool, in string) (bool, error) {
+	read := strings.ToLower(strings.TrimSpace(in))
 	switch read {
 	case no:
 		return false, nil
@@ -361,6 +365,18 @@ func Environ() []string {
 	return results
 }
 
+func parseConfigKeyEarly[T any](env interface {
+	Key() string
+	Get() (T, error)
+}, inputs map[string]string, conv func(string) (T, error),
+) (T, error) {
+	raw, ok := inputs[env.Key()]
+	if ok {
+		return conv(raw)
+	}
+	return env.Get()
+}
+
 // ExpandParsed handles cycles of parsing configuration env inputs to resolve ALL variables
 func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	if inputs == nil {
@@ -369,14 +385,13 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	if len(inputs) == 0 {
 		return inputs, nil
 	}
-	var err error
-	var cycles int
-	possibleCycles, ok := inputs[envConfigExpands.Key()]
-	if ok {
-		cycles, err = strconv.Atoi(possibleCycles)
-	} else {
-		cycles, err = envConfigExpands.Get()
+	cycles, err := parseConfigKeyEarly(envConfigExpands, inputs, strconv.Atoi)
+	if err != nil {
+		return nil, err
 	}
+	quoted, err := parseConfigKeyEarly(envConfigQuoted, inputs, func(v string) (bool, error) {
+		return parseStringYesNo(envConfigQuoted, v)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -385,7 +400,7 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	}
 	result := inputs
 	for cycles > 0 {
-		expanded := expandParsed(result)
+		expanded := expandParsed(result, quoted)
 		if len(expanded) == len(result) {
 			same := true
 			for k, v := range expanded {
@@ -409,12 +424,18 @@ func ExpandParsed(inputs map[string]string) (map[string]string, error) {
 	return nil, errors.New("reached maximum expand cycle count")
 }
 
-func expandParsed(inputs map[string]string) map[string]string {
+func expandParsed(inputs map[string]string, quoted bool) map[string]string {
 	result := make(map[string]string)
 	for k, v := range inputs {
-		result[k] = os.Expand(v, func(in string) string {
-			if val, ok := inputs[in]; ok {
-				return val
+		val := v
+		if quoted {
+			if strings.HasPrefix(val, "\"") && strings.HasSuffix(val, "\"") {
+				val = strings.TrimPrefix(strings.TrimSuffix(val, "\""), "\"")
+			}
+		}
+		result[k] = os.Expand(val, func(in string) string {
+			if i, ok := inputs[in]; ok {
+				return i
 			}
 			return os.Getenv(in)
 		})

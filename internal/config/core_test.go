@@ -231,6 +231,33 @@ func TestExpandParsed(t *testing.T) {
 	if err != nil || len(r) != 2 || r["TEST"] != "$TEST_ABC" {
 		t.Errorf("invalid expand: %v", r)
 	}
+	ins["LOCKBOX_ENV_EXPANDS"] = "5"
+	ins["TEST"] = "\"abc\""
+	os.Setenv("LOCKBOX_ENV_QUOTED", "yes")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 2 || r["TEST"] != "abc" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	os.Setenv("LOCKBOX_ENV_QUOTED", "no")
+	ins["TEST"] = "\"abc\""
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 2 || r["TEST"] != "\"abc\"" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	os.Unsetenv("LOCKBOX_ENV_QUOTED")
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 2 || r["TEST"] != "abc" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	ins["LOCKBOX_ENV_QUOTED"] = "yes"
+	r, err = config.ExpandParsed(ins)
+	if err != nil || len(r) != 3 || r["TEST"] != "abc" {
+		t.Errorf("invalid expand: %v", r)
+	}
+	ins["LOCKBOX_ENV_QUOTED"] = "1"
+	if _, err = config.ExpandParsed(ins); err == nil || err.Error() != "invalid yes/no env value for LOCKBOX_ENV_QUOTED" {
+		t.Errorf("invalid error: %v", err)
+	}
 }
 
 func TestWrap(t *testing.T) {

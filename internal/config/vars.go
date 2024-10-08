@@ -314,6 +314,14 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			allowed:    []string{commandArgsExample, "password"},
 			canDefault: false,
 		})
+	envConfigQuoted = environmentRegister(
+		EnvironmentBool{
+			environmentDefault: newDefaultedEnvironment(true,
+				environmentBase{
+					subKey: EnvConfig.subKey + "_QUOTED",
+					desc:   "Enables removing prefix/suffix quotes from shell environment config settings\nwhen loaded through configuration file.",
+				}),
+		})
 	envConfigExpands = environmentRegister(
 		EnvironmentInt{
 			environmentDefault: newDefaultedEnvironment(20,

@@ -2,15 +2,12 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-
-	env "github.com/hashicorp/go-envparse"
 
 	"github.com/seanenck/lockbox/internal/app"
 	"github.com/seanenck/lockbox/internal/config"
@@ -48,35 +45,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	for _, useEnv := range paths {
-		if !platform.PathExists(useEnv) {
-			continue
-		}
-		b, err := os.ReadFile(useEnv)
-		if err != nil {
-			return err
-		}
-		r := bytes.NewReader(b)
-		found, err := env.Parse(r)
-		if err != nil {
-			return err
-		}
-		result, err := config.ExpandParsed(found)
-		if err != nil {
-			return err
-		}
-		for k, v := range result {
-			ok, err := config.IsUnset(k, v)
-			if err != nil {
-				return err
-			}
-			if !ok {
-				if err := os.Setenv(k, v); err != nil {
-					return err
-				}
-			}
-		}
-		break
+	if err := platform.LoadEnvConfigs(paths...); err != nil {
+		return err
 	}
 	args := os.Args
 	if len(args) < 2 {
