@@ -34,12 +34,16 @@ const (
 	YesValue = yes
 	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
 	TemplateVariable = "[%]"
+	configDirName    = "lockbox"
+	configDir        = ".config"
 )
 
 var (
-	detectEnvironmentPaths = []string{filepath.Join(".config", envFile), filepath.Join(".config", "lockbox", envFile)}
-	exampleColorWindows    = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
-	registeredEnv          = []printer{}
+	configDirOffsetFile = filepath.Join(configDirName, envFile)
+	xdgPaths            = []string{configDirOffsetFile, envFile}
+	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, envFile)}
+	exampleColorWindows = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
+	registeredEnv       = []printer{}
 )
 
 type (
@@ -326,15 +330,21 @@ func NewEnvFiles() ([]string, error) {
 	if v != detectEnvironment {
 		return []string{v}, nil
 	}
+	var options []string
+	pathAdder := func(root string, err error, subs []string) {
+		if err == nil && root != "" {
+			for _, s := range subs {
+				options = append(options, filepath.Join(root, s))
+			}
+		}
+	}
+	pathAdder(os.Getenv("XDG_CONFIG_HOME"), nil, xdgPaths)
 	h, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
+	pathAdder(h, err, homePaths)
+	if len(options) == 0 {
+		return nil, errors.New("unable to initialize default config locations")
 	}
-	var results []string
-	for _, p := range detectEnvironmentPaths {
-		results = append(results, filepath.Join(h, p))
-	}
-	return results, nil
+	return options, nil
 }
 
 // IsUnset will indicate if a variable is an unset (and unset it) or return that it isn't

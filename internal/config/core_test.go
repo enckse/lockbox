@@ -107,6 +107,7 @@ func TestParseWindows(t *testing.T) {
 }
 
 func TestNewEnvFiles(t *testing.T) {
+	os.Clearenv()
 	os.Setenv("LOCKBOX_ENV", "none")
 	f, err := config.NewEnvFiles()
 	if len(f) != 0 || err != nil {
@@ -122,6 +123,24 @@ func TestNewEnvFiles(t *testing.T) {
 	f, err = config.NewEnvFiles()
 	if len(f) != 2 || err != nil {
 		t.Errorf("invalid files: %v %v", f, err)
+	}
+	os.Setenv("LOCKBOX_ENV", "detect")
+	os.Setenv("XDG_CONFIG_HOME", "test")
+	f, err = config.NewEnvFiles()
+	if len(f) != 4 || err != nil {
+		t.Errorf("invalid files: %v %v", f, err)
+	}
+	os.Setenv("LOCKBOX_ENV", "detect")
+	os.Unsetenv("HOME")
+	f, err = config.NewEnvFiles()
+	if len(f) != 2 || err != nil {
+		t.Errorf("invalid files: %v %v", f, err)
+	}
+	os.Setenv("LOCKBOX_ENV", "detect")
+	os.Unsetenv("XDG_CONFIG_HOME")
+	_, err = config.NewEnvFiles()
+	if err == nil || err.Error() != "unable to initialize default config locations" {
+		t.Errorf("invalid files: %v", err)
 	}
 }
 

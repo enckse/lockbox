@@ -279,11 +279,10 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 					subKey: "ENV",
 					desc: fmt.Sprintf(`Allows setting a specific file of environment variables for lockbox to read and use as
 configuration values (an '.env' file). The keyword '%s' will disable this functionality and the keyword '%s' will
-search for a file in the following paths in the user's home directory matching the first file found.
+search for a file in the following paths in XDG_CONFIG_HOME (%s) or from the user's HOME (%s).
+Matches the first file found.
 
-paths: %v
-
-Note that this setting is not output as part of the environment.`, noEnvironment, detectEnvironment, detectEnvironmentPaths),
+Note that this setting is not output as part of the environment.`, noEnvironment, detectEnvironment, strings.Join(xdgPaths, ","), strings.Join(homePaths, ",")),
 				}),
 			canDefault: true,
 			allowed:    []string{detectEnvironment, fileExample, noEnvironment},
