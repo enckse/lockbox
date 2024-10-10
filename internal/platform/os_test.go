@@ -24,7 +24,6 @@ func TestPathExist(t *testing.T) {
 
 func TestLoadEnvConfigs(t *testing.T) {
 	os.Clearenv()
-	defer os.Clearenv()
 	files := []string{filepath.Join("testdata", "xyz"), filepath.Join("testdata", "abc")}
 	if err := platform.LoadEnvConfigs(files...); err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -48,15 +47,15 @@ TEST_3="abc $HOME $X $TEST_X"`), 0o644)
 		}
 	}
 	verify([]string{"TEST_X=1", "TEST_Y=2", "TEST_3=abc   1", "TEST_Z=\"1", "TEST11=1\""})
-	os.Setenv("HOME", "a123")
+	t.Setenv("HOME", "a123")
 	if err := platform.LoadEnvConfigs(files...); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 	env = fmt.Sprintf("%v", os.Environ())
 	verify([]string{"TEST_X=1", "TEST_Y=2", "TEST_3=abc a123  1", "TEST_Z=\"1", "TEST11=1\""})
-	os.Setenv("XYZ", "xyz")
-	os.Setenv("HOME", "$TEST4")
-	os.Setenv("TEST4", "$XYZ")
+	t.Setenv("XYZ", "xyz")
+	t.Setenv("HOME", "$TEST4")
+	t.Setenv("TEST4", "$XYZ")
 	if err := platform.LoadEnvConfigs(files...); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -64,7 +63,7 @@ TEST_3="abc $HOME $X $TEST_X"`), 0o644)
 	verify([]string{"TEST_X=1", "TEST_Y=2", "TEST_3=abc xyz  1", "TEST_Z=\"1", "TEST11=1\""})
 	final := filepath.Join("testdata", "zzz")
 	files = append(files, final)
-	os.Setenv("TEST4", "a")
+	t.Setenv("TEST4", "a")
 	os.WriteFile(final, []byte(`
 TEST_X=1
 TEST_Y=2

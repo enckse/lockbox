@@ -10,7 +10,7 @@ import (
 )
 
 func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {
-	os.Setenv(key, "yes")
+	t.Setenv(key, "yes")
 	c, err := obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -18,7 +18,7 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 	if !c {
 		t.Error("invalid setting")
 	}
-	os.Setenv(key, "")
+	t.Setenv(key, "")
 	c, err = obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -26,7 +26,7 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 	if c != onEmpty {
 		t.Error("invalid setting")
 	}
-	os.Setenv(key, "no")
+	t.Setenv(key, "no")
 	c, err = obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -34,7 +34,7 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 	if c {
 		t.Error("invalid setting")
 	}
-	os.Setenv(key, "afoieae")
+	t.Setenv(key, "afoieae")
 	_, err = obj.Get()
 	if err == nil || err.Error() != fmt.Sprintf("invalid yes/no env value for %s", key) {
 		t.Errorf("unexpected error: %v", err)
@@ -82,11 +82,11 @@ func TestDefaultCompletions(t *testing.T) {
 }
 
 func TestTOTP(t *testing.T) {
-	os.Setenv("LOCKBOX_TOTP", "abc")
+	t.Setenv("LOCKBOX_TOTP", "abc")
 	if config.EnvTOTPToken.Get() != "abc" {
 		t.Error("invalid totp token field")
 	}
-	os.Setenv("LOCKBOX_TOTP", "")
+	t.Setenv("LOCKBOX_TOTP", "")
 	if config.EnvTOTPToken.Get() != "totp" {
 		t.Error("invalid totp token field")
 	}
@@ -139,12 +139,12 @@ func TestFormatTOTP(t *testing.T) {
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	os.Setenv("LOCKBOX_TOTP_FORMAT", "test/%s")
+	t.Setenv("LOCKBOX_TOTP_FORMAT", "test/%s")
 	otp = config.EnvFormatTOTP.Get("abc")
 	if otp != "test/abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	os.Setenv("LOCKBOX_TOTP_FORMAT", "")
+	t.Setenv("LOCKBOX_TOTP_FORMAT", "")
 	otp = config.EnvFormatTOTP.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
@@ -152,27 +152,26 @@ func TestFormatTOTP(t *testing.T) {
 }
 
 func TestParseJSONMode(t *testing.T) {
-	defer os.Clearenv()
 	m, err := config.ParseJSONOutput()
 	if m != config.JSONOutputs.Hash || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA", "hAsH ")
+	t.Setenv("LOCKBOX_JSON_DATA", "hAsH ")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONOutputs.Hash || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA", "EMPTY")
+	t.Setenv("LOCKBOX_JSON_DATA", "EMPTY")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONOutputs.Blank || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA", " PLAINtext ")
+	t.Setenv("LOCKBOX_JSON_DATA", " PLAINtext ")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONOutputs.Raw || err != nil {
 		t.Error("invalid mode read")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA", "a")
+	t.Setenv("LOCKBOX_JSON_DATA", "a")
 	if _, err = config.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -195,18 +194,17 @@ func TestWordCount(t *testing.T) {
 }
 
 func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {
-	os.Setenv(key, "")
-	defer os.Clearenv()
+	t.Setenv(key, "")
 	val, err := e.Get()
 	if err != nil || val != def {
 		t.Error("invalid read")
 	}
-	os.Setenv(key, "1")
+	t.Setenv(key, "1")
 	val, err = e.Get()
 	if err != nil || val != 1 {
 		t.Error("invalid read")
 	}
-	os.Setenv(key, "-1")
+	t.Setenv(key, "-1")
 	zero := ""
 	if allowZero {
 		zero = "="
@@ -214,11 +212,11 @@ func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool
 	if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be >%s 0", text, zero) {
 		t.Errorf("invalid err: %v", err)
 	}
-	os.Setenv(key, "alk;ja")
+	t.Setenv(key, "alk;ja")
 	if _, err := e.Get(); err == nil || err.Error() != "strconv.Atoi: parsing \"alk;ja\": invalid syntax" {
 		t.Errorf("invalid err: %v", err)
 	}
-	os.Setenv(key, "0")
+	t.Setenv(key, "0")
 	if allowZero {
 		val, err = e.Get()
 		if err != nil || val != 0 {
@@ -245,7 +243,7 @@ func TestEnvironDefinitions(t *testing.T) {
 		if env == "LOCKBOX_ENV" {
 			continue
 		}
-		os.Setenv(env, "test")
+		t.Setenv(env, "test")
 		expect[env] = struct{}{}
 	}
 	if !found {
@@ -270,7 +268,6 @@ func TestEnvironDefinitions(t *testing.T) {
 }
 
 func TestCanColor(t *testing.T) {
-	defer os.Clearenv()
 	os.Clearenv()
 	if can, _ := config.CanColor(); !can {
 		t.Error("should be able to color")
@@ -281,17 +278,17 @@ func TestCanColor(t *testing.T) {
 	} {
 		os.Clearenv()
 		key := fmt.Sprintf("LOCKBOX_%s", raw)
-		os.Setenv(key, "yes")
+		t.Setenv(key, "yes")
 		if can, _ := config.CanColor(); can != expect {
 			t.Errorf("expect != actual: %s", key)
 		}
-		os.Setenv(key, "no")
+		t.Setenv(key, "no")
 		if can, _ := config.CanColor(); can == expect {
 			t.Errorf("expect == actual: %s", key)
 		}
 	}
 	os.Clearenv()
-	os.Setenv("NO_COLOR", "1")
+	t.Setenv("NO_COLOR", "1")
 	if can, _ := config.CanColor(); can {
 		t.Error("should NOT be able to color")
 	}

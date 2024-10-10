@@ -97,8 +97,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 {
 		t.Errorf("invalid date/time")
 	}
-	os.Setenv("LOCKBOX_JSON_DATA_HASH_LENGTH", "10")
-	defer os.Clearenv()
+	t.Setenv("LOCKBOX_JSON_DATA_HASH_LENGTH", "10")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -128,8 +127,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data == "" {
 		t.Errorf("invalid json: %v", m)
 	}
-	os.Setenv("LOCKBOX_JSON_DATA", "plAINtExt")
-	defer os.Clearenv()
+	t.Setenv("LOCKBOX_JSON_DATA", "plAINtExt")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -141,8 +139,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data != "tedst" {
 		t.Errorf("invalid json: %v", m)
 	}
-	os.Setenv("LOCKBOX_JSON_DATA", "emPTY")
-	defer os.Clearenv()
+	t.Setenv("LOCKBOX_JSON_DATA", "emPTY")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -214,7 +211,7 @@ func TestQueryCallback(t *testing.T) {
 func TestSetModTime(t *testing.T) {
 	testDateTime := "2022-12-30T12:34:56-05:00"
 	tr := fullSetup(t, false)
-	os.Setenv("LOCKBOX_SET_MODTIME", testDateTime)
+	t.Setenv("LOCKBOX_SET_MODTIME", testDateTime)
 	tr.Insert("test/xyz", "test")
 	q, err := fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
@@ -229,7 +226,7 @@ func TestSetModTime(t *testing.T) {
 	}
 
 	tr = fullSetup(t, false)
-	os.Setenv("LOCKBOX_SET_MODTIME", "")
+	t.Setenv("LOCKBOX_SET_MODTIME", "")
 	tr.Insert("test/xyz", "test")
 	q, err = fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
@@ -244,7 +241,7 @@ func TestSetModTime(t *testing.T) {
 	}
 
 	tr = fullSetup(t, false)
-	os.Setenv("LOCKBOX_SET_MODTIME", "garbage")
+	t.Setenv("LOCKBOX_SET_MODTIME", "garbage")
 	err = tr.Insert("test/xyz", "test")
 	if err == nil || !strings.Contains(err.Error(), "parsing time") {
 		t.Errorf("invalid error: %v", err)

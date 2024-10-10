@@ -54,7 +54,7 @@ func TestEnvInfo(t *testing.T) {
 	if buf.String() != "" {
 		t.Error("nothing written")
 	}
-	os.Setenv("LOCKBOX_STORE", "1")
+	t.Setenv("LOCKBOX_STORE", "1")
 	ok, err = app.Info(&buf, "env", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -71,7 +71,6 @@ func TestEnvInfo(t *testing.T) {
 }
 
 func TestCompletionInfo(t *testing.T) {
-	defer os.Clearenv()
 	for k, v := range map[string]string{
 		"zsh":  "typeset -A opt_args",
 		"fish": "set -f commands",
@@ -80,10 +79,10 @@ func TestCompletionInfo(t *testing.T) {
 		for _, b := range []bool{true, false} {
 			os.Clearenv()
 			sub := []string{k}
-			os.Setenv("SHELL", "invalid")
+			t.Setenv("SHELL", "invalid")
 			if b {
 				sub = []string{}
-				os.Setenv("SHELL", k)
+				t.Setenv("SHELL", k)
 			}
 			var buf bytes.Buffer
 			ok, err := app.Info(&buf, "completions", sub)
@@ -105,7 +104,7 @@ func TestCompletionInfo(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Clearenv()
-	os.Setenv("SHELL", "bad")
+	t.Setenv("SHELL", "bad")
 	if _, err := app.Info(&buf, "completions", []string{}); err.Error() != "unknown completion type: bad" {
 		t.Errorf("invalid error: %v", err)
 	}

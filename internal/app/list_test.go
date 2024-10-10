@@ -24,14 +24,14 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	if !keep {
 		os.Remove(file)
 	}
-	os.Setenv("LOCKBOX_READONLY", "no")
-	os.Setenv("LOCKBOX_STORE", file)
-	os.Setenv("LOCKBOX_KEY", "test")
-	os.Setenv("LOCKBOX_KEYFILE", "")
-	os.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	os.Setenv("LOCKBOX_TOTP", "totp")
-	os.Setenv("LOCKBOX_HOOKDIR", "")
-	os.Setenv("LOCKBOX_SET_MODTIME", "")
+	t.Setenv("LOCKBOX_READONLY", "no")
+	t.Setenv("LOCKBOX_STORE", file)
+	t.Setenv("LOCKBOX_KEY", "test")
+	t.Setenv("LOCKBOX_KEYFILE", "")
+	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
+	t.Setenv("LOCKBOX_TOTP", "totp")
+	t.Setenv("LOCKBOX_HOOKDIR", "")
+	t.Setenv("LOCKBOX_SET_MODTIME", "")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)

@@ -10,8 +10,7 @@ import (
 )
 
 func TestHooks(t *testing.T) {
-	defer os.Clearenv()
-	os.Setenv("LOCKBOX_HOOKDIR", "")
+	t.Setenv("LOCKBOX_HOOKDIR", "")
 	h, err := backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -22,7 +21,7 @@ func TestHooks(t *testing.T) {
 	if _, err := backend.NewHook("", backend.InsertAction); err.Error() != "empty path is not allowed for hooks" {
 		t.Errorf("wrong error: %v", err)
 	}
-	os.Setenv("LOCKBOX_HOOKDIR", "is_garbage")
+	t.Setenv("LOCKBOX_HOOKDIR", "is_garbage")
 	if _, err := backend.NewHook("b", backend.InsertAction); err.Error() != "hook directory does NOT exist" {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -31,7 +30,7 @@ func TestHooks(t *testing.T) {
 	if err := os.MkdirAll(testPath, 0o755); err != nil {
 		t.Errorf("failed, mkdir: %v", err)
 	}
-	os.Setenv("LOCKBOX_HOOKDIR", testPath)
+	t.Setenv("LOCKBOX_HOOKDIR", testPath)
 	h, err = backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -60,7 +59,7 @@ func TestHooks(t *testing.T) {
 	if err := h.Run(backend.HookPre); strings.Contains("fork/exec", err.Error()) {
 		t.Errorf("wrong error: %v", err)
 	}
-	os.Setenv("LOCKBOX_NOHOOKS", "yes")
+	t.Setenv("LOCKBOX_NOHOOKS", "yes")
 	h, err = backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)

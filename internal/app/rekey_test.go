@@ -47,6 +47,7 @@ func (m *mockKeyer) Writer() io.Writer {
 func TestReKey(t *testing.T) {
 	newMockCommand(t)
 	mock := &mockKeyer{}
+	mock.t = t
 	if err := app.ReKey(mock); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -64,6 +65,7 @@ func TestReKey(t *testing.T) {
 func TestReKeyPipe(t *testing.T) {
 	newMockCommand(t)
 	mock := &mockKeyer{}
+	mock.t = t
 	mock.pipe = true
 	if err := app.ReKey(mock); err == nil || err.Error() != "key and/or keyfile must be set" {
 		t.Errorf("invalid error: %v", err)
