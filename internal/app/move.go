@@ -1,3 +1,4 @@
+// Package app can move entries
 package app
 
 import (

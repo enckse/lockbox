@@ -1,3 +1,4 @@
+// Package app can do various conversions
 package app
 
 import (

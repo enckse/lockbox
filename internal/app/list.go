@@ -1,3 +1,4 @@
+// Package app can list entries
 package app
 
 import (

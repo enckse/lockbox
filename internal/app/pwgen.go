@@ -1,3 +1,4 @@
+// Package app can generate passwords
 package app
 
 import (

@@ -1,3 +1,4 @@
+// Package app handles rekeying a database
 package app
 
 import (
