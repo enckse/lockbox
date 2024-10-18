@@ -15,17 +15,17 @@ jobs:
     strategy:
       matrix:
         os:
-          - name: ubuntu-latest
+          - name: ubuntu-24.04
             image: null
-            deps: "echo no deps"
+            deps: "sudo apt-get update && sudo apt-get install just"
             display: ubuntu
           - name: ubuntu-latest
             image: alpine:latest
-            deps: "apk add make"
+            deps: "apk add just"
             display: alpine
           - name: macos-latest
             image: null
-            deps: "echo no deps"
+            deps: "brew install just"
             display: macos
     runs-on: ${{ matrix.os.name }}
     name: ${{ matrix.os.display }}
@@ -40,4 +40,4 @@ jobs:
       - name: "deps"
         run: ${{ matrix.os.deps }}
       - name: "build"
-        run: make check VERSION=${GITHUB_SHA}
+        run: just version=${GITHUB_SHA} check

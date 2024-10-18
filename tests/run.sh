@@ -1,5 +1,5 @@
 #!/bin/sh
-LB_BINARY=../build/lb
+LB_BINARY=../target/lb
 DATA="testdata/$1"
 ENV="$DATA/env"
 CLIP_WAIT=1

@@ -121,11 +121,11 @@ Setup the `.gitattributes` for the repository to include
 
 ## build
 
-Requires `make`
+Requires `just`
 
 Clone this repository and:
 ```
-make
+just
 ```
 
-_run `make check` to run tests_
+_run `just check` to run tests_
