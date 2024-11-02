@@ -118,6 +118,17 @@ type (
 			KeyFile string
 			NoKey   string
 		}
+		Hooks struct {
+			Mode struct {
+				Pre  string
+				Post string
+			}
+			Action struct {
+				Remove string
+				Insert string
+				Move   string
+			}
+		}
 	}
 )
 
@@ -243,6 +254,11 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		}
 		document.ReKey.KeyFile = setDocFlag(config.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = config.ReKeyFlags.NoKey
+		document.Hooks.Mode.Pre = string(backend.HookPre)
+		document.Hooks.Mode.Post = string(backend.HookPost)
+		document.Hooks.Action.Insert = string(backend.InsertAction)
+		document.Hooks.Action.Remove = string(backend.RemoveAction)
+		document.Hooks.Action.Move = string(backend.MoveAction)
 		files, err := docs.ReadDir(docDir)
 		if err != nil {
 			return nil, err
