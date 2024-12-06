@@ -1,0 +1,5 @@
+the environment settings can also be set via TOML configuration
+files. The TOML file is read, the values transformed into the
+corresponding environment keys, values parsed (if not strings),
+expanded for shell variables, and then set into the process. The
+following is a outline of what is allowed in the TOML file:
