@@ -107,39 +107,33 @@ func TestParseWindows(t *testing.T) {
 
 func TestNewEnvFiles(t *testing.T) {
 	os.Clearenv()
-	t.Setenv("LOCKBOX_ENV", "none")
-	f, err := config.NewEnvFiles()
-	if len(f) != 0 || err != nil {
-		t.Errorf("invalid files: %v %v", f, err)
+	t.Setenv("LOCKBOX_CONFIG_TOML", "none")
+	f := config.NewConfigFiles()
+	if len(f) != 0 {
+		t.Errorf("invalid files: %v", f)
 	}
-	t.Setenv("LOCKBOX_ENV", "test")
-	f, err = config.NewEnvFiles()
-	if len(f) != 1 || f[0] != "test" || err != nil {
-		t.Errorf("invalid files: %v %v", f, err)
+	t.Setenv("LOCKBOX_CONFIG_TOML", "test")
+	f = config.NewConfigFiles()
+	if len(f) != 1 || f[0] != "test" {
+		t.Errorf("invalid files: %v", f)
 	}
 	t.Setenv("HOME", "test")
-	t.Setenv("LOCKBOX_ENV", "detect")
-	f, err = config.NewEnvFiles()
-	if len(f) != 2 || err != nil {
-		t.Errorf("invalid files: %v %v", f, err)
+	t.Setenv("LOCKBOX_CONFIG_TOML", "detect")
+	f = config.NewConfigFiles()
+	if len(f) != 2 {
+		t.Errorf("invalid files: %v", f)
 	}
-	t.Setenv("LOCKBOX_ENV", "detect")
+	t.Setenv("LOCKBOX_CONFIG_TOML", "detect")
 	t.Setenv("XDG_CONFIG_HOME", "test")
-	f, err = config.NewEnvFiles()
-	if len(f) != 4 || err != nil {
-		t.Errorf("invalid files: %v %v", f, err)
+	f = config.NewConfigFiles()
+	if len(f) != 4 {
+		t.Errorf("invalid files: %v", f)
 	}
-	t.Setenv("LOCKBOX_ENV", "detect")
+	t.Setenv("LOCKBOX_CONFIG_TOML", "detect")
 	os.Unsetenv("HOME")
-	f, err = config.NewEnvFiles()
-	if len(f) != 2 || err != nil {
-		t.Errorf("invalid files: %v %v", f, err)
-	}
-	t.Setenv("LOCKBOX_ENV", "detect")
-	os.Unsetenv("XDG_CONFIG_HOME")
-	_, err = config.NewEnvFiles()
-	if err == nil || err.Error() != "unable to initialize default config locations" {
-		t.Errorf("invalid files: %v", err)
+	f = config.NewConfigFiles()
+	if len(f) != 2 {
+		t.Errorf("invalid files: %v", f)
 	}
 }
 
@@ -177,103 +171,6 @@ func TestEnviron(t *testing.T) {
 	e = config.Environ()
 	if len(e) != 2 || fmt.Sprintf("%v", e) != "[LOCKBOX_KEY=2 LOCKBOX_STORE=1]" {
 		t.Errorf("invalid environ: %v", e)
-	}
-}
-
-func TestExpandParsed(t *testing.T) {
-	os.Clearenv()
-	t.Setenv("TEST_ABC", "1")
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "a")
-	_, err := config.ExpandParsed(nil)
-	if err == nil || err.Error() != "invalid input variables" {
-		t.Errorf("invalid error: %v", err)
-	}
-	r, err := config.ExpandParsed(make(map[string]string))
-	if err != nil || len(r) != 0 {
-		t.Errorf("invalid expand")
-	}
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "a")
-	ins := make(map[string]string)
-	ins["TEST"] = "$TEST_ABC"
-	_, err = config.ExpandParsed(ins)
-	if err == nil || err.Error() != "strconv.Atoi: parsing \"a\": invalid syntax" {
-		t.Errorf("invalid error: %v", err)
-	}
-	ins["LOCKBOX_ENV_EXPANDS"] = "2"
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 2 || r["TEST"] != "1" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	delete(ins, "LOCKBOX_ENV_EXPANDS")
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "2")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 1 || r["TEST"] != "1" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "2")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 1 || r["TEST"] != "1" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	t.Setenv("TEST_ABC", "$OTHER_TEST")
-	t.Setenv("OTHER_TEST", "$ANOTHER_TEST")
-	t.Setenv("ANOTHER_TEST", "2")
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "1")
-	if _, err = config.ExpandParsed(ins); err == nil || err.Error() != "reached maximum expand cycle count" {
-		t.Errorf("invalid error: %v", err)
-	}
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "2")
-	ins["OTHER_FIRST"] = "2"
-	ins["OTHER_OTHER"] = "$ANOTHER_TEST|$TEST_ABC|$OTHER_TEST"
-	ins["OTHER"] = "$OTHER_OTHER|$OTHER_FIRST"
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "20")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 4 || r["TEST"] != "2" || r["OTHER"] != "2|2|2|2" || r["OTHER_OTHER"] != "2|2|2" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	t.Setenv("LOCKBOX_ENV_EXPANDS", "0")
-	delete(ins, "OTHER_FIRST")
-	delete(ins, "OTHER")
-	delete(ins, "OTHER_OTHER")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 1 || r["TEST"] != "$TEST_ABC" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	os.Unsetenv("LOCKBOX_ENV_EXPANDS")
-	delete(ins, "OTHER_FIRST")
-	delete(ins, "OTHER")
-	delete(ins, "OTHER_OTHER")
-	ins["LOCKBOX_ENV_EXPANDS"] = "0"
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 2 || r["TEST"] != "$TEST_ABC" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	ins["LOCKBOX_ENV_EXPANDS"] = "5"
-	ins["TEST"] = "\"abc\""
-	t.Setenv("LOCKBOX_ENV_QUOTED", "yes")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 2 || r["TEST"] != "abc" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	t.Setenv("LOCKBOX_ENV_QUOTED", "no")
-	ins["TEST"] = "\"abc\""
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 2 || r["TEST"] != "\"abc\"" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	os.Unsetenv("LOCKBOX_ENV_QUOTED")
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 2 || r["TEST"] != "abc" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	ins["LOCKBOX_ENV_QUOTED"] = "yes"
-	r, err = config.ExpandParsed(ins)
-	if err != nil || len(r) != 3 || r["TEST"] != "abc" {
-		t.Errorf("invalid expand: %v", r)
-	}
-	ins["LOCKBOX_ENV_QUOTED"] = "1"
-	if _, err = config.ExpandParsed(ins); err == nil || err.Error() != "invalid yes/no env value for LOCKBOX_ENV_QUOTED" {
-		t.Errorf("invalid error: %v", err)
 	}
 }
 

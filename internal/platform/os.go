@@ -9,9 +9,6 @@ import (
 	"os"
 	"strings"
 	"syscall"
-
-	"github.com/seanenck/lockbox/internal/config"
-	"mvdan.cc/sh/v3/expand"
 )
 
 func termEcho(on bool) {
@@ -140,40 +137,4 @@ func PathExists(file string) bool {
 		return false
 	}
 	return true
-}
-
-// LoadEnvConfigs load environment settings from configs
-func LoadEnvConfigs(paths ...string) error {
-	for _, useEnv := range paths {
-		if !PathExists(useEnv) {
-			continue
-		}
-		b, err := os.ReadFile(useEnv)
-		if err != nil {
-			return err
-		}
-		env := expand.ListEnviron(strings.Split(string(b), "\n")...)
-		found := make(map[string]string)
-		env.Each(func(name string, vr expand.Variable) bool {
-			found[name] = vr.String()
-			return true
-		})
-		result, err := config.ExpandParsed(found)
-		if err != nil {
-			return err
-		}
-		for k, v := range result {
-			ok, err := config.IsUnset(k, v)
-			if err != nil {
-				return err
-			}
-			if !ok {
-				if err := os.Setenv(k, v); err != nil {
-					return err
-				}
-			}
-		}
-		break
-	}
-	return nil
 }

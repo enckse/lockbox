@@ -11,10 +11,10 @@ build:
   go build {{goflags}} -ldflags "{{ldflags}} -X main.version={{version}}" -o "{{object}}" cmd/main.go
 
 unittest:
-  LOCKBOX_ENV=none go test ./...
+  LOCKBOX_CONFIG_TOML=none go test ./...
 
 check: unittest build
-  cd tests && LOCKBOX_ENV=none ./run.sh
+  cd tests && LOCKBOX_CONFIG_TOML=none ./run.sh
 
 clean:
   rm -f "{{object}}"

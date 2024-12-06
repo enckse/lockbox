@@ -41,12 +41,13 @@ func handleEarly(command string, args []string) (bool, error) {
 }
 
 func run() error {
-	paths, err := config.NewEnvFiles()
-	if err != nil {
-		return err
-	}
-	if err := platform.LoadEnvConfigs(paths...); err != nil {
-		return err
+	for _, p := range config.NewConfigFiles() {
+		if platform.PathExists(p) {
+			if err := config.LoadConfigFile(p); err != nil {
+				return err
+			}
+			break
+		}
 	}
 	args := os.Args
 	if len(args) < 2 {

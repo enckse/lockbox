@@ -1,7 +1,7 @@
 #!/bin/sh
 LB_BINARY=../target/lb
 DATA="testdata/$1"
-ENV="$DATA/env"
+TOML="$DATA/config.toml"
 CLIP_WAIT=1
 CLIP_TRIES=3
 CLIP_COPY="$DATA/clip.copy"
@@ -26,7 +26,7 @@ if [ -z "$1" ]; then
 fi
 
 _unset
-export LOCKBOX_ENV="none"
+export LOCKBOX_CONFIG_TOML="none"
 if [ ! -x "${LB_BINARY}" ]; then
   echo "binary missing?"
   exit 1
@@ -219,15 +219,29 @@ printf "%-10s ... " "$1"
   export LOCKBOX_KEYMODE="$OLDMODE"
   # configuration
   {
-    echo "PLAINTEXT=text"
-    # shellcheck disable=SC2016
-    env | grep '^LOCKBOX' | sed 's/plaintext/$LOCKBOX_FAKE_TEST$PLAINTEXT/g'
-  } > "$ENV"
+    cat << EOF
+store = "$LOCKBOX_STORE"
+
+[clip]
+copy = [$(echo "$LOCKBOX_CLIP_COPY" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
+copy = [$(echo "$LOCKBOX_CLIP_PASTE" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
+max = $LOCKBOX_CLIP_MAX
+
+[json]
+mode = "$LOCKBOX_JSON_DATA"
+hash_length = $LOCKBOX_JSON_DATA_HASH_LENGTH
+
+[keys]
+file = "$LOCKBOX_KEYFILE"
+mode = "$LOCKBOX_KEYMODE"
+key = "$LOCKBOX_KEY"
+EOF
+  } > "$TOML"
   _unset
   export LOCKBOX_FAKE_TEST=plain
-  export LOCKBOX_ENV="none"
+  export LOCKBOX_CONFIG_TOML="none"
   ${LB_BINARY} ls
-  export LOCKBOX_ENV="$ENV"
+  export LOCKBOX_CONFIG_TOML="$TOML"
   ${LB_BINARY} ls
 } 2>&1 | \
   sed 's/"modtime": "[0-9].*$/"modtime": "XXXX-XX-XX",/g' | \

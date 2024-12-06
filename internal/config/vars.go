@@ -271,14 +271,15 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 		cat:    totpCategory,
 		desc:   "Override the otpauth url used to store totp tokens. It must have ONE format string ('%s') to insert the totp base code.",
 	}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."})
-	// EnvConfig is the location of the config file to read environment variables from
+	// EnvConfig is the location of the config file to read
 	EnvConfig = environmentRegister(
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(detectEnvironment,
 				environmentBase{
-					subKey: "ENV",
-					desc: fmt.Sprintf(`Allows setting a specific file of environment variables for lockbox to read and use as
-configuration values (an '.env' file). The keyword '%s' will disable this functionality and the keyword '%s' will
+					subKey: "CONFIG_TOML",
+					desc: fmt.Sprintf(`Allows setting a specific toml file to read and load into the environment.
+
+The keyword '%s' will disable this functionality and the keyword '%s' will
 search for a file in the following paths in XDG_CONFIG_HOME (%s) or from the user's HOME (%s).
 Matches the first file found.
 
@@ -312,26 +313,6 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				}),
 			allowed:    []string{commandArgsExample, "password"},
 			canDefault: false,
-		})
-	envConfigQuoted = environmentRegister(
-		EnvironmentBool{
-			environmentDefault: newDefaultedEnvironment(true,
-				environmentBase{
-					subKey: EnvConfig.subKey + "_QUOTED",
-					desc:   "Enables removing prefix/suffix quotes from shell environment config settings\nwhen loaded through configuration file.",
-				}),
-		})
-	envConfigExpands = environmentRegister(
-		EnvironmentInt{
-			environmentDefault: newDefaultedEnvironment(20,
-				environmentBase{
-					subKey: EnvConfig.subKey + "_EXPANDS",
-					desc: `The maximum number of times to expand the input env to resolve variables (set to 0 to disable expansion).
-
-This value can NOT be an expansion itself.`,
-				}),
-			shortDesc: "max expands",
-			allowZero: true,
 		})
 	// EnvPasswordGenCount is the number of words that will be selected for password generation
 	EnvPasswordGenCount = environmentRegister(

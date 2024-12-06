@@ -1,0 +1,46 @@
+language = ""
+platform = ""
+readonly = false
+store = ""
+include = []
+
+[color]
+enabled = true
+
+[clip]
+copy = []
+paste = []
+max = 0
+osc52 = false
+enabled = true
+
+[hook]
+enabled = true
+directory = ""
+
+[json]
+mode = ""
+hash_length = 0
+
+[keys]
+file = ""
+mode = ""
+key = ""
+
+[pwgen]
+enabled = true
+chars = ""
+count = 0
+template = ""
+title = true
+wordlist = []
+
+[totp]
+enabled = true
+attribute = ""
+between = []
+format = ""
+max = 0
+
+[entry]
+modtime = ""

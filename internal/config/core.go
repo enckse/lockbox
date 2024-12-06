@@ -24,7 +24,7 @@ const (
 	no                   = "no"
 	detectEnvironment    = "detect"
 	noEnvironment        = "none"
-	envFile              = "lockbox.env"
+	tomlFile             = "lockbox.toml"
 	unknownPlatform      = ""
 	// sub categories
 	clipCategory keyCategory = "CLIP_"
@@ -33,15 +33,16 @@ const (
 	// YesValue are yes (on) values
 	YesValue = yes
 	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
-	TemplateVariable = "[%]"
-	configDirName    = "lockbox"
-	configDir        = ".config"
+	TemplateVariable  = "[%]"
+	configDirName     = "lockbox"
+	configDir         = ".config"
+	environmentPrefix = "LOCKBOX_"
 )
 
 var (
-	configDirOffsetFile = filepath.Join(configDirName, envFile)
-	xdgPaths            = []string{configDirOffsetFile, envFile}
-	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, envFile)}
+	configDirOffsetFile = filepath.Join(configDirName, tomlFile)
+	xdgPaths            = []string{configDirOffsetFile, tomlFile}
+	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, tomlFile)}
 	exampleColorWindows = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
 	registeredEnv       = []printer{}
 )
@@ -134,7 +135,7 @@ func environOrDefault(envKey, defaultValue string) string {
 }
 
 func (e environmentBase) Key() string {
-	return fmt.Sprintf("LOCKBOX_%s%s", string(e.cat), e.subKey)
+	return fmt.Sprintf(environmentPrefix+"%s%s", string(e.cat), e.subKey)
 }
 
 // Get will get the boolean value for the setting
@@ -319,16 +320,16 @@ func ParseColorWindow(windowString string) ([]ColorWindow, error) {
 
 // NewEnvFiles will get the list of candidate environment files
 // it will also set the environment to empty for the caller
-func NewEnvFiles() ([]string, error) {
+func NewConfigFiles() []string {
 	v := EnvConfig.Get()
 	if v == "" || v == noEnvironment {
-		return []string{}, nil
+		return []string{}
 	}
 	if err := EnvConfig.Set(noEnvironment); err != nil {
-		return nil, err
+		return nil
 	}
 	if v != detectEnvironment {
-		return []string{v}, nil
+		return []string{v}
 	}
 	var options []string
 	pathAdder := func(root string, err error, subs []string) {
@@ -341,10 +342,7 @@ func NewEnvFiles() ([]string, error) {
 	pathAdder(os.Getenv("XDG_CONFIG_HOME"), nil, xdgPaths)
 	h, err := os.UserHomeDir()
 	pathAdder(h, err, homePaths)
-	if len(options) == 0 {
-		return nil, errors.New("unable to initialize default config locations")
-	}
-	return options, nil
+	return options
 }
 
 // IsUnset will indicate if a variable is an unset (and unset it) or return that it isn't
@@ -373,84 +371,6 @@ func Environ() []string {
 	}
 	sort.Strings(results)
 	return results
-}
-
-func parseConfigKeyEarly[T any](env interface {
-	Key() string
-	Get() (T, error)
-}, inputs map[string]string, conv func(string) (T, error),
-) (T, error) {
-	raw, ok := inputs[env.Key()]
-	if ok {
-		return conv(raw)
-	}
-	return env.Get()
-}
-
-// ExpandParsed handles cycles of parsing configuration env inputs to resolve ALL variables
-func ExpandParsed(inputs map[string]string) (map[string]string, error) {
-	if inputs == nil {
-		return nil, errors.New("invalid input variables")
-	}
-	if len(inputs) == 0 {
-		return inputs, nil
-	}
-	cycles, err := parseConfigKeyEarly(envConfigExpands, inputs, strconv.Atoi)
-	if err != nil {
-		return nil, err
-	}
-	quoted, err := parseConfigKeyEarly(envConfigQuoted, inputs, func(v string) (bool, error) {
-		return parseStringYesNo(envConfigQuoted, v)
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cycles == 0 {
-		return inputs, nil
-	}
-	result := inputs
-	for cycles > 0 {
-		expanded := expandParsed(result, quoted)
-		if len(expanded) == len(result) {
-			same := true
-			for k, v := range expanded {
-				val, ok := result[k]
-				if !ok {
-					same = false
-					break
-				}
-				if val != v {
-					same = false
-					break
-				}
-			}
-			if same {
-				return expanded, nil
-			}
-		}
-		result = expanded
-		cycles--
-	}
-	return nil, errors.New("reached maximum expand cycle count")
-}
-
-func expandParsed(inputs map[string]string, quoted bool) map[string]string {
-	result := make(map[string]string)
-	for k, v := range inputs {
-		val := v
-		if quoted {
-			if strings.HasPrefix(val, "\"") && strings.HasSuffix(val, "\"") {
-				val = strings.TrimPrefix(strings.TrimSuffix(val, "\""), "\"")
-			}
-		}
-		result[k] = os.Expand(val, func(in string) string {
-			if i, ok := inputs[in]; ok {
-				return i
-			}
-			return os.Getenv(in)
-		})
-	}
-	return result
 }
 
 // Wrap performs simple block text word wrapping

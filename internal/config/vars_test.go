@@ -105,7 +105,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 34 {
+	if l != 32 {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
@@ -240,7 +240,7 @@ func TestEnvironDefinitions(t *testing.T) {
 		if !strings.HasPrefix(env, "LOCKBOX_") {
 			t.Errorf("invalid env var: %s", env)
 		}
-		if env == "LOCKBOX_ENV" {
+		if env == "LOCKBOX_CONFIG_TOML" {
 			continue
 		}
 		t.Setenv(env, "test")
