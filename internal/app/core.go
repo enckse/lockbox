@@ -114,6 +114,7 @@ type (
 		ReKeyCommand       string
 		CompletionsCommand string
 		CompletionsEnv     string
+		ExampleTOML        string
 		ReKey              struct {
 			KeyFile string
 			NoKey   string
@@ -251,6 +252,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			ReKeyCommand:       ReKeyCommand,
 			CompletionsCommand: CompletionsCommand,
 			CompletionsEnv:     config.EnvDefaultCompletionKey,
+			ExampleTOML:        config.ExampleTOML,
 		}
 		document.ReKey.KeyFile = setDocFlag(config.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = config.ReKeyFlags.NoKey
@@ -275,10 +277,16 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
-			if header == "[environment]" {
+			switch header {
+			case "[environment]":
 				env = s
-			} else {
+			default:
 				buf.WriteString(s)
+				if header == "[toml]" {
+					buf.WriteString("========================================\nconfig.toml\n---\n")
+					buf.WriteString(config.ExampleTOML)
+					buf.WriteString("========================================\n\n")
+				}
 			}
 		}
 		if env == "" {

@@ -318,8 +318,7 @@ func ParseColorWindow(windowString string) ([]ColorWindow, error) {
 	return rules, nil
 }
 
-// NewEnvFiles will get the list of candidate environment files
-// it will also set the environment to empty for the caller
+// NewConfigFiles will get the list of candidate config files
 func NewConfigFiles() []string {
 	v := EnvConfig.Get()
 	if v == "" || v == noEnvironment {

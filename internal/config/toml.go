@@ -14,14 +14,17 @@ import (
 )
 
 type (
-	ConfigLoader func(string) (io.Reader, error)
-	ShellEnv     struct {
+	// Loader indicates how included files should be sourced
+	Loader func(string) (io.Reader, error)
+	// ShellEnv is the output shell environment settings parsed from TOML config
+	ShellEnv struct {
 		Key   string
 		Value string
 	}
 )
 
 var (
+	// ExampleTOML is an example TOML file of viable fields
 	//go:embed "config.toml"
 	ExampleTOML string
 	redirects   = map[string]string{
@@ -64,7 +67,8 @@ var (
 	}
 )
 
-func LoadConfig(r io.Reader, loader ConfigLoader) ([]ShellEnv, error) {
+// LoadConfig will read the input reader and use the loader to source configuration files
+func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 	m := make(map[string]interface{})
 	if err := overlayConfig(r, true, &m, loader); err != nil {
 		return nil, err
@@ -124,7 +128,7 @@ func LoadConfig(r io.Reader, loader ConfigLoader) ([]ShellEnv, error) {
 	return res, nil
 }
 
-func overlayConfig(r io.Reader, canInclude bool, m *map[string]interface{}, loader ConfigLoader) error {
+func overlayConfig(r io.Reader, canInclude bool, m *map[string]interface{}, loader Loader) error {
 	d := toml.NewDecoder(r)
 	if _, err := d.Decode(m); err != nil {
 		return err
@@ -204,6 +208,8 @@ func configLoader(path string) (io.Reader, error) {
 	return bytes.NewReader(data), nil
 }
 
+// LoadConfigFile will load a path as the configuration
+// it will also set the environment
 func LoadConfigFile(path string) error {
 	reader, err := configLoader(path)
 	if err != nil {

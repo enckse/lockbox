@@ -178,7 +178,7 @@ max = 1
 max = -1
 `
 	r = strings.NewReader(data)
-	env, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
+	_, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
 		return nil, nil
 	})
 	if err == nil || err.Error() != "-1 is negative (not allowed here)" {
@@ -259,7 +259,7 @@ format = -1
 
 func TestLoadFile(t *testing.T) {
 	os.Mkdir("testdata", 0o755)
-	// defer os.RemoveAll("testdata")
+	defer os.RemoveAll("testdata")
 	defer os.Clearenv()
 	file := filepath.Join("testdata", "config.toml")
 	os.WriteFile(file, []byte(config.ExampleTOML), 0o644)
