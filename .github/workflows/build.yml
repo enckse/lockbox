@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - name: ubuntu-24.04
+          - name: ubuntu-latest
             image: null
             deps: "sudo apt-get update && sudo apt-get install just"
             display: ubuntu
