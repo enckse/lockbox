@@ -17,9 +17,8 @@ via other tooling if needed.
 
 ## environment
 
-The following variables must be set to use `lb`, they can also be set via an
-explicit environment file just for `lb`, following the rules of the
-[parser](https://github.com/hashicorp/go-envparse)
+The following variables must be set to use `lb`, they can also be set via a
+toml configuration file.
 
 ```
 # the keying object to use to ACTUALLY unlock the passwords (e.g. using a gpg encrypted file with the password inside of it)
