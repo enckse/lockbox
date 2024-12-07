@@ -40,8 +40,8 @@ store = "$HOME/.passwords/secrets.kdbx"
 password = ["gpg", "--decrypt", "$HOME/.secrets/key.gpg"]
 ```
 
-Use `lb help verbose` for additional information about options and
-configuration variables
+Use `lb help verbose` for additional information about functionality and
+`lb help config` for details on configuration variables
 
 ### supported systems
 

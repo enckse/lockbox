@@ -30,7 +30,7 @@ _{{ $.Executable }}() {
     if [ "$COMP_CWORD" -eq 2 ]; then
       case "$chosen" in
         "{{ $.HelpCommand }}")
-          opts="{{ $.HelpAdvancedCommand }}"
+          opts="{{ $.HelpAdvancedCommand }} {{ $.HelpConfigCommand }}"
           ;;
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
           if {{ $.Conditionals.Not.AskMode }}; then

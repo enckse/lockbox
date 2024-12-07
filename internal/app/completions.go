@@ -33,6 +33,7 @@ type (
 		JSONCommand         string
 		HelpCommand         string
 		HelpAdvancedCommand string
+		HelpConfigCommand   string
 		Options             []CompletionOption
 		TOTPSubCommands     []CompletionOption
 		Conditionals        struct {
@@ -93,6 +94,7 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		JSONCommand:         JSONCommand,
 		HelpCommand:         HelpCommand,
 		HelpAdvancedCommand: HelpAdvancedCommand,
+		HelpConfigCommand:   HelpConfigCommand,
 		TOTPCommand:         TOTPCommand,
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),

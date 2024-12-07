@@ -4,7 +4,6 @@ package app
 import (
 	"bytes"
 	"embed"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -43,6 +42,8 @@ const (
 	HelpCommand = "help"
 	// HelpAdvancedCommand shows advanced help
 	HelpAdvancedCommand = "verbose"
+	// HelpConfigCommand shows configuration information
+	HelpConfigCommand = "config"
 	// RemoveCommand removes an entry
 	RemoveCommand = "rm"
 	// EnvCommand shows environment information used by lockbox
@@ -223,6 +224,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(EnvCommand, "", "display environment variable information"))
 	results = append(results, command(HelpCommand, "", "show this usage information"))
 	results = append(results, subCommand(HelpCommand, HelpAdvancedCommand, "", "display verbose help information"))
+	results = append(results, subCommand(HelpCommand, HelpConfigCommand, "", "display verbose configuration information"))
 	results = append(results, command(InsertCommand, "entry", "insert a new entry into the store"))
 	results = append(results, command(JSONCommand, "filter", "display detailed information"))
 	results = append(results, command(ListCommand, "", "list entries"))
@@ -263,7 +265,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			return nil, err
 		}
 		var buf bytes.Buffer
-		var env string
 		for _, f := range files {
 			n := f.Name()
 			if !strings.HasSuffix(n, textFile) {
@@ -274,24 +275,9 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
-			switch header {
-			case "[toml]":
-				env = s
-			default:
-				buf.WriteString(s)
-			}
+			buf.WriteString(s)
 		}
-		if env == "" {
-			return nil, errors.New("no environment header configured")
-		}
-		buf.WriteString(env)
 		results = append(results, strings.Split(strings.TrimSpace(buf.String()), "\n")...)
-		results = append(results, "")
-		toml, err := config.DefaultTOML()
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, toml)
 	}
 	return append(usage, results...), nil
 }

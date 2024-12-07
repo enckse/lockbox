@@ -42,6 +42,13 @@ func TestHelpInfo(t *testing.T) {
 	if _, err = app.Info(&buf, "help", []string{"verbose", "A"}); err.Error() != "invalid help command" {
 		t.Errorf("invalid error: %v", err)
 	}
+	ok, err = app.Info(&buf, "help", []string{"config"})
+	if !ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if buf.String() == "" || old == buf.String() {
+		t.Error("nothing written")
+	}
 }
 
 func TestEnvInfo(t *testing.T) {

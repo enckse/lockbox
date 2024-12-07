@@ -12,7 +12,7 @@ function {{ $.Executable }}-completion
   end
 {{- end }}
   complete -c {{ $.Executable }} -n "not __fish_seen_subcommand_from $commands" -a "$commands"
-  complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.HelpCommand }}; and test (count (commandline -opc)) -lt 3" -a "{{ $.HelpAdvancedCommand }}"
+  complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.HelpCommand }}; and test (count (commandline -opc)) -lt 3" -a "{{ $.HelpAdvancedCommand }} {{ $.HelpConfigCommand }}"
   if {{ $.Conditionals.Not.ReadOnly }}
     if {{ $.Conditionals.Not.AskMode }}
       complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.InsertCommand }} {{ $.MultiLineCommand }} {{ $.RemoveCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList }})"

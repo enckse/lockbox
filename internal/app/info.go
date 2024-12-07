@@ -44,6 +44,12 @@ func info(command string, args []string) ([]string, error) {
 			switch args[0] {
 			case HelpAdvancedCommand:
 				isAdvanced = true
+			case HelpConfigCommand:
+				data, err := config.DefaultTOML()
+				if err != nil {
+					return nil, err
+				}
+				return []string{data}, nil
 			default:
 				return nil, errors.New("invalid help option")
 			}
