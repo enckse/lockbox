@@ -33,19 +33,20 @@ var (
 	//go:embed "config.toml"
 	ExampleTOML string
 	redirects   = map[string]string{
-		"HOOK_DIRECTORY":   EnvHookDir.Key(),
-		"HOOK_ENABLED":     EnvNoHooks.Key(),
-		"JSON_MODE":        EnvJSONDataOutput.Key(),
-		"JSON_HASH_LENGTH": EnvHashLength.Key(),
-		"KEYS_FILE":        EnvKeyFile.Key(),
-		"KEYS_MODE":        EnvKeyMode.Key(),
-		"KEYS_KEY":         envKey.Key(),
-		"CLIP_ENABLED":     EnvNoClip.Key(),
-		"COLOR_ENABLED":    EnvNoColor.Key(),
-		"PWGEN_ENABLED":    EnvNoPasswordGen.Key(),
-		"TOTP_ENABLED":     EnvNoTOTP.Key(),
-		"TOTP_ATTRIBUTE":   EnvTOTPToken.Key(),
-		"ENTRY_MODTIME":    EnvModTime.Key(),
+		"HOOK_DIRECTORY":      EnvHookDir.Key(),
+		"HOOK_ENABLED":        EnvNoHooks.Key(),
+		"JSON_MODE":           EnvJSONDataOutput.Key(),
+		"JSON_HASH_LENGTH":    EnvHashLength.Key(),
+		"KEYS_FILE":           EnvKeyFile.Key(),
+		"KEYS_MODE":           EnvKeyMode.Key(),
+		"KEYS_KEY":            envKey.Key(),
+		"CLIP_ENABLED":        EnvNoClip.Key(),
+		"COLOR_ENABLED":       EnvNoColor.Key(),
+		"PWGEN_ENABLED":       EnvNoPasswordGen.Key(),
+		"TOTP_ENABLED":        EnvNoTOTP.Key(),
+		"TOTP_ATTRIBUTE":      EnvTOTPToken.Key(),
+		"DEFAULTS_MODTIME":    EnvModTime.Key(),
+		"DEFAULTS_COMPLETION": EnvDefaultCompletion.Key(),
 	}
 	arrayTypes = []string{
 		EnvClipCopy.Key(),
@@ -69,6 +70,7 @@ var (
 		EnvNoTOTP.Key(),
 		EnvPasswordGenTitle.Key(),
 		EnvReadOnly.Key(),
+		EnvInteractive.Key(),
 	}
 	reverseMap = map[string][]string{
 		"[]":   arrayTypes,

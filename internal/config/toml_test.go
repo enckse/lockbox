@@ -276,7 +276,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 			count++
 		}
 	}
-	if count != 29 {
+	if count != 31 {
 		t.Errorf("invalid environment after load: %d", count)
 	}
 }

@@ -3,6 +3,11 @@ platform = ""
 readonly = false
 store = ""
 include = []
+interactive = true
+
+[defaults]
+modtime = ""
+completion = ""
 
 [color]
 enabled = true
@@ -41,6 +46,3 @@ attribute = ""
 between = []
 format = ""
 max = 0
-
-[entry]
-modtime = ""

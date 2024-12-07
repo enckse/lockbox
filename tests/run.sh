@@ -221,6 +221,7 @@ printf "%-10s ... " "$1"
   {
     cat << EOF
 store = "$LOCKBOX_STORE"
+interactive = false
 
 [clip]
 copy = [$(echo "$LOCKBOX_CLIP_COPY" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
