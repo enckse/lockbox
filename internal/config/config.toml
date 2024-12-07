@@ -35,14 +35,14 @@ password = []
 [pwgen]
 enabled = true
 characters = ""
-count = 0
+word_count = 0
 template = ""
 title = true
 words_command = []
 
 [totp]
 enabled = true
-attribute = ""
+entry = ""
 color_windows = []
 otp_format = ""
 timeout = 0

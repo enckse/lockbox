@@ -184,7 +184,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	}
 	var hashLength int
 	if jsonMode == config.JSONOutputs.Hash {
-		hashLength, err = config.EnvHashLength.Get()
+		hashLength, err = config.EnvJSONHashLength.Get()
 		if err != nil {
 			return nil, err
 		}

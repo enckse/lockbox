@@ -38,18 +38,18 @@ fi
 mkdir -p "$DATA"
 find "$DATA" -type f -delete
 
-export LOCKBOX_KEYFILE=""
-export LOCKBOX_KEY=""
+export LOCKBOX_CREDENTIALS_KEY_FILE=""
+export LOCKBOX_CREDENTIALS_PASSWORD=""
 VALID=0
 if [ "$1" = "$PASS_TEST" ] || [ "$1" = "$BOTH_TEST" ]; then
   VALID=1
-  export LOCKBOX_KEY="testingkey"
+  export LOCKBOX_CREDENTIALS_PASSWORD="testingkey"
 fi
 if [ "$1" = "$KEYF_TEST" ] || [ "$1" = "$BOTH_TEST" ]; then
   VALID=1
   KEYFILE="$DATA/test.key"
   echo "thisisatest" > "$KEYFILE"
-  export LOCKBOX_KEYFILE="$KEYFILE"
+  export LOCKBOX_CREDENTIALS_KEY_FILE="$KEYFILE"
 fi
 if [ "$VALID" -eq 0 ]; then
   echo "invalid test"
@@ -59,32 +59,32 @@ fi
 LOGFILE="$DATA/actual.log"
 printf "%-10s ... " "$1"
 {
-  export LOCKBOX_HOOKDIR=""
+  export LOCKBOX_HOOKS_DIRECTORY=""
   export LOCKBOX_STORE="${DATA}/passwords.kdbx"
-  export LOCKBOX_TOTP=totp
+  export LOCKBOX_TOTP_ENTRY=totp
   export LOCKBOX_INTERACTIVE=no
   export LOCKBOX_READONLY=no
-  if [ "$LOCKBOX_KEY" = "" ]; then
-    export LOCKBOX_KEYMODE=none
+  if [ "$LOCKBOX_CREDENTIALS_PASSWORD" = "" ]; then
+    export LOCKBOX_CREDENTIALS_PASSWORD_MODE=none
   else
-    export LOCKBOX_KEYMODE=plaintext
+    export LOCKBOX_CREDENTIALS_PASSWORD_MODE=plaintext
   fi
-  export LOCKBOX_JSON_DATA_HASH_LENGTH=0
+  export LOCKBOX_JSON_HASH_LENGTH=0
   echo test2 |${LB_BINARY} insert keys/k/one2
-  OLDMODE="$LOCKBOX_KEYMODE"
-  OLDKEY="$LOCKBOX_KEY"
+  OLDMODE="$LOCKBOX_CREDENTIALS_PASSWORD_MODE"
+  OLDKEY="$LOCKBOX_CREDENTIALS_PASSWORD"
   if [ "$OLDKEY" != "" ]; then
     export LOCKBOX_INTERACTIVE=yes
-    export LOCKBOX_KEYMODE=ask
-    export LOCKBOX_KEY=""
+    export LOCKBOX_CREDENTIALS_PASSWORD_MODE=ask
+    export LOCKBOX_CREDENTIALS_PASSWORD=""
   else
     printf "password: "
   fi
   echo "$OLDKEY" | ${LB_BINARY} ls 2>/dev/null
   if [ "$OLDKEY" != "" ]; then
     export LOCKBOX_INTERACTIVE=no
-    export LOCKBOX_KEYMODE="$OLDMODE"
-    export LOCKBOX_KEY="$OLDKEY"
+    export LOCKBOX_CREDENTIALS_PASSWORD_MODE="$OLDMODE"
+    export LOCKBOX_CREDENTIALS_PASSWORD="$OLDKEY"
   fi
   echo test |${LB_BINARY} insert keys/k/one
   echo test |${LB_BINARY} insert key/a/one
@@ -141,7 +141,7 @@ printf "%-10s ... " "$1"
   echo test2 |${LB_BINARY} insert keys/k2/t1/one2
   echo test |${LB_BINARY} insert keys/k2/t1/one
   echo test2 |${LB_BINARY} insert keys/k2/t2/one2
-  export LOCKBOX_HOOKDIR="$PWD/hooks"
+  export LOCKBOX_HOOKS_DIRECTORY="$PWD/hooks"
   echo test |${LB_BINARY} insert keys/k2/t2/one
   echo
   ${LB_BINARY} ls
@@ -155,34 +155,34 @@ printf "%-10s ... " "$1"
   # rekeying
   REKEY_ARGS=""
   NEWKEY="newkey$1"
-  export LOCKBOX_HOOKDIR=""
-  if [ -n "$LOCKBOX_KEYFILE" ]; then
+  export LOCKBOX_HOOKS_DIRECTORY=""
+  if [ -n "$LOCKBOX_CREDENTIALS_KEY_FILE" ]; then
     REKEYFILE="$DATA/newkeyfile"
     REKEY_ARGS="-keyfile $REKEYFILE"
     echo "thisisanewkey" > "$REKEYFILE"
-    if [ -z "$LOCKBOX_KEY" ]; then
+    if [ -z "$LOCKBOX_CREDENTIALS_PASSWORD" ]; then
       REKEY_ARGS="$REKEY_ARGS -nokey"
       NEWKEY=""
     fi
   fi
   # shellcheck disable=SC2086
   echo "$NEWKEY" | ${LB_BINARY} rekey $REKEY_ARGS
-  export LOCKBOX_KEY="$NEWKEY"
-  export LOCKBOX_KEYFILE="$REKEYFILE"
+  export LOCKBOX_CREDENTIALS_PASSWORD="$NEWKEY"
+  export LOCKBOX_CREDENTIALS_KEY_FILE="$REKEYFILE"
   echo
   ${LB_BINARY} ls
   ${LB_BINARY} show keys/k/one2
-  export LOCKBOX_JSON_DATA=plaintext
+  export LOCKBOX_JSON_MODE=plaintext
   ${LB_BINARY} json k
-  export LOCKBOX_JSON_DATA=empty
+  export LOCKBOX_JSON_MODE=empty
   ${LB_BINARY} json k
-  export LOCKBOX_JSON_DATA=hash
-  export LOCKBOX_JSON_DATA_HASH_LENGTH=3
+  export LOCKBOX_JSON_MODE=hash
+  export LOCKBOX_JSON_HASH_LENGTH=3
   ${LB_BINARY} json k
   # clipboard
-  export LOCKBOX_CLIP_COPY="touch $CLIP_COPY"
-  export LOCKBOX_CLIP_PASTE="touch $CLIP_PASTE"
-  export LOCKBOX_CLIP_MAX=5
+  export LOCKBOX_CLIP_COPY_COMMAND="touch $CLIP_COPY"
+  export LOCKBOX_CLIP_PASTE_COMMAND="touch $CLIP_PASTE"
+  export LOCKBOX_CLIP_TIMEOUT=5
   ${LB_BINARY} clip keys/k/one2
   CLIP_PASSED=0
   while [ "$CLIP_TRIES" -gt 0 ] ; do
@@ -197,26 +197,26 @@ printf "%-10s ... " "$1"
     echo "clipboard test failed"
   fi
   # invalid settings
-  OLDKEY="$LOCKBOX_KEY"
-  OLDMODE="$LOCKBOX_KEYMODE"
-  OLDKEYFILE="$LOCKBOX_KEYFILE"
-  if [ -n "$LOCKBOX_KEYFILE" ]; then
-    export LOCKBOX_KEYFILE=""
-    if [ -z "$LOCKBOX_KEY" ]; then
-      export LOCKBOX_KEY="garbage"
+  OLDKEY="$LOCKBOX_CREDENTIALS_PASSWORD"
+  OLDMODE="$LOCKBOX_CREDENTIALS_PASSWORD_MODE"
+  OLDKEYFILE="$LOCKBOX_CREDENTIALS_KEY_FILE"
+  if [ -n "$LOCKBOX_CREDENTIALS_KEY_FILE" ]; then
+    export LOCKBOX_CREDENTIALS_KEY_FILE=""
+    if [ -z "$LOCKBOX_CREDENTIALS_PASSWORD" ]; then
+      export LOCKBOX_CREDENTIALS_PASSWORD="garbage"
     fi
   else
     KEYFILE="$DATA/invalid.key"
     echo "invalid" > "$KEYFILE"
-    export LOCKBOX_KEYFILE="$KEYFILE"
+    export LOCKBOX_CREDENTIALS_KEY_FILE="$KEYFILE"
   fi
   if [ "$OLDMODE" = "none" ]; then
-    export LOCKBOX_KEYMODE="plaintext"
+    export LOCKBOX_CREDENTIALS_PASSWORD_MODE="plaintext"
   fi
   ${LB_BINARY} ls
-  export LOCKBOX_KEYFILE="$OLDKEYFILE"
-  export LOCKBOX_KEY="$OLDKEY"
-  export LOCKBOX_KEYMODE="$OLDMODE"
+  export LOCKBOX_CREDENTIALS_KEY_FILE="$OLDKEYFILE"
+  export LOCKBOX_CREDENTIALS_PASSWORD="$OLDKEY"
+  export LOCKBOX_CREDENTIALS_PASSWORD_MODE="$OLDMODE"
   # configuration
   {
     cat << EOF
@@ -224,18 +224,18 @@ store = "$LOCKBOX_STORE"
 interactive = false
 
 [clip]
-copy_command = [$(echo "$LOCKBOX_CLIP_COPY" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
-copy_command = [$(echo "$LOCKBOX_CLIP_PASTE" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
-timeout = $LOCKBOX_CLIP_MAX
+copy_command = [$(echo "$LOCKBOX_CLIP_COPY_COMMAND" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
+copy_command = [$(echo "$LOCKBOX_CLIP_PASTE_COMMAND" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
+timeout = $LOCKBOX_CLIP_TIMEOUT
 
 [json]
-mode = "$LOCKBOX_JSON_DATA"
-hash_length = $LOCKBOX_JSON_DATA_HASH_LENGTH
+mode = "$LOCKBOX_JSON_MODE"
+hash_length = $LOCKBOX_JSON_HASH_LENGTH
 
 [credentials]
-key_file = "$LOCKBOX_KEYFILE"
-password_mode = "$LOCKBOX_KEYMODE"
-password = "$LOCKBOX_KEY"
+key_file = "$LOCKBOX_CREDENTIALS_KEY_FILE"
+password_mode = "$LOCKBOX_CREDENTIALS_PASSWORD_MODE"
+password = "$LOCKBOX_CREDENTIALS_PASSWORD"
 EOF
   } > "$TOML"
   _unset

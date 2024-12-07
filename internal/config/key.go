@@ -35,8 +35,8 @@ const (
 
 // NewKey will create a new key
 func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
-	useKey := envKey.Get()
-	keyMode := EnvKeyMode.Get()
+	useKey := envPassword.Get()
+	keyMode := EnvPasswordMode.Get()
 	if keyMode == "" {
 		keyMode = string(defaultKeyModeType)
 	}

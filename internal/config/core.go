@@ -27,11 +27,17 @@ const (
 	tomlFile             = "lockbox.toml"
 	unknownPlatform      = ""
 	// sub categories
-	clipCategory keyCategory = "CLIP_"
-	totpCategory keyCategory = "TOTP_"
-	genCategory  keyCategory = "PWGEN_"
+	clipCategory    keyCategory = "CLIP_"
+	totpCategory    keyCategory = "TOTP_"
+	genCategory     keyCategory = "PWGEN_"
+	jsonCategory    keyCategory = "JSON_"
+	credsCategory   keyCategory = "CREDENTIALS_"
+	defaultCategory keyCategory = "DEFAULTS_"
+	hookCategory    keyCategory = "HOOKS_"
 	// YesValue are yes (on) values
 	YesValue = yes
+	// NoValue are no (off) values
+	NoValue = no
 	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
 	TemplateVariable  = "[%]"
 	configDirName     = "lockbox"
@@ -245,7 +251,7 @@ func (e EnvironmentInt) values() (string, []string) {
 }
 
 func (e EnvironmentFormatter) values() (string, []string) {
-	return strings.ReplaceAll(strings.ReplaceAll(EnvFormatTOTP.Get("%s"), "%25s", "%s"), "&", " \\\n           &"), []string{e.allowed}
+	return strings.ReplaceAll(strings.ReplaceAll(EnvTOTPFormat.Get("%s"), "%25s", "%s"), "&", " \\\n           &"), []string{e.allowed}
 }
 
 func (e EnvironmentCommand) values() (string, []string) {

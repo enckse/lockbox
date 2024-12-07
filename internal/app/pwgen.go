@@ -18,14 +18,14 @@ import (
 
 // GeneratePassword generates a password
 func GeneratePassword(cmd CommandOptions) error {
-	ok, err := config.EnvNoPasswordGen.Get()
+	enabled, err := config.EnvPasswordGenEnabled.Get()
 	if err != nil {
 		return err
 	}
-	if ok {
+	if !enabled {
 		return errors.New("password generation is disabled")
 	}
-	length, err := config.EnvPasswordGenCount.Get()
+	length, err := config.EnvPasswordGenWordCount.Get()
 	if err != nil {
 		return err
 	}

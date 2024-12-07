@@ -37,12 +37,12 @@ type (
 		TOTPSubCommands     []CompletionOption
 		Conditionals        struct {
 			Not struct {
-				ReadOnly      string
-				NoClip        string
-				NoTOTP        string
-				AskMode       string
-				Ever          string
-				NoPasswordGen string
+				ReadOnly       string
+				CanClip        string
+				CanTOTP        string
+				AskMode        string
+				Ever           string
+				CanPasswordGen string
 			}
 		}
 	}
@@ -99,25 +99,25 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
 	}
 	c.Conditionals.Not.ReadOnly = newShellIsNotEqualConditional(config.EnvReadOnly, config.YesValue)
-	c.Conditionals.Not.NoClip = newShellIsNotEqualConditional(config.EnvNoClip, config.YesValue)
-	c.Conditionals.Not.NoTOTP = newShellIsNotEqualConditional(config.EnvNoTOTP, config.YesValue)
-	c.Conditionals.Not.AskMode = newShellIsNotEqualConditional(config.EnvKeyMode, string(config.AskKeyMode))
-	c.Conditionals.Not.NoPasswordGen = newShellIsNotEqualConditional(config.EnvNoPasswordGen, config.YesValue)
+	c.Conditionals.Not.CanClip = newShellIsNotEqualConditional(config.EnvClipEnabled, config.NoValue)
+	c.Conditionals.Not.CanTOTP = newShellIsNotEqualConditional(config.EnvTOTPEnabled, config.NoValue)
+	c.Conditionals.Not.AskMode = newShellIsNotEqualConditional(config.EnvPasswordMode, string(config.AskKeyMode))
+	c.Conditionals.Not.CanPasswordGen = newShellIsNotEqualConditional(config.EnvPasswordGenEnabled, config.NoValue)
 	c.Conditionals.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
 
 	c.Options = c.newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 		map[string]string{
-			ClipCommand:             c.Conditionals.Not.NoClip,
-			TOTPCommand:             c.Conditionals.Not.NoTOTP,
+			ClipCommand:             c.Conditionals.Not.CanClip,
+			TOTPCommand:             c.Conditionals.Not.CanTOTP,
 			MoveCommand:             c.Conditionals.Not.ReadOnly,
 			RemoveCommand:           c.Conditionals.Not.ReadOnly,
 			InsertCommand:           c.Conditionals.Not.ReadOnly,
 			MultiLineCommand:        c.Conditionals.Not.ReadOnly,
-			PasswordGenerateCommand: c.Conditionals.Not.NoPasswordGen,
+			PasswordGenerateCommand: c.Conditionals.Not.CanPasswordGen,
 		})
 	c.TOTPSubCommands = c.newGenOptions([]string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand},
 		map[string]string{
-			TOTPClipCommand:   c.Conditionals.Not.NoClip,
+			TOTPClipCommand:   c.Conditionals.Not.CanClip,
 			TOTPInsertCommand: c.Conditionals.Not.ReadOnly,
 		})
 	using, err := readShell(completionType)

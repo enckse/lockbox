@@ -26,11 +26,11 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	}
 	t.Setenv("LOCKBOX_READONLY", "no")
 	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_KEY", "test")
-	t.Setenv("LOCKBOX_KEYFILE", "")
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP", "totp")
-	t.Setenv("LOCKBOX_HOOKDIR", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
+	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
 	t.Setenv("LOCKBOX_SET_MODTIME", "")
 	tr, err := backend.NewTransaction()
 	if err != nil {

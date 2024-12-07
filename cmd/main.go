@@ -88,7 +88,7 @@ func run() error {
 	case app.ConvCommand:
 		return app.Conv(p)
 	case app.TOTPCommand:
-		args, err := app.NewTOTPArguments(sub, config.EnvTOTPToken.Get())
+		args, err := app.NewTOTPArguments(sub, config.EnvTOTPEntry.Get())
 		if err != nil {
 			return err
 		}

@@ -10,8 +10,8 @@ import (
 
 func TestNoClipboard(t *testing.T) {
 	t.Setenv("LOCKBOX_CLIP_OSC52", "no")
-	t.Setenv("LOCKBOX_CLIP_MAX", "")
-	t.Setenv("LOCKBOX_NOCLIP", "yes")
+	t.Setenv("LOCKBOX_CLIP_TIMEOUT", "")
+	t.Setenv("LOCKBOX_CLIP_ENABLED", "no")
 	_, err := platform.NewClipboard()
 	if err == nil || err.Error() != "clipboard is off" {
 		t.Errorf("invalid error: %v", err)
@@ -19,10 +19,10 @@ func TestNoClipboard(t *testing.T) {
 }
 
 func TestMaxTime(t *testing.T) {
-	t.Setenv("LOCKBOX_NOCLIP", "no")
+	t.Setenv("LOCKBOX_CLIP_ENABLED", "yes")
 	t.Setenv("LOCKBOX_CLIP_OSC52", "no")
 	t.Setenv("LOCKBOX_PLATFORM", string(config.Platforms.LinuxWaylandPlatform))
-	t.Setenv("LOCKBOX_CLIP_MAX", "")
+	t.Setenv("LOCKBOX_CLIP_TIMEOUT", "")
 	c, err := platform.NewClipboard()
 	if err != nil {
 		t.Errorf("invalid clipboard: %v", err)
@@ -30,7 +30,7 @@ func TestMaxTime(t *testing.T) {
 	if c.MaxTime != 45 {
 		t.Error("invalid default")
 	}
-	t.Setenv("LOCKBOX_CLIP_MAX", "1")
+	t.Setenv("LOCKBOX_CLIP_TIMEOUT", "1")
 	c, err = platform.NewClipboard()
 	if err != nil {
 		t.Errorf("invalid clipboard: %v", err)
@@ -38,12 +38,12 @@ func TestMaxTime(t *testing.T) {
 	if c.MaxTime != 1 {
 		t.Error("invalid default")
 	}
-	t.Setenv("LOCKBOX_CLIP_MAX", "-1")
+	t.Setenv("LOCKBOX_CLIP_TIMEOUT", "-1")
 	_, err = platform.NewClipboard()
 	if err == nil || err.Error() != "clipboard max time must be > 0" {
 		t.Errorf("invalid max time error: %v", err)
 	}
-	t.Setenv("LOCKBOX_CLIP_MAX", "$&(+")
+	t.Setenv("LOCKBOX_CLIP_TIMEOUT", "$&(+")
 	_, err = platform.NewClipboard()
 	if err == nil || err.Error() != "strconv.Atoi: parsing \"$&(+\": invalid syntax" {
 		t.Errorf("invalid max time error: %v", err)
@@ -51,8 +51,8 @@ func TestMaxTime(t *testing.T) {
 }
 
 func TestClipboardInstances(t *testing.T) {
-	t.Setenv("LOCKBOX_NOCLIP", "no")
-	t.Setenv("LOCKBOX_CLIP_MAX", "")
+	t.Setenv("LOCKBOX_CLIP_ENABLED", "yes")
+	t.Setenv("LOCKBOX_CLIP_TIMEOUT", "")
 	t.Setenv("LOCKBOX_CLIP_OSC52", "no")
 	for _, item := range config.Platforms.List() {
 		t.Setenv("LOCKBOX_PLATFORM", item)
@@ -77,7 +77,7 @@ func TestOSC52(t *testing.T) {
 }
 
 func TestArgsOverride(t *testing.T) {
-	t.Setenv("LOCKBOX_CLIP_PASTE", "abc xyz 111")
+	t.Setenv("LOCKBOX_CLIP_PASTE_COMMAND", "abc xyz 111")
 	t.Setenv("LOCKBOX_CLIP_OSC52", "no")
 	t.Setenv("LOCKBOX_PLATFORM", string(config.Platforms.WindowsLinuxPlatform))
 	c, _ := platform.NewClipboard()
@@ -89,7 +89,7 @@ func TestArgsOverride(t *testing.T) {
 	if cmd != "abc" || len(args) != 2 || args[0] != "xyz" || args[1] != "111" || !ok {
 		t.Error("invalid parse")
 	}
-	t.Setenv("LOCKBOX_CLIP_COPY", "zzz lll 123")
+	t.Setenv("LOCKBOX_CLIP_COPY_COMMAND", "zzz lll 123")
 	c, _ = platform.NewClipboard()
 	cmd, args, ok = c.Args(true)
 	if cmd != "zzz" || len(args) != 2 || args[0] != "lll" || args[1] != "123" || !ok {
@@ -99,8 +99,8 @@ func TestArgsOverride(t *testing.T) {
 	if cmd != "abc" || len(args) != 2 || args[0] != "xyz" || args[1] != "111" || !ok {
 		t.Error("invalid parse")
 	}
-	t.Setenv("LOCKBOX_CLIP_PASTE", "")
-	t.Setenv("LOCKBOX_CLIP_COPY", "")
+	t.Setenv("LOCKBOX_CLIP_PASTE_COMMAND", "")
+	t.Setenv("LOCKBOX_CLIP_COPY_COMMAND", "")
 	c, _ = platform.NewClipboard()
 	cmd, args, ok = c.Args(true)
 	if cmd != "clip.exe" || len(args) != 0 || !ok {

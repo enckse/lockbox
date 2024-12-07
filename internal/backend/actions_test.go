@@ -29,12 +29,12 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	}
 	t.Setenv("LOCKBOX_READONLY", "no")
 	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_KEY", "test")
-	t.Setenv("LOCKBOX_KEYFILE", "")
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP", "totp")
-	t.Setenv("LOCKBOX_HOOKDIR", "")
-	t.Setenv("LOCKBOX_SET_MODTIME", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
+	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -49,12 +49,12 @@ func TestKeyFile(t *testing.T) {
 	os.Remove(file)
 	t.Setenv("LOCKBOX_READONLY", "no")
 	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_KEY", "test")
-	t.Setenv("LOCKBOX_KEYFILE", keyFile)
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP", "totp")
-	t.Setenv("LOCKBOX_HOOKDIR", "")
-	t.Setenv("LOCKBOX_SET_MODTIME", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", keyFile)
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
+	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
 	os.WriteFile(keyFile, []byte("test"), 0o644)
 	tr, err := backend.NewTransaction()
 	if err != nil {
@@ -80,7 +80,7 @@ func TestNoWriteOnRO(t *testing.T) {
 
 func TestBadTOTP(t *testing.T) {
 	tr := setup(t)
-	t.Setenv("LOCKBOX_TOTP", "Title")
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "Title")
 	if err := tr.Insert("a/a/a", "a"); err.Error() != "invalid totp field, uses restricted name" {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -285,14 +285,14 @@ func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 	os.Remove(file)
 	t.Setenv("LOCKBOX_STORE", file)
 	if key {
-		t.Setenv("LOCKBOX_KEY", "test")
-		t.Setenv("LOCKBOX_KEYMODE", "plaintext")
+		t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
+		t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	} else {
-		t.Setenv("LOCKBOX_KEYMODE", "none")
+		t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "none")
 	}
 	if keyFile {
 		key := testFile("keyfileor.key")
-		t.Setenv("LOCKBOX_KEYFILE", key)
+		t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", key)
 		os.WriteFile(key, []byte("test"), 0o644)
 	}
 	tr, err := backend.NewTransaction()
@@ -319,11 +319,11 @@ func TestReKey(t *testing.T) {
 	defer os.Remove(filepath.Join(testDir, f))
 	t.Setenv("LOCKBOX_READONLY", "no")
 	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_KEY", "test")
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP", "totp")
-	t.Setenv("LOCKBOX_HOOKDIR", "")
-	t.Setenv("LOCKBOX_SET_MODTIME", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
+	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)

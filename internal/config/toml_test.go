@@ -83,7 +83,7 @@ func TestArrayLoad(t *testing.T) {
 	t.Setenv("TEST", "abc")
 	data := `store="xyz"
 [clip]
-copy = ["'xyz/$TEST'", "s", 1]
+copy_command = ["'xyz/$TEST'", "s", 1]
 `
 	r := strings.NewReader(data)
 	_, err := config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -95,7 +95,7 @@ copy = ["'xyz/$TEST'", "s", 1]
 	data = `include = []
 store="xyz"
 [clip]
-copy = ["'xyz/$TEST'", "s"]
+copy_command = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
 	env, err := config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -107,13 +107,13 @@ copy = ["'xyz/$TEST'", "s"]
 	slices.SortFunc(env, func(x, y config.ShellEnv) int {
 		return strings.Compare(x.Key, y.Key)
 	})
-	if len(env) != 2 || env[1].Key != "LOCKBOX_STORE" || env[1].Value != "xyz" || env[0].Key != "LOCKBOX_CLIP_COPY" || env[0].Value != "'xyz/abc' s" {
+	if len(env) != 2 || env[1].Key != "LOCKBOX_STORE" || env[1].Value != "xyz" || env[0].Key != "LOCKBOX_CLIP_COPY_COMMAND" || env[0].Value != "'xyz/abc' s" {
 		t.Errorf("invalid object: %v", env)
 	}
 	data = `include = []
 store="xyz"
 [clip]
-copy = "'xyz/$TEST' s"
+copy_command = "'xyz/$TEST' s"
 `
 	r = strings.NewReader(data)
 	env, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -125,24 +125,7 @@ copy = "'xyz/$TEST' s"
 	slices.SortFunc(env, func(x, y config.ShellEnv) int {
 		return strings.Compare(x.Key, y.Key)
 	})
-	if len(env) != 2 || env[1].Key != "LOCKBOX_STORE" || env[1].Value != "xyz" || env[0].Key != "LOCKBOX_CLIP_COPY" || env[0].Value != "'xyz/abc' s" {
-		t.Errorf("invalid object: %v", env)
-	}
-}
-
-func TestRedirect(t *testing.T) {
-	data := `include = []
-[hooks]
-directory = "xyz"
-`
-	r := strings.NewReader(data)
-	env, err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if len(env) != 1 || env[0].Key != "LOCKBOX_HOOKDIR" || env[0].Value != "xyz" {
+	if len(env) != 2 || env[1].Key != "LOCKBOX_STORE" || env[1].Value != "xyz" || env[0].Key != "LOCKBOX_CLIP_COPY_COMMAND" || env[0].Value != "'xyz/abc' s" {
 		t.Errorf("invalid object: %v", env)
 	}
 }
@@ -150,7 +133,7 @@ directory = "xyz"
 func TestReadInt(t *testing.T) {
 	data := `
 [clip]
-max = true
+timeout = true
 `
 	r := strings.NewReader(data)
 	_, err := config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -161,7 +144,7 @@ max = true
 	}
 	data = `include = []
 [clip]
-max = 1
+timeout = 1
 `
 	r = strings.NewReader(data)
 	env, err := config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -170,12 +153,12 @@ max = 1
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(env) != 1 || env[0].Key != "LOCKBOX_CLIP_MAX" || env[0].Value != "1" {
+	if len(env) != 1 || env[0].Key != "LOCKBOX_CLIP_TIMEOUT" || env[0].Value != "1" {
 		t.Errorf("invalid object: %v", env)
 	}
 	data = `include = []
 [clip]
-max = -1
+timeout = -1
 `
 	r = strings.NewReader(data)
 	_, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -211,7 +194,7 @@ enabled = true
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(env) != 1 || env[0].Key != "LOCKBOX_NOTOTP" || env[0].Value != "yes" {
+	if len(env) != 1 || env[0].Key != "LOCKBOX_TOTP_ENABLED" || env[0].Value != "yes" {
 		t.Errorf("invalid object: %v", env)
 	}
 	data = `include = []
@@ -225,7 +208,7 @@ enabled = false
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(env) != 1 || env[0].Key != "LOCKBOX_NOTOTP" || env[0].Value != "no" {
+	if len(env) != 1 || env[0].Key != "LOCKBOX_TOTP_ENABLED" || env[0].Value != "no" {
 		t.Errorf("invalid object: %v", env)
 	}
 }
@@ -246,13 +229,13 @@ enabled = "false"
 	}
 	data = `include = []
 [totp]
-format = -1
+otp_format = -1
 `
 	r = strings.NewReader(data)
 	_, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
 		return nil, nil
 	})
-	if err == nil || err.Error() != "unknown field, can't determine type: totp_format (-1)" {
+	if err == nil || err.Error() != "unknown field, can't determine type: totp_otp_format (-1)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

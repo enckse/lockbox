@@ -19,7 +19,7 @@ function {{ $.Executable }}-completion
       complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.MoveCommand }}; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoList }})"
     end
   end
-  if {{ $.Conditionals.Not.NoTOTP }}
+  if {{ $.Conditionals.Not.CanTOTP }}
     set -f totps ""
 {{- range $idx, $value := $.TOTPSubCommands }}
   {{- if gt $idx 0 }}
@@ -34,7 +34,7 @@ function {{ $.Executable }}-completion
       complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoTOTPList }})"
     end
   end
-  if {{ $.Conditionals.Not.NoClip }} 
+  if {{ $.Conditionals.Not.CanClip }} 
     if {{ $.Conditionals.Not.AskMode }}
       complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.ClipCommand }}; and test (count (commandline -opc)) -lt 3" -a "({{ $.DoList}})"
     end

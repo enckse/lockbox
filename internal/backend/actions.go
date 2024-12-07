@@ -192,7 +192,7 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 	if strings.TrimSpace(src.Value) == "" {
 		return errors.New("empty secret not allowed")
 	}
-	mod := config.EnvModTime.Get()
+	mod := config.EnvDefaultModTime.Get()
 	modTime := time.Now()
 	if mod != "" {
 		p, err := time.Parse(config.ModTimeFormat, mod)
@@ -241,7 +241,7 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 			if multi {
 				return errors.New("totp tokens can NOT be multi-line")
 			}
-			otp := config.EnvFormatTOTP.Get(v)
+			otp := config.EnvTOTPFormat.Get(v)
 			e.Values = append(e.Values, protectedValue("otp", otp))
 		}
 		e.Values = append(e.Values, protectedValue(field, v))

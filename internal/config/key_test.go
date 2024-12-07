@@ -9,46 +9,46 @@ import (
 )
 
 func TestDefaultKey(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "")
-	t.Setenv("LOCKBOX_KEY", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	if _, err := config.NewKey(config.DefaultKeyMode); err == nil || err.Error() != "key MUST be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestNewKeyErrors(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "invalid")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "invalid")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "unknown key mode: invalid" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "none")
-	t.Setenv("LOCKBOX_KEY", "  test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "none")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "  test")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key can NOT be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "ask")
-	t.Setenv("LOCKBOX_KEY", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key can NOT be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "command")
-	t.Setenv("LOCKBOX_KEY", "   ")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "command")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "   ")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key MUST be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key MUST be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
 	t.Setenv("LOCKBOX_INTERACTIVE", "yes")
-	t.Setenv("LOCKBOX_KEYMODE", "ask")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -59,21 +59,21 @@ func TestNewKeyErrors(t *testing.T) {
 }
 
 func TestAskKey(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "")
-	t.Setenv("LOCKBOX_KEY", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	k, _ := config.NewKey(config.IgnoreKeyMode)
 	if k.Ask() {
 		t.Error("invalid ask key")
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "ask")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	t.Setenv("LOCKBOX_INTERACTIVE", "no")
 	k, _ = config.NewKey(config.IgnoreKeyMode)
 	if k.Ask() {
 		t.Error("invalid ask key")
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "ask")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	t.Setenv("LOCKBOX_INTERACTIVE", "yes")
 	k, _ = config.NewKey(config.IgnoreKeyMode)
 	if !k.Ask() {
@@ -103,13 +103,13 @@ func TestAskKey(t *testing.T) {
 }
 
 func TestIgnoreKey(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "ignore")
-	t.Setenv("LOCKBOX_KEY", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ignore")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "ignore")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ignore")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -129,8 +129,8 @@ func TestReadErrors(t *testing.T) {
 }
 
 func TestPlainKey(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_KEY", "  test ")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "  test ")
 	k, err := config.NewKey(config.IgnoreKeyMode)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -145,8 +145,8 @@ func TestPlainKey(t *testing.T) {
 }
 
 func TestReadIgnoreOrNoKey(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "ignore")
-	t.Setenv("LOCKBOX_KEY", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ignore")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	k, err := config.NewKey(config.IgnoreKeyMode)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -158,8 +158,8 @@ func TestReadIgnoreOrNoKey(t *testing.T) {
 	if err != nil || val != "" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "ignore")
-	t.Setenv("LOCKBOX_KEY", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ignore")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	k, err = config.NewKey(config.IgnoreKeyMode)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -168,7 +168,7 @@ func TestReadIgnoreOrNoKey(t *testing.T) {
 	if err != nil || val != "" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_KEYMODE", "none")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "none")
 	k, err = config.NewKey(config.IgnoreKeyMode)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -180,8 +180,8 @@ func TestReadIgnoreOrNoKey(t *testing.T) {
 }
 
 func TestCommandKey(t *testing.T) {
-	t.Setenv("LOCKBOX_KEYMODE", "command")
-	t.Setenv("LOCKBOX_KEY", "thisisagarbagekey")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "command")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "thisisagarbagekey")
 	k, err := config.NewKey(config.IgnoreKeyMode)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)

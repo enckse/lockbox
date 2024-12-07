@@ -97,7 +97,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 {
 		t.Errorf("invalid date/time")
 	}
-	t.Setenv("LOCKBOX_JSON_DATA_HASH_LENGTH", "10")
+	t.Setenv("LOCKBOX_JSON_HASH_LENGTH", "10")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -127,7 +127,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data == "" {
 		t.Errorf("invalid json: %v", m)
 	}
-	t.Setenv("LOCKBOX_JSON_DATA", "plAINtExt")
+	t.Setenv("LOCKBOX_JSON_MODE", "plAINtExt")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -139,7 +139,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data != "tedst" {
 		t.Errorf("invalid json: %v", m)
 	}
-	t.Setenv("LOCKBOX_JSON_DATA", "emPTY")
+	t.Setenv("LOCKBOX_JSON_MODE", "emPTY")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -211,7 +211,7 @@ func TestQueryCallback(t *testing.T) {
 func TestSetModTime(t *testing.T) {
 	testDateTime := "2022-12-30T12:34:56-05:00"
 	tr := fullSetup(t, false)
-	t.Setenv("LOCKBOX_SET_MODTIME", testDateTime)
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", testDateTime)
 	tr.Insert("test/xyz", "test")
 	q, err := fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
@@ -226,7 +226,7 @@ func TestSetModTime(t *testing.T) {
 	}
 
 	tr = fullSetup(t, false)
-	t.Setenv("LOCKBOX_SET_MODTIME", "")
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
 	tr.Insert("test/xyz", "test")
 	q, err = fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
@@ -241,7 +241,7 @@ func TestSetModTime(t *testing.T) {
 	}
 
 	tr = fullSetup(t, false)
-	t.Setenv("LOCKBOX_SET_MODTIME", "garbage")
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "garbage")
 	err = tr.Insert("test/xyz", "test")
 	if err == nil || !strings.Contains(err.Error(), "parsing time") {
 		t.Errorf("invalid error: %v", err)

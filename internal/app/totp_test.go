@@ -29,8 +29,8 @@ func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
 	opts := app.NewDefaultTOTPOptions(m)
 	opts.Clear = func() {
 	}
-	opts.IsNoTOTP = func() (bool, error) {
-		return false, nil
+	opts.CanTOTP = func() (bool, error) {
+		return true, nil
 	}
 	opts.IsInteractive = func() (bool, error) {
 		return true, nil
@@ -45,13 +45,13 @@ func fullTOTPSetup(t *testing.T, keep bool) *backend.Transaction {
 	}
 	t.Setenv("LOCKBOX_READONLY", "no")
 	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_KEY", "test")
-	t.Setenv("LOCKBOX_KEYFILE", "")
-	t.Setenv("LOCKBOX_KEYMODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP", "totp")
-	t.Setenv("LOCKBOX_HOOKDIR", "")
-	t.Setenv("LOCKBOX_SET_MODTIME", "")
-	t.Setenv("LOCKBOX_TOTP_MAX", "1")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
+	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
+	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
+	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
+	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
+	t.Setenv("LOCKBOX_TOTP_TIMEOUT", "1")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -143,8 +143,8 @@ func TestDoErrors(t *testing.T) {
 	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)
 	}
-	opts.IsNoTOTP = func() (bool, error) {
-		return true, nil
+	opts.CanTOTP = func() (bool, error) {
+		return false, nil
 	}
 	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)

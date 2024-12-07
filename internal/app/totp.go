@@ -39,7 +39,7 @@ type (
 	TOTPOptions struct {
 		app           CommandOptions
 		Clear         func()
-		IsNoTOTP      func() (bool, error)
+		CanTOTP       func() (bool, error)
 		IsInteractive func() (bool, error)
 	}
 )
@@ -67,7 +67,7 @@ func NewDefaultTOTPOptions(app CommandOptions) TOTPOptions {
 		app:           app,
 		Clear:         clearFunc,
 		IsInteractive: config.EnvInteractive.Get,
-		IsNoTOTP:      config.EnvNoTOTP.Get,
+		CanTOTP:       config.EnvTOTPEnabled.Get,
 	}
 }
 
@@ -108,7 +108,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		return errors.New("object does not exist")
 	}
 	totpToken := string(entity.Value)
-	k, err := coreotp.NewKeyFromURL(config.EnvFormatTOTP.Get(totpToken))
+	k, err := coreotp.NewKeyFromURL(config.EnvTOTPFormat.Get(totpToken))
 	if err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
-	runFor, err := config.EnvMaxTOTP.Get()
+	runFor, err := config.EnvTOTPTimeout.Get()
 	if err != nil {
 		return err
 	}
@@ -216,14 +216,14 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 	if args.Mode == UnknownTOTPMode {
 		return ErrUnknownTOTPMode
 	}
-	if opts.Clear == nil || opts.IsNoTOTP == nil || opts.IsInteractive == nil {
+	if opts.Clear == nil || opts.CanTOTP == nil || opts.IsInteractive == nil {
 		return errors.New("invalid option functions")
 	}
-	off, err := opts.IsNoTOTP()
+	can, err := opts.CanTOTP()
 	if err != nil {
 		return err
 	}
-	if off {
+	if !can {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListTOTPMode {

@@ -41,11 +41,11 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 }
 
 func TestColorSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_NOCOLOR", t, config.EnvNoColor, false)
+	checkYesNo("LOCKBOX_COLOR_ENABLED", t, config.EnvColorEnabled, true)
 }
 
 func TestNoHook(t *testing.T) {
-	checkYesNo("LOCKBOX_NOHOOKS", t, config.EnvNoHooks, false)
+	checkYesNo("LOCKBOX_HOOKS_ENABLED", t, config.EnvHooksEnabled, true)
 }
 
 func TestInteractiveSetting(t *testing.T) {
@@ -61,15 +61,15 @@ func TestIsOSC52(t *testing.T) {
 }
 
 func TestIsNoTOTP(t *testing.T) {
-	checkYesNo("LOCKBOX_NOTOTP", t, config.EnvNoTOTP, false)
+	checkYesNo("LOCKBOX_TOTP_ENABLED", t, config.EnvTOTPEnabled, true)
 }
 
 func TestIsNoClip(t *testing.T) {
-	checkYesNo("LOCKBOX_NOCLIP", t, config.EnvNoClip, false)
+	checkYesNo("LOCKBOX_CLIP_ENABLED", t, config.EnvClipEnabled, true)
 }
 
 func TestIsNoGeneratePassword(t *testing.T) {
-	checkYesNo("LOCKBOX_NOPWGEN", t, config.EnvNoPasswordGen, false)
+	checkYesNo("LOCKBOX_PWGEN_ENABLED", t, config.EnvPasswordGenEnabled, true)
 }
 
 func TestIsTitle(t *testing.T) {
@@ -77,16 +77,16 @@ func TestIsTitle(t *testing.T) {
 }
 
 func TestDefaultCompletions(t *testing.T) {
-	checkYesNo("LOCKBOX_DEFAULT_COMPLETION", t, config.EnvDefaultCompletion, false)
+	checkYesNo("LOCKBOX_DEFAULTS_COMPLETION", t, config.EnvDefaultCompletion, false)
 }
 
 func TestTOTP(t *testing.T) {
-	t.Setenv("LOCKBOX_TOTP", "abc")
-	if config.EnvTOTPToken.Get() != "abc" {
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "abc")
+	if config.EnvTOTPEntry.Get() != "abc" {
 		t.Error("invalid totp token field")
 	}
-	t.Setenv("LOCKBOX_TOTP", "")
-	if config.EnvTOTPToken.Get() != "totp" {
+	t.Setenv("LOCKBOX_TOTP_ENTRY", "")
+	if config.EnvTOTPEntry.Get() != "totp" {
 		t.Error("invalid totp token field")
 	}
 }
@@ -112,21 +112,21 @@ func TestReKey(t *testing.T) {
 }
 
 func TestFormatTOTP(t *testing.T) {
-	otp := config.EnvFormatTOTP.Get("otpauth://abc")
+	otp := config.EnvTOTPFormat.Get("otpauth://abc")
 	if otp != "otpauth://abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	otp = config.EnvFormatTOTP.Get("abc")
+	otp = config.EnvTOTPFormat.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	t.Setenv("LOCKBOX_TOTP_FORMAT", "test/%s")
-	otp = config.EnvFormatTOTP.Get("abc")
+	t.Setenv("LOCKBOX_TOTP_OTP_FORMAT", "test/%s")
+	otp = config.EnvTOTPFormat.Get("abc")
 	if otp != "test/abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	t.Setenv("LOCKBOX_TOTP_FORMAT", "")
-	otp = config.EnvFormatTOTP.Get("abc")
+	t.Setenv("LOCKBOX_TOTP_OTP_FORMAT", "")
+	otp = config.EnvTOTPFormat.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
@@ -137,41 +137,41 @@ func TestParseJSONMode(t *testing.T) {
 	if m != config.JSONOutputs.Hash || err != nil {
 		t.Error("invalid mode read")
 	}
-	t.Setenv("LOCKBOX_JSON_DATA", "hAsH ")
+	t.Setenv("LOCKBOX_JSON_MODE", "hAsH ")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONOutputs.Hash || err != nil {
 		t.Error("invalid mode read")
 	}
-	t.Setenv("LOCKBOX_JSON_DATA", "EMPTY")
+	t.Setenv("LOCKBOX_JSON_MODE", "EMPTY")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONOutputs.Blank || err != nil {
 		t.Error("invalid mode read")
 	}
-	t.Setenv("LOCKBOX_JSON_DATA", " PLAINtext ")
+	t.Setenv("LOCKBOX_JSON_MODE", " PLAINtext ")
 	m, err = config.ParseJSONOutput()
 	if m != config.JSONOutputs.Raw || err != nil {
 		t.Error("invalid mode read")
 	}
-	t.Setenv("LOCKBOX_JSON_DATA", "a")
+	t.Setenv("LOCKBOX_JSON_MODE", "a")
 	if _, err = config.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestClipboardMax(t *testing.T) {
-	checkInt(config.EnvClipMax, "LOCKBOX_CLIP_MAX", "clipboard max time", 45, false, t)
+	checkInt(config.EnvClipTimeout, "LOCKBOX_CLIP_TIMEOUT", "clipboard max time", 45, false, t)
 }
 
 func TestHashLength(t *testing.T) {
-	checkInt(config.EnvHashLength, "LOCKBOX_JSON_DATA_HASH_LENGTH", "hash length", 0, true, t)
+	checkInt(config.EnvJSONHashLength, "LOCKBOX_JSON_HASH_LENGTH", "hash length", 0, true, t)
 }
 
 func TestMaxTOTP(t *testing.T) {
-	checkInt(config.EnvMaxTOTP, "LOCKBOX_TOTP_MAX", "max totp time", 120, false, t)
+	checkInt(config.EnvTOTPTimeout, "LOCKBOX_TOTP_TIMEOUT", "max totp time", 120, false, t)
 }
 
 func TestWordCount(t *testing.T) {
-	checkInt(config.EnvPasswordGenCount, "LOCKBOX_PWGEN_COUNT", "word count", 8, false, t)
+	checkInt(config.EnvPasswordGenWordCount, "LOCKBOX_PWGEN_WORD_COUNT", "word count", 8, false, t)
 }
 
 func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {
@@ -216,8 +216,8 @@ func TestCanColor(t *testing.T) {
 		t.Error("should be able to color")
 	}
 	for raw, expect := range map[string]bool{
-		"INTERACTIVE": true,
-		"NOCOLOR":     false,
+		"INTERACTIVE":   true,
+		"COLOR_ENABLED": true,
 	} {
 		os.Clearenv()
 		key := fmt.Sprintf("LOCKBOX_%s", raw)

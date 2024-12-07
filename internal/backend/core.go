@@ -142,7 +142,7 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 }
 
 func isTOTP(title string) (bool, error) {
-	t := config.EnvTOTPToken.Get()
+	t := config.EnvTOTPEntry.Get()
 	if t == notesKey || t == passKey || t == titleKey {
 		return false, errors.New("invalid totp field, uses restricted name")
 	}

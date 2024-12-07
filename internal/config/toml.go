@@ -34,50 +34,26 @@ var (
 	// ExampleTOML is an example TOML file of viable fields
 	//go:embed "config.toml"
 	ExampleTOML string
-	redirects   = map[string]string{
-		"HOOKS_DIRECTORY":           EnvHookDir.Key(),
-		"HOOKS_ENABLED":             EnvNoHooks.Key(),
-		"JSON_MODE":                 EnvJSONDataOutput.Key(),
-		"JSON_HASH_LENGTH":          EnvHashLength.Key(),
-		"CREDENTIALS_KEY_FILE":      EnvKeyFile.Key(),
-		"CREDENTIALS_PASSWORD_MODE": EnvKeyMode.Key(),
-		"CREDENTIALS_PASSWORD":      envKey.Key(),
-		"CLIP_ENABLED":              EnvNoClip.Key(),
-		"COLOR_ENABLED":             EnvNoColor.Key(),
-		"PWGEN_ENABLED":             EnvNoPasswordGen.Key(),
-		"TOTP_ENABLED":              EnvNoTOTP.Key(),
-		"TOTP_ATTRIBUTE":            EnvTOTPToken.Key(),
-		"TOTP_OTP_FORMAT":           EnvFormatTOTP.Key(),
-		"TOTP_COLOR_WINDOWS":        EnvTOTPColorBetween.Key(),
-		"TOTP_TIMEOUT":              EnvMaxTOTP.Key(),
-		"DEFAULTS_MODTIME":          EnvModTime.Key(),
-		"DEFAULTS_COMPLETION":       EnvDefaultCompletion.Key(),
-		"PWGEN_WORDS_COMMAND":       EnvPasswordGenWordList.Key(),
-		"CLIP_COPY_COMMAND":         EnvClipCopy.Key(),
-		"CLIP_PASTE_COMMAND":        EnvClipPaste.Key(),
-		"CLIP_TIMEOUT":              EnvClipMax.Key(),
-		"PWGEN_CHARACTERS":          EnvPasswordGenChars.Key(),
-	}
-	arrayTypes = []string{
+	arrayTypes  = []string{
 		EnvClipCopy.Key(),
 		EnvClipPaste.Key(),
 		EnvPasswordGenWordList.Key(),
-		envKey.Key(),
+		envPassword.Key(),
 		EnvTOTPColorBetween.Key(),
 	}
 	intTypes = []string{
-		EnvClipMax.Key(),
-		EnvMaxTOTP.Key(),
-		EnvHashLength.Key(),
-		EnvPasswordGenCount.Key(),
+		EnvClipTimeout.Key(),
+		EnvTOTPTimeout.Key(),
+		EnvJSONHashLength.Key(),
+		EnvPasswordGenWordCount.Key(),
 	}
 	boolTypes = []string{
 		EnvClipOSC52.Key(),
-		EnvNoClip.Key(),
-		EnvNoColor.Key(),
-		EnvNoHooks.Key(),
-		EnvNoPasswordGen.Key(),
-		EnvNoTOTP.Key(),
+		EnvClipEnabled.Key(),
+		EnvTOTPEnabled.Key(),
+		EnvColorEnabled.Key(),
+		EnvHooksEnabled.Key(),
+		EnvPasswordGenEnabled.Key(),
 		EnvPasswordGenTitle.Key(),
 		EnvReadOnly.Key(),
 		EnvInteractive.Key(),
@@ -211,12 +187,7 @@ func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 	}
 	var res []ShellEnv
 	for k, v := range m {
-		export := strings.ToUpper(k)
-		if r, ok := redirects[export]; ok {
-			export = r
-		} else {
-			export = environmentPrefix + export
-		}
+		export := environmentPrefix + strings.ToUpper(k)
 		if _, ok := registry[export]; !ok {
 			return nil, fmt.Errorf("unknown key: %s (%s)", k, export)
 		}
