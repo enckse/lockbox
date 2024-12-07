@@ -2,12 +2,10 @@ package config
 
 import (
 	"bytes"
-	_ "embed"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 
@@ -15,69 +13,37 @@ import (
 )
 
 const (
-	isInclude = "include"
-	maxDepth  = 10
+	isInclude  = "include"
+	maxDepth   = 10
+	tomlInt    = "integer"
+	tomlBool   = "boolean"
+	tomlString = "string"
+	tomlArray  = "[]string"
 )
 
 type (
+	tomlType string
 	// Loader indicates how included files should be sourced
 	Loader func(string) (io.Reader, error)
 	// ShellEnv is the output shell environment settings parsed from TOML config
 	ShellEnv struct {
 		Key   string
 		Value string
-		raw   string
-	}
-)
-
-var (
-	// ExampleTOML is an example TOML file of viable fields
-	//go:embed "config.toml"
-	ExampleTOML string
-	arrayTypes  = []string{
-		EnvClipCopy.Key(),
-		EnvClipPaste.Key(),
-		EnvPasswordGenWordList.Key(),
-		envPassword.Key(),
-		EnvTOTPColorBetween.Key(),
-	}
-	intTypes = []string{
-		EnvClipTimeout.Key(),
-		EnvTOTPTimeout.Key(),
-		EnvJSONHashLength.Key(),
-		EnvPasswordGenWordCount.Key(),
-	}
-	boolTypes = []string{
-		EnvClipOSC52.Key(),
-		EnvClipEnabled.Key(),
-		EnvTOTPEnabled.Key(),
-		EnvColorEnabled.Key(),
-		EnvHooksEnabled.Key(),
-		EnvPasswordGenEnabled.Key(),
-		EnvPasswordGenTitle.Key(),
-		EnvReadOnly.Key(),
-		EnvInteractive.Key(),
-		EnvDefaultCompletion.Key(),
-	}
-	reverseMap = map[string][]string{
-		"[]":   arrayTypes,
-		"0":    intTypes,
-		"true": boolTypes,
 	}
 )
 
 // DefaultTOML will load the internal, default TOML with additional comment markups
 func DefaultTOML() (string, error) {
-	s, err := LoadConfig(strings.NewReader(ExampleTOML), nil)
-	if err != nil {
-		return "", err
-	}
 	const root = "_root_"
 	unmapped := make(map[string][]string)
 	keys := []string{}
-	for _, item := range s {
-		raw := item.raw
-		parts := strings.Split(raw, "_")
+	isConfig := EnvConfig.Key()
+	for envKey, item := range registry {
+		if envKey == isConfig {
+			continue
+		}
+		tomlKey := strings.ToLower(strings.TrimPrefix(envKey, environmentPrefix))
+		parts := strings.Split(tomlKey, "_")
 		length := len(parts)
 		if length == 0 {
 			return "", fmt.Errorf("invalid internal TOML structure: %v", item)
@@ -93,14 +59,8 @@ func DefaultTOML() (string, error) {
 		default:
 			sub = strings.Join(parts[1:], "_")
 		}
-		field := "\"\""
-		for to, fromKey := range reverseMap {
-			if slices.Contains(fromKey, item.Key) {
-				field = to
-				break
-			}
-		}
-		text, err := generateDetailText(item.Key)
+		_, field := item.toml()
+		text, err := generateDetailText(item)
 		if err != nil {
 			return "", err
 		}
@@ -117,7 +77,7 @@ func DefaultTOML() (string, error) {
 	}
 	sort.Strings(keys)
 	builder := strings.Builder{}
-	configEnv, err := generateDetailText(EnvConfig.Key())
+	configEnv, err := generateDetailText(EnvConfig)
 	if err != nil {
 		return "", err
 	}
@@ -151,24 +111,22 @@ func DefaultTOML() (string, error) {
 	return builder.String(), nil
 }
 
-func generateDetailText(key string) (string, error) {
-	data, ok := registry[key]
-	if !ok {
-		return "", fmt.Errorf("unexpected configuration key has no environment settings: %s", key)
-	}
+func generateDetailText(data printer) (string, error) {
 	env := data.self()
 	value, allow := data.values()
 	if len(value) == 0 {
 		value = "(unset)"
 	}
+	key := env.Key()
 	description := strings.TrimSpace(Wrap(2, env.desc))
 	requirement := "optional/default"
 	r := strings.TrimSpace(env.requirement)
 	if r != "" {
 		requirement = r
 	}
+	t, _ := data.toml()
 	var text []string
-	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s\n", description), fmt.Sprintf("default: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|")), fmt.Sprintf("default: %s", value)} {
+	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s\n", description), fmt.Sprintf("requirement: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|")), fmt.Sprintf("default: %s", value), fmt.Sprintf("toml: %s", t)} {
 		for _, comment := range strings.Split(line, "\n") {
 			text = append(text, fmt.Sprintf("# %s", comment))
 		}
@@ -191,43 +149,50 @@ func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 	var res []ShellEnv
 	for k, v := range m {
 		export := environmentPrefix + strings.ToUpper(k)
-		if _, ok := registry[export]; !ok {
+		env, ok := registry[export]
+		if !ok {
 			return nil, fmt.Errorf("unknown key: %s (%s)", k, export)
 		}
-		value, ok := v.(string)
-		if !ok {
-			if slices.Contains(arrayTypes, export) {
-				array, err := parseStringArray(v)
-				if err != nil {
-					return nil, err
-				}
-				value = strings.Join(array, " ")
-			} else if slices.Contains(intTypes, export) {
-				i, ok := v.(int64)
-				if !ok {
-					return nil, fmt.Errorf("non-int64 found where expected: %v", v)
-				}
-				if i < 0 {
-					return nil, fmt.Errorf("%d is negative (not allowed here)", i)
-				}
-				value = fmt.Sprintf("%d", i)
-			} else if slices.Contains(boolTypes, export) {
-				switch t := v.(type) {
-				case bool:
-					if t {
-						value = yes
-					} else {
-						value = no
-					}
-				default:
-					return nil, fmt.Errorf("non-bool found where expected: %v", v)
-				}
-			} else {
-				return nil, fmt.Errorf("unknown field, can't determine type: %s (%v)", k, v)
+		var value string
+		isType, _ := env.toml()
+		switch isType {
+		case tomlArray:
+			array, err := parseStringArray(v)
+			if err != nil {
+				return nil, err
 			}
+			value = strings.Join(array, " ")
+		case tomlInt:
+			i, ok := v.(int64)
+			if !ok {
+				return nil, fmt.Errorf("non-int64 found where expected: %v", v)
+			}
+			if i < 0 {
+				return nil, fmt.Errorf("%d is negative (not allowed here)", i)
+			}
+			value = fmt.Sprintf("%d", i)
+		case tomlBool:
+			switch t := v.(type) {
+			case bool:
+				if t {
+					value = yes
+				} else {
+					value = no
+				}
+			default:
+				return nil, fmt.Errorf("non-bool found where expected: %v", v)
+			}
+		case tomlString:
+			s, ok := v.(string)
+			if !ok {
+				return nil, fmt.Errorf("non-string found where expected: %v", v)
+			}
+			value = s
+		default:
+			return nil, fmt.Errorf("unknown field, can't determine type: %s (%v)", k, v)
 		}
 		value = os.Expand(value, os.Getenv)
-		res = append(res, ShellEnv{Key: export, Value: value, raw: k})
+		res = append(res, ShellEnv{Key: export, Value: value})
 
 	}
 	return res, nil

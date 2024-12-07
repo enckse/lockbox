@@ -113,7 +113,7 @@ copy_command = ["'xyz/$TEST'", "s"]
 	data = `include = []
 store="xyz"
 [clip]
-copy_command = "'xyz/$TEST' s"
+copy_command = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
 	env, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
@@ -235,7 +235,7 @@ otp_format = -1
 	_, err = config.LoadConfig(r, func(p string) (io.Reader, error) {
 		return nil, nil
 	})
-	if err == nil || err.Error() != "unknown field, can't determine type: totp_otp_format (-1)" {
+	if err == nil || err.Error() != "non-string found where expected: -1" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

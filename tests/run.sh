@@ -235,7 +235,7 @@ hash_length = $LOCKBOX_JSON_HASH_LENGTH
 [credentials]
 key_file = "$LOCKBOX_CREDENTIALS_KEY_FILE"
 password_mode = "$LOCKBOX_CREDENTIALS_PASSWORD_MODE"
-password = "$LOCKBOX_CREDENTIALS_PASSWORD"
+password = ["$LOCKBOX_CREDENTIALS_PASSWORD"]
 EOF
   } > "$TOML"
   _unset

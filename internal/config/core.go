@@ -70,6 +70,7 @@ type (
 	printer     interface {
 		values() (string, []string)
 		self() environmentBase
+		toml() (tomlType, string)
 	}
 )
 

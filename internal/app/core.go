@@ -114,7 +114,6 @@ type (
 		ReKeyCommand       string
 		CompletionsCommand string
 		CompletionsEnv     string
-		ExampleTOML        string
 		ReKey              struct {
 			KeyFile string
 			NoKey   string
@@ -252,7 +251,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			ReKeyCommand:       ReKeyCommand,
 			CompletionsCommand: CompletionsCommand,
 			CompletionsEnv:     config.EnvDefaultCompletionKey,
-			ExampleTOML:        config.ExampleTOML,
 		}
 		document.ReKey.KeyFile = setDocFlag(reKeyFlags.KeyFile)
 		document.ReKey.NoKey = reKeyFlags.NoKey

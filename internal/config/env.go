@@ -34,6 +34,7 @@ type (
 		environmentDefault[string]
 		canDefault bool
 		allowed    []string
+		isArray    bool
 	}
 	// EnvironmentCommand are settings that are parsed as shell commands
 	EnvironmentCommand struct {
@@ -163,4 +164,27 @@ func (e EnvironmentFormatter) values() (string, []string) {
 
 func (e EnvironmentCommand) values() (string, []string) {
 	return detectedValue, []string{commandArgsExample}
+}
+
+func (e EnvironmentInt) toml() (tomlType, string) {
+	return tomlInt, "0"
+}
+
+func (e EnvironmentBool) toml() (tomlType, string) {
+	return tomlBool, "true"
+}
+
+func (e EnvironmentString) toml() (tomlType, string) {
+	if e.isArray {
+		return tomlArray, "[]"
+	}
+	return tomlString, "\"\""
+}
+
+func (e EnvironmentCommand) toml() (tomlType, string) {
+	return tomlArray, "[]"
+}
+
+func (e EnvironmentFormatter) toml() (tomlType, string) {
+	return tomlString, "\"\""
 }

@@ -194,6 +194,7 @@ var (
 must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
 and '%s' allows for multiple windows.`, core.ColorWindowSpan, core.ColorWindowDelimiter),
 				}),
+			isArray:    true,
 			canDefault: true,
 			allowed:    exampleColorWindows,
 		})
@@ -283,6 +284,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 						plainKeyMode,
 						commandKeyMode),
 				}),
+			isArray:    true,
 			allowed:    []string{commandArgsExample, "password"},
 			canDefault: false,
 		})
