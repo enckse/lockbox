@@ -178,14 +178,14 @@ func generateDetailText(key string) (string, error) {
 	if len(value) == 0 {
 		value = "(unset)"
 	}
-	description := Wrap(2, env.desc)
+	description := strings.TrimSpace(Wrap(2, env.desc))
 	requirement := "optional/default"
 	r := strings.TrimSpace(env.requirement)
 	if r != "" {
 		requirement = r
 	}
 	var text []string
-	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s", description), fmt.Sprintf("default: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|"))} {
+	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s\n", description), fmt.Sprintf("default: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|"))} {
 		for _, comment := range strings.Split(line, "\n") {
 			text = append(text, fmt.Sprintf("# %s", comment))
 		}
