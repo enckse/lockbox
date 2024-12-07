@@ -13,13 +13,13 @@ completion = ""
 enabled = true
 
 [clip]
-copy = []
-paste = []
-max = 0
+copy_command = []
+paste_command = []
+timeout = 0
 osc52 = false
 enabled = true
 
-[hook]
+[hooks]
 enabled = true
 directory = ""
 
@@ -27,22 +27,22 @@ directory = ""
 mode = ""
 hash_length = 0
 
-[keys]
-file = ""
-mode = ""
-key = ""
+[credentials]
+key_file = ""
+password_mode = ""
+password = []
 
 [pwgen]
 enabled = true
-chars = ""
+characters = ""
 count = 0
 template = ""
 title = true
-wordlist = []
+words_command = []
 
 [totp]
 enabled = true
 attribute = ""
-between = []
-format = ""
-max = 0
+color_windows = []
+otp_format = ""
+timeout = 0

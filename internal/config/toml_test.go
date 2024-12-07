@@ -132,7 +132,7 @@ copy = "'xyz/$TEST' s"
 
 func TestRedirect(t *testing.T) {
 	data := `include = []
-[hook]
+[hooks]
 directory = "xyz"
 `
 	r := strings.NewReader(data)

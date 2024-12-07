@@ -224,18 +224,18 @@ store = "$LOCKBOX_STORE"
 interactive = false
 
 [clip]
-copy = [$(echo "$LOCKBOX_CLIP_COPY" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
-copy = [$(echo "$LOCKBOX_CLIP_PASTE" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
-max = $LOCKBOX_CLIP_MAX
+copy_command = [$(echo "$LOCKBOX_CLIP_COPY" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
+copy_command = [$(echo "$LOCKBOX_CLIP_PASTE" | sed 's/ /", "/g;s/^/"/g;s/$/"/g')]
+timeout = $LOCKBOX_CLIP_MAX
 
 [json]
 mode = "$LOCKBOX_JSON_DATA"
 hash_length = $LOCKBOX_JSON_DATA_HASH_LENGTH
 
-[keys]
-file = "$LOCKBOX_KEYFILE"
-mode = "$LOCKBOX_KEYMODE"
-key = "$LOCKBOX_KEY"
+[credentials]
+key_file = "$LOCKBOX_KEYFILE"
+password_mode = "$LOCKBOX_KEYMODE"
+password = "$LOCKBOX_KEY"
 EOF
   } > "$TOML"
   _unset
