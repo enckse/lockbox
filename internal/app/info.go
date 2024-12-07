@@ -7,8 +7,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
+	"github.com/seanenck/lockbox/internal/app/commands"
+	"github.com/seanenck/lockbox/internal/app/completions"
+	"github.com/seanenck/lockbox/internal/app/help"
 	"github.com/seanenck/lockbox/internal/config"
 )
 
@@ -35,16 +39,16 @@ func exeName() (string, error) {
 
 func info(command string, args []string) ([]string, error) {
 	switch command {
-	case HelpCommand:
+	case commands.Help:
 		if len(args) > 1 {
 			return nil, errors.New("invalid help command")
 		}
 		isAdvanced := false
 		if len(args) == 1 {
 			switch args[0] {
-			case HelpAdvancedCommand:
+			case commands.HelpAdvanced:
 				isAdvanced = true
-			case HelpConfigCommand:
+			case commands.HelpConfig:
 				data, err := config.DefaultTOML()
 				if err != nil {
 					return nil, err
@@ -58,21 +62,21 @@ func info(command string, args []string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		results, err := Usage(isAdvanced, exe)
+		results, err := help.Usage(isAdvanced, exe)
 		if err != nil {
 			return nil, err
 		}
 		return results, nil
-	case EnvCommand:
+	case commands.Env:
 		var set []string
 		switch len(args) {
 		case 0:
 		case 1:
 			sub := args[0]
-			if sub != CompletionsCommand {
+			if sub != commands.Completions {
 				return nil, fmt.Errorf("unknown env subset: %s", sub)
 			}
-			set = newConditionals().Exported
+			set = completions.NewConditionals().Exported
 		default:
 			return nil, errors.New("invalid env command, too many arguments")
 		}
@@ -81,7 +85,7 @@ func info(command string, args []string) ([]string, error) {
 			env = []string{""}
 		}
 		return env, nil
-	case CompletionsCommand:
+	case commands.Completions:
 		shell := ""
 		exe, err := exeName()
 		if err != nil {
@@ -95,13 +99,10 @@ func info(command string, args []string) ([]string, error) {
 		default:
 			return nil, errors.New("invalid completions subcommand")
 		}
-		switch shell {
-		case CompletionsZshCommand, CompletionsBashCommand, CompletionsFishCommand:
-			break
-		default:
+		if !slices.Contains(commands.CompletionTypes, shell) {
 			return nil, fmt.Errorf("unknown completion type: %s", shell)
 		}
-		return GenerateCompletions(shell, exe)
+		return completions.Generate(shell, exe)
 	}
 	return nil, nil
 }

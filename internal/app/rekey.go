@@ -5,17 +5,9 @@ import (
 	"errors"
 	"flag"
 	"strings"
+
+	"github.com/seanenck/lockbox/internal/app/commands"
 )
-
-var reKeyFlags = struct {
-	KeyFile string
-	NoKey   string
-}{"keyfile", "nokey"}
-
-type reKeyArgs struct {
-	NoKey   bool
-	KeyFile string
-}
 
 // ReKey handles entry rekeying
 func ReKey(cmd UserInputOptions) error {
@@ -41,17 +33,17 @@ func ReKey(cmd UserInputOptions) error {
 	return cmd.Transaction().ReKey(pass, vars.KeyFile)
 }
 
-func readArgs(args []string) (reKeyArgs, error) {
+func readArgs(args []string) (commands.ReKeyArgs, error) {
 	set := flag.NewFlagSet("rekey", flag.ExitOnError)
-	keyFile := set.String(reKeyFlags.KeyFile, "", "new keyfile")
-	noKey := set.Bool(reKeyFlags.NoKey, false, "disable password/key credential")
+	keyFile := set.String(commands.ReKeyFlags.KeyFile, "", "new keyfile")
+	noKey := set.Bool(commands.ReKeyFlags.NoKey, false, "disable password/key credential")
 	if err := set.Parse(args); err != nil {
-		return reKeyArgs{}, err
+		return commands.ReKeyArgs{}, err
 	}
 	noPass := *noKey
 	file := *keyFile
 	if strings.TrimSpace(file) == "" && noPass {
-		return reKeyArgs{}, errors.New("a key or keyfile must be passed for rekey")
+		return commands.ReKeyArgs{}, errors.New("a key or keyfile must be passed for rekey")
 	}
-	return reKeyArgs{KeyFile: file, NoKey: noPass}, nil
+	return commands.ReKeyArgs{KeyFile: file, NoKey: noPass}, nil
 }

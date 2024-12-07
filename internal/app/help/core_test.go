@@ -1,18 +1,18 @@
-package app_test
+package help_test
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/app/help"
 )
 
 func TestUsage(t *testing.T) {
-	u, _ := app.Usage(false, "lb")
+	u, _ := help.Usage(false, "lb")
 	if len(u) != 27 {
 		t.Errorf("invalid usage, out of date? %d", len(u))
 	}
-	u, _ = app.Usage(true, "lb")
+	u, _ = help.Usage(true, "lb")
 	if len(u) != 100 {
 		t.Errorf("invalid verbose usage, out of date? %d", len(u))
 	}

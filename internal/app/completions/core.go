@@ -1,5 +1,5 @@
-// Package app common objects
-package app
+// Package completions generations shell completions
+package completions
 
 import (
 	"bytes"
@@ -9,12 +9,14 @@ import (
 	"sort"
 	"text/template"
 
+	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/util"
 )
 
 type (
-	// Completions handles the inputs to completions for templating
-	Completions struct {
+	// Template handles the inputs to completions for templating
+	Template struct {
 		InsertCommand       string
 		TOTPListCommand     string
 		RemoveCommand       string
@@ -57,7 +59,7 @@ type (
 //go:embed shell/*
 var shell embed.FS
 
-func (c Completions) newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
+func (c Template) newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
 	opt := []CompletionOption{}
 	for _, a := range defaults {
 		opt = append(opt, CompletionOption{c.Conditionals.Not.Ever, a})
@@ -74,7 +76,8 @@ func (c Completions) newGenOptions(defaults []string, kv map[string]string) []Co
 	return opt
 }
 
-func newConditionals() Conditionals {
+// NewConditionals creates the conditional components of completions
+func NewConditionals() Conditionals {
 	const shellIsNotText = `[ "%s" != "%s" ]`
 	c := Conditionals{}
 	registerIsNotEqual := func(key interface{ Key() string }, right string) string {
@@ -91,47 +94,47 @@ func newConditionals() Conditionals {
 	return c
 }
 
-// GenerateCompletions handles creating shell completion outputs
-func GenerateCompletions(completionType, exe string) ([]string, error) {
-	if !slices.Contains(completionTypes, completionType) {
+// Generate handles creating shell completion outputs
+func Generate(completionType, exe string) ([]string, error) {
+	if !slices.Contains(commands.CompletionTypes, completionType) {
 		return nil, fmt.Errorf("unknown completion request: %s", completionType)
 	}
-	c := Completions{
+	c := Template{
 		Executable:          exe,
-		InsertCommand:       InsertCommand,
-		RemoveCommand:       RemoveCommand,
-		TOTPListCommand:     TOTPListCommand,
-		ClipCommand:         ClipCommand,
-		ShowCommand:         ShowCommand,
-		MultiLineCommand:    MultiLineCommand,
-		JSONCommand:         JSONCommand,
-		HelpCommand:         HelpCommand,
-		HelpAdvancedCommand: HelpAdvancedCommand,
-		HelpConfigCommand:   HelpConfigCommand,
-		TOTPCommand:         TOTPCommand,
-		MoveCommand:         MoveCommand,
-		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
-		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
-		ExportCommand:       fmt.Sprintf("%s %s %s", exe, EnvCommand, CompletionsCommand),
+		InsertCommand:       commands.Insert,
+		RemoveCommand:       commands.Remove,
+		TOTPListCommand:     commands.TOTPList,
+		ClipCommand:         commands.Clip,
+		ShowCommand:         commands.Show,
+		MultiLineCommand:    commands.MultiLine,
+		JSONCommand:         commands.JSON,
+		HelpCommand:         commands.Help,
+		HelpAdvancedCommand: commands.HelpAdvanced,
+		HelpConfigCommand:   commands.HelpConfig,
+		TOTPCommand:         commands.TOTP,
+		MoveCommand:         commands.Move,
+		DoList:              fmt.Sprintf("%s %s", exe, commands.List),
+		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, commands.TOTP, commands.TOTPList),
+		ExportCommand:       fmt.Sprintf("%s %s %s", exe, commands.Env, commands.Completions),
 	}
-	c.Conditionals = newConditionals()
+	c.Conditionals = NewConditionals()
 
-	c.Options = c.newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
+	c.Options = c.newGenOptions([]string{commands.Env, commands.Help, commands.List, commands.Show, commands.Version, commands.JSON},
 		map[string]string{
-			ClipCommand:             c.Conditionals.Not.CanClip,
-			TOTPCommand:             c.Conditionals.Not.CanTOTP,
-			MoveCommand:             c.Conditionals.Not.ReadOnly,
-			RemoveCommand:           c.Conditionals.Not.ReadOnly,
-			InsertCommand:           c.Conditionals.Not.ReadOnly,
-			MultiLineCommand:        c.Conditionals.Not.ReadOnly,
-			PasswordGenerateCommand: c.Conditionals.Not.CanPasswordGen,
+			commands.Clip:             c.Conditionals.Not.CanClip,
+			commands.TOTP:             c.Conditionals.Not.CanTOTP,
+			commands.Move:             c.Conditionals.Not.ReadOnly,
+			commands.Remove:           c.Conditionals.Not.ReadOnly,
+			commands.Insert:           c.Conditionals.Not.ReadOnly,
+			commands.MultiLine:        c.Conditionals.Not.ReadOnly,
+			commands.PasswordGenerate: c.Conditionals.Not.CanPasswordGen,
 		})
-	c.TOTPSubCommands = c.newGenOptions([]string{TOTPMinimalCommand, TOTPOnceCommand, TOTPShowCommand},
+	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow},
 		map[string]string{
-			TOTPClipCommand:   c.Conditionals.Not.CanClip,
-			TOTPInsertCommand: c.Conditionals.Not.ReadOnly,
+			commands.TOTPClip:   c.Conditionals.Not.CanClip,
+			commands.TOTPInsert: c.Conditionals.Not.ReadOnly,
 		})
-	using, err := readShell(completionType)
+	using, err := util.ReadDirFile("shell", fmt.Sprintf("%s.sh", completionType), shell)
 	if err != nil {
 		return nil, err
 	}
@@ -142,11 +145,7 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 	return []string{s}, nil
 }
 
-func readShell(file string) (string, error) {
-	return readEmbedded(fmt.Sprintf("%s.sh", file), "shell", shell)
-}
-
-func templateScript(script string, c Completions) (string, error) {
+func templateScript(script string, c Template) (string, error) {
 	t, err := template.New("t").Parse(script)
 	if err != nil {
 		return "", err

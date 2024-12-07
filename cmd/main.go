@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/seanenck/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform"
 	"github.com/seanenck/lockbox/internal/platform/clip"
@@ -32,10 +33,10 @@ func handleEarly(command string, args []string) (bool, error) {
 		return true, nil
 	}
 	switch command {
-	case app.VersionCommand:
+	case commands.Version:
 		fmt.Printf("version: %s\n", version)
 		return true, nil
-	case app.ClearCommand:
+	case commands.Clear:
 		return true, clearClipboard()
 	}
 	return false, nil
@@ -68,27 +69,27 @@ func run() error {
 		return err
 	}
 	switch command {
-	case app.ReKeyCommand:
+	case commands.ReKey:
 		return app.ReKey(p)
-	case app.ListCommand:
+	case commands.List:
 		return app.List(p)
-	case app.MoveCommand:
+	case commands.Move:
 		return app.Move(p)
-	case app.InsertCommand, app.MultiLineCommand:
+	case commands.Insert, commands.MultiLine:
 		mode := app.SingleLineInsert
-		if command == app.MultiLineCommand {
+		if command == commands.MultiLine {
 			mode = app.MultiLineInsert
 		}
 		return app.Insert(p, mode)
-	case app.RemoveCommand:
+	case commands.Remove:
 		return app.Remove(p)
-	case app.JSONCommand:
+	case commands.JSON:
 		return app.JSON(p)
-	case app.ShowCommand, app.ClipCommand:
-		return app.ShowClip(p, command == app.ShowCommand)
-	case app.ConvCommand:
+	case commands.Show, commands.Clip:
+		return app.ShowClip(p, command == commands.Show)
+	case commands.Conv:
 		return app.Conv(p)
-	case app.TOTPCommand:
+	case commands.TOTP:
 		args, err := app.NewTOTPArguments(sub, config.EnvTOTPEntry.Get())
 		if err != nil {
 			return err
@@ -98,7 +99,7 @@ func run() error {
 			return app.Insert(p, app.TOTPInsert)
 		}
 		return args.Do(app.NewDefaultTOTPOptions(p))
-	case app.PasswordGenerateCommand:
+	case commands.PasswordGenerate:
 		return app.GeneratePassword(p)
 	default:
 		return fmt.Errorf("unknown command: %s", command)

@@ -10,6 +10,7 @@ import (
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
 
+	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/backend"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform/clip"
@@ -257,21 +258,21 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 	sub := args[0]
 	needs := true
 	switch sub {
-	case TOTPListCommand:
+	case commands.TOTPList:
 		needs = false
 		if len(args) != 1 {
 			return nil, errors.New("list takes no arguments")
 		}
 		opts.Mode = ListTOTPMode
-	case TOTPInsertCommand:
+	case commands.TOTPInsert:
 		opts.Mode = InsertTOTPMode
-	case TOTPShowCommand:
+	case commands.TOTPShow:
 		opts.Mode = ShowTOTPMode
-	case TOTPClipCommand:
+	case commands.TOTPClip:
 		opts.Mode = ClipTOTPMode
-	case TOTPMinimalCommand:
+	case commands.TOTPMinimal:
 		opts.Mode = MinimalTOTPMode
-	case TOTPOnceCommand:
+	case commands.TOTPOnce:
 		opts.Mode = OnceTOTPMode
 	default:
 		return nil, ErrUnknownTOTPMode
