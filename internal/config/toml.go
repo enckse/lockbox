@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -146,13 +147,23 @@ func overlayConfig(r io.Reader, canInclude bool, m *map[string]interface{}, load
 				return errors.New("nested includes not allowed")
 			}
 			for _, s := range including {
-				read := os.Expand(s, os.Getenv)
-				reader, err := loader(read)
-				if err != nil {
-					return err
+				use := os.Expand(s, os.Getenv)
+				files := []string{use}
+				if strings.Contains(use, "*") {
+					matched, err := filepath.Glob(use)
+					if err != nil {
+						return err
+					}
+					files = matched
 				}
-				if err := overlayConfig(reader, false, m, nil); err != nil {
-					return err
+				for _, file := range files {
+					reader, err := loader(file)
+					if err != nil {
+						return err
+					}
+					if err := overlayConfig(reader, false, m, nil); err != nil {
+						return err
+					}
 				}
 			}
 		}
