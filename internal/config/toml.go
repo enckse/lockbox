@@ -126,7 +126,16 @@ func generateDetailText(data printer) (string, error) {
 	}
 	t, _ := data.toml()
 	var text []string
-	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s\n", description), fmt.Sprintf("requirement: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|")), fmt.Sprintf("default: %s", value), fmt.Sprintf("toml: %s", t)} {
+	for _, line := range []string{
+		fmt.Sprintf("environment: %s", key),
+		fmt.Sprintf("description:\n%s\n", description),
+		fmt.Sprintf("requirement: %s", requirement),
+		fmt.Sprintf("option: %s", strings.Join(allow, "|")),
+		fmt.Sprintf("default: %s", value),
+		fmt.Sprintf("type: %s", t),
+		"",
+		"NOTE: the following value is NOT a default, it is an empty TOML placeholder",
+	} {
 		for _, comment := range strings.Split(line, "\n") {
 			text = append(text, fmt.Sprintf("# %s", comment))
 		}
