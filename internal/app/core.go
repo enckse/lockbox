@@ -115,6 +115,8 @@ type (
 		ReKeyCommand       string
 		CompletionsCommand string
 		CompletionsEnv     string
+		HelpCommand        string
+		HelpConfigCommand  string
 		ReKey              struct {
 			KeyFile string
 			NoKey   string
@@ -252,6 +254,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			RemoveCommand:      RemoveCommand,
 			ReKeyCommand:       ReKeyCommand,
 			CompletionsCommand: CompletionsCommand,
+			HelpCommand:        HelpCommand,
+			HelpConfigCommand:  HelpConfigCommand,
 		}
 		document.ReKey.KeyFile = setDocFlag(reKeyFlags.KeyFile)
 		document.ReKey.NoKey = reKeyFlags.NoKey

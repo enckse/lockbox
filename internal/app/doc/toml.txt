@@ -1,10 +1,11 @@
 The core components of `{{ $.Executable }}` are controlled via
 environment settings, but these settings are secondary (overriden)
-by TOML configuration file(s) if given. The following represents
-all available environment and TOML settings as a TOML file with
-comments indicating the mapping to the underlying environment
-settings.
+by TOML configuration file(s) if given. Run `{{ $.Executable }} {{ $.HelpCommand }} {{ $.HelpConfigCommand
+}}` for more information.
 
-Arrays defined within the TOML configuration are flattened into
+- TOML values are read, transformed, and set into the process
+environment.
+
+- Arrays defined within the TOML configuration are flattened into
 a string (space delimited), quoting should be done within array
 parameters when needed.
