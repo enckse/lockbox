@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/output"
 	"github.com/seanenck/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/util"
 )
 
 var (
@@ -29,7 +30,7 @@ var (
 				environmentBase{
 					cat:    jsonCategory,
 					subKey: "HASH_LENGTH",
-					desc:   fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", core.JSONOutputs.Hash),
+					desc:   fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", output.JSONModes.Hash),
 				}),
 			shortDesc: "hash length",
 			allowZero: true,
@@ -181,7 +182,7 @@ var (
 					cat:    totpCategory,
 					desc: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
 must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
-and '%s' allows for multiple windows.`, core.ColorWindowSpan, core.ColorWindowDelimiter),
+and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDelimiter),
 				}),
 			isArray:    true,
 			canDefault: true,
@@ -215,14 +216,14 @@ and '%s' allows for multiple windows.`, core.ColorWindowSpan, core.ColorWindowDe
 	// EnvJSONMode controls how JSON is output in the 'data' field
 	EnvJSONMode = environmentRegister(
 		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment(string(core.JSONOutputs.Hash),
+			environmentDefault: newDefaultedEnvironment(string(output.JSONModes.Hash),
 				environmentBase{
 					cat:    jsonCategory,
 					subKey: "MODE",
-					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", core.JSONOutputs.Raw),
+					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", output.JSONModes.Raw),
 				}),
 			canDefault: true,
-			allowed:    core.JSONOutputs.List(),
+			allowed:    output.JSONModes.List(),
 		})
 	// EnvTOTPFormat supports formatting the TOTP tokens for generation of tokens
 	EnvTOTPFormat = environmentRegister(EnvironmentFormatter{environmentBase: environmentBase{

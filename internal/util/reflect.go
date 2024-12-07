@@ -1,5 +1,5 @@
-// Package core has helpers
-package core
+// Package util has reflection helpers
+package util
 
 import (
 	"fmt"

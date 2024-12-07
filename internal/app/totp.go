@@ -12,8 +12,8 @@ import (
 
 	"github.com/seanenck/lockbox/internal/backend"
 	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/core"
 	"github.com/seanenck/lockbox/internal/platform/clip"
+	"github.com/seanenck/lockbox/internal/util"
 )
 
 var (
@@ -76,12 +76,12 @@ func clearFunc() {
 	fmt.Print("\033[H\033[2J")
 }
 
-func colorWhenRules() ([]core.ColorWindow, error) {
+func colorWhenRules() ([]util.TimeWindow, error) {
 	envTime := config.EnvTOTPColorBetween.Get()
 	if envTime == config.TOTPDefaultBetween {
 		return config.TOTPDefaultColorWindow, nil
 	}
-	return core.ParseColorWindow(envTime)
+	return util.ParseTimeWindow(envTime)
 }
 
 func (w totpWrapper) generateCode() (string, error) {

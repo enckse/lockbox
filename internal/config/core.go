@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/util"
 	"mvdan.cc/sh/v3/shell"
 )
 
@@ -44,24 +44,24 @@ const (
 	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat      = time.RFC3339
-	exampleColorWindow = "start" + core.ColorWindowSpan + "end"
+	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
 )
 
 var (
-	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, core.ColorWindowDelimiter))}
+	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, util.TimeWindowDelimiter))}
 	configDirOffsetFile = filepath.Join(configDirName, tomlFile)
 	xdgPaths            = []string{configDirOffsetFile, tomlFile}
 	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, tomlFile)}
 	registry            = map[string]printer{}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
-	TOTPDefaultColorWindow = []core.ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
+	TOTPDefaultColorWindow = []util.TimeWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string
 	TOTPDefaultBetween = func() string {
 		var results []string
 		for _, w := range TOTPDefaultColorWindow {
-			results = append(results, fmt.Sprintf("%d%s%d", w.Start, core.ColorWindowSpan, w.End))
+			results = append(results, fmt.Sprintf("%d%s%d", w.Start, util.TimeWindowSpan, w.End))
 		}
-		return strings.Join(results, core.ColorWindowDelimiter)
+		return strings.Join(results, util.TimeWindowDelimiter)
 	}()
 )
 

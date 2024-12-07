@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/util"
 )
 
 const (
@@ -119,7 +119,7 @@ func generateDetailText(data printer) (string, error) {
 		value = "(unset)"
 	}
 	key := env.Key()
-	description := strings.TrimSpace(core.TextWrap(2, env.desc))
+	description := strings.TrimSpace(util.TextWrap(2, env.desc))
 	requirement := "optional/default"
 	r := strings.TrimSpace(env.requirement)
 	if r != "" {

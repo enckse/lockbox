@@ -13,8 +13,8 @@ import (
 	"text/template"
 
 	"github.com/seanenck/lockbox/internal/backend"
-	"github.com/seanenck/lockbox/internal/core"
 	"github.com/seanenck/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/util"
 )
 
 const (
@@ -299,7 +299,7 @@ func processDoc(header, file string, doc Documentation) (string, error) {
 	if err := t.Execute(&buf, doc); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s\n%s", header, core.TextWrap(0, buf.String())), nil
+	return fmt.Sprintf("%s\n%s", header, util.TextWrap(0, buf.String())), nil
 }
 
 func setDocFlag(f string) string {

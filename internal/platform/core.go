@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/util"
 )
 
 // Systems are the known platforms for lockbox
@@ -35,7 +35,7 @@ type (
 
 // List will list the platform types on the struct
 func (p SystemTypes) List() []string {
-	return core.ListFields(p)
+	return util.ListFields(p)
 }
 
 // NewSystem gets a new system platform.
