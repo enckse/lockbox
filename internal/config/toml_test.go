@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -267,6 +268,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.WriteFile(file, []byte(loaded), 0o644)
+	fmt.Println(loaded)
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -276,8 +278,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 			count++
 		}
 	}
-	// NOTE: this is one less than available because the default config itself is not configurable...via the config
-	if count != expectEnv-1 {
+	if count != 31 {
 		t.Errorf("invalid environment after load: %d", count)
 	}
 }

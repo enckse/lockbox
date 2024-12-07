@@ -121,9 +121,13 @@ func DefaultTOML() (string, error) {
 				break
 			}
 		}
-		sub = fmt.Sprintf(`# environment map: %s
+		text, err := generateDetailText(item.Key)
+		if err != nil {
+			return "", err
+		}
+		sub = fmt.Sprintf(`%s
 %s = %s
-`, item.Key, sub, field)
+`, text, sub, field)
 		had, ok := unmapped[key]
 		if !ok {
 			had = []string{}
@@ -134,10 +138,20 @@ func DefaultTOML() (string, error) {
 	}
 	sort.Strings(keys)
 	builder := strings.Builder{}
-	if _, err := fmt.Fprintf(&builder, `# include additional configs, can NOT nest, but does allow globs ('*')
-%s = []
-`, isInclude); err != nil {
+	configEnv, err := generateDetailText(EnvConfig.Key())
+	if err != nil {
 		return "", err
+	}
+	for _, header := range []string{configEnv, "\n", fmt.Sprintf(`
+# include additional configs, can NOT nest, but does allow globs ('*')
+# this field is not configurable via environment variables
+# and it is not considered part of the environment either
+# it is ONLY used during TOML configuration loading
+%s = []
+`, isInclude), "\n"} {
+		if _, err := builder.WriteString(header); err != nil {
+			return "", err
+		}
 	}
 	for _, k := range keys {
 		if k != root {
@@ -154,15 +168,36 @@ func DefaultTOML() (string, error) {
 	return builder.String(), nil
 }
 
+func generateDetailText(key string) (string, error) {
+	data, ok := registry[key]
+	if !ok {
+		return "", fmt.Errorf("unexpected configuration key has no environment settings: %s", key)
+	}
+	env := data.self()
+	value, allow := data.values()
+	if len(value) == 0 {
+		value = "(unset)"
+	}
+	description := Wrap(2, env.desc)
+	requirement := "optional/default"
+	r := strings.TrimSpace(env.requirement)
+	if r != "" {
+		requirement = r
+	}
+	var text []string
+	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s", description), fmt.Sprintf("default: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|"))} {
+		for _, comment := range strings.Split(line, "\n") {
+			text = append(text, fmt.Sprintf("# %s", comment))
+		}
+	}
+	return strings.Join(text, "\n"), nil
+}
+
 // LoadConfig will read the input reader and use the loader to source configuration files
 func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 	m := make(map[string]interface{})
 	if err := overlayConfig(r, true, &m, loader); err != nil {
 		return nil, err
-	}
-	var allowed []string
-	for _, k := range registeredEnv {
-		allowed = append(allowed, k.self().Key())
 	}
 	m = flatten(m, "")
 	var res []ShellEnv
@@ -173,7 +208,7 @@ func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 		} else {
 			export = environmentPrefix + export
 		}
-		if !slices.Contains(allowed, export) {
+		if _, ok := registry[export]; !ok {
 			return nil, fmt.Errorf("unknown key: %s (%s)", k, export)
 		}
 		value, ok := v.(string)

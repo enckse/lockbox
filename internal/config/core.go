@@ -44,7 +44,7 @@ var (
 	xdgPaths            = []string{configDirOffsetFile, tomlFile}
 	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, tomlFile)}
 	exampleColorWindows = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
-	registeredEnv       = []printer{}
+	registry            = map[string]printer{}
 )
 
 type (
@@ -356,7 +356,7 @@ func IsUnset(k, v string) (bool, error) {
 func Environ() []string {
 	var results []string
 	for _, k := range os.Environ() {
-		for _, r := range registeredEnv {
+		for _, r := range registry {
 			key := r.self().Key()
 			if key == EnvConfig.Key() {
 				continue
@@ -427,7 +427,7 @@ func wrap(in string, maxLength int) string {
 }
 
 func environmentRegister[T printer](obj T) T {
-	registeredEnv = append(registeredEnv, obj)
+	registry[obj.self().Key()] = obj
 	return obj
 }
 

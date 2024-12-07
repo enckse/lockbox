@@ -3,13 +3,10 @@ package config_test
 import (
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/config"
 )
-
-const expectEnv = 32
 
 func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {
 	t.Setenv(key, "yes")
@@ -91,24 +88,6 @@ func TestTOTP(t *testing.T) {
 	t.Setenv("LOCKBOX_TOTP", "")
 	if config.EnvTOTPToken.Get() != "totp" {
 		t.Error("invalid totp token field")
-	}
-}
-
-func TestListVariables(t *testing.T) {
-	known := make(map[string]struct{})
-	for _, v := range config.ListEnvironmentVariables() {
-		trim := strings.Split(strings.TrimSpace(v), " ")[0]
-		if !strings.HasPrefix(trim, "LOCKBOX_") {
-			t.Errorf("invalid env: %s", v)
-		}
-		if _, ok := known[trim]; ok {
-			t.Errorf("invalid re-used env: %s", trim)
-		}
-		known[trim] = struct{}{}
-	}
-	l := len(known)
-	if l != expectEnv {
-		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
 
@@ -227,44 +206,6 @@ func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool
 	} else {
 		if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be > 0", text) {
 			t.Errorf("invalid err: %v", err)
-		}
-	}
-}
-
-func TestEnvironDefinitions(t *testing.T) {
-	os.Clearenv()
-	vals := config.ListEnvironmentVariables()
-	expect := make(map[string]struct{})
-	found := false
-	for _, val := range vals {
-		found = true
-		env := strings.Split(strings.TrimSpace(val), "\n")[0]
-		if !strings.HasPrefix(env, "LOCKBOX_") {
-			t.Errorf("invalid env var: %s", env)
-		}
-		if env == "LOCKBOX_CONFIG_TOML" {
-			continue
-		}
-		t.Setenv(env, "test")
-		expect[env] = struct{}{}
-	}
-	if !found {
-		t.Errorf("no environment variables found?")
-	}
-	read := config.Environ()
-	if len(read) != len(expect) {
-		t.Errorf("invalid environment variable info: %d != %d", len(expect), len(read))
-	}
-	for k := range expect {
-		found := false
-		for _, r := range read {
-			if r == fmt.Sprintf("%s=test", k) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("unable to find env: %s", k)
 		}
 	}
 }

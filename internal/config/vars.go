@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 	"time"
 )
@@ -68,7 +67,7 @@ var (
 			environmentDefault: newDefaultedEnvironment(0,
 				environmentBase{
 					subKey: EnvJSONDataOutput.subKey + "_HASH_LENGTH",
-					desc:   fmt.Sprintf("Maximum hash string length the JSON output should contain when '%s' mode is set for JSON output.", JSONOutputs.Hash),
+					desc:   fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", JSONOutputs.Hash),
 				}),
 			shortDesc: "hash length",
 			allowZero: true,
@@ -155,7 +154,7 @@ var (
 				environmentBase{
 					subKey: "MAX",
 					cat:    totpCategory,
-					desc:   "Time, in seconds, in which to show a TOTP token before automatically exiting.",
+					desc:   "Time, in seconds, to show a TOTP token before automatically exiting.",
 				}),
 			shortDesc: "max totp time",
 			allowZero: false,
@@ -283,7 +282,8 @@ The keyword '%s' will disable this functionality and the keyword '%s' will
 search for a file in the following paths in XDG_CONFIG_HOME (%s) or from the user's HOME (%s).
 Matches the first file found.
 
-Note that this setting is not output as part of the environment.`, noEnvironment, detectEnvironment, strings.Join(xdgPaths, ","), strings.Join(homePaths, ",")),
+Note that this value is not output as part of the environment, nor
+can it be set via TOML configuration.`, noEnvironment, detectEnvironment, strings.Join(xdgPaths, ","), strings.Join(homePaths, ",")),
 				}),
 			canDefault: true,
 			allowed:    []string{detectEnvironment, fileExample, noEnvironment},
@@ -343,7 +343,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				environmentBase{
 					subKey: "TEMPLATE",
 					cat:    genCategory,
-					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues). Fields available are Text, Position.Start, and Position.End.", TemplateVariable),
+					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues). Available fields: Text, Position.Start, and Position.End.", TemplateVariable),
 				}),
 			allowed:    []string{"<go template>"},
 			canDefault: true,
@@ -381,7 +381,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				environmentBase{
 					subKey: "CHARS",
 					cat:    genCategory,
-					desc:   "The set of allowed characters in output words (empty means any characters are allowed).",
+					desc:   "The set of allowed characters in output words (empty means any character is allowed).",
 				}),
 			allowed:    []string{"<list of characters>"},
 			canDefault: true,
@@ -402,28 +402,6 @@ func GetReKey(args []string) (ReKeyArgs, error) {
 		return ReKeyArgs{}, errors.New("a key or keyfile must be passed for rekey")
 	}
 	return ReKeyArgs{KeyFile: file, NoKey: noPass}, nil
-}
-
-// ListEnvironmentVariables will print information about env variables
-func ListEnvironmentVariables() []string {
-	var results []string
-	for _, item := range registeredEnv {
-		env := item.self()
-		value, allow := item.values()
-		if len(value) == 0 {
-			value = "(unset)"
-		}
-		description := Wrap(2, env.desc)
-		requirement := "optional/default"
-		r := strings.TrimSpace(env.requirement)
-		if r != "" {
-			requirement = r
-		}
-		text := fmt.Sprintf("\n%s\n%s  requirement: %s\n  default: %s\n  options: %s\n", env.Key(), description, requirement, value, strings.Join(allow, "|"))
-		results = append(results, text)
-	}
-	sort.Strings(results)
-	return results
 }
 
 func formatterTOTP(key, value string) string {

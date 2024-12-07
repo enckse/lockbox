@@ -1,5 +1,8 @@
-the environment settings can also be set via TOML configuration
-files. The TOML file is read, the values transformed into the
-corresponding environment keys, values parsed (if not strings),
-expanded for shell variables, and then set into the process. The
-following is a outline of what is allowed in the TOML file:
+The core components of `{{ $.Executable }}` are controlled via
+environment settings, but these settings are secondary (overriden)
+by TOML configuration file(s) if given. The following represents
+all available environment and TOML settings as a TOML file with
+comments indicating the mapping to the underlying environment
+settings:
+
+---

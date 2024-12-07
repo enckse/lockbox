@@ -278,19 +278,10 @@ func Usage(verbose bool, exe string) ([]string, error) {
 				return nil, err
 			}
 			switch header {
-			case "[environment]":
+			case "[toml]":
 				env = s
 			default:
 				buf.WriteString(s)
-				if header == "[toml]" {
-					buf.WriteString("========================================\nconfig.toml\n---\n")
-					def, err := config.DefaultTOML()
-					if err != nil {
-						return nil, err
-					}
-					buf.WriteString(def)
-					buf.WriteString("========================================\n\n")
-				}
 			}
 		}
 		if env == "" {
@@ -299,7 +290,11 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		buf.WriteString(env)
 		results = append(results, strings.Split(strings.TrimSpace(buf.String()), "\n")...)
 		results = append(results, "")
-		results = append(results, config.ListEnvironmentVariables()...)
+		toml, err := config.DefaultTOML()
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, toml)
 	}
 	return append(usage, results...), nil
 }
