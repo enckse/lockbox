@@ -113,25 +113,6 @@ func TestEnviron(t *testing.T) {
 	}
 }
 
-func TestWrap(t *testing.T) {
-	w := config.Wrap(0, "")
-	if w != "" {
-		t.Errorf("invalid wrap: %s", w)
-	}
-	w = config.Wrap(0, "abc\n\nabc\nxyz\n")
-	if w != "abc\n\nabc xyz\n\n" {
-		t.Errorf("invalid wrap: %s", w)
-	}
-	w = config.Wrap(0, "abc\n\nabc\nxyz\n\nx")
-	if w != "abc\n\nabc xyz\n\nx\n\n" {
-		t.Errorf("invalid wrap: %s", w)
-	}
-	w = config.Wrap(5, "abc\n\nabc\nxyz\n\nx")
-	if w != "     abc\n\n     abc xyz\n\n     x\n\n" {
-		t.Errorf("invalid wrap: %s", w)
-	}
-}
-
 func TestCanColor(t *testing.T) {
 	os.Clearenv()
 	if can, _ := config.CanColor(); !can {
