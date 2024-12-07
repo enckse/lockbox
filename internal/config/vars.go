@@ -72,18 +72,6 @@ var (
 					desc:   "Enable clipboard operations.",
 				}),
 		})
-	// EnvDefaultCompletion disable completion detection
-	EnvDefaultCompletion = environmentRegister(
-		EnvironmentBool{
-			environmentDefault: newDefaultedEnvironment(false,
-				environmentBase{
-					cat:    defaultCategory,
-					subKey: "COMPLETION",
-					desc:   "Use the default completion set (disable detection).",
-				}),
-		})
-	// EnvDefaultCompletionKey is the key for default completion handling
-	EnvDefaultCompletionKey = EnvDefaultCompletion.Key()
 	// EnvColorEnabled indicates if colors are enabled
 	EnvColorEnabled = environmentRegister(
 		EnvironmentBool{

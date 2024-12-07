@@ -1,4 +1,6 @@
-Completions are available for certain shells and detect available completions
-determined by other environment settings. Completion command detection can be
-disabled by setting {{ $.CompletionsEnv }}. Generation of completions are
-handled by `{{ $.Executable }} {{ $.CompletionsCommand }}`
+Completions are available for certain shells. Generation of completions is
+handled by `{{ $.Executable }} {{ $.CompletionsCommand }}` (detecting the
+shell by default), provide an additional argument to the command of a
+the specific shell to generate completions for. Generated completions use
+various `{{ $.Executable }}` settings to disable components depending on
+user settings.

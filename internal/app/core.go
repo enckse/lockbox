@@ -250,7 +250,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			RemoveCommand:      RemoveCommand,
 			ReKeyCommand:       ReKeyCommand,
 			CompletionsCommand: CompletionsCommand,
-			CompletionsEnv:     config.EnvDefaultCompletionKey,
 		}
 		document.ReKey.KeyFile = setDocFlag(reKeyFlags.KeyFile)
 		document.ReKey.NoKey = reKeyFlags.NoKey

@@ -75,10 +75,6 @@ func TestIsTitle(t *testing.T) {
 	checkYesNo("LOCKBOX_PWGEN_TITLE", t, config.EnvPasswordGenTitle, true)
 }
 
-func TestDefaultCompletions(t *testing.T) {
-	checkYesNo("LOCKBOX_DEFAULTS_COMPLETION", t, config.EnvDefaultCompletion, false)
-}
-
 func TestTOTP(t *testing.T) {
 	t.Setenv("LOCKBOX_TOTP_ENTRY", "abc")
 	if config.EnvTOTPEntry.Get() != "abc" {
