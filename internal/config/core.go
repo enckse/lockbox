@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -125,19 +126,25 @@ func IsUnset(k, v string) (bool, error) {
 }
 
 // Environ will list the current environment keys
-func Environ() []string {
+func Environ(set ...string) []string {
 	var results []string
+	filtered := len(set) > 0
 	for _, k := range os.Environ() {
 		for _, r := range registry {
-			key := r.self().Key()
-			if key == EnvConfig.Key() {
+			rawKey := r.self().Key()
+			if rawKey == EnvConfig.Key() {
 				continue
 			}
-			key = fmt.Sprintf("%s=", key)
-			if strings.HasPrefix(k, key) {
-				results = append(results, k)
-				break
+			key := fmt.Sprintf("%s=", rawKey)
+			if !strings.HasPrefix(k, key) {
+				continue
 			}
+			if filtered {
+				if !slices.Contains(set, rawKey) {
+					continue
+				}
+			}
+			results = append(results, k)
 		}
 	}
 	sort.Strings(results)

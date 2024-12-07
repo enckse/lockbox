@@ -55,24 +55,42 @@ func TestEnvInfo(t *testing.T) {
 	os.Clearenv()
 	var buf bytes.Buffer
 	ok, err := app.Info(&buf, "env", []string{})
-	if ok || err != nil {
+	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() != "" {
+	if buf.String() != "\n" {
 		t.Error("nothing written")
 	}
+	buf = bytes.Buffer{}
 	t.Setenv("LOCKBOX_STORE", "1")
 	ok, err = app.Info(&buf, "env", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if buf.String() == "" {
+	if strings.TrimSpace(buf.String()) != "LOCKBOX_STORE=1" {
 		t.Error("nothing written")
 	}
-	if _, err = app.Info(&buf, "env", []string{"defaults"}); err.Error() != "invalid env command" {
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "env", []string{"completions"})
+	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid env command" {
+	if buf.String() != "\n" {
+		t.Error("nothing written")
+	}
+	t.Setenv("LOCKBOX_READONLY", "true")
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "env", []string{"completions"})
+	if !ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if strings.TrimSpace(buf.String()) != "LOCKBOX_READONLY=true" {
+		t.Error("nothing written")
+	}
+	if _, err = app.Info(&buf, "env", []string{"defaults"}); err.Error() != "unknown env subset: defaults" {
+		t.Errorf("invalid error: %v", err)
+	}
+	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid env command, too many arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

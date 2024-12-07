@@ -64,10 +64,23 @@ func info(command string, args []string) ([]string, error) {
 		}
 		return results, nil
 	case EnvCommand:
-		if len(args) != 0 {
-			return nil, errors.New("invalid env command")
+		var set []string
+		switch len(args) {
+		case 0:
+		case 1:
+			sub := args[0]
+			if sub != CompletionsCommand {
+				return nil, fmt.Errorf("unknown env subset: %s", sub)
+			}
+			set = newConditionals().Exported
+		default:
+			return nil, errors.New("invalid env command, too many arguments")
 		}
-		return config.Environ(), nil
+		env := config.Environ(set...)
+		if len(env) == 0 {
+			env = []string{""}
+		}
+		return env, nil
 	case CompletionsCommand:
 		shell := ""
 		exe, err := exeName()

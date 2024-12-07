@@ -2,6 +2,7 @@
 
 _{{ $.Executable }}() {
   local cur opts chosen found
+  source <({{ $.ExportCommand }}) 
   cur=${COMP_WORDS[COMP_CWORD]}
   if [ "$COMP_CWORD" -eq 1 ]; then
 {{- range $idx, $value := $.Options }}

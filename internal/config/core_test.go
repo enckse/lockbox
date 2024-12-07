@@ -107,6 +107,10 @@ func TestEnviron(t *testing.T) {
 	if len(e) != 2 || fmt.Sprintf("%v", e) != "[LOCKBOX_CREDENTIALS_PASSWORD=2 LOCKBOX_STORE=1]" {
 		t.Errorf("invalid environ: %v", e)
 	}
+	e = config.Environ("LOCKBOX_STORE", "LOCKBOX_OTHER")
+	if len(e) != 1 || fmt.Sprintf("%v", e) != "[LOCKBOX_STORE=1]" {
+		t.Errorf("invalid environ: %v", e)
+	}
 }
 
 func TestWrap(t *testing.T) {

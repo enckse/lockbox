@@ -3,7 +3,7 @@
 _{{ $.Executable }}() {
   local curcontext="$curcontext" state len chosen found args
   typeset -A opt_args
-
+  source <({{ $.ExportCommand }}) 
   _arguments \
     '1: :->main'\
     '*: :->args'

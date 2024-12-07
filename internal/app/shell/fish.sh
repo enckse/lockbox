@@ -3,6 +3,10 @@ complete -c {{ $.Executable }} -f
 
 function {{ $.Executable }}-completion
   set -f commands ""
+  for line in ({{ $.ExportCommand }})
+    set item (string split -m 1 "=" $line)
+    set -f $item[1] $item[2]
+  end
 {{- range $idx, $value := $.Options }}
   {{- if gt $idx 0 }}
   set -f commands " $commands"

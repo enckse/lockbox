@@ -12,10 +12,6 @@ import (
 	"github.com/seanenck/lockbox/internal/config"
 )
 
-const (
-	shellIsNotText = `[ "%s" != "%s" ]`
-)
-
 type (
 	// Completions handles the inputs to completions for templating
 	Completions struct {
@@ -34,18 +30,22 @@ type (
 		HelpCommand         string
 		HelpAdvancedCommand string
 		HelpConfigCommand   string
+		ExportCommand       string
 		Options             []CompletionOption
 		TOTPSubCommands     []CompletionOption
-		Conditionals        struct {
-			Not struct {
-				ReadOnly       string
-				CanClip        string
-				CanTOTP        string
-				AskMode        string
-				Ever           string
-				CanPasswordGen string
-			}
+		Conditionals        Conditionals
+	}
+	// Conditionals help control completion flow
+	Conditionals struct {
+		Not struct {
+			ReadOnly       string
+			CanClip        string
+			CanTOTP        string
+			AskMode        string
+			Ever           string
+			CanPasswordGen string
 		}
+		Exported []string
 	}
 	// CompletionOption are conditional wrapped logic for options that may be disabled
 	CompletionOption struct {
@@ -56,10 +56,6 @@ type (
 
 //go:embed shell/*
 var shell embed.FS
-
-func newShellIsNotEqualConditional(keyed interface{ Key() string }, right string) string {
-	return fmt.Sprintf(shellIsNotText, fmt.Sprintf("$%s", keyed.Key()), right)
-}
 
 func (c Completions) newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
 	opt := []CompletionOption{}
@@ -76,6 +72,23 @@ func (c Completions) newGenOptions(defaults []string, kv map[string]string) []Co
 		opt = append(opt, CompletionOption{check, key})
 	}
 	return opt
+}
+
+func newConditionals() Conditionals {
+	const shellIsNotText = `[ "%s" != "%s" ]`
+	c := Conditionals{}
+	registerIsNotEqual := func(key interface{ Key() string }, right string) string {
+		k := key.Key()
+		c.Exported = append(c.Exported, k)
+		return fmt.Sprintf(shellIsNotText, fmt.Sprintf("$%s", k), right)
+	}
+	c.Not.ReadOnly = registerIsNotEqual(config.EnvReadOnly, config.YesValue)
+	c.Not.CanClip = registerIsNotEqual(config.EnvClipEnabled, config.NoValue)
+	c.Not.CanTOTP = registerIsNotEqual(config.EnvTOTPEnabled, config.NoValue)
+	c.Not.AskMode = registerIsNotEqual(config.EnvPasswordMode, string(config.AskKeyMode))
+	c.Not.CanPasswordGen = registerIsNotEqual(config.EnvPasswordGenEnabled, config.NoValue)
+	c.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
+	return c
 }
 
 // GenerateCompletions handles creating shell completion outputs
@@ -99,13 +112,9 @@ func GenerateCompletions(completionType, exe string) ([]string, error) {
 		MoveCommand:         MoveCommand,
 		DoList:              fmt.Sprintf("%s %s", exe, ListCommand),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, TOTPCommand, TOTPListCommand),
+		ExportCommand:       fmt.Sprintf("%s %s %s", exe, EnvCommand, CompletionsCommand),
 	}
-	c.Conditionals.Not.ReadOnly = newShellIsNotEqualConditional(config.EnvReadOnly, config.YesValue)
-	c.Conditionals.Not.CanClip = newShellIsNotEqualConditional(config.EnvClipEnabled, config.NoValue)
-	c.Conditionals.Not.CanTOTP = newShellIsNotEqualConditional(config.EnvTOTPEnabled, config.NoValue)
-	c.Conditionals.Not.AskMode = newShellIsNotEqualConditional(config.EnvPasswordMode, string(config.AskKeyMode))
-	c.Conditionals.Not.CanPasswordGen = newShellIsNotEqualConditional(config.EnvPasswordGenEnabled, config.NoValue)
-	c.Conditionals.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
+	c.Conditionals = newConditionals()
 
 	c.Options = c.newGenOptions([]string{EnvCommand, HelpCommand, ListCommand, ShowCommand, VersionCommand, JSONCommand},
 		map[string]string{
