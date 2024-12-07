@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/config"
@@ -91,26 +90,6 @@ func TestTOTP(t *testing.T) {
 	}
 }
 
-func TestReKey(t *testing.T) {
-	if _, err := config.GetReKey([]string{"-nokey"}); err == nil || err.Error() != "a key or keyfile must be passed for rekey" {
-		t.Errorf("failed: %v", err)
-	}
-	out, err := config.GetReKey([]string{})
-	if err != nil {
-		t.Errorf("failed: %v", err)
-	}
-	if out.NoKey || out.KeyFile != "" {
-		t.Errorf("invalid args: %v", out)
-	}
-	out, err = config.GetReKey([]string{"-keyfile", "vars.go", "-nokey"})
-	if err != nil {
-		t.Errorf("failed: %v", err)
-	}
-	if !out.NoKey || out.KeyFile != "vars.go" {
-		t.Errorf("invalid args: %v", out)
-	}
-}
-
 func TestFormatTOTP(t *testing.T) {
 	otp := config.EnvTOTPFormat.Get("otpauth://abc")
 	if otp != "otpauth://abc" {
@@ -129,32 +108,6 @@ func TestFormatTOTP(t *testing.T) {
 	otp = config.EnvTOTPFormat.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
-	}
-}
-
-func TestParseJSONMode(t *testing.T) {
-	m, err := config.ParseJSONOutput()
-	if m != config.JSONOutputs.Hash || err != nil {
-		t.Error("invalid mode read")
-	}
-	t.Setenv("LOCKBOX_JSON_MODE", "hAsH ")
-	m, err = config.ParseJSONOutput()
-	if m != config.JSONOutputs.Hash || err != nil {
-		t.Error("invalid mode read")
-	}
-	t.Setenv("LOCKBOX_JSON_MODE", "EMPTY")
-	m, err = config.ParseJSONOutput()
-	if m != config.JSONOutputs.Blank || err != nil {
-		t.Error("invalid mode read")
-	}
-	t.Setenv("LOCKBOX_JSON_MODE", " PLAINtext ")
-	m, err = config.ParseJSONOutput()
-	if m != config.JSONOutputs.Raw || err != nil {
-		t.Error("invalid mode read")
-	}
-	t.Setenv("LOCKBOX_JSON_MODE", "a")
-	if _, err = config.ParseJSONOutput(); err == nil || err.Error() != "invalid JSON output mode: a" {
-		t.Errorf("invalid error: %v", err)
 	}
 }
 
@@ -207,32 +160,5 @@ func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool
 		if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be > 0", text) {
 			t.Errorf("invalid err: %v", err)
 		}
-	}
-}
-
-func TestCanColor(t *testing.T) {
-	os.Clearenv()
-	if can, _ := config.CanColor(); !can {
-		t.Error("should be able to color")
-	}
-	for raw, expect := range map[string]bool{
-		"INTERACTIVE":   true,
-		"COLOR_ENABLED": true,
-	} {
-		os.Clearenv()
-		key := fmt.Sprintf("LOCKBOX_%s", raw)
-		t.Setenv(key, "true")
-		if can, _ := config.CanColor(); can != expect {
-			t.Errorf("expect != actual: %s", key)
-		}
-		t.Setenv(key, "false")
-		if can, _ := config.CanColor(); can == expect {
-			t.Errorf("expect == actual: %s", key)
-		}
-	}
-	os.Clearenv()
-	t.Setenv("NO_COLOR", "1")
-	if can, _ := config.CanColor(); can {
-		t.Error("should NOT be able to color")
 	}
 }

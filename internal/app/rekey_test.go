@@ -75,3 +75,19 @@ func TestReKeyPipe(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 }
+
+func TestReKeyFlags(t *testing.T) {
+	newMockCommand(t)
+	mock := &mockKeyer{}
+	mock.t = t
+	mock.args = []string{"-nokey"}
+	if err := app.ReKey(mock); err == nil || err.Error() != "a key or keyfile must be passed for rekey" {
+		t.Errorf("invalid error: %v", err)
+	}
+	mock.args = []string{"-nokey", "-keyfile", "blla"}
+	mock.confirm = true
+	mock.pipe = false
+	if err := app.ReKey(mock); err == nil || err.Error() != "no keyfile found on disk" {
+		t.Errorf("invalid error: %v", err)
+	}
+}

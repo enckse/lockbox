@@ -254,8 +254,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			CompletionsEnv:     config.EnvDefaultCompletionKey,
 			ExampleTOML:        config.ExampleTOML,
 		}
-		document.ReKey.KeyFile = setDocFlag(config.ReKeyFlags.KeyFile)
-		document.ReKey.NoKey = config.ReKeyFlags.NoKey
+		document.ReKey.KeyFile = setDocFlag(reKeyFlags.KeyFile)
+		document.ReKey.NoKey = reKeyFlags.NoKey
 		document.Hooks.Mode.Pre = string(backend.HookPre)
 		document.Hooks.Mode.Post = string(backend.HookPost)
 		document.Hooks.Action.Insert = string(backend.InsertAction)

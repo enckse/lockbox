@@ -2,53 +2,13 @@
 package config
 
 import (
-	"errors"
-	"flag"
 	"fmt"
-	"net/url"
-	"os"
 	"strings"
-	"time"
-)
 
-const (
-	commandArgsExample   = "[cmd args...]"
-	fileExample          = "<file>"
-	detectedValue        = "<detected>"
-	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
-	// ModTimeFormat is the expected modtime format
-	ModTimeFormat = time.RFC3339
+	"github.com/seanenck/lockbox/internal/core"
 )
 
 var (
-	// Platforms are the known platforms for lockbox
-	Platforms = PlatformTypes{
-		MacOSPlatform:        "macos",
-		LinuxWaylandPlatform: "linux-wayland",
-		LinuxXPlatform:       "linux-x",
-		WindowsLinuxPlatform: "wsl",
-	}
-	// ReKeyFlags are the CLI argument flags for rekey handling
-	ReKeyFlags = struct {
-		KeyFile string
-		NoKey   string
-	}{"keyfile", "nokey"}
-	// JSONOutputs are the JSON data output types for exporting/output of values
-	JSONOutputs = JSONOutputTypes{
-		Hash:  "hash",
-		Blank: "empty",
-		Raw:   "plaintext",
-	}
-	// TOTPDefaultColorWindow is the default coloring rules for totp
-	TOTPDefaultColorWindow = []ColorWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
-	// TOTPDefaultBetween is the default color window as a string
-	TOTPDefaultBetween = func() string {
-		var results []string
-		for _, w := range TOTPDefaultColorWindow {
-			results = append(results, fmt.Sprintf("%d%s%d", w.Start, colorWindowSpan, w.End))
-		}
-		return strings.Join(results, colorWindowDelimiter)
-	}()
 	// EnvClipTimeout gets the maximum clipboard time
 	EnvClipTimeout = environmentRegister(
 		EnvironmentInt{
@@ -68,7 +28,7 @@ var (
 				environmentBase{
 					cat:    jsonCategory,
 					subKey: "HASH_LENGTH",
-					desc:   fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", JSONOutputs.Hash),
+					desc:   fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", core.JSONOutputs.Hash),
 				}),
 			shortDesc: "hash length",
 			allowZero: true,
@@ -184,7 +144,7 @@ var (
 					subKey: "PLATFORM",
 					desc:   "Override the detected platform.",
 				}),
-			allowed:    Platforms.List(),
+			allowed:    core.Platforms.List(),
 			canDefault: false,
 		})
 	// EnvStore is the location of the keepass file/store
@@ -232,7 +192,7 @@ var (
 					cat:    totpCategory,
 					desc: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
 must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
-and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
+and '%s' allows for multiple windows.`, core.ColorWindowSpan, core.ColorWindowDelimiter),
 				}),
 			canDefault: true,
 			allowed:    exampleColorWindows,
@@ -265,14 +225,14 @@ and '%s' allows for multiple windows.`, colorWindowSpan, colorWindowDelimiter),
 	// EnvJSONMode controls how JSON is output in the 'data' field
 	EnvJSONMode = environmentRegister(
 		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment(string(JSONOutputs.Hash),
+			environmentDefault: newDefaultedEnvironment(string(core.JSONOutputs.Hash),
 				environmentBase{
 					cat:    jsonCategory,
 					subKey: "MODE",
-					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", JSONOutputs.Raw),
+					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", core.JSONOutputs.Raw),
 				}),
 			canDefault: true,
-			allowed:    JSONOutputs.List(),
+			allowed:    core.JSONOutputs.List(),
 		})
 	// EnvTOTPFormat supports formatting the TOTP tokens for generation of tokens
 	EnvTOTPFormat = environmentRegister(EnvironmentFormatter{environmentBase: environmentBase{
@@ -400,76 +360,3 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			canDefault: true,
 		})
 )
-
-// GetReKey will get the rekey environment settings
-func GetReKey(args []string) (ReKeyArgs, error) {
-	set := flag.NewFlagSet("rekey", flag.ExitOnError)
-	keyFile := set.String(ReKeyFlags.KeyFile, "", "new keyfile")
-	noKey := set.Bool(ReKeyFlags.NoKey, false, "disable password/key credential")
-	if err := set.Parse(args); err != nil {
-		return ReKeyArgs{}, err
-	}
-	noPass := *noKey
-	file := *keyFile
-	if strings.TrimSpace(file) == "" && noPass {
-		return ReKeyArgs{}, errors.New("a key or keyfile must be passed for rekey")
-	}
-	return ReKeyArgs{KeyFile: file, NoKey: noPass}, nil
-}
-
-func formatterTOTP(key, value string) string {
-	const (
-		otpAuth   = "otpauth"
-		otpIssuer = "lbissuer"
-	)
-	if strings.HasPrefix(value, otpAuth) {
-		return value
-	}
-	override := environOrDefault(key, "")
-	if override != "" {
-		return fmt.Sprintf(override, value)
-	}
-	v := url.Values{}
-	v.Set("secret", value)
-	v.Set("issuer", otpIssuer)
-	v.Set("period", "30")
-	v.Set("algorithm", "SHA1")
-	v.Set("digits", "6")
-	u := url.URL{
-		Scheme:   otpAuth,
-		Host:     "totp",
-		Path:     "/" + otpIssuer + ":" + "lbaccount",
-		RawQuery: v.Encode(),
-	}
-	return u.String()
-}
-
-// ParseJSONOutput handles detecting the JSON output mode
-func ParseJSONOutput() (JSONOutputMode, error) {
-	val := JSONOutputMode(strings.ToLower(strings.TrimSpace(EnvJSONMode.Get())))
-	switch val {
-	case JSONOutputs.Hash, JSONOutputs.Blank, JSONOutputs.Raw:
-		return val, nil
-	}
-	return JSONOutputs.Blank, fmt.Errorf("invalid JSON output mode: %s", val)
-}
-
-// CanColor indicates if colorized output is allowed (or disabled)
-func CanColor() (bool, error) {
-	if _, noColor := os.LookupEnv("NO_COLOR"); noColor {
-		return false, nil
-	}
-	interactive, err := EnvInteractive.Get()
-	if err != nil {
-		return false, err
-	}
-	colors := interactive
-	if colors {
-		isColored, err := EnvColorEnabled.Get()
-		if err != nil {
-			return false, err
-		}
-		colors = isColored
-	}
-	return colors, nil
-}

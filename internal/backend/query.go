@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/core"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -174,16 +175,16 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsonMode := config.JSONOutputs.Blank
+	jsonMode := core.JSONOutputs.Blank
 	if args.Values == JSONValue {
-		m, err := config.ParseJSONOutput()
+		m, err := core.ParseJSONOutput(config.EnvJSONMode.Get())
 		if err != nil {
 			return nil, err
 		}
 		jsonMode = m
 	}
 	var hashLength int
-	if jsonMode == config.JSONOutputs.Hash {
+	if jsonMode == core.JSONOutputs.Hash {
 		hashLength, err = config.EnvJSONHashLength.Get()
 		if err != nil {
 			return nil, err
@@ -202,9 +203,9 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 				case JSONValue:
 					data := ""
 					switch jsonMode {
-					case config.JSONOutputs.Raw:
+					case core.JSONOutputs.Raw:
 						data = val
-					case config.JSONOutputs.Hash:
+					case core.JSONOutputs.Hash:
 						data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 						if hashLength > 0 && len(data) > hashLength {
 							data = data[0:hashLength]

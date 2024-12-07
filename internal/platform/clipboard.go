@@ -9,6 +9,7 @@ import (
 
 	osc "github.com/aymanbagabas/go-osc52"
 	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/core"
 )
 
 type (
@@ -57,7 +58,7 @@ func NewClipboard() (Clipboard, error) {
 		c := Clipboard{isOSC52: true}
 		return c, nil
 	}
-	sys, err := config.NewPlatform()
+	sys, err := NewPlatform()
 	if err != nil {
 		return Clipboard{}, err
 	}
@@ -65,16 +66,16 @@ func NewClipboard() (Clipboard, error) {
 	var copying []string
 	var pasting []string
 	switch sys {
-	case config.Platforms.MacOSPlatform:
+	case core.Platforms.MacOSPlatform:
 		copying = []string{"pbcopy"}
 		pasting = []string{"pbpaste"}
-	case config.Platforms.LinuxXPlatform:
+	case core.Platforms.LinuxXPlatform:
 		copying = []string{"xclip"}
 		pasting = []string{"xclip", "-o"}
-	case config.Platforms.LinuxWaylandPlatform:
+	case core.Platforms.LinuxWaylandPlatform:
 		copying = []string{"wl-copy"}
 		pasting = []string{"wl-paste"}
-	case config.Platforms.WindowsLinuxPlatform:
+	case core.Platforms.WindowsLinuxPlatform:
 		copying = []string{"clip.exe"}
 		pasting = []string{"powershell.exe", "-command", "Get-Clipboard"}
 	default:
