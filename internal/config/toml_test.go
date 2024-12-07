@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -20,11 +19,11 @@ func TestLoadIncludes(t *testing.T) {
 	r := strings.NewReader(data)
 	if _, err := config.LoadConfig(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
-			return strings.NewReader("include = [\"aaa\"]"), nil
+			return strings.NewReader("include = [\"$TEST/abc\"]"), nil
 		} else {
 			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "nested includes not allowed" {
+	}); err == nil || err.Error() != "too many nested includes (11 > 10)" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = ["abc"]`
@@ -268,7 +267,6 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.WriteFile(file, []byte(loaded), 0o644)
-	fmt.Println(loaded)
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
