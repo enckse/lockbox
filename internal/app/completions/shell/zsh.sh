@@ -41,7 +41,8 @@ _{{ $.Executable }}() {
       case $chosen in
         "{{ $.HelpCommand }}")
           if [ "$len" -eq 3 ]; then
-            compadd "$@" "{{ $.HelpAdvancedCommand }} {{ $.HelpConfigCommand }}"
+            compadd "$@" "{{ $.HelpAdvancedCommand }}"
+            compadd "$@" "{{ $.HelpConfigCommand }}"
           fi
         ;;
         "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
