@@ -199,11 +199,16 @@ func generateDetailText(key string) (string, error) {
 
 // LoadConfig will read the input reader and use the loader to source configuration files
 func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
-	m := make(map[string]interface{})
-	if err := overlayConfig(r, 1, &m, loader); err != nil {
+	maps, err := readConfigs(r, 1, loader)
+	if err != nil {
 		return nil, err
 	}
-	m = flatten(m, "")
+	m := make(map[string]interface{})
+	for _, config := range maps {
+		for k, v := range flatten(config, "") {
+			m[k] = v
+		}
+	}
 	var res []ShellEnv
 	for k, v := range m {
 		export := strings.ToUpper(k)
@@ -254,21 +259,22 @@ func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 	return res, nil
 }
 
-func overlayConfig(r io.Reader, depth int, m *map[string]interface{}, loader Loader) error {
+func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{}, error) {
 	if depth > maxDepth {
-		return fmt.Errorf("too many nested includes (%d > %d)", depth, maxDepth)
+		return nil, fmt.Errorf("too many nested includes (%d > %d)", depth, maxDepth)
 	}
 	d := toml.NewDecoder(r)
-	if _, err := d.Decode(m); err != nil {
-		return err
+	m := make(map[string]interface{})
+	if _, err := d.Decode(&m); err != nil {
+		return nil, err
 	}
-	res := *m
-	includes, ok := res[isInclude]
+	maps := []map[string]interface{}{m}
+	includes, ok := m[isInclude]
 	if ok {
-		delete(*m, isInclude)
+		delete(m, isInclude)
 		including, err := parseStringArray(includes)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if len(including) > 0 {
 			for _, s := range including {
@@ -277,23 +283,25 @@ func overlayConfig(r io.Reader, depth int, m *map[string]interface{}, loader Loa
 				if strings.Contains(use, "*") {
 					matched, err := filepath.Glob(use)
 					if err != nil {
-						return err
+						return nil, err
 					}
 					files = matched
 				}
 				for _, file := range files {
 					reader, err := loader(file)
 					if err != nil {
-						return err
+						return nil, err
 					}
-					if err := overlayConfig(reader, depth+1, m, loader); err != nil {
-						return err
+					results, err := readConfigs(reader, depth+1, loader)
+					if err != nil {
+						return nil, err
 					}
+					maps = append(maps, results...)
 				}
 			}
 		}
 	}
-	return nil
+	return maps, nil
 }
 
 func parseStringArray(value interface{}) ([]string, error) {
