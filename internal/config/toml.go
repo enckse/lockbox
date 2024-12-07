@@ -140,7 +140,9 @@ func DefaultTOML() (string, error) {
 				return "", err
 			}
 		}
-		for _, sub := range unmapped[k] {
+		subs := unmapped[k]
+		sort.Strings(subs)
+		for _, sub := range subs {
 			if _, err := builder.WriteString(sub); err != nil {
 				return "", err
 			}
