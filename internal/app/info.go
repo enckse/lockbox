@@ -73,10 +73,11 @@ func info(command string, args []string) ([]string, error) {
 		case 0:
 		case 1:
 			sub := args[0]
-			if sub != commands.Completions {
-				return nil, fmt.Errorf("unknown env subset: %s", sub)
+			if sub == commands.Completions {
+				set = completions.NewConditionals().Exported
+			} else {
+				set = []string{sub}
 			}
-			set = completions.NewConditionals().Exported
 		default:
 			return nil, errors.New("invalid env command, too many arguments")
 		}

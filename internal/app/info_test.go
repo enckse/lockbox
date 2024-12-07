@@ -87,8 +87,21 @@ func TestEnvInfo(t *testing.T) {
 	if strings.TrimSpace(buf.String()) != "LOCKBOX_READONLY=true" {
 		t.Error("nothing written")
 	}
-	if _, err = app.Info(&buf, "env", []string{"defaults"}); err.Error() != "unknown env subset: defaults" {
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "env", []string{"LOCKBOX_READONLY"})
+	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
+	}
+	if strings.TrimSpace(buf.String()) != "LOCKBOX_READONLY=true" {
+		t.Error("nothing written")
+	}
+	buf = bytes.Buffer{}
+	ok, err = app.Info(&buf, "env", []string{"garbage"})
+	if !ok || err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if buf.String() != "\n" {
+		t.Error("nothing written")
 	}
 	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid env command, too many arguments" {
 		t.Errorf("invalid error: %v", err)
