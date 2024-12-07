@@ -59,7 +59,7 @@ func TestHooks(t *testing.T) {
 	if err := h.Run(backend.HookPre); strings.Contains("fork/exec", err.Error()) {
 		t.Errorf("wrong error: %v", err)
 	}
-	t.Setenv("LOCKBOX_HOOKS_ENABLED", "no")
+	t.Setenv("LOCKBOX_HOOKS_ENABLED", "false")
 	h, err = backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)

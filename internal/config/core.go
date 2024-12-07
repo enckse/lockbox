@@ -20,8 +20,8 @@ const (
 	colorWindowDelimiter = " "
 	colorWindowSpan      = ":"
 	exampleColorWindow   = "start" + colorWindowSpan + "end"
-	yes                  = "yes"
-	no                   = "no"
+	yes                  = "true"
+	no                   = "false"
 	detectEnvironment    = "detect"
 	noEnvironment        = "none"
 	tomlFile             = "lockbox.toml"
@@ -49,7 +49,7 @@ var (
 	configDirOffsetFile = filepath.Join(configDirName, tomlFile)
 	xdgPaths            = []string{configDirOffsetFile, tomlFile}
 	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, tomlFile)}
-	exampleColorWindows = []string{strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter)}
+	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, colorWindowDelimiter))}
 	registry            = map[string]printer{}
 )
 

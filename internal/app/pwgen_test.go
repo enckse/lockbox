@@ -49,7 +49,7 @@ func TestGenerateError(t *testing.T) {
 	if err := app.GeneratePassword(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_ENABLED", "no")
+	t.Setenv("LOCKBOX_PWGEN_ENABLED", "false")
 	if err := app.GeneratePassword(m); err == nil || err.Error() != "password generation is disabled" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestGenerate(t *testing.T) {
 	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s 1 1 1 1 1 1 1 1 1 1 1 1", pwgenPath))
 	testPasswordGen(t, "1-1-1-1-1-1-1-1-1-1")
 	t.Setenv("LOCKBOX_PWGEN_WORD_COUNT", "4")
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "yes")
+	t.Setenv("LOCKBOX_PWGEN_TITLE", "true")
 	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s a a a a a a a a a a a a a a a", pwgenPath))
 	testPasswordGen(t, "A-A-A-A")
 	t.Setenv("LOCKBOX_PWGEN_CHARACTERS", "bc")
@@ -83,8 +83,8 @@ func TestGenerate(t *testing.T) {
 	testPasswordGen(t, "Bc-Bc-Bc-Bc")
 	os.Unsetenv("LOCKBOX_PWGEN_CHARACTERS")
 	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s a a a a a a a a a a a a a a a", pwgenPath))
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "no")
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "no")
+	t.Setenv("LOCKBOX_PWGEN_TITLE", "false")
+	t.Setenv("LOCKBOX_PWGEN_TITLE", "false")
 	testPasswordGen(t, "a-a-a-a")
 	// NOTE: this allows templating below in golang
 	t.Setenv("DOLLAR", "$")
@@ -93,7 +93,7 @@ func TestGenerate(t *testing.T) {
 	t.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val.Text }}{{end}}")
 	testPasswordGen(t, "-a-a-a-a")
 	os.Unsetenv("LOCKBOX_PWGEN_TEMPLATE")
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "yes")
+	t.Setenv("LOCKBOX_PWGEN_TITLE", "true")
 	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s abc axy axY aZZZ aoijafea aoiajfoea afaeoa", pwgenPath))
 	m := newMockCommand(t)
 	if err := app.GeneratePassword(m); err != nil {

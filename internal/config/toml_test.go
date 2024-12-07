@@ -194,7 +194,7 @@ enabled = true
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(env) != 1 || env[0].Key != "LOCKBOX_TOTP_ENABLED" || env[0].Value != "yes" {
+	if len(env) != 1 || env[0].Key != "LOCKBOX_TOTP_ENABLED" || env[0].Value != "true" {
 		t.Errorf("invalid object: %v", env)
 	}
 	data = `include = []
@@ -208,7 +208,7 @@ enabled = false
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(env) != 1 || env[0].Key != "LOCKBOX_TOTP_ENABLED" || env[0].Value != "no" {
+	if len(env) != 1 || env[0].Key != "LOCKBOX_TOTP_ENABLED" || env[0].Value != "false" {
 		t.Errorf("invalid object: %v", env)
 	}
 }

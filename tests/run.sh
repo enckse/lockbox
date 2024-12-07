@@ -62,8 +62,8 @@ printf "%-10s ... " "$1"
   export LOCKBOX_HOOKS_DIRECTORY=""
   export LOCKBOX_STORE="${DATA}/passwords.kdbx"
   export LOCKBOX_TOTP_ENTRY=totp
-  export LOCKBOX_INTERACTIVE=no
-  export LOCKBOX_READONLY=no
+  export LOCKBOX_INTERACTIVE=false
+  export LOCKBOX_READONLY=false
   if [ "$LOCKBOX_CREDENTIALS_PASSWORD" = "" ]; then
     export LOCKBOX_CREDENTIALS_PASSWORD_MODE=none
   else
@@ -74,7 +74,7 @@ printf "%-10s ... " "$1"
   OLDMODE="$LOCKBOX_CREDENTIALS_PASSWORD_MODE"
   OLDKEY="$LOCKBOX_CREDENTIALS_PASSWORD"
   if [ "$OLDKEY" != "" ]; then
-    export LOCKBOX_INTERACTIVE=yes
+    export LOCKBOX_INTERACTIVE=true
     export LOCKBOX_CREDENTIALS_PASSWORD_MODE=ask
     export LOCKBOX_CREDENTIALS_PASSWORD=""
   else
@@ -82,7 +82,7 @@ printf "%-10s ... " "$1"
   fi
   echo "$OLDKEY" | ${LB_BINARY} ls 2>/dev/null
   if [ "$OLDKEY" != "" ]; then
-    export LOCKBOX_INTERACTIVE=no
+    export LOCKBOX_INTERACTIVE=false
     export LOCKBOX_CREDENTIALS_PASSWORD_MODE="$OLDMODE"
     export LOCKBOX_CREDENTIALS_PASSWORD="$OLDKEY"
   fi

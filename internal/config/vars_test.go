@@ -9,7 +9,7 @@ import (
 )
 
 func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {
-	t.Setenv(key, "yes")
+	t.Setenv(key, "true")
 	c, err := obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -25,7 +25,7 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 	if c != onEmpty {
 		t.Error("invalid setting")
 	}
-	t.Setenv(key, "no")
+	t.Setenv(key, "false")
 	c, err = obj.Get()
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -221,11 +221,11 @@ func TestCanColor(t *testing.T) {
 	} {
 		os.Clearenv()
 		key := fmt.Sprintf("LOCKBOX_%s", raw)
-		t.Setenv(key, "yes")
+		t.Setenv(key, "true")
 		if can, _ := config.CanColor(); can != expect {
 			t.Errorf("expect != actual: %s", key)
 		}
-		t.Setenv(key, "no")
+		t.Setenv(key, "false")
 		if can, _ := config.CanColor(); can == expect {
 			t.Errorf("expect == actual: %s", key)
 		}

@@ -27,7 +27,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	if !keep {
 		os.Remove(file)
 	}
-	t.Setenv("LOCKBOX_READONLY", "no")
+	t.Setenv("LOCKBOX_READONLY", "false")
 	t.Setenv("LOCKBOX_STORE", file)
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
@@ -47,7 +47,7 @@ func TestKeyFile(t *testing.T) {
 	file := testFile("keyfile_test.kdbx")
 	keyFile := testFile("file.key")
 	os.Remove(file)
-	t.Setenv("LOCKBOX_READONLY", "no")
+	t.Setenv("LOCKBOX_READONLY", "false")
 	t.Setenv("LOCKBOX_STORE", file)
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", keyFile)
@@ -71,7 +71,7 @@ func setup(t *testing.T) *backend.Transaction {
 
 func TestNoWriteOnRO(t *testing.T) {
 	setup(t)
-	t.Setenv("LOCKBOX_READONLY", "yes")
+	t.Setenv("LOCKBOX_READONLY", "true")
 	tr, _ := backend.NewTransaction()
 	if err := tr.Insert("a/a/a", "a"); err.Error() != "unable to alter database in readonly mode" {
 		t.Errorf("wrong error: %v", err)
@@ -317,7 +317,7 @@ func TestReKey(t *testing.T) {
 	f := "rekey_test.kdbx"
 	file := testFile(f)
 	defer os.Remove(filepath.Join(testDir, f))
-	t.Setenv("LOCKBOX_READONLY", "no")
+	t.Setenv("LOCKBOX_READONLY", "false")
 	t.Setenv("LOCKBOX_STORE", file)
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")

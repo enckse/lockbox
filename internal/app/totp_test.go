@@ -43,7 +43,7 @@ func fullTOTPSetup(t *testing.T, keep bool) *backend.Transaction {
 	if !keep {
 		os.Remove(file)
 	}
-	t.Setenv("LOCKBOX_READONLY", "no")
+	t.Setenv("LOCKBOX_READONLY", "false")
 	t.Setenv("LOCKBOX_STORE", file)
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
 	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")

@@ -46,13 +46,13 @@ func TestNewKeyErrors(t *testing.T) {
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key MUST be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_INTERACTIVE", "yes")
+	t.Setenv("LOCKBOX_INTERACTIVE", "true")
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_INTERACTIVE", "no")
+	t.Setenv("LOCKBOX_INTERACTIVE", "false")
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "ask key mode requested in non-interactive mode" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -67,14 +67,14 @@ func TestAskKey(t *testing.T) {
 	}
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
-	t.Setenv("LOCKBOX_INTERACTIVE", "no")
+	t.Setenv("LOCKBOX_INTERACTIVE", "false")
 	k, _ = config.NewKey(config.IgnoreKeyMode)
 	if k.Ask() {
 		t.Error("invalid ask key")
 	}
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
 	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "")
-	t.Setenv("LOCKBOX_INTERACTIVE", "yes")
+	t.Setenv("LOCKBOX_INTERACTIVE", "true")
 	k, _ = config.NewKey(config.IgnoreKeyMode)
 	if !k.Ask() {
 		t.Error("invalid ask key")
