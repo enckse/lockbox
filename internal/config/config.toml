@@ -7,7 +7,7 @@ interactive = true
 
 [defaults]
 modtime = ""
-completion = ""
+completion = true
 
 [color]
 enabled = true

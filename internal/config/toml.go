@@ -57,6 +57,7 @@ var (
 		EnvPasswordGenTitle.Key(),
 		EnvReadOnly.Key(),
 		EnvInteractive.Key(),
+		EnvDefaultCompletion.Key(),
 	}
 	reverseMap = map[string][]string{
 		"[]":   arrayTypes,
@@ -165,7 +166,7 @@ func generateDetailText(key string) (string, error) {
 		requirement = r
 	}
 	var text []string
-	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s\n", description), fmt.Sprintf("default: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|"))} {
+	for _, line := range []string{fmt.Sprintf("environment: %s", key), fmt.Sprintf("description:\n%s\n", description), fmt.Sprintf("default: %s", requirement), fmt.Sprintf("option: %s", strings.Join(allow, "|")), fmt.Sprintf("default: %s", value)} {
 		for _, comment := range strings.Split(line, "\n") {
 			text = append(text, fmt.Sprintf("# %s", comment))
 		}
