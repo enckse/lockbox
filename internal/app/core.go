@@ -284,7 +284,11 @@ func Usage(verbose bool, exe string) ([]string, error) {
 				buf.WriteString(s)
 				if header == "[toml]" {
 					buf.WriteString("========================================\nconfig.toml\n---\n")
-					buf.WriteString(config.ExampleTOML)
+					def, err := config.DefaultTOML()
+					if err != nil {
+						return nil, err
+					}
+					buf.WriteString(def)
 					buf.WriteString("========================================\n\n")
 				}
 			}

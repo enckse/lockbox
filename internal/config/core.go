@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	colorWindowDelimiter = ","
+	colorWindowDelimiter = " "
 	colorWindowSpan      = ":"
 	exampleColorWindow   = "start" + colorWindowSpan + "end"
 	yes                  = "yes"

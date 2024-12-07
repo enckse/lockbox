@@ -9,10 +9,13 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/BurntSushi/toml"
 )
+
+const isInclude = "include"
 
 type (
 	// Loader indicates how included files should be sourced
@@ -21,6 +24,7 @@ type (
 	ShellEnv struct {
 		Key   string
 		Value string
+		raw   string
 	}
 )
 
@@ -66,7 +70,79 @@ var (
 		EnvPasswordGenTitle.Key(),
 		EnvReadOnly.Key(),
 	}
+	reverseMap = map[string][]string{
+		"[]":   arrayTypes,
+		"0":    intTypes,
+		"true": boolTypes,
+	}
 )
+
+// DefaultTOML will load the internal, default TOML with additional comment markups
+func DefaultTOML() (string, error) {
+	s, err := LoadConfig(strings.NewReader(ExampleTOML), nil)
+	if err != nil {
+		return "", err
+	}
+	const root = "_root_"
+	unmapped := make(map[string][]string)
+	keys := []string{}
+	for _, item := range s {
+		raw := item.raw
+		parts := strings.Split(raw, "_")
+		length := len(parts)
+		if length == 0 {
+			return "", fmt.Errorf("invalid internal TOML structure: %v", item)
+		}
+		key := parts[0]
+		sub := ""
+		switch length {
+		case 1:
+			key = root
+			sub = parts[0]
+		case 2:
+			sub = parts[1]
+		default:
+			sub = strings.Join(parts[1:], "_")
+		}
+		field := "\"\""
+		for to, fromKey := range reverseMap {
+			if slices.Contains(fromKey, item.Key) {
+				field = to
+				break
+			}
+		}
+		sub = fmt.Sprintf(`# environment map: %s
+%s = %s
+`, item.Key, sub, field)
+		had, ok := unmapped[key]
+		if !ok {
+			had = []string{}
+			keys = append(keys, key)
+		}
+		had = append(had, sub)
+		unmapped[key] = had
+	}
+	sort.Strings(keys)
+	builder := strings.Builder{}
+	if _, err := fmt.Fprintf(&builder, `# include additional configs, can NOT nest, but does allow globs ('*')
+%s = []
+`, isInclude); err != nil {
+		return "", err
+	}
+	for _, k := range keys {
+		if k != root {
+			if _, err := fmt.Fprintf(&builder, "\n[%s]\n", k); err != nil {
+				return "", err
+			}
+		}
+		for _, sub := range unmapped[k] {
+			if _, err := builder.WriteString(sub); err != nil {
+				return "", err
+			}
+		}
+	}
+	return builder.String(), nil
+}
 
 // LoadConfig will read the input reader and use the loader to source configuration files
 func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
@@ -123,7 +199,7 @@ func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 			}
 		}
 		value = os.Expand(value, os.Getenv)
-		res = append(res, ShellEnv{Key: export, Value: value})
+		res = append(res, ShellEnv{Key: export, Value: value, raw: k})
 
 	}
 	return res, nil
@@ -135,9 +211,9 @@ func overlayConfig(r io.Reader, canInclude bool, m *map[string]interface{}, load
 		return err
 	}
 	res := *m
-	includes, ok := res["include"]
+	includes, ok := res[isInclude]
 	if ok {
-		delete(*m, "include")
+		delete(*m, isInclude)
 		including, err := parseStringArray(includes)
 		if err != nil {
 			return err

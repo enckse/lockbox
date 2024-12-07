@@ -257,12 +257,16 @@ format = -1
 	}
 }
 
-func TestLoadFile(t *testing.T) {
+func TestDefaultTOMLToLoadFile(t *testing.T) {
 	os.Mkdir("testdata", 0o755)
 	defer os.RemoveAll("testdata")
 	defer os.Clearenv()
 	file := filepath.Join("testdata", "config.toml")
-	os.WriteFile(file, []byte(config.ExampleTOML), 0o644)
+	loaded, err := config.DefaultTOML()
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	os.WriteFile(file, []byte(loaded), 0o644)
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
