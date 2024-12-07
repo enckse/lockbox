@@ -15,19 +15,33 @@ While `lb` uses a `.kdbx` formatted file that can be opened by a variety of tool
 is using a common format so that it doesn't lock a user into a custom file format or dealing with gpg, age, etc. files and instead COULD be recovered
 via other tooling if needed.
 
-## environment
+## configuration
 
-The following variables must be set to use `lb`, they can also be set via a
-toml configuration file.
+There are two ways to configure `lb`:
+- TOML configuration file(s)
+- Environment variables
+
+The TOML configuration files have higher priority over environment variables
+(if both are set) where the TOML files are ultimately loaded into the
+processes environment itself (once parsed). To run `lb` at least the
+following variables must be set:
 
 ```
+config.toml
+---
+# database to read
+# this can also be set via LOCKBOX_STORE
+store = "$HOME/.passwords/secrets.kdbx"
+
+[credentials]
 # the keying object to use to ACTUALLY unlock the passwords (e.g. using a gpg encrypted file with the password inside of it)
-LOCKBOX_KEY="gpg --decrypt /Users/alice/.secrets/key.gpg"
-# the location, on disk, of the password store
-LOCKBOX_STORE=/Users/alice/.passwords/secrets.kdbx
+# this can also be set via LOCKBOX_KEY
+# alternative credential settings for key files are also available
+password = ["gpg", "--decrypt", "$HOME/.secrets/key.gpg"]
 ```
 
-Use `lb help verbose` for additional information about options and environment variables
+Use `lb help verbose` for additional information about options and
+configuration variables
 
 ### supported systems
 
@@ -83,7 +97,6 @@ lb show my/key/value
 To get a totp token
 ```
 lb totp show token
-# 'token' must contain an entry with the name of LOCKBOX_TOTP
 ```
 
 The token can be automatically copied to the clipboard too
