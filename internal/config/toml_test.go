@@ -276,7 +276,8 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 			count++
 		}
 	}
-	if count != 31 {
+	// NOTE: this is one less than available because the default config itself is not configurable...via the config
+	if count != expectEnv-1 {
 		t.Errorf("invalid environment after load: %d", count)
 	}
 }

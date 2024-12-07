@@ -9,6 +9,8 @@ import (
 	"github.com/seanenck/lockbox/internal/config"
 )
 
+const expectEnv = 32
+
 func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {
 	t.Setenv(key, "yes")
 	c, err := obj.Get()
@@ -105,7 +107,7 @@ func TestListVariables(t *testing.T) {
 		known[trim] = struct{}{}
 	}
 	l := len(known)
-	if l != 32 {
+	if l != expectEnv {
 		t.Errorf("invalid env count, outdated? %d", l)
 	}
 }
