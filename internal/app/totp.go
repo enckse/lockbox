@@ -13,7 +13,7 @@ import (
 	"github.com/seanenck/lockbox/internal/backend"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/core"
-	"github.com/seanenck/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/platform/clip"
 )
 
 var (
@@ -97,8 +97,8 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		interactive = false
 	}
 	once := args.Mode == OnceTOTPMode
-	clip := args.Mode == ClipTOTPMode
-	if !interactive && clip {
+	clipMode := args.Mode == ClipTOTPMode
+	if !interactive && clipMode {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
 	entity, err := opts.app.Transaction().Get(backend.NewPath(args.Entry, args.token), backend.SecretValue)
@@ -131,14 +131,14 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	first := true
 	running := 0
 	lastSecond := -1
-	if !clip {
+	if !clipMode {
 		if !once {
 			opts.Clear()
 		}
 	}
-	clipboard := platform.Clipboard{}
-	if clip {
-		clipboard, err = platform.NewClipboard()
+	clipboard := clip.Board{}
+	if clipMode {
+		clipboard, err = clip.New()
 		if err != nil {
 			return err
 		}
@@ -193,7 +193,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 			txt = fmt.Sprintf("\x1b[31m%s\x1b[39m", txt)
 		}
 		outputs := []string{txt}
-		if !clip {
+		if !clipMode {
 			outputs = append(outputs, fmt.Sprintf("%s\n    %s", args.Entry, code))
 			if !once {
 				outputs = append(outputs, "-> CTRL+C to exit")

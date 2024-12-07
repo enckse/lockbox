@@ -1,5 +1,5 @@
-// Package platform handles platform-specific operations around clipboards.
-package platform
+// Package clip handles platform-specific operations around clipboards.
+package clip
 
 import (
 	"errors"
@@ -9,12 +9,12 @@ import (
 
 	osc "github.com/aymanbagabas/go-osc52"
 	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/platform"
 )
 
 type (
-	// Clipboard represent system clipboard operations.
-	Clipboard struct {
+	// Board represent system clipboard operations.
+	Board struct {
 		copying []string
 		pasting []string
 		MaxTime int
@@ -22,64 +22,64 @@ type (
 	}
 )
 
-func newClipboard(copying, pasting []string) (Clipboard, error) {
+func newBoard(copying, pasting []string) (Board, error) {
 	maximum, err := config.EnvClipTimeout.Get()
 	if err != nil {
-		return Clipboard{}, err
+		return Board{}, err
 	}
-	return Clipboard{copying: copying, pasting: pasting, MaxTime: maximum, isOSC52: false}, nil
+	return Board{copying: copying, pasting: pasting, MaxTime: maximum, isOSC52: false}, nil
 }
 
-// NewClipboard will retrieve the commands to use for clipboard operations.
-func NewClipboard() (Clipboard, error) {
+// New will retrieve the commands to use for clipboard operations.
+func New() (Board, error) {
 	canClip, err := config.EnvClipEnabled.Get()
 	if err != nil {
-		return Clipboard{}, err
+		return Board{}, err
 	}
 	if !canClip {
-		return Clipboard{}, errors.New("clipboard is off")
+		return Board{}, errors.New("clipboard is off")
 	}
 	overridePaste, err := config.EnvClipPaste.Get()
 	if err != nil {
-		return Clipboard{}, err
+		return Board{}, err
 	}
 	overrideCopy, err := config.EnvClipCopy.Get()
 	if err != nil {
-		return Clipboard{}, err
+		return Board{}, err
 	}
 	if overrideCopy != nil && overridePaste != nil {
-		return newClipboard(overrideCopy, overridePaste)
+		return newBoard(overrideCopy, overridePaste)
 	}
 	isOSC, err := config.EnvClipOSC52.Get()
 	if err != nil {
-		return Clipboard{}, err
+		return Board{}, err
 	}
 	if isOSC {
-		c := Clipboard{isOSC52: true}
+		c := Board{isOSC52: true}
 		return c, nil
 	}
-	sys, err := core.NewPlatform(config.EnvPlatform.Get())
+	sys, err := platform.NewSystem(config.EnvPlatform.Get())
 	if err != nil {
-		return Clipboard{}, err
+		return Board{}, err
 	}
 
 	var copying []string
 	var pasting []string
 	switch sys {
-	case core.Platforms.MacOSPlatform:
+	case platform.Systems.MacOSSystem:
 		copying = []string{"pbcopy"}
 		pasting = []string{"pbpaste"}
-	case core.Platforms.LinuxXPlatform:
+	case platform.Systems.LinuxXSystem:
 		copying = []string{"xclip"}
 		pasting = []string{"xclip", "-o"}
-	case core.Platforms.LinuxWaylandPlatform:
+	case platform.Systems.LinuxWaylandSystem:
 		copying = []string{"wl-copy"}
 		pasting = []string{"wl-paste"}
-	case core.Platforms.WindowsLinuxPlatform:
+	case platform.Systems.WindowsLinuxSystem:
 		copying = []string{"clip.exe"}
 		pasting = []string{"powershell.exe", "-command", "Get-Clipboard"}
 	default:
-		return Clipboard{}, errors.New("clipboard is unavailable")
+		return Board{}, errors.New("clipboard is unavailable")
 	}
 	if overridePaste != nil {
 		pasting = overridePaste
@@ -87,11 +87,11 @@ func NewClipboard() (Clipboard, error) {
 	if overrideCopy != nil {
 		copying = overrideCopy
 	}
-	return newClipboard(copying, pasting)
+	return newBoard(copying, pasting)
 }
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
-func (c Clipboard) CopyTo(value string) error {
+func (c Board) CopyTo(value string) error {
 	if c.isOSC52 {
 		osc.Copy(value)
 		return nil
@@ -110,7 +110,7 @@ func (c Clipboard) CopyTo(value string) error {
 }
 
 // Args returns clipboard args for execution.
-func (c Clipboard) Args(copying bool) (string, []string, bool) {
+func (c Board) Args(copying bool) (string, []string, bool) {
 	if c.isOSC52 {
 		return "", []string{}, false
 	}

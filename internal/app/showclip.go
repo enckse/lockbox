@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/seanenck/lockbox/internal/backend"
-	"github.com/seanenck/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/platform/clip"
 )
 
 // ShowClip will handle showing/clipping an entry
@@ -16,10 +16,10 @@ func ShowClip(cmd CommandOptions, isShow bool) error {
 		return errors.New("only one argument supported")
 	}
 	entry := args[0]
-	clipboard := platform.Clipboard{}
+	clipboard := clip.Board{}
 	if !isShow {
 		var err error
-		clipboard, err = platform.NewClipboard()
+		clipboard, err = clip.New()
 		if err != nil {
 			return fmt.Errorf("unable to get clipboard: %w", err)
 		}

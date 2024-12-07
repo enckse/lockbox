@@ -27,7 +27,7 @@ type (
 
 // List will list the output modes on the struct
 func (p JSONOutputTypes) List() []string {
-	return listFields[JSONOutputMode](p)
+	return ListFields(p)
 }
 
 // ParseJSONOutput handles detecting the JSON output mode

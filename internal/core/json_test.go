@@ -1,14 +1,16 @@
 package core_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/core"
 )
 
 func TestJSONList(t *testing.T) {
-	if len(core.JSONOutputs.List()) != 3 {
-		t.Errorf("invalid list result")
+	list := core.JSONOutputs.List()
+	if len(list) != 3 || fmt.Sprintf("%v", list) != "[empty hash plaintext]" {
+		t.Errorf("invalid list result: %v", list)
 	}
 }
 

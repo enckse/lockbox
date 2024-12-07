@@ -12,6 +12,7 @@ import (
 	"github.com/seanenck/lockbox/internal/app"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform"
+	"github.com/seanenck/lockbox/internal/platform/clip"
 )
 
 var version string
@@ -110,7 +111,7 @@ func clearClipboard() error {
 	if err != nil {
 		return err
 	}
-	clipboard, err := platform.NewClipboard()
+	clipboard, err := clip.New()
 	if err != nil {
 		return err
 	}

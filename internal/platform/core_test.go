@@ -1,31 +1,31 @@
-package core_test
+package platform_test
 
 import (
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/platform"
 )
 
 func TestPlatformList(t *testing.T) {
-	if len(core.Platforms.List()) != 4 {
+	if len(platform.Systems.List()) != 4 {
 		t.Errorf("invalid list result")
 	}
 }
 
 func TestNewPlatform(t *testing.T) {
-	for _, item := range core.Platforms.List() {
-		s, err := core.NewPlatform(item)
+	for _, item := range platform.Systems.List() {
+		s, err := platform.NewSystem(item)
 		if err != nil {
 			t.Errorf("invalid clipboard: %v", err)
 		}
-		if s != core.SystemPlatform(item) {
+		if s != platform.System(item) {
 			t.Error("mismatch on input and resulting detection")
 		}
 	}
 }
 
 func TestNewPlatformUnknown(t *testing.T) {
-	_, err := core.NewPlatform("ifjoajei")
+	_, err := platform.NewSystem("ifjoajei")
 	if err == nil || err.Error() != "unknown platform mode" {
 		t.Errorf("error expected for platform: %v", err)
 	}

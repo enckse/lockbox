@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/seanenck/lockbox/internal/core"
+	"github.com/seanenck/lockbox/internal/platform"
 )
 
 var (
@@ -132,7 +133,7 @@ var (
 					subKey: "PLATFORM",
 					desc:   "Override the detected platform.",
 				}),
-			allowed:    core.Platforms.List(),
+			allowed:    platform.Systems.List(),
 			canDefault: false,
 		})
 	// EnvStore is the location of the keepass file/store
