@@ -54,14 +54,14 @@ func DefaultTOML() (string, error) {
 		default:
 			sub = strings.Join(parts[1:], "_")
 		}
-		_, field, _ := item.toml()
+		md := item.display()
 		text, err := generateDetailText(item)
 		if err != nil {
 			return "", err
 		}
 		sub = fmt.Sprintf(`%s
 %s = %s
-`, text, sub, field)
+`, text, sub, md.tomlValue)
 		had, ok := unmapped[key]
 		if !ok {
 			had = []string{}
@@ -102,7 +102,8 @@ func DefaultTOML() (string, error) {
 
 func generateDetailText(data printer) (string, error) {
 	env := data.self()
-	value, allow := data.values()
+	md := data.display()
+	value := md.value
 	if len(value) == 0 {
 		value = "(unset)"
 	}
@@ -113,16 +114,15 @@ func generateDetailText(data printer) (string, error) {
 	if r != "" {
 		requirement = r
 	}
-	t, _, expands := data.toml()
 	var text []string
 	for _, line := range []string{
 		fmt.Sprintf("description:\n%s\n", description),
 		fmt.Sprintf("requirement: %s", requirement),
-		fmt.Sprintf("option: %s", strings.Join(allow, "|")),
+		fmt.Sprintf("option: %s", strings.Join(md.allowed, "|")),
 		fmt.Sprintf("%s name: %s", commands.Env, key),
 		fmt.Sprintf("default: %s", value),
-		fmt.Sprintf("expands: %s", strconv.FormatBool(expands)),
-		fmt.Sprintf("type: %s", t),
+		fmt.Sprintf("expands: %s", strconv.FormatBool(md.canExpand)),
+		fmt.Sprintf("type: %s", md.tomlType),
 		"",
 		"NOTE: the following value is NOT a default, it is an empty TOML placeholder",
 	} {
@@ -151,10 +151,10 @@ func LoadConfig(r io.Reader, loader Loader) error {
 		if !ok {
 			return fmt.Errorf("unknown key: %s (%s)", k, export)
 		}
-		isType, _, expand := env.toml()
-		switch isType {
+		md := env.display()
+		switch md.tomlType {
 		case tomlArray:
-			array, err := parseStringArray(v, expand)
+			array, err := parseStringArray(v, md.canExpand)
 			if err != nil {
 				return err
 			}
@@ -180,7 +180,7 @@ func LoadConfig(r io.Reader, loader Loader) error {
 			if !ok {
 				return fmt.Errorf("non-string found where expected: %v", v)
 			}
-			if expand {
+			if md.canExpand {
 				s = os.Expand(s, os.Getenv)
 			}
 			store.SetString(export, s)

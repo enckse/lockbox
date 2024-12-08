@@ -61,9 +61,8 @@ var (
 
 type (
 	printer interface {
-		values() (string, []string)
+		display() metaData
 		self() environmentBase
-		toml() (tomlType, string, bool)
 	}
 )
 

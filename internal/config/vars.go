@@ -131,7 +131,7 @@ var (
 	// EnvStore is the location of the keepass file/store
 	EnvStore = environmentRegister(
 		EnvironmentString{
-			expand: true,
+			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         "STORE",
@@ -144,7 +144,7 @@ var (
 	// EnvHookDir is the directory of hooks to execute
 	EnvHookDir = environmentRegister(
 		EnvironmentString{
-			expand: true,
+			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         hookCategory + "DIRECTORY",
@@ -180,7 +180,7 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 	// EnvKeyFile is an keyfile for the database
 	EnvKeyFile = environmentRegister(
 		EnvironmentString{
-			expand: true,
+			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         credsCategory + "KEY_FILE",
@@ -232,7 +232,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		})
 	envPassword = environmentRegister(
 		EnvironmentString{
-			expand: true,
+			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					requirement: requiredKeyOrKeyFile,

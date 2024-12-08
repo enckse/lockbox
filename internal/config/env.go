@@ -34,7 +34,7 @@ type (
 		canDefault bool
 		allowed    []string
 		isArray    bool
-		expand     bool
+		canExpand  bool
 	}
 	// EnvironmentArray are settings that are parsed as shell commands
 	EnvironmentArray struct {
@@ -45,6 +45,13 @@ type (
 		environmentBase
 		allowed string
 		fxn     func(string, string) string
+	}
+	metaData struct {
+		value     string
+		allowed   []string
+		tomlType  tomlType
+		tomlValue string
+		canExpand bool
 	}
 )
 
@@ -110,53 +117,67 @@ func (e EnvironmentFormatter) Get(value string) string {
 	return e.fxn(e.Key(), value)
 }
 
-func (e EnvironmentString) values() (string, []string) {
-	return e.value, e.allowed
+func (e EnvironmentString) display() metaData {
+	var t tomlType
+	t = tomlString
+	v := "\"\""
+	if e.isArray {
+		t = tomlArray
+		v = "[]"
+	}
+	return metaData{
+		value:     e.value,
+		allowed:   e.allowed,
+		tomlType:  t,
+		tomlValue: v,
+		canExpand: e.canExpand,
+	}
 }
 
 func (e environmentBase) self() environmentBase {
 	return e
 }
 
-func (e EnvironmentBool) values() (string, []string) {
+func (e EnvironmentBool) display() metaData {
 	val := NoValue
 	if e.value {
 		val = YesValue
 	}
-	return val, []string{YesValue, NoValue}
-}
-
-func (e EnvironmentInt) values() (string, []string) {
-	return fmt.Sprintf("%d", e.value), []string{"<integer>"}
-}
-
-func (e EnvironmentFormatter) values() (string, []string) {
-	return strings.ReplaceAll(strings.ReplaceAll(EnvTOTPFormat.Get("%s"), "%25s", "%s"), "&", " \\\n           &"), []string{e.allowed}
-}
-
-func (e EnvironmentArray) values() (string, []string) {
-	return detectedValue, []string{commandArgsExample}
-}
-
-func (e EnvironmentInt) toml() (tomlType, string, bool) {
-	return tomlInt, "0", false
-}
-
-func (e EnvironmentBool) toml() (tomlType, string, bool) {
-	return tomlBool, YesValue, false
-}
-
-func (e EnvironmentString) toml() (tomlType, string, bool) {
-	if e.isArray {
-		return tomlArray, "[]", e.expand
+	return metaData{
+		value:     val,
+		allowed:   []string{YesValue, NoValue},
+		tomlType:  tomlBool,
+		tomlValue: YesValue,
+		canExpand: false,
 	}
-	return tomlString, "\"\"", e.expand
 }
 
-func (e EnvironmentArray) toml() (tomlType, string, bool) {
-	return tomlArray, "[]", true
+func (e EnvironmentInt) display() metaData {
+	return metaData{
+		value:     fmt.Sprintf("%d", e.value),
+		allowed:   []string{"<integer>"},
+		tomlType:  tomlInt,
+		tomlValue: "0",
+		canExpand: false,
+	}
 }
 
-func (e EnvironmentFormatter) toml() (tomlType, string, bool) {
-	return tomlString, "\"\"", false
+func (e EnvironmentFormatter) display() metaData {
+	return metaData{
+		value:     strings.ReplaceAll(strings.ReplaceAll(EnvTOTPFormat.Get("%s"), "%25s", "%s"), "&", " \\\n           &"),
+		allowed:   []string{e.allowed},
+		tomlType:  tomlString,
+		tomlValue: "\"\"",
+		canExpand: false,
+	}
+}
+
+func (e EnvironmentArray) display() metaData {
+	return metaData{
+		value:     detectedValue,
+		allowed:   []string{commandArgsExample},
+		tomlType:  tomlArray,
+		tomlValue: "[]",
+		canExpand: true,
+	}
 }
