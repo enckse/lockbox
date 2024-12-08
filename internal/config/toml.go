@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/config/store"
 	"github.com/seanenck/lockbox/internal/util"
 )
@@ -117,7 +118,7 @@ func generateDetailText(data printer) (string, error) {
 		fmt.Sprintf("description:\n%s\n", description),
 		fmt.Sprintf("requirement: %s", requirement),
 		fmt.Sprintf("option: %s", strings.Join(allow, "|")),
-		fmt.Sprintf("env: %s", key),
+		fmt.Sprintf("%s name: %s", commands.Env, key),
 		fmt.Sprintf("default: %s", value),
 		fmt.Sprintf("type: %s", t),
 		"",

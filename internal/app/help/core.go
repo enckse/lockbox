@@ -82,7 +82,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	for _, c := range commands.CompletionTypes {
 		results = append(results, subCommand(commands.Completions, c, "", fmt.Sprintf("generate %s completions", c)))
 	}
-	results = append(results, command(commands.Env, "", "display environment variable information"))
+	results = append(results, command(commands.Env, "", "display configured variable information"))
 	results = append(results, command(commands.Help, "", "show this usage information"))
 	results = append(results, subCommand(commands.Help, commands.HelpAdvanced, "", "display verbose help information"))
 	results = append(results, subCommand(commands.Help, commands.HelpConfig, "", "display verbose configuration information"))
