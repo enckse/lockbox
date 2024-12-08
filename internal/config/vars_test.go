@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/config"
@@ -136,5 +137,49 @@ func checkInt(e config.EnvironmentInt, key, text string, def int64, allowZero bo
 		if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be > 0", text) {
 			t.Errorf("invalid err: %v", err)
 		}
+	}
+}
+
+func TestStringsGetDefault(t *testing.T) {
+	store.Clear()
+	val := config.EnvPlatform.Get()
+	if val != "" {
+		t.Errorf("invalid read: %v", val)
+	}
+	val = config.EnvJSONMode.Get()
+	if val != "hash" {
+		t.Errorf("invalid read: %v", val)
+	}
+	store.SetString("LOCKBOX_PLATFORM", "1")
+	store.SetString("LOCKBOX_JSON_MODE", "a")
+	val = config.EnvPlatform.Get()
+	if val != "1" {
+		t.Errorf("invalid read: %v", val)
+	}
+	val = config.EnvJSONMode.Get()
+	if val != "a" {
+		t.Errorf("invalid read: %v", val)
+	}
+}
+
+func TestStringsArray(t *testing.T) {
+	store.Clear()
+	val := config.EnvTOTPColorBetween.AsArray()
+	if slices.Compare(val, config.TOTPDefaultBetween) != 0 {
+		t.Errorf("invalid read: %v", val)
+	}
+	val = config.EnvClipCopy.AsArray()
+	if len(val) != 0 {
+		t.Errorf("invalid read: %v", val)
+	}
+	store.SetArray("LOCKBOX_CLIP_COPY_COMMAND", []string{"1"})
+	store.SetArray("LOCKBOX_TOTP_COLOR_WINDOWS", []string{"1", "2", "3"})
+	val = config.EnvTOTPColorBetween.AsArray()
+	if len(val) != 3 {
+		t.Errorf("invalid read: %v", val)
+	}
+	val = config.EnvClipCopy.AsArray()
+	if len(val) != 1 {
+		t.Errorf("invalid read: %v", val)
 	}
 }

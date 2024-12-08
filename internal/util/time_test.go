@@ -7,10 +7,10 @@ import (
 )
 
 func TestParseWindows(t *testing.T) {
-	if _, err := util.ParseTimeWindow(""); err.Error() != "invalid colorization rules for totp, none found" {
+	if _, err := util.ParseTimeWindow(); err.Error() != "invalid colorization rules for totp, none found" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := util.ParseTimeWindow(" 2"); err.Error() != "invalid colorization rule found: 2" {
+	if _, err := util.ParseTimeWindow(" ", "2"); err.Error() != "invalid colorization rule found: 2" {
 		t.Errorf("invalid error: %v", err)
 	}
 	if _, err := util.ParseTimeWindow(" 1:200"); err.Error() != "invalid time found for colorization rule: 1:200" {
@@ -34,7 +34,7 @@ func TestParseWindows(t *testing.T) {
 	if _, err := util.ParseTimeWindow(" 1:xxx"); err.Error() != "strconv.Atoi: parsing \"xxx\": invalid syntax" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := util.ParseTimeWindow("1:2 11:22"); err != nil {
+	if _, err := util.ParseTimeWindow("1:2", " 11:22"); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 }

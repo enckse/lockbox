@@ -9,8 +9,6 @@ import (
 )
 
 const (
-	// TimeWindowDelimiter indicates how windows are split in env/config keys
-	TimeWindowDelimiter = " "
 	// TimeWindowSpan indicates the delineation between start -> end (start:end)
 	TimeWindowSpan = ":"
 )
@@ -22,9 +20,9 @@ type TimeWindow struct {
 }
 
 // ParseTimeWindow will handle parsing a window of colors for TOTP operations
-func ParseTimeWindow(windowString string) ([]TimeWindow, error) {
+func ParseTimeWindow(windows ...string) ([]TimeWindow, error) {
 	var rules []TimeWindow
-	for _, item := range strings.Split(windowString, TimeWindowDelimiter) {
+	for _, item := range windows {
 		line := strings.TrimSpace(item)
 		if line == "" {
 			continue

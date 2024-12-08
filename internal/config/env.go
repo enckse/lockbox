@@ -88,23 +88,24 @@ func (e EnvironmentInt) Get() (int64, error) {
 
 // Get will read the string from the environment
 func (e EnvironmentStrings) Get() string {
-	val, ok := store.GetString(e.Key())
-	if !ok {
-		flags := e.flattenFlags()
-		if slices.Contains(flags, canDefaultFlag) {
-			val = e.value
-		}
-	}
-	return val
+	return stringsGet(e, store.GetString, func(val string) string {
+		return val
+	})
 }
 
 // AsArray indicates the item should be queried as an array
 func (e EnvironmentStrings) AsArray() []string {
-	val, ok := store.GetArray(e.Key())
+	return stringsGet(e, store.GetArray, func(val string) []string {
+		return strings.Split(val, arrayDelimiter)
+	})
+}
+
+func stringsGet[T string | []string](e EnvironmentStrings, getter func(string) (T, bool), conv func(string) T) T {
+	val, ok := getter(e.Key())
 	if !ok {
 		flags := e.flattenFlags()
 		if slices.Contains(flags, canDefaultFlag) {
-			val = []string{e.value}
+			val = conv(e.value)
 		}
 	}
 	return val

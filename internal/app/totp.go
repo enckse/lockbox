@@ -4,6 +4,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -78,11 +79,11 @@ func clearFunc() {
 }
 
 func colorWhenRules() ([]util.TimeWindow, error) {
-	envTime := config.EnvTOTPColorBetween.Get()
-	if envTime == config.TOTPDefaultBetween {
+	envTime := config.EnvTOTPColorBetween.AsArray()
+	if slices.Compare(envTime, config.TOTPDefaultBetween) == 0 {
 		return config.TOTPDefaultColorWindow, nil
 	}
-	return util.ParseTimeWindow(envTime)
+	return util.ParseTimeWindow(envTime...)
 }
 
 func (w totpWrapper) generateCode() (string, error) {

@@ -32,6 +32,7 @@ const (
 	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
 	detectedValue      = "(detected)"
 	unset              = "(unset)"
+	arrayDelimiter     = " "
 )
 
 const (
@@ -42,7 +43,7 @@ const (
 )
 
 var (
-	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, util.TimeWindowDelimiter))}
+	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, arrayDelimiter))}
 	configDirFile       = filepath.Join("lockbox", "config.toml")
 	registry            = map[string]printer{}
 	// ConfigXDG is the offset to the config for XDG
@@ -58,12 +59,12 @@ var (
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []util.TimeWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string
-	TOTPDefaultBetween = func() string {
+	TOTPDefaultBetween = func() []string {
 		var results []string
 		for _, w := range TOTPDefaultColorWindow {
 			results = append(results, fmt.Sprintf("%d%s%d", w.Start, util.TimeWindowSpan, w.End))
 		}
-		return strings.Join(results, util.TimeWindowDelimiter)
+		return results
 	}()
 )
 

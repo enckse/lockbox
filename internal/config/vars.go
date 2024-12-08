@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/seanenck/lockbox/internal/output"
 	"github.com/seanenck/lockbox/internal/platform"
@@ -170,12 +171,11 @@ var (
 	// EnvTOTPColorBetween handles terminal coloring for TOTP windows (seconds)
 	EnvTOTPColorBetween = environmentRegister(
 		EnvironmentStrings{
-			environmentDefault: newDefaultedEnvironment(TOTPDefaultBetween,
+			environmentDefault: newDefaultedEnvironment(strings.Join(TOTPDefaultBetween, arrayDelimiter),
 				environmentBase{
 					key: totpCategory + "COLOR_WINDOWS",
 					description: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
-must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
-and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDelimiter),
+must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each).`, util.TimeWindowSpan),
 				}),
 			flags:   []stringsFlags{isArrayFlag, canDefaultFlag},
 			allowed: exampleColorWindows,
