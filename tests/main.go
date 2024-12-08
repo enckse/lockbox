@@ -331,7 +331,7 @@ func test(profile string) error {
 	r.run("", "pwgen")
 
 	// what is env
-	r.run("", fmt.Sprintf("var | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
+	r.run("", fmt.Sprintf("vars | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
 
 	// cleanup and diff results
 	tmpFile := fmt.Sprintf("%s.tmp", r.log)

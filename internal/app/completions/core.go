@@ -119,7 +119,7 @@ func Generate(completionType, exe string) ([]string, error) {
 	}
 	c.Conditionals = NewConditionals()
 
-	c.Options = c.newGenOptions([]string{commands.Env, commands.Help, commands.List, commands.Show, commands.Version, commands.JSON},
+	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON},
 		map[string]string{
 			commands.Clip:             c.Conditionals.Not.CanClip,
 			commands.TOTP:             c.Conditionals.Not.CanTOTP,
