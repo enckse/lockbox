@@ -317,6 +317,20 @@ func test(profile string) error {
 	r.run("", "ls")
 	setConfig(r.config)
 	r.run("", "ls")
+
+	// pwgen
+	c["pwgen.words_command"] = "[\"/bin/sh\", \"-c\", \"echo abc abc | tr ' ' '\\n'\"]"
+	c["pwgen.word_count"] = "1"
+	r.writeConfig(c)
+	r.run("", "pwgen")
+	c["pwgen.template"] = "\"{{range [%]idx, [%]val := .}}{{if lt [%]val.Position.End 5}}{{ [%]val.Text }}{{end}}{{end}}\""
+	c["pwgen.characters"] = c.quoteString("b")
+	c["pwgen.word_count"] = "2"
+	c["pwgen.title"] = "false"
+	r.writeConfig(c)
+	r.run("", "pwgen")
+
+	// cleanup and diff results
 	tmpFile := fmt.Sprintf("%s.tmp", r.log)
 	for _, item := range []string{"'s/\"modtime\": \"[0-9].*$/\"modtime\": \"XXXX-XX-XX\",/g'", "'s/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g'"} {
 		exec.Command("/bin/sh", "-c", fmt.Sprintf("sed %s %s > %s", item, r.log, tmpFile)).Run()
