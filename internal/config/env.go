@@ -10,20 +10,19 @@ import (
 
 type (
 	environmentBase struct {
-		subKey      string
-		cat         keyCategory
-		desc        string
+		key         string
+		description string
 		requirement string
 	}
 	environmentDefault[T any] struct {
 		environmentBase
-		defaultValue T
+		value T
 	}
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {
 		environmentDefault[int]
-		allowZero bool
-		shortDesc string
+		canZero bool
+		short   string
 	}
 	// EnvironmentBool are environment settings that are booleans
 	EnvironmentBool struct {
@@ -50,14 +49,14 @@ type (
 )
 
 func (e environmentBase) Key() string {
-	return fmt.Sprintf(environmentPrefix+"%s%s", string(e.cat), e.subKey)
+	return fmt.Sprintf(environmentPrefix+"%s", e.key)
 }
 
 // Get will get the boolean value for the setting
 func (e EnvironmentBool) Get() bool {
 	val, ok := store.GetBool(e.Key())
 	if !ok {
-		val = e.defaultValue
+		val = e.value
 	}
 	return val
 }
@@ -66,21 +65,21 @@ func (e EnvironmentBool) Get() bool {
 func (e EnvironmentInt) Get() (int64, error) {
 	i, ok := store.GetInt64(e.Key())
 	if !ok {
-		i = int64(e.defaultValue)
+		i = int64(e.value)
 	}
 	invalid := false
 	check := ""
-	if e.allowZero {
+	if e.canZero {
 		check = "="
 	}
 	switch i {
 	case 0:
-		invalid = !e.allowZero
+		invalid = !e.canZero
 	default:
 		invalid = i < 0
 	}
 	if invalid {
-		return -1, fmt.Errorf("%s must be >%s 0", e.shortDesc, check)
+		return -1, fmt.Errorf("%s must be >%s 0", e.short, check)
 	}
 	return i, nil
 }
@@ -92,7 +91,7 @@ func (e EnvironmentString) Get() string {
 		if !e.canDefault {
 			return ""
 		}
-		val = e.defaultValue
+		val = e.value
 	}
 	return val
 }
@@ -112,7 +111,7 @@ func (e EnvironmentFormatter) Get(value string) string {
 }
 
 func (e EnvironmentString) values() (string, []string) {
-	return e.defaultValue, e.allowed
+	return e.value, e.allowed
 }
 
 func (e environmentBase) self() environmentBase {
@@ -121,14 +120,14 @@ func (e environmentBase) self() environmentBase {
 
 func (e EnvironmentBool) values() (string, []string) {
 	val := NoValue
-	if e.defaultValue {
+	if e.value {
 		val = YesValue
 	}
 	return val, []string{YesValue, NoValue}
 }
 
 func (e EnvironmentInt) values() (string, []string) {
-	return fmt.Sprintf("%d", e.defaultValue), []string{"<integer>"}
+	return fmt.Sprintf("%d", e.value), []string{"<integer>"}
 }
 
 func (e EnvironmentFormatter) values() (string, []string) {

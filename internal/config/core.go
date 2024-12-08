@@ -16,17 +16,17 @@ import (
 
 const (
 	// sub categories
-	clipCategory         keyCategory = "CLIP_"
-	totpCategory         keyCategory = "TOTP_"
-	genCategory          keyCategory = "PWGEN_"
-	jsonCategory         keyCategory = "JSON_"
-	credsCategory        keyCategory = "CREDENTIALS_"
-	defaultCategory      keyCategory = "DEFAULTS_"
-	hookCategory         keyCategory = "HOOKS_"
-	environmentPrefix                = "LOCKBOX_"
-	commandArgsExample               = "[cmd args...]"
-	fileExample                      = "<file>"
-	requiredKeyOrKeyFile             = "a key, a key file, or both must be set"
+	clipCategory         = "CLIP_"
+	totpCategory         = "TOTP_"
+	genCategory          = "PWGEN_"
+	jsonCategory         = "JSON_"
+	credsCategory        = "CREDENTIALS_"
+	defaultCategory      = "DEFAULTS_"
+	hookCategory         = "HOOKS_"
+	environmentPrefix    = "LOCKBOX_"
+	commandArgsExample   = "[cmd args...]"
+	fileExample          = "<file>"
+	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat      = time.RFC3339
 	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
@@ -60,8 +60,7 @@ var (
 )
 
 type (
-	keyCategory string
-	printer     interface {
+	printer interface {
 		values() (string, []string)
 		self() environmentBase
 		toml() (tomlType, string, bool)
@@ -94,7 +93,7 @@ func environmentRegister[T printer](obj T) T {
 func newDefaultedEnvironment[T any](val T, base environmentBase) environmentDefault[T] {
 	obj := environmentDefault[T]{}
 	obj.environmentBase = base
-	obj.defaultValue = val
+	obj.value = val
 	return obj
 }
 

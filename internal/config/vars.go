@@ -15,33 +15,30 @@ var (
 		EnvironmentInt{
 			environmentDefault: newDefaultedEnvironment(45,
 				environmentBase{
-					subKey: "TIMEOUT",
-					cat:    clipCategory,
-					desc:   "Override the amount of time before totp clears the clipboard (seconds).",
+					key:         clipCategory + "TIMEOUT",
+					description: "Override the amount of time before totp clears the clipboard (seconds).",
 				}),
-			shortDesc: "clipboard max time",
-			allowZero: false,
+			short:   "clipboard max time",
+			canZero: false,
 		})
 	// EnvJSONHashLength handles the hashing output length
 	EnvJSONHashLength = environmentRegister(
 		EnvironmentInt{
 			environmentDefault: newDefaultedEnvironment(0,
 				environmentBase{
-					cat:    jsonCategory,
-					subKey: "HASH_LENGTH",
-					desc:   fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", output.JSONModes.Hash),
+					key:         jsonCategory + "HASH_LENGTH",
+					description: fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", output.JSONModes.Hash),
 				}),
-			shortDesc: "hash length",
-			allowZero: true,
+			short:   "hash length",
+			canZero: true,
 		})
 	// EnvClipOSC52 indicates if OSC52 clipboard mode is enabled
 	EnvClipOSC52 = environmentRegister(
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(false,
 				environmentBase{
-					subKey: "OSC52",
-					cat:    clipCategory,
-					desc:   "Enable OSC52 clipboard mode.",
+					key:         clipCategory + "OSC52",
+					description: "Enable OSC52 clipboard mode.",
 				}),
 		})
 	// EnvTOTPEnabled indicates if TOTP is allowed
@@ -49,9 +46,8 @@ var (
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					cat:    totpCategory,
-					subKey: "ENABLED",
-					desc:   "Enable TOTP integrations.",
+					key:         totpCategory + "ENABLED",
+					description: "Enable TOTP integrations.",
 				}),
 		})
 	// EnvReadOnly indicates if in read-only mode
@@ -59,8 +55,8 @@ var (
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(false,
 				environmentBase{
-					subKey: "READONLY",
-					desc:   "Operate in readonly mode.",
+					key:         "READONLY",
+					description: "Operate in readonly mode.",
 				}),
 		})
 	// EnvClipEnabled indicates if clipboard is enabled
@@ -68,9 +64,8 @@ var (
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					cat:    clipCategory,
-					subKey: "ENABLED",
-					desc:   "Enable clipboard operations.",
+					key:         clipCategory + "ENABLED",
+					description: "Enable clipboard operations.",
 				}),
 		})
 	// EnvColorEnabled indicates if colors are enabled
@@ -78,8 +73,8 @@ var (
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					subKey: "COLOR_ENABLED",
-					desc:   "Enable terminal colors.",
+					key:         "COLOR_ENABLED",
+					description: "Enable terminal colors.",
 				}),
 		})
 	// EnvHooksEnabled indicates if hooks are enabled
@@ -87,9 +82,8 @@ var (
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					cat:    hookCategory,
-					subKey: "ENABLED",
-					desc:   "Enable hooks",
+					key:         hookCategory + "ENABLED",
+					description: "Enable hooks",
 				}),
 		})
 	// EnvInteractive indicates if operating in interactive mode
@@ -97,8 +91,8 @@ var (
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					subKey: "INTERACTIVE",
-					desc:   "Enable interactive mode.",
+					key:         "INTERACTIVE",
+					description: "Enable interactive mode.",
 				}),
 		})
 	// EnvTOTPTimeout indicates when TOTP display should timeout
@@ -106,21 +100,19 @@ var (
 		EnvironmentInt{
 			environmentDefault: newDefaultedEnvironment(120,
 				environmentBase{
-					subKey: "TIMEOUT",
-					cat:    totpCategory,
-					desc:   "Time, in seconds, to show a TOTP token before automatically exiting.",
+					key:         totpCategory + "TIMEOUT",
+					description: "Time, in seconds, to show a TOTP token before automatically exiting.",
 				}),
-			shortDesc: "max totp time",
-			allowZero: false,
+			short:   "max totp time",
+			canZero: false,
 		})
 	// EnvTOTPEntry is the leaf token to use to store TOTP tokens
 	EnvTOTPEntry = environmentRegister(
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("totp",
 				environmentBase{
-					cat:    totpCategory,
-					subKey: "ENTRY",
-					desc:   "Entry name to store TOTP tokens within the database.",
+					key:         totpCategory + "ENTRY",
+					description: "Entry name to store TOTP tokens within the database.",
 				}),
 			allowed:    []string{"<string>"},
 			canDefault: true,
@@ -130,8 +122,8 @@ var (
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(detectedValue,
 				environmentBase{
-					subKey: "PLATFORM",
-					desc:   "Override the detected platform.",
+					key:         "PLATFORM",
+					description: "Override the detected platform.",
 				}),
 			allowed:    platform.Systems.List(),
 			canDefault: false,
@@ -142,8 +134,8 @@ var (
 			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					subKey:      "STORE",
-					desc:        "Directory to the database file.",
+					key:         "STORE",
+					description: "Directory to the database file.",
 					requirement: "must be set",
 				}),
 			canDefault: false,
@@ -155,33 +147,29 @@ var (
 			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					cat:    hookCategory,
-					subKey: "DIRECTORY",
-					desc:   "The path to hooks to execute on actions against the database.",
+					key:         hookCategory + "DIRECTORY",
+					description: "The path to hooks to execute on actions against the database.",
 				}),
 			allowed:    []string{"<directory>"},
 			canDefault: true,
 		})
 	// EnvClipCopy allows overriding the clipboard copy command
 	EnvClipCopy = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
-		subKey: "COPY_COMMAND",
-		cat:    clipCategory,
-		desc:   "Override the detected platform copy command.",
+		key:         clipCategory + "COPY_COMMAND",
+		description: "Override the detected platform copy command.",
 	}})
 	// EnvClipPaste allows overriding the clipboard paste command
 	EnvClipPaste = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
-		subKey: "PASTE_COMMAND",
-		cat:    clipCategory,
-		desc:   "Override the detected platform paste command.",
+		key:         clipCategory + "PASTE_COMMAND",
+		description: "Override the detected platform paste command.",
 	}})
 	// EnvTOTPColorBetween handles terminal coloring for TOTP windows (seconds)
 	EnvTOTPColorBetween = environmentRegister(
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(TOTPDefaultBetween,
 				environmentBase{
-					subKey: "COLOR_WINDOWS",
-					cat:    totpCategory,
-					desc: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
+					key: totpCategory + "COLOR_WINDOWS",
+					description: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
 must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each),
 and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDelimiter),
 				}),
@@ -195,10 +183,9 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					cat:         credsCategory,
-					subKey:      "KEY_FILE",
+					key:         credsCategory + "KEY_FILE",
 					requirement: requiredKeyOrKeyFile,
-					desc:        "A keyfile to access/protect the database.",
+					description: "A keyfile to access/protect the database.",
 				}),
 			allowed:    []string{"keyfile"},
 			canDefault: true,
@@ -208,9 +195,8 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					cat:    defaultCategory,
-					subKey: "MODTIME",
-					desc:   fmt.Sprintf("Input modification time to set for the entry\n\nExpected format: %s.", ModTimeFormat),
+					key:         defaultCategory + "MODTIME",
+					description: fmt.Sprintf("Input modification time to set for the entry\n\nExpected format: %s.", ModTimeFormat),
 				}),
 			canDefault: true,
 			allowed:    []string{"modtime"},
@@ -220,28 +206,25 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(string(output.JSONModes.Hash),
 				environmentBase{
-					cat:    jsonCategory,
-					subKey: "MODE",
-					desc:   fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", output.JSONModes.Raw),
+					key:         jsonCategory + "MODE",
+					description: fmt.Sprintf("Changes what the data field in JSON outputs will contain.\n\nUse '%s' with CAUTION.", output.JSONModes.Raw),
 				}),
 			canDefault: true,
 			allowed:    output.JSONModes.List(),
 		})
 	// EnvTOTPFormat supports formatting the TOTP tokens for generation of tokens
 	EnvTOTPFormat = environmentRegister(EnvironmentFormatter{environmentBase: environmentBase{
-		subKey: "OTP_FORMAT",
-		cat:    totpCategory,
-		desc:   "Override the otpauth url used to store totp tokens. It must have ONE format string ('%s') to insert the totp base code.",
+		key:         totpCategory + "OTP_FORMAT",
+		description: "Override the otpauth url used to store totp tokens. It must have ONE format string ('%s') to insert the totp base code.",
 	}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."})
 	// EnvPasswordMode indicates how the password is read
 	EnvPasswordMode = environmentRegister(
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment(string(DefaultKeyMode),
 				environmentBase{
-					cat:         credsCategory,
-					subKey:      "PASSWORD_MODE",
+					key:         credsCategory + "PASSWORD_MODE",
 					requirement: "must be set to a valid mode when using a key",
-					desc: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
+					description: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
 Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				}),
 			allowed:    []string{string(AskKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
@@ -252,10 +235,9 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					cat:         credsCategory,
 					requirement: requiredKeyOrKeyFile,
-					subKey:      "PASSWORD",
-					desc: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
+					key:         credsCategory + "PASSWORD",
+					description: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
 						plainKeyMode,
 						commandKeyMode),
 				}),
@@ -268,21 +250,19 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		EnvironmentInt{
 			environmentDefault: newDefaultedEnvironment(8,
 				environmentBase{
-					subKey: "WORD_COUNT",
-					cat:    genCategory,
-					desc:   "Number of words to select and include in the generated password.",
+					key:         genCategory + "WORD_COUNT",
+					description: "Number of words to select and include in the generated password.",
 				}),
-			shortDesc: "word count",
-			allowZero: false,
+			short:   "word count",
+			canZero: false,
 		})
 	// EnvPasswordGenTitle indicates if titling (e.g. uppercasing) will occur to words
 	EnvPasswordGenTitle = environmentRegister(
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					subKey: "TITLE",
-					cat:    genCategory,
-					desc:   "Title words during password generation.",
+					key:         genCategory + "TITLE",
+					description: "Title words during password generation.",
 				}),
 		})
 	// EnvPasswordGenTemplate is the output template for controlling how output words are placed together
@@ -290,26 +270,24 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}",
 				environmentBase{
-					subKey: "TEMPLATE",
-					cat:    genCategory,
-					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password. Available fields: %s.", util.TextPositionFields()),
+					key:         genCategory + "TEMPLATE",
+					description: fmt.Sprintf("The go text template to use to format the chosen words into a password. Available fields: %s.", util.TextPositionFields()),
 				}),
 			allowed:    []string{"<go template>"},
 			canDefault: true,
 		})
 	// EnvPasswordGenWordList is the command text to generate the word list
 	EnvPasswordGenWordList = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
-		subKey: "WORDS_COMMAND",
-		cat:    genCategory,
-		desc:   "Command to retrieve the word list to use for password generation (must be split by newline).",
+		key:         genCategory + "WORDS_COMMAND",
+		description: "Command to retrieve the word list to use for password generation (must be split by newline).",
 	}})
 	// EnvLanguage is the language to use for everything
 	EnvLanguage = environmentRegister(
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("en-US",
 				environmentBase{
-					subKey: "LANGUAGE",
-					desc:   "Language to run under.",
+					key:         "LANGUAGE",
+					description: "Language to run under.",
 				}),
 			allowed:    []string{"<language code>"},
 			canDefault: true,
@@ -319,9 +297,8 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		EnvironmentBool{
 			environmentDefault: newDefaultedEnvironment(true,
 				environmentBase{
-					cat:    genCategory,
-					subKey: "ENABLED",
-					desc:   "Enable password generation.",
+					key:         genCategory + "ENABLED",
+					description: "Enable password generation.",
 				}),
 		})
 	// EnvPasswordGenChars allows for restricting which characters can be used
@@ -329,9 +306,8 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		EnvironmentString{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					subKey: "CHARACTERS",
-					cat:    genCategory,
-					desc:   "The set of allowed characters in output words (empty means any character is allowed).",
+					key:         genCategory + "CHARACTERS",
+					description: "The set of allowed characters in output words (empty means any character is allowed).",
 				}),
 			allowed:    []string{"<list of characters>"},
 			canDefault: true,
