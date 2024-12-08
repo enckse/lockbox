@@ -1,7 +1,11 @@
 The core components of `{{ $.Executable }}` are controlled via
-TOML configuration file(s). Run `{{ $.Executable }} {{ $.HelpCommand }} {{ $.HelpConfigCommand
-}}` for more information.
+TOML configuration file(s). The configuration can be specifically
+set via `{{ $.Config.Env }}=...`, detected/found in HOME ({{ $.Config.Home }}),
+or detected/found in XDG_CONFIG_HOME ({{ $.Config.XDG }}).
 
 - Arrays defined within the TOML configuration are flattened into
 a string (space delimited), quoting should be done within array
 parameters when needed.
+
+- Run `{{ $.Executable }} {{ $.HelpCommand }} {{ $.HelpConfigCommand
+}}` for more information.

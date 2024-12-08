@@ -12,6 +12,7 @@ import (
 
 	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/util"
 )
 
@@ -34,7 +35,12 @@ type (
 		CompletionsEnv     string
 		HelpCommand        string
 		HelpConfigCommand  string
-		ReKey              struct {
+		Config             struct {
+			Env  string
+			Home string
+			XDG  string
+		}
+		ReKey struct {
 			KeyFile string
 			NoKey   string
 		}
@@ -110,6 +116,9 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			HelpCommand:        commands.Help,
 			HelpConfigCommand:  commands.HelpConfig,
 		}
+		document.Config.Env = config.ConfigEnv
+		document.Config.Home = config.ConfigHome
+		document.Config.XDG = config.ConfigXDG
 		document.ReKey.KeyFile = setDocFlag(commands.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = commands.ReKeyFlags.NoKey
 		document.Hooks.Mode.Pre = string(backend.HookPre)
