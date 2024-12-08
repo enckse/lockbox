@@ -17,3 +17,16 @@ func ListFields(p any) []string {
 	sort.Strings(vals)
 	return vals
 }
+
+func readNested(v reflect.Type, root string) []string {
+	var fields []string
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		if field.Type.Kind() == reflect.Struct {
+			fields = append(fields, readNested(field.Type, fmt.Sprintf("%s.", field.Name))...)
+		} else {
+			fields = append(fields, fmt.Sprintf("%s%s", root, field.Name))
+		}
+	}
+	return fields
+}

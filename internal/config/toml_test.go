@@ -189,8 +189,6 @@ timeout = -1
 
 func TestReadBool(t *testing.T) {
 	store.Clear()
-	defer os.Clearenv()
-	t.Setenv("TEST", "abc")
 	data := `
 [totp]
 enabled = 1
@@ -240,8 +238,6 @@ enabled = false
 
 func TestBadValues(t *testing.T) {
 	store.Clear()
-	defer os.Clearenv()
-	t.Setenv("TEST", "abc")
 	data := `
 [totsp]
 enabled = "false"
@@ -281,5 +277,37 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 	}
 	if len(store.List()) != 30 {
 		t.Errorf("invalid environment after load")
+	}
+}
+
+func TestExpands(t *testing.T) {
+	store.Clear()
+	t.Setenv("TEST", "1")
+	data := `include = []
+store = "$TEST"
+clip.copy_command = ["$TEST", "$TEST"]
+[totp]
+otp_format = "$TEST"
+`
+	r := strings.NewReader(data)
+	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
+		return nil, nil
+	}); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if len(store.List()) != 3 {
+		t.Errorf("invalid store")
+	}
+	val, ok := store.GetString("LOCKBOX_TOTP_OTP_FORMAT")
+	if val != "$TEST" || !ok {
+		t.Errorf("invalid object: %v", val)
+	}
+	val, ok = store.GetString("LOCKBOX_STORE")
+	if val != "1" || !ok {
+		t.Errorf("invalid object: %v", val)
+	}
+	a, ok := store.GetArray("LOCKBOX_CLIP_COPY_COMMAND")
+	if fmt.Sprintf("%v", a) != "[1 1]" || !ok {
+		t.Errorf("invalid object: %v", a)
 	}
 }

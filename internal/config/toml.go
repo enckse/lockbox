@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -53,7 +54,7 @@ func DefaultTOML() (string, error) {
 		default:
 			sub = strings.Join(parts[1:], "_")
 		}
-		_, field := item.toml()
+		_, field, _ := item.toml()
 		text, err := generateDetailText(item)
 		if err != nil {
 			return "", err
@@ -112,7 +113,7 @@ func generateDetailText(data printer) (string, error) {
 	if r != "" {
 		requirement = r
 	}
-	t, _ := data.toml()
+	t, _, expands := data.toml()
 	var text []string
 	for _, line := range []string{
 		fmt.Sprintf("description:\n%s\n", description),
@@ -120,6 +121,7 @@ func generateDetailText(data printer) (string, error) {
 		fmt.Sprintf("option: %s", strings.Join(allow, "|")),
 		fmt.Sprintf("%s name: %s", commands.Env, key),
 		fmt.Sprintf("default: %s", value),
+		fmt.Sprintf("expands: %s", strconv.FormatBool(expands)),
 		fmt.Sprintf("type: %s", t),
 		"",
 		"NOTE: the following value is NOT a default, it is an empty TOML placeholder",
@@ -149,10 +151,10 @@ func LoadConfig(r io.Reader, loader Loader) error {
 		if !ok {
 			return fmt.Errorf("unknown key: %s (%s)", k, export)
 		}
-		isType, _ := env.toml()
+		isType, _, expand := env.toml()
 		switch isType {
 		case tomlArray:
-			array, err := parseStringArray(v, true)
+			array, err := parseStringArray(v, expand)
 			if err != nil {
 				return err
 			}
@@ -178,7 +180,10 @@ func LoadConfig(r io.Reader, loader Loader) error {
 			if !ok {
 				return fmt.Errorf("non-string found where expected: %v", v)
 			}
-			store.SetString(export, os.Expand(s, os.Getenv))
+			if expand {
+				s = os.Expand(s, os.Getenv)
+			}
+			store.SetString(export, s)
 		default:
 			return fmt.Errorf("unknown field, can't determine type: %s (%v)", k, v)
 		}

@@ -24,3 +24,10 @@ func TestWrap(t *testing.T) {
 		t.Errorf("invalid wrap: %s", w)
 	}
 }
+
+func TestTextFields(t *testing.T) {
+	v := util.TextPositionFields()
+	if v != "Text, Position.Start, Position.End" {
+		t.Errorf("unexpected fields: %s", v)
+	}
+}

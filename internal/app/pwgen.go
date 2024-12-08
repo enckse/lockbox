@@ -12,6 +12,7 @@ import (
 	"text/template"
 
 	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/util"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -30,7 +31,6 @@ func GeneratePassword(cmd CommandOptions) error {
 		return fmt.Errorf("word count must be >= 1")
 	}
 	tmplString := config.EnvPasswordGenTemplate.Get()
-	tmplString = strings.ReplaceAll(tmplString, config.TemplateVariable, "$")
 	wordList := config.EnvPasswordGenWordList.Get()
 	if len(wordList) == 0 {
 		return errors.New("word list command must set")
@@ -82,25 +82,17 @@ func GeneratePassword(cmd CommandOptions) error {
 		}
 		choices = append(choices, use)
 	}
-	type position struct {
-		Start int
-		End   int
-	}
-	type word struct {
-		Text     string
-		Position position
-	}
 	found := len(choices)
 	if found == 0 {
 		return errors.New("no sources given")
 	}
-	var selected []word
+	var selected []util.Word
 	var cnt int64
 	totalLength := 0
 	for cnt < length {
 		choice := choices[rand.Intn(found)]
 		textLength := len(choice)
-		selected = append(selected, word{choice, position{totalLength, totalLength + textLength}})
+		selected = append(selected, util.Word{Text: choice, Position: util.Position{Start: totalLength, End: totalLength + textLength}})
 		totalLength += textLength
 		cnt++
 	}

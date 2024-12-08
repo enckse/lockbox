@@ -3,7 +3,21 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"strings"
+)
+
+type (
+	// Position is the start/end of a word in a greater set
+	Position struct {
+		Start int
+		End   int
+	}
+	// Word is the text and position in a greater position
+	Word struct {
+		Text     string
+		Position Position
+	}
 )
 
 // TextWrap performs simple block text word wrapping
@@ -58,4 +72,9 @@ func wrap(in string, maxLength int) string {
 		lines = append(lines, strings.Join(cur, " "))
 	}
 	return strings.Join(lines, "\n")
+}
+
+// TextPositionFields is the displayable set of templated fields
+func TextPositionFields() string {
+	return strings.Join(readNested(reflect.TypeOf(Word{}), ""), ", ")
 }

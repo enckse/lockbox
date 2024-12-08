@@ -139,6 +139,7 @@ var (
 	// EnvStore is the location of the keepass file/store
 	EnvStore = environmentRegister(
 		EnvironmentString{
+			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					subKey:      "STORE",
@@ -151,6 +152,7 @@ var (
 	// EnvHookDir is the directory of hooks to execute
 	EnvHookDir = environmentRegister(
 		EnvironmentString{
+			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					cat:    hookCategory,
@@ -190,6 +192,7 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 	// EnvKeyFile is an keyfile for the database
 	EnvKeyFile = environmentRegister(
 		EnvironmentString{
+			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					cat:         credsCategory,
@@ -246,6 +249,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		})
 	envPassword = environmentRegister(
 		EnvironmentString{
+			expand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					cat:         credsCategory,
@@ -284,11 +288,11 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 	// EnvPasswordGenTemplate is the output template for controlling how output words are placed together
 	EnvPasswordGenTemplate = environmentRegister(
 		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment(fmt.Sprintf("{{range %si, %sval := .}}{{if %si}}-{{end}}{{%sval.Text}}{{end}}", TemplateVariable, TemplateVariable, TemplateVariable, TemplateVariable),
+			environmentDefault: newDefaultedEnvironment("{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}",
 				environmentBase{
 					subKey: "TEMPLATE",
 					cat:    genCategory,
-					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password (use '%s' to include a '$' to avoid shell expansion issues). Available fields: Text, Position.Start, and Position.End.", TemplateVariable),
+					desc:   fmt.Sprintf("The go text template to use to format the chosen words into a password. Available fields: %s.", util.TextPositionFields()),
 				}),
 			allowed:    []string{"<go template>"},
 			canDefault: true,

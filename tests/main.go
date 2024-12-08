@@ -323,7 +323,7 @@ func test(profile string) error {
 	c["pwgen.word_count"] = "1"
 	r.writeConfig(c)
 	r.run("", "pwgen")
-	c["pwgen.template"] = "\"{{range [%]idx, [%]val := .}}{{if lt [%]val.Position.End 5}}{{ [%]val.Text }}{{end}}{{end}}\""
+	c["pwgen.template"] = "\"{{range $idx, $val := .}}{{if lt $val.Position.End 5}}{{ $val.Text }}{{end}}{{end}}\""
 	c["pwgen.characters"] = c.quoteString("b")
 	c["pwgen.word_count"] = "2"
 	c["pwgen.title"] = "false"

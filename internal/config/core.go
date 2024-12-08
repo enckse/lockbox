@@ -16,19 +16,17 @@ import (
 
 const (
 	// sub categories
-	clipCategory    keyCategory = "CLIP_"
-	totpCategory    keyCategory = "TOTP_"
-	genCategory     keyCategory = "PWGEN_"
-	jsonCategory    keyCategory = "JSON_"
-	credsCategory   keyCategory = "CREDENTIALS_"
-	defaultCategory keyCategory = "DEFAULTS_"
-	hookCategory    keyCategory = "HOOKS_"
-	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
-	TemplateVariable     = "[%]"
-	environmentPrefix    = "LOCKBOX_"
-	commandArgsExample   = "[cmd args...]"
-	fileExample          = "<file>"
-	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
+	clipCategory         keyCategory = "CLIP_"
+	totpCategory         keyCategory = "TOTP_"
+	genCategory          keyCategory = "PWGEN_"
+	jsonCategory         keyCategory = "JSON_"
+	credsCategory        keyCategory = "CREDENTIALS_"
+	defaultCategory      keyCategory = "DEFAULTS_"
+	hookCategory         keyCategory = "HOOKS_"
+	environmentPrefix                = "LOCKBOX_"
+	commandArgsExample               = "[cmd args...]"
+	fileExample                      = "<file>"
+	requiredKeyOrKeyFile             = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat      = time.RFC3339
 	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
@@ -66,7 +64,7 @@ type (
 	printer     interface {
 		values() (string, []string)
 		self() environmentBase
-		toml() (tomlType, string)
+		toml() (tomlType, string, bool)
 	}
 )
 

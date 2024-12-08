@@ -90,7 +90,7 @@ func TestGenerate(t *testing.T) {
 	// NOTE: this allows templating below in golang
 	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range $idx, $val := .}}{{if lt $idx 5}}-{{end}}{{ $val.Text }}{{ $val.Position.Start }}{{ $val.Position.End }}{{end}}")
 	testPasswordGen(t, "-a01-a12-a23-a34")
-	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val.Text }}{{end}}")
+	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range $idx, $val := .}}{{if lt $idx 5}}-{{end}}{{ $val.Text }}{{end}}")
 	testPasswordGen(t, "-a-a-a-a")
 	store.Clear()
 	store.SetBool("LOCKBOX_PWGEN_TITLE", true)

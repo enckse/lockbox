@@ -35,6 +35,7 @@ type (
 		canDefault bool
 		allowed    []string
 		isArray    bool
+		expand     bool
 	}
 	// EnvironmentCommand are settings that are parsed as shell commands
 	EnvironmentCommand struct {
@@ -138,25 +139,25 @@ func (e EnvironmentCommand) values() (string, []string) {
 	return detectedValue, []string{commandArgsExample}
 }
 
-func (e EnvironmentInt) toml() (tomlType, string) {
-	return tomlInt, "0"
+func (e EnvironmentInt) toml() (tomlType, string, bool) {
+	return tomlInt, "0", false
 }
 
-func (e EnvironmentBool) toml() (tomlType, string) {
-	return tomlBool, "true"
+func (e EnvironmentBool) toml() (tomlType, string, bool) {
+	return tomlBool, YesValue, false
 }
 
-func (e EnvironmentString) toml() (tomlType, string) {
+func (e EnvironmentString) toml() (tomlType, string, bool) {
 	if e.isArray {
-		return tomlArray, "[]"
+		return tomlArray, "[]", e.expand
 	}
-	return tomlString, "\"\""
+	return tomlString, "\"\"", e.expand
 }
 
-func (e EnvironmentCommand) toml() (tomlType, string) {
-	return tomlArray, "[]"
+func (e EnvironmentCommand) toml() (tomlType, string, bool) {
+	return tomlArray, "[]", true
 }
 
-func (e EnvironmentFormatter) toml() (tomlType, string) {
-	return tomlString, "\"\""
+func (e EnvironmentFormatter) toml() (tomlType, string, bool) {
+	return tomlString, "\"\"", false
 }
