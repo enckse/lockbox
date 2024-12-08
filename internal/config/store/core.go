@@ -1,21 +1,24 @@
+// Package store is the internal memory store for loaded configuration settings
 package store
 
 import (
 	"slices"
 )
 
-type backing struct {
-	integers map[string]int64
-	strings  map[string]string
-	booleans map[string]bool
-	arrays   map[string][]string
-	all      map[string]struct{}
-}
+type (
+	backing struct {
+		integers map[string]int64
+		strings  map[string]string
+		booleans map[string]bool
+		arrays   map[string][]string
+	}
 
-type KeyValue struct {
-	Key   string
-	Value interface{}
-}
+	// KeyValue are values exportable for interrogation beyond the store
+	KeyValue struct {
+		Key   string
+		Value interface{}
+	}
+)
 
 var configuration = newConfig()
 
@@ -28,10 +31,12 @@ func newConfig() backing {
 	return c
 }
 
+// Clear will clear store contents
 func Clear() {
 	configuration = newConfig()
 }
 
+// List will get the key/value list of settings
 func List(filter ...string) []KeyValue {
 	var results []KeyValue
 	results = append(results, list(configuration.integers, GetInt64, filter)...)
@@ -56,18 +61,22 @@ func list[T any](m map[string]T, conv func(string) (T, bool), filter []string) [
 	return result
 }
 
+// GetInt64 will get an int64 value
 func GetInt64(key string) (int64, bool) {
 	return get(key, configuration.integers)
 }
 
+// GetBool will get a bool value
 func GetBool(key string) (bool, bool) {
 	return get(key, configuration.booleans)
 }
 
+// GetString will get a string value
 func GetString(key string) (string, bool) {
 	return get(key, configuration.strings)
 }
 
+// GetArray will get an array value
 func GetArray(key string) ([]string, bool) {
 	return get(key, configuration.arrays)
 }
@@ -77,18 +86,22 @@ func get[T any](key string, m map[string]T) (T, bool) {
 	return val, ok
 }
 
+// SetInt64 will set an int64 value
 func SetInt64(key string, val int64) {
 	configuration.integers[key] = val
 }
 
+// SetBool will set a bool value
 func SetBool(key string, val bool) {
 	configuration.booleans[key] = val
 }
 
-func SetString(key string, val string) {
+// SetString will set a string value
+func SetString(key, val string) {
 	configuration.strings[key] = val
 }
 
+// SetArray will set an array value
 func SetArray(key string, val []string) {
 	configuration.arrays[key] = val
 }

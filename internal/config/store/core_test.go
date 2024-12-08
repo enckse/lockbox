@@ -24,7 +24,7 @@ func TestClear(t *testing.T) {
 	}
 }
 
-func checkItem(keyValue store.KeyValue, key string, value string) error {
+func checkItem(keyValue store.KeyValue, key, value string) error {
 	if keyValue.Key != key || fmt.Sprintf("%v", keyValue.Value) != value {
 		return fmt.Errorf("invalid value: %v", keyValue)
 	}
