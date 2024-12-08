@@ -126,7 +126,7 @@ func (e EnvironmentStrings) display() metaData {
 	if slices.Contains(flags, isArrayFlag) {
 		t = tomlArray
 		v = "[]"
-		if canExpand {
+		if slices.Contains(flags, isCommandFlag) {
 			if len(show) == 0 {
 				show = []string{"[cmd args...]"}
 			}
