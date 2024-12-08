@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,10 +15,6 @@ import (
 )
 
 const (
-	yes               = "true"
-	no                = "false"
-	detectEnvironment = "detect"
-	tomlFile          = "lockbox.toml"
 	// sub categories
 	clipCategory    keyCategory = "CLIP_"
 	totpCategory    keyCategory = "TOTP_"
@@ -26,29 +23,26 @@ const (
 	credsCategory   keyCategory = "CREDENTIALS_"
 	defaultCategory keyCategory = "DEFAULTS_"
 	hookCategory    keyCategory = "HOOKS_"
-	// YesValue are yes (on) values
-	YesValue = yes
-	// NoValue are no (off) values
-	NoValue = no
 	// TemplateVariable is used to handle '$' in shell vars (due to expansion)
 	TemplateVariable     = "[%]"
-	configDirName        = "lockbox"
-	configDir            = ".config"
 	environmentPrefix    = "LOCKBOX_"
 	commandArgsExample   = "[cmd args...]"
 	fileExample          = "<file>"
-	detectedValue        = "<detected>"
 	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat      = time.RFC3339
 	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
+	detectedValue      = "(detected)"
 )
 
 var (
+	YesValue            = strconv.FormatBool(true)
+	NoValue             = strconv.FormatBool(false)
 	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, util.TimeWindowDelimiter))}
-	configDirOffsetFile = filepath.Join(configDirName, tomlFile)
-	xdgPaths            = []string{configDirOffsetFile, tomlFile}
-	homePaths           = []string{filepath.Join(configDir, configDirOffsetFile), filepath.Join(configDir, tomlFile)}
+	configDirFile       = filepath.Join("lockbox", "config.toml")
+	ConfigXDG           = configDirFile
+	ConfigHome          = filepath.Join(".config", configDirFile)
+	ConfigEnv           = environmentPrefix + "CONFIG_TOML"
 	registry            = map[string]printer{}
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []util.TimeWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
@@ -73,21 +67,19 @@ type (
 
 // NewConfigFiles will get the list of candidate config files
 func NewConfigFiles() []string {
-	v := os.Expand(os.Getenv(EnvConfig.Key()), os.Getenv)
-	if v != detectEnvironment {
+	v := os.Expand(os.Getenv(ConfigEnv), os.Getenv)
+	if v != "" {
 		return []string{v}
 	}
 	var options []string
-	pathAdder := func(root string, err error, subs []string) {
+	pathAdder := func(root, sub string, err error) {
 		if err == nil && root != "" {
-			for _, s := range subs {
-				options = append(options, filepath.Join(root, s))
-			}
+			options = append(options, filepath.Join(root, sub))
 		}
 	}
-	pathAdder(os.Getenv("XDG_CONFIG_HOME"), nil, xdgPaths)
+	pathAdder(os.Getenv("XDG_CONFIG_HOME"), ConfigXDG, nil)
 	h, err := os.UserHomeDir()
-	pathAdder(h, err, homePaths)
+	pathAdder(h, ConfigHome, err)
 	return options
 }
 

@@ -119,11 +119,11 @@ func (e environmentBase) self() environmentBase {
 }
 
 func (e EnvironmentBool) values() (string, []string) {
-	val := no
+	val := NoValue
 	if e.defaultValue {
-		val = yes
+		val = YesValue
 	}
-	return val, []string{yes, no}
+	return val, []string{YesValue, NoValue}
 }
 
 func (e EnvironmentInt) values() (string, []string) {

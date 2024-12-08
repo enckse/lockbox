@@ -17,21 +17,21 @@ func TestNewEnvFiles(t *testing.T) {
 		t.Errorf("invalid files: %v", f)
 	}
 	t.Setenv("HOME", "test")
-	t.Setenv("LOCKBOX_CONFIG_TOML", "detect")
+	t.Setenv("LOCKBOX_CONFIG_TOML", "")
 	f = config.NewConfigFiles()
-	if len(f) != 2 {
+	if len(f) != 1 {
 		t.Errorf("invalid files: %v", f)
 	}
-	t.Setenv("LOCKBOX_CONFIG_TOML", "detect")
+	t.Setenv("LOCKBOX_CONFIG_TOML", "")
 	t.Setenv("XDG_CONFIG_HOME", "test")
 	f = config.NewConfigFiles()
-	if len(f) != 4 {
+	if len(f) != 2 {
 		t.Errorf("invalid files: %v", f)
 	}
-	t.Setenv("LOCKBOX_CONFIG_TOML", "detect")
+	t.Setenv("LOCKBOX_CONFIG_TOML", "")
 	os.Unsetenv("HOME")
 	f = config.NewConfigFiles()
-	if len(f) != 2 {
+	if len(f) != 1 {
 		t.Errorf("invalid files: %v", f)
 	}
 }

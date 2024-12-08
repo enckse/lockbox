@@ -3,7 +3,6 @@ package config
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/seanenck/lockbox/internal/output"
 	"github.com/seanenck/lockbox/internal/platform"
@@ -231,20 +230,6 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 		cat:    totpCategory,
 		desc:   "Override the otpauth url used to store totp tokens. It must have ONE format string ('%s') to insert the totp base code.",
 	}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."})
-	// EnvConfig is the location of the config file to read
-	EnvConfig = environmentRegister(
-		EnvironmentString{
-			environmentDefault: newDefaultedEnvironment(detectEnvironment,
-				environmentBase{
-					subKey: "CONFIG_TOML",
-					desc: fmt.Sprintf(`Allows setting a specific toml file to read and load.
-
-The keyword '%s' will search for a file in the following paths in
-XDG_CONFIG_HOME (%s) or from the user's HOME (%s). Matches the first file found.`, detectEnvironment, strings.Join(xdgPaths, ","), strings.Join(homePaths, ",")),
-				}),
-			canDefault: true,
-			allowed:    []string{detectEnvironment, fileExample},
-		})
 	// EnvPasswordMode indicates how the password is read
 	EnvPasswordMode = environmentRegister(
 		EnvironmentString{

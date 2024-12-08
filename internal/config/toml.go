@@ -34,11 +34,7 @@ func DefaultTOML() (string, error) {
 	const root = "_root_"
 	unmapped := make(map[string][]string)
 	keys := []string{}
-	isConfig := EnvConfig.Key()
 	for envKey, item := range registry {
-		if envKey == isConfig {
-			continue
-		}
 		tomlKey := strings.ToLower(strings.TrimPrefix(envKey, environmentPrefix))
 		parts := strings.Split(tomlKey, "_")
 		length := len(parts)
@@ -74,11 +70,7 @@ func DefaultTOML() (string, error) {
 	}
 	sort.Strings(keys)
 	builder := strings.Builder{}
-	configEnv, err := generateDetailText(EnvConfig)
-	if err != nil {
-		return "", err
-	}
-	for _, header := range []string{configEnv, "\n", fmt.Sprintf(`
+	for _, header := range []string{fmt.Sprintf(`
 # include additional configs, allowing globs ('*'), nesting
 # depth allowed up to %d include levels
 #
