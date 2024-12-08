@@ -36,14 +36,19 @@ const (
 )
 
 var (
-	YesValue            = strconv.FormatBool(true)
-	NoValue             = strconv.FormatBool(false)
 	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, util.TimeWindowDelimiter))}
 	configDirFile       = filepath.Join("lockbox", "config.toml")
-	ConfigXDG           = configDirFile
-	ConfigHome          = filepath.Join(".config", configDirFile)
-	ConfigEnv           = environmentPrefix + "CONFIG_TOML"
 	registry            = map[string]printer{}
+	// ConfigXDG is the offset to the config for XDG
+	ConfigXDG = configDirFile
+	// ConfigHome is the offset to the config HOME
+	ConfigHome = filepath.Join(".config", configDirFile)
+	// ConfigEnv allows overriding the config detection
+	ConfigEnv = environmentPrefix + "CONFIG_TOML"
+	// YesValue is the string variant of 'Yes' (or true) items
+	YesValue = strconv.FormatBool(true)
+	// NoValue is the string variant of 'No' (or false) items
+	NoValue = strconv.FormatBool(false)
 	// TOTPDefaultColorWindow is the default coloring rules for totp
 	TOTPDefaultColorWindow = []util.TimeWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string

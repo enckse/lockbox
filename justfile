@@ -11,12 +11,12 @@ build:
   go build {{goflags}} -ldflags "{{ldflags}} -X main.version={{version}}" -o "{{object}}" cmd/main.go
 
 unittest:
-  LOCKBOX_CONFIG_TOML= go test ./...
+  LOCKBOX_CONFIG_TOML=fake go test ./...
 
 check: unittest tests
 
 tests: build
-  cd tests && LOCKBOX_CONFIG_TOML= ./run.sh
+  cd tests && LOCKBOX_CONFIG_TOML=fake go run main.go
 
 clean:
   rm -f "{{object}}"
