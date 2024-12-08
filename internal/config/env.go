@@ -37,8 +37,8 @@ type (
 		isArray    bool
 		expand     bool
 	}
-	// EnvironmentCommand are settings that are parsed as shell commands
-	EnvironmentCommand struct {
+	// EnvironmentArray are settings that are parsed as shell commands
+	EnvironmentArray struct {
 		environmentBase
 	}
 	// EnvironmentFormatter allows for sending a string into a get request
@@ -98,7 +98,7 @@ func (e EnvironmentString) Get() string {
 }
 
 // Get will read (and shlex) the value if set
-func (e EnvironmentCommand) Get() []string {
+func (e EnvironmentArray) Get() []string {
 	val, ok := store.GetArray(e.Key())
 	if !ok {
 		return []string{}
@@ -135,7 +135,7 @@ func (e EnvironmentFormatter) values() (string, []string) {
 	return strings.ReplaceAll(strings.ReplaceAll(EnvTOTPFormat.Get("%s"), "%25s", "%s"), "&", " \\\n           &"), []string{e.allowed}
 }
 
-func (e EnvironmentCommand) values() (string, []string) {
+func (e EnvironmentArray) values() (string, []string) {
 	return detectedValue, []string{commandArgsExample}
 }
 
@@ -154,7 +154,7 @@ func (e EnvironmentString) toml() (tomlType, string, bool) {
 	return tomlString, "\"\"", e.expand
 }
 
-func (e EnvironmentCommand) toml() (tomlType, string, bool) {
+func (e EnvironmentArray) toml() (tomlType, string, bool) {
 	return tomlArray, "[]", true
 }
 

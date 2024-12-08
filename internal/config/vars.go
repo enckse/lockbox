@@ -163,13 +163,13 @@ var (
 			canDefault: true,
 		})
 	// EnvClipCopy allows overriding the clipboard copy command
-	EnvClipCopy = environmentRegister(EnvironmentCommand{environmentBase: environmentBase{
+	EnvClipCopy = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
 		subKey: "COPY_COMMAND",
 		cat:    clipCategory,
 		desc:   "Override the detected platform copy command.",
 	}})
 	// EnvClipPaste allows overriding the clipboard paste command
-	EnvClipPaste = environmentRegister(EnvironmentCommand{environmentBase: environmentBase{
+	EnvClipPaste = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
 		subKey: "PASTE_COMMAND",
 		cat:    clipCategory,
 		desc:   "Override the detected platform paste command.",
@@ -298,7 +298,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			canDefault: true,
 		})
 	// EnvPasswordGenWordList is the command text to generate the word list
-	EnvPasswordGenWordList = environmentRegister(EnvironmentCommand{environmentBase: environmentBase{
+	EnvPasswordGenWordList = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
 		subKey: "WORDS_COMMAND",
 		cat:    genCategory,
 		desc:   "Command to retrieve the word list to use for password generation (must be split by newline).",
