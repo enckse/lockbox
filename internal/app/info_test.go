@@ -57,7 +57,7 @@ func TestEnvInfo(t *testing.T) {
 	os.Clearenv()
 	store.Clear()
 	var buf bytes.Buffer
-	ok, err := app.Info(&buf, "env", []string{})
+	ok, err := app.Info(&buf, "var", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestEnvInfo(t *testing.T) {
 	}
 	buf = bytes.Buffer{}
 	store.SetString("LOCKBOX_STORE", "1")
-	ok, err = app.Info(&buf, "env", []string{})
+	ok, err = app.Info(&buf, "var", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestEnvInfo(t *testing.T) {
 		t.Error("nothing written")
 	}
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"completions"})
+	ok, err = app.Info(&buf, "var", []string{"completions"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestEnvInfo(t *testing.T) {
 	}
 	store.SetString("LOCKBOX_READONLY", "true")
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"completions"})
+	ok, err = app.Info(&buf, "var", []string{"completions"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -91,7 +91,7 @@ func TestEnvInfo(t *testing.T) {
 		t.Error("nothing written")
 	}
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"LOCKBOX_READONLY"})
+	ok, err = app.Info(&buf, "var", []string{"LOCKBOX_READONLY"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -99,14 +99,14 @@ func TestEnvInfo(t *testing.T) {
 		t.Error("nothing written")
 	}
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "env", []string{"garbage"})
+	ok, err = app.Info(&buf, "var", []string{"garbage"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if buf.String() != "\n" {
 		t.Error("nothing written")
 	}
-	if _, err = app.Info(&buf, "env", []string{"test", "default"}); err.Error() != "invalid env command, too many arguments" {
+	if _, err = app.Info(&buf, "var", []string{"test", "default"}); err.Error() != "invalid env command, too many arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

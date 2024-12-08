@@ -31,7 +31,7 @@ const (
 	// Remove removes an entry
 	Remove = "rm"
 	// Env shows environment information used by lockbox
-	Env = "env"
+	Env = "var"
 	// TOTPClip is the argument for copying totp codes to clipboard
 	TOTPClip = Clip
 	// TOTPMinimal is the argument for getting the short version of a code
