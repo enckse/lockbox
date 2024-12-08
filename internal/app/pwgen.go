@@ -18,10 +18,7 @@ import (
 
 // GeneratePassword generates a password
 func GeneratePassword(cmd CommandOptions) error {
-	enabled, err := config.EnvPasswordGenEnabled.Get()
-	if err != nil {
-		return err
-	}
+	enabled := config.EnvPasswordGenEnabled.Get()
 	if !enabled {
 		return errors.New("password generation is disabled")
 	}
@@ -34,10 +31,7 @@ func GeneratePassword(cmd CommandOptions) error {
 	}
 	tmplString := config.EnvPasswordGenTemplate.Get()
 	tmplString = strings.ReplaceAll(tmplString, config.TemplateVariable, "$")
-	wordList, err := config.EnvPasswordGenWordList.Get()
-	if err != nil {
-		return err
-	}
+	wordList := config.EnvPasswordGenWordList.Get()
 	if len(wordList) == 0 {
 		return errors.New("word list command must set")
 	}
@@ -46,10 +40,7 @@ func GeneratePassword(cmd CommandOptions) error {
 	if len(wordList) > 1 {
 		args = wordList[1:]
 	}
-	capitalize, err := config.EnvPasswordGenTitle.Get()
-	if err != nil {
-		return err
-	}
+	capitalize := config.EnvPasswordGenTitle.Get()
 	wordResults, err := exec.Command(exe, args...).Output()
 	if err != nil {
 		return err
@@ -104,7 +95,7 @@ func GeneratePassword(cmd CommandOptions) error {
 		return errors.New("no sources given")
 	}
 	var selected []word
-	cnt := 0
+	var cnt int64
 	totalLength := 0
 	for cnt < length {
 		choice := choices[rand.Intn(found)]

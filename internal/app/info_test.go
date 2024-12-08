@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 func TestNoInfo(t *testing.T) {
@@ -19,6 +20,7 @@ func TestNoInfo(t *testing.T) {
 
 func TestHelpInfo(t *testing.T) {
 	os.Clearenv()
+	store.Clear()
 	var buf bytes.Buffer
 	ok, err := app.Info(&buf, "help", []string{})
 	if !ok || err != nil {
@@ -53,6 +55,7 @@ func TestHelpInfo(t *testing.T) {
 
 func TestEnvInfo(t *testing.T) {
 	os.Clearenv()
+	store.Clear()
 	var buf bytes.Buffer
 	ok, err := app.Info(&buf, "env", []string{})
 	if !ok || err != nil {
@@ -62,7 +65,7 @@ func TestEnvInfo(t *testing.T) {
 		t.Error("nothing written")
 	}
 	buf = bytes.Buffer{}
-	t.Setenv("LOCKBOX_STORE", "1")
+	store.SetString("LOCKBOX_STORE", "1")
 	ok, err = app.Info(&buf, "env", []string{})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -78,7 +81,7 @@ func TestEnvInfo(t *testing.T) {
 	if buf.String() != "\n" {
 		t.Error("nothing written")
 	}
-	t.Setenv("LOCKBOX_READONLY", "true")
+	store.SetString("LOCKBOX_READONLY", "true")
 	buf = bytes.Buffer{}
 	ok, err = app.Info(&buf, "env", []string{"completions"})
 	if !ok || err != nil {
@@ -115,6 +118,7 @@ func TestCompletionInfo(t *testing.T) {
 		"bash": "local cur opts",
 	} {
 		for _, b := range []bool{true, false} {
+			store.Clear()
 			os.Clearenv()
 			sub := []string{k}
 			t.Setenv("SHELL", "invalid")
@@ -142,6 +146,7 @@ func TestCompletionInfo(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	os.Clearenv()
+	store.Clear()
 	t.Setenv("SHELL", "bad")
 	if _, err := app.Info(&buf, "completions", []string{}); err.Error() != "unknown completion type: bad" {
 		t.Errorf("invalid error: %v", err)

@@ -3,6 +3,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,6 +26,7 @@ type (
 )
 
 const (
+	internalHookEnv = "___HOOK___CALLED___"
 	// HookPre are triggers BEFORE an action is performed on an entity
 	HookPre HookMode = "pre"
 	// HookPost are triggers AFTER an action is performed on an entity
@@ -33,11 +35,8 @@ const (
 
 // NewHook will create a new hook type
 func NewHook(path string, a ActionMode) (Hook, error) {
-	enabled, err := config.EnvHooksEnabled.Get()
-	if err != nil {
-		return Hook{}, err
-	}
-	if !enabled {
+	enabled := config.EnvHooksEnabled.Get()
+	if !enabled || os.Getenv(internalHookEnv) != "" {
 		return Hook{enabled: false}, nil
 	}
 	if strings.TrimSpace(path) == "" {
@@ -70,7 +69,7 @@ func (h Hook) Run(mode HookMode) error {
 		return nil
 	}
 	env := os.Environ()
-	env = append(env, config.EnvHooksEnabled.KeyValue(config.NoValue))
+	env = append(env, fmt.Sprintf("%s=1", internalHookEnv))
 	for _, s := range h.scripts {
 		c := exec.Command(s, string(mode), string(h.mode), h.path)
 		c.Stdout = os.Stdout

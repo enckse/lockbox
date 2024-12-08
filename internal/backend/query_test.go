@@ -2,11 +2,11 @@ package backend_test
 
 import (
 	"encoding/json"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 func setupInserts(t *testing.T) {
@@ -18,6 +18,7 @@ func setupInserts(t *testing.T) {
 }
 
 func TestMatchPath(t *testing.T) {
+	store.Clear()
 	setupInserts(t)
 	q, err := fullSetup(t, true).MatchPath("test/test/abc")
 	if err != nil {
@@ -74,7 +75,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestValueModes(t *testing.T) {
-	os.Clearenv()
+	store.Clear()
 	setupInserts(t)
 	q, err := fullSetup(t, true).Get("test/test/abc", backend.BlankValue)
 	if err != nil {
@@ -97,7 +98,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 {
 		t.Errorf("invalid date/time")
 	}
-	t.Setenv("LOCKBOX_JSON_HASH_LENGTH", "10")
+	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -127,7 +128,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data == "" {
 		t.Errorf("invalid json: %v", m)
 	}
-	t.Setenv("LOCKBOX_JSON_MODE", "plAINtExt")
+	store.SetString("LOCKBOX_JSON_MODE", "plAINtExt")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -139,7 +140,7 @@ func TestValueModes(t *testing.T) {
 	if len(m.ModTime) < 20 || m.Data != "tedst" {
 		t.Errorf("invalid json: %v", m)
 	}
-	t.Setenv("LOCKBOX_JSON_MODE", "emPTY")
+	store.SetString("LOCKBOX_JSON_MODE", "emPTY")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -209,9 +210,10 @@ func TestQueryCallback(t *testing.T) {
 }
 
 func TestSetModTime(t *testing.T) {
+	store.Clear()
 	testDateTime := "2022-12-30T12:34:56-05:00"
 	tr := fullSetup(t, false)
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", testDateTime)
+	store.SetString("LOCKBOX_DEFAULTS_MODTIME", testDateTime)
 	tr.Insert("test/xyz", "test")
 	q, err := fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
@@ -225,8 +227,8 @@ func TestSetModTime(t *testing.T) {
 		t.Errorf("invalid date/time")
 	}
 
+	store.Clear()
 	tr = fullSetup(t, false)
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
 	tr.Insert("test/xyz", "test")
 	q, err = fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
@@ -241,7 +243,7 @@ func TestSetModTime(t *testing.T) {
 	}
 
 	tr = fullSetup(t, false)
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "garbage")
+	store.SetString("LOCKBOX_DEFAULTS_MODTIME", "garbage")
 	err = tr.Insert("test/xyz", "test")
 	if err == nil || !strings.Contains(err.Error(), "parsing time") {
 		t.Errorf("invalid error: %v", err)

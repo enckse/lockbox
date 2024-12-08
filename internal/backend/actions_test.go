@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config/store"
 	"github.com/seanenck/lockbox/internal/platform"
 )
 
@@ -27,14 +28,11 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	if !keep {
 		os.Remove(file)
 	}
-	t.Setenv("LOCKBOX_READONLY", "false")
-	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
-	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
+	store.SetBool("LOCKBOX_READONLY", false)
+	store.SetString("LOCKBOX_STORE", file)
+	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
+	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -43,18 +41,16 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 }
 
 func TestKeyFile(t *testing.T) {
-	os.Clearenv()
+	store.Clear()
+	defer store.Clear()
 	file := testFile("keyfile_test.kdbx")
 	keyFile := testFile("file.key")
 	os.Remove(file)
-	t.Setenv("LOCKBOX_READONLY", "false")
-	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
-	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", keyFile)
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
+	store.SetString("LOCKBOX_STORE", file)
+	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
+	store.SetString("LOCKBOX_CREDENTIALS_KEY_FILE", keyFile)
+	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	os.WriteFile(keyFile, []byte("test"), 0o644)
 	tr, err := backend.NewTransaction()
 	if err != nil {
@@ -71,7 +67,7 @@ func setup(t *testing.T) *backend.Transaction {
 
 func TestNoWriteOnRO(t *testing.T) {
 	setup(t)
-	t.Setenv("LOCKBOX_READONLY", "true")
+	store.SetBool("LOCKBOX_READONLY", true)
 	tr, _ := backend.NewTransaction()
 	if err := tr.Insert("a/a/a", "a"); err.Error() != "unable to alter database in readonly mode" {
 		t.Errorf("wrong error: %v", err)
@@ -80,7 +76,7 @@ func TestNoWriteOnRO(t *testing.T) {
 
 func TestBadTOTP(t *testing.T) {
 	tr := setup(t)
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "Title")
+	store.SetString("LOCKBOX_TOTP_ENTRY", "Title")
 	if err := tr.Insert("a/a/a", "a"); err.Error() != "invalid totp field, uses restricted name" {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -280,19 +276,19 @@ func TestKeyAndOrKeyFile(t *testing.T) {
 }
 
 func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
-	os.Clearenv()
+	store.Clear()
 	file := testFile("keyorkeyfile.kdbx")
 	os.Remove(file)
-	t.Setenv("LOCKBOX_STORE", file)
+	store.SetString("LOCKBOX_STORE", file)
 	if key {
-		t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
-		t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+		store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
+		store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	} else {
-		t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "none")
+		store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "none")
 	}
 	if keyFile {
 		key := testFile("keyfileor.key")
-		t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", key)
+		store.SetString("LOCKBOX_CREDENTIALS_KEY_FILE", key)
 		os.WriteFile(key, []byte("test"), 0o644)
 	}
 	tr, err := backend.NewTransaction()
@@ -313,17 +309,14 @@ func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 }
 
 func TestReKey(t *testing.T) {
-	os.Clearenv()
+	store.Clear()
 	f := "rekey_test.kdbx"
 	file := testFile(f)
 	defer os.Remove(filepath.Join(testDir, f))
-	t.Setenv("LOCKBOX_READONLY", "false")
-	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
+	store.SetString("LOCKBOX_STORE", file)
+	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
+	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)

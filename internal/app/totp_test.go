@@ -9,6 +9,7 @@ import (
 
 	"github.com/seanenck/lockbox/internal/app"
 	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 type (
@@ -29,29 +30,26 @@ func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
 	opts := app.NewDefaultTOTPOptions(m)
 	opts.Clear = func() {
 	}
-	opts.CanTOTP = func() (bool, error) {
-		return true, nil
+	opts.CanTOTP = func() bool {
+		return true
 	}
-	opts.IsInteractive = func() (bool, error) {
-		return true, nil
+	opts.IsInteractive = func() bool {
+		return true
 	}
 	return m, opts
 }
 
 func fullTOTPSetup(t *testing.T, keep bool) *backend.Transaction {
+	store.Clear()
 	file := testFile()
 	if !keep {
 		os.Remove(file)
 	}
-	t.Setenv("LOCKBOX_READONLY", "false")
-	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
-	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
-	t.Setenv("LOCKBOX_DEFAULTS_MODTIME", "")
-	t.Setenv("LOCKBOX_TOTP_TIMEOUT", "1")
+	store.SetString("LOCKBOX_STORE", file)
+	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
+	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
+	store.SetInt64("LOCKBOX_TOTP_TIMEOUT", 1)
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
@@ -143,14 +141,14 @@ func TestDoErrors(t *testing.T) {
 	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)
 	}
-	opts.CanTOTP = func() (bool, error) {
-		return false, nil
+	opts.CanTOTP = func() bool {
+		return false
 	}
 	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)
 	}
-	opts.IsInteractive = func() (bool, error) {
-		return false, nil
+	opts.IsInteractive = func() bool {
+		return false
 	}
 	if err := args.Do(opts); err == nil || err.Error() != "totp is disabled" {
 		t.Errorf("invalid error: %v", err)
@@ -173,14 +171,14 @@ func TestNonListError(t *testing.T) {
 	setupTOTP(t)
 	args, _ := app.NewTOTPArguments([]string{"clip", "test"}, "totp")
 	_, opts := newMock(t)
-	opts.IsInteractive = func() (bool, error) {
-		return false, nil
+	opts.IsInteractive = func() bool {
+		return false
 	}
 	if err := args.Do(opts); err == nil || err.Error() != "clipboard not available in non-interactive mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	opts.IsInteractive = func() (bool, error) {
-		return true, nil
+	opts.IsInteractive = func() bool {
+		return true
 	}
 	if err := args.Do(opts); err == nil || err.Error() != "object does not exist" {
 		t.Errorf("invalid error: %v", err)
@@ -203,8 +201,8 @@ func TestNonInteractive(t *testing.T) {
 	setupTOTP(t)
 	args, _ := app.NewTOTPArguments([]string{"show", "test/test3"}, "totp")
 	m, opts := newMock(t)
-	opts.IsInteractive = func() (bool, error) {
-		return false, nil
+	opts.IsInteractive = func() bool {
+		return false
 	}
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)

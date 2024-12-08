@@ -7,6 +7,7 @@ import (
 
 	"github.com/seanenck/lockbox/internal/app"
 	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config/store"
 	"github.com/seanenck/lockbox/internal/platform"
 )
 
@@ -24,14 +25,10 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	if !keep {
 		os.Remove(file)
 	}
-	t.Setenv("LOCKBOX_READONLY", "false")
-	t.Setenv("LOCKBOX_STORE", file)
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD", "test")
-	t.Setenv("LOCKBOX_CREDENTIALS_KEY_FILE", "")
-	t.Setenv("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "totp")
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
-	t.Setenv("LOCKBOX_SET_MODTIME", "")
+	store.SetString("LOCKBOX_STORE", file)
+	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
+	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
+	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	tr, err := backend.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)

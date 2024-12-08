@@ -237,17 +237,13 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 			environmentDefault: newDefaultedEnvironment(detectEnvironment,
 				environmentBase{
 					subKey: "CONFIG_TOML",
-					desc: fmt.Sprintf(`Allows setting a specific toml file to read and load into the environment.
+					desc: fmt.Sprintf(`Allows setting a specific toml file to read and load.
 
-The keyword '%s' will disable this functionality and the keyword '%s' will
-search for a file in the following paths in XDG_CONFIG_HOME (%s) or from the user's HOME (%s).
-Matches the first file found.
-
-Note that this value is not output as part of the environment, nor
-can it be set via TOML configuration.`, noEnvironment, detectEnvironment, strings.Join(xdgPaths, ","), strings.Join(homePaths, ",")),
+The keyword '%s' will search for a file in the following paths in
+XDG_CONFIG_HOME (%s) or from the user's HOME (%s). Matches the first file found.`, detectEnvironment, strings.Join(xdgPaths, ","), strings.Join(homePaths, ",")),
 				}),
 			canDefault: true,
-			allowed:    []string{detectEnvironment, fileExample, noEnvironment},
+			allowed:    []string{detectEnvironment, fileExample},
 		})
 	// EnvPasswordMode indicates how the password is read
 	EnvPasswordMode = environmentRegister(

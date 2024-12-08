@@ -183,13 +183,14 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		}
 		jsonMode = m
 	}
-	var hashLength int
+	var hashLength int64
 	if jsonMode == output.JSONModes.Hash {
 		hashLength, err = config.EnvJSONHashLength.Get()
 		if err != nil {
 			return nil, err
 		}
 	}
+	l := int(hashLength)
 	return func(yield func(Entity, error) bool) {
 		for _, item := range entities {
 			entity := Entity{Path: item.path}
@@ -207,7 +208,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 						data = val
 					case output.JSONModes.Hash:
 						data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
-						if hashLength > 0 && len(data) > hashLength {
+						if hashLength > 0 && len(data) > l {
 							data = data[0:hashLength]
 						}
 					}

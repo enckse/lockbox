@@ -107,7 +107,7 @@ func run() error {
 }
 
 func clearClipboard() error {
-	idx := 0
+	var idx int64
 	val, err := platform.Stdin(false)
 	if err != nil {
 		return err

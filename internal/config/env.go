@@ -3,9 +3,9 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"strconv"
 	"strings"
+
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 type (
@@ -53,84 +53,56 @@ func (e environmentBase) Key() string {
 }
 
 // Get will get the boolean value for the setting
-func (e EnvironmentBool) Get() (bool, error) {
-	return parseStringYesNo(e, getExpand(e.Key()))
-}
-
-func parseStringYesNo(e EnvironmentBool, in string) (bool, error) {
-	read := strings.ToLower(strings.TrimSpace(in))
-	switch read {
-	case no:
-		return false, nil
-	case yes:
-		return true, nil
-	case "":
-		return e.defaultValue, nil
+func (e EnvironmentBool) Get() bool {
+	val, ok := store.GetBool(e.Key())
+	if !ok {
+		val = e.defaultValue
 	}
-
-	return false, fmt.Errorf("invalid yes/no env value for %s", e.Key())
+	return val
 }
 
 // Get will get the integer value for the setting
-func (e EnvironmentInt) Get() (int, error) {
-	val := e.defaultValue
-	use := getExpand(e.Key())
-	if use != "" {
-		i, err := strconv.Atoi(use)
-		if err != nil {
-			return -1, err
-		}
-		invalid := false
-		check := ""
-		if e.allowZero {
-			check = "="
-		}
-		switch i {
-		case 0:
-			invalid = !e.allowZero
-		default:
-			invalid = i < 0
-		}
-		if invalid {
-			return -1, fmt.Errorf("%s must be >%s 0", e.shortDesc, check)
-		}
-		val = i
+func (e EnvironmentInt) Get() (int64, error) {
+	i, ok := store.GetInt64(e.Key())
+	if !ok {
+		i = int64(e.defaultValue)
 	}
-	return val, nil
+	invalid := false
+	check := ""
+	if e.allowZero {
+		check = "="
+	}
+	switch i {
+	case 0:
+		invalid = !e.allowZero
+	default:
+		invalid = i < 0
+	}
+	if invalid {
+		return -1, fmt.Errorf("%s must be >%s 0", e.shortDesc, check)
+	}
+	return i, nil
 }
 
 // Get will read the string from the environment
 func (e EnvironmentString) Get() string {
-	if !e.canDefault {
-		return getExpand(e.Key())
+	val, ok := store.GetString(e.Key())
+	if !ok {
+		if !e.canDefault {
+			return ""
+		}
+		val = e.defaultValue
 	}
-	return environOrDefault(e.Key(), e.defaultValue)
+	return val
 }
 
 // Get will read (and shlex) the value if set
-func (e EnvironmentCommand) Get() ([]string, error) {
-	value := environOrDefault(e.Key(), "")
-	if strings.TrimSpace(value) == "" {
-		return nil, nil
+func (e EnvironmentCommand) Get() []string {
+	val, ok := store.GetArray(e.Key())
+	if !ok {
+		return []string{}
 	}
-	return shlex(value)
-}
-
-// KeyValue will get the string representation of the key+value
-func (e environmentBase) KeyValue(value string) string {
-	return fmt.Sprintf("%s=%s", e.Key(), value)
-}
-
-// Setenv will do an environment set for the value to key
-func (e environmentBase) Set(value string) error {
-	unset, err := IsUnset(e.Key(), value)
-	if err != nil {
-		return err
-	}
-	if unset {
-		return nil
-	}
-	return os.Setenv(e.Key(), value)
+	return val
 }
 
 // Get will retrieve the value with the formatted input included

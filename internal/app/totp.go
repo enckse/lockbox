@@ -41,8 +41,8 @@ type (
 	TOTPOptions struct {
 		app           CommandOptions
 		Clear         func()
-		CanTOTP       func() (bool, error)
-		IsInteractive func() (bool, error)
+		CanTOTP       func() bool
+		IsInteractive func() bool
 	}
 )
 
@@ -90,10 +90,7 @@ func (w totpWrapper) generateCode() (string, error) {
 }
 
 func (args *TOTPArguments) display(opts TOTPOptions) error {
-	interactive, err := opts.IsInteractive()
-	if err != nil {
-		return err
-	}
+	interactive := opts.IsInteractive()
 	if args.Mode == MinimalTOTPMode {
 		interactive = false
 	}
@@ -130,7 +127,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		return nil
 	}
 	first := true
-	running := 0
+	var running int64
 	lastSecond := -1
 	if !clipMode {
 		if !once {
@@ -221,11 +218,7 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 	if opts.Clear == nil || opts.CanTOTP == nil || opts.IsInteractive == nil {
 		return errors.New("invalid option functions")
 	}
-	can, err := opts.CanTOTP()
-	if err != nil {
-		return err
-	}
-	if !can {
+	if !opts.CanTOTP() {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListTOTPMode {

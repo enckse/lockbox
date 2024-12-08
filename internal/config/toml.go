@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/seanenck/lockbox/internal/config/store"
 	"github.com/seanenck/lockbox/internal/util"
 )
 
@@ -26,11 +27,6 @@ type (
 	tomlType string
 	// Loader indicates how included files should be sourced
 	Loader func(string) (io.Reader, error)
-	// ShellEnv is the output shell environment settings parsed from TOML config
-	ShellEnv struct {
-		Key   string
-		Value string
-	}
 )
 
 // DefaultTOML will load the internal, default TOML with additional comment markups
@@ -86,8 +82,6 @@ func DefaultTOML() (string, error) {
 # include additional configs, allowing globs ('*'), nesting
 # depth allowed up to %d include levels
 #
-# this field is not configurable via environment variables
-# and it is not considered part of the environment either
 # it is ONLY used during TOML configuration loading
 %s = []
 `, maxDepth, isInclude), "\n"} {
@@ -128,10 +122,10 @@ func generateDetailText(data printer) (string, error) {
 	t, _ := data.toml()
 	var text []string
 	for _, line := range []string{
-		fmt.Sprintf("environment: %s", key),
 		fmt.Sprintf("description:\n%s\n", description),
 		fmt.Sprintf("requirement: %s", requirement),
 		fmt.Sprintf("option: %s", strings.Join(allow, "|")),
+		fmt.Sprintf("env: %s", key),
 		fmt.Sprintf("default: %s", value),
 		fmt.Sprintf("type: %s", t),
 		"",
@@ -145,10 +139,10 @@ func generateDetailText(data printer) (string, error) {
 }
 
 // LoadConfig will read the input reader and use the loader to source configuration files
-func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
+func LoadConfig(r io.Reader, loader Loader) error {
 	maps, err := readConfigs(r, 1, loader)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	m := make(map[string]interface{})
 	for _, config := range maps {
@@ -156,56 +150,48 @@ func LoadConfig(r io.Reader, loader Loader) ([]ShellEnv, error) {
 			m[k] = v
 		}
 	}
-	var res []ShellEnv
 	for k, v := range m {
 		export := environmentPrefix + strings.ToUpper(k)
 		env, ok := registry[export]
 		if !ok {
-			return nil, fmt.Errorf("unknown key: %s (%s)", k, export)
+			return fmt.Errorf("unknown key: %s (%s)", k, export)
 		}
-		var value string
 		isType, _ := env.toml()
 		switch isType {
 		case tomlArray:
-			array, err := parseStringArray(v)
+			array, err := parseStringArray(v, true)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			value = strings.Join(array, " ")
+			store.SetArray(export, array)
 		case tomlInt:
 			i, ok := v.(int64)
 			if !ok {
-				return nil, fmt.Errorf("non-int64 found where expected: %v", v)
+				return fmt.Errorf("non-int64 found where expected: %v", v)
 			}
 			if i < 0 {
-				return nil, fmt.Errorf("%d is negative (not allowed here)", i)
+				return fmt.Errorf("%d is negative (not allowed here)", i)
 			}
-			value = fmt.Sprintf("%d", i)
+			store.SetInt64(export, i)
 		case tomlBool:
 			switch t := v.(type) {
 			case bool:
-				if t {
-					value = yes
-				} else {
-					value = no
-				}
+				store.SetBool(export, t)
 			default:
-				return nil, fmt.Errorf("non-bool found where expected: %v", v)
+				return fmt.Errorf("non-bool found where expected: %v", v)
 			}
 		case tomlString:
 			s, ok := v.(string)
 			if !ok {
-				return nil, fmt.Errorf("non-string found where expected: %v", v)
+				return fmt.Errorf("non-string found where expected: %v", v)
 			}
-			value = s
+			store.SetString(export, os.Expand(s, os.Getenv))
 		default:
-			return nil, fmt.Errorf("unknown field, can't determine type: %s (%v)", k, v)
+			return fmt.Errorf("unknown field, can't determine type: %s (%v)", k, v)
 		}
-		value = os.Expand(value, os.Getenv)
-		res = append(res, ShellEnv{Key: export, Value: value})
 
 	}
-	return res, nil
+	return nil
 }
 
 func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{}, error) {
@@ -221,7 +207,7 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{
 	includes, ok := m[isInclude]
 	if ok {
 		delete(m, isInclude)
-		including, err := parseStringArray(includes)
+		including, err := parseStringArray(includes, false)
 		if err != nil {
 			return nil, err
 		}
@@ -253,14 +239,18 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{
 	return maps, nil
 }
 
-func parseStringArray(value interface{}) ([]string, error) {
+func parseStringArray(value interface{}, expand bool) ([]string, error) {
 	var res []string
 	switch t := value.(type) {
 	case []interface{}:
 		for _, item := range t {
 			switch s := item.(type) {
 			case string:
-				res = append(res, s)
+				val := s
+				if expand {
+					val = os.Expand(s, os.Getenv)
+				}
+				res = append(res, val)
 			default:
 				return nil, fmt.Errorf("value is not string in array: %v", item)
 			}
@@ -308,12 +298,5 @@ func LoadConfigFile(path string) error {
 	if err != nil {
 		return err
 	}
-	env, err := LoadConfig(reader, configLoader)
-	if err != nil {
-		return err
-	}
-	for _, v := range env {
-		os.Setenv(v.Key, v.Value)
-	}
-	return nil
+	return LoadConfig(reader, configLoader)
 }

@@ -65,10 +65,7 @@ func loadFile(file string, must bool) (*Transaction, error) {
 			return nil, errors.New("invalid file, does not exist")
 		}
 	}
-	ro, err := config.EnvReadOnly.Get()
-	if err != nil {
-		return nil, err
-	}
+	ro := config.EnvReadOnly.Get()
 	return &Transaction{valid: true, file: file, exists: exists, readonly: ro}, nil
 }
 

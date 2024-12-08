@@ -5,37 +5,21 @@ import (
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {
-	t.Setenv(key, "true")
-	c, err := obj.Get()
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if !c {
+	store.Clear()
+	if obj.Get() != onEmpty {
 		t.Error("invalid setting")
 	}
-	t.Setenv(key, "")
-	c, err = obj.Get()
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if c != onEmpty {
+	store.SetBool(key, true)
+	if !obj.Get() {
 		t.Error("invalid setting")
 	}
-	t.Setenv(key, "false")
-	c, err = obj.Get()
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if c {
+	store.SetBool(key, false)
+	if obj.Get() {
 		t.Error("invalid setting")
-	}
-	t.Setenv(key, "afoieae")
-	_, err = obj.Get()
-	if err == nil || err.Error() != fmt.Sprintf("invalid yes/no env value for %s", key) {
-		t.Errorf("unexpected error: %v", err)
 	}
 }
 
@@ -76,17 +60,18 @@ func TestIsTitle(t *testing.T) {
 }
 
 func TestTOTP(t *testing.T) {
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "abc")
-	if config.EnvTOTPEntry.Get() != "abc" {
+	store.Clear()
+	if config.EnvTOTPEntry.Get() != "totp" {
 		t.Error("invalid totp token field")
 	}
-	t.Setenv("LOCKBOX_TOTP_ENTRY", "")
-	if config.EnvTOTPEntry.Get() != "totp" {
+	store.SetString("LOCKBOX_TOTP_ENTRY", "abc")
+	if config.EnvTOTPEntry.Get() != "abc" {
 		t.Error("invalid totp token field")
 	}
 }
 
 func TestFormatTOTP(t *testing.T) {
+	store.Clear()
 	otp := config.EnvTOTPFormat.Get("otpauth://abc")
 	if otp != "otpauth://abc" {
 		t.Errorf("invalid totp token: %s", otp)
@@ -95,14 +80,13 @@ func TestFormatTOTP(t *testing.T) {
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
-	t.Setenv("LOCKBOX_TOTP_OTP_FORMAT", "test/%s")
-	otp = config.EnvTOTPFormat.Get("abc")
-	if otp != "test/abc" {
-		t.Errorf("invalid totp token: %s", otp)
-	}
-	t.Setenv("LOCKBOX_TOTP_OTP_FORMAT", "")
 	otp = config.EnvTOTPFormat.Get("abc")
 	if otp != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=abc" {
+		t.Errorf("invalid totp token: %s", otp)
+	}
+	store.SetString("LOCKBOX_TOTP_OTP_FORMAT", "test/%s")
+	otp = config.EnvTOTPFormat.Get("abc")
+	if otp != "test/abc" {
 		t.Errorf("invalid totp token: %s", otp)
 	}
 }
@@ -123,18 +107,18 @@ func TestWordCount(t *testing.T) {
 	checkInt(config.EnvPasswordGenWordCount, "LOCKBOX_PWGEN_WORD_COUNT", "word count", 8, false, t)
 }
 
-func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool, t *testing.T) {
-	t.Setenv(key, "")
+func checkInt(e config.EnvironmentInt, key, text string, def int64, allowZero bool, t *testing.T) {
+	store.Clear()
 	val, err := e.Get()
 	if err != nil || val != def {
 		t.Error("invalid read")
 	}
-	t.Setenv(key, "1")
+	store.SetInt64(key, 1)
 	val, err = e.Get()
 	if err != nil || val != 1 {
 		t.Error("invalid read")
 	}
-	t.Setenv(key, "-1")
+	store.SetInt64(key, -1)
 	zero := ""
 	if allowZero {
 		zero = "="
@@ -142,11 +126,7 @@ func checkInt(e config.EnvironmentInt, key, text string, def int, allowZero bool
 	if _, err := e.Get(); err == nil || err.Error() != fmt.Sprintf("%s must be >%s 0", text, zero) {
 		t.Errorf("invalid err: %v", err)
 	}
-	t.Setenv(key, "alk;ja")
-	if _, err := e.Get(); err == nil || err.Error() != "strconv.Atoi: parsing \"alk;ja\": invalid syntax" {
-		t.Errorf("invalid err: %v", err)
-	}
-	t.Setenv(key, "0")
+	store.SetInt64(key, 0)
 	if allowZero {
 		val, err = e.Get()
 		if err != nil || val != 0 {

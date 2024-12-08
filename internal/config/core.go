@@ -6,20 +6,17 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"slices"
-	"sort"
 	"strings"
 	"time"
 
+	"github.com/seanenck/lockbox/internal/config/store"
 	"github.com/seanenck/lockbox/internal/util"
-	"mvdan.cc/sh/v3/shell"
 )
 
 const (
 	yes               = "true"
 	no                = "false"
 	detectEnvironment = "detect"
-	noEnvironment     = "none"
 	tomlFile          = "lockbox.toml"
 	// sub categories
 	clipCategory    keyCategory = "CLIP_"
@@ -74,31 +71,9 @@ type (
 	}
 )
 
-func shlex(in string) ([]string, error) {
-	return shell.Fields(in, os.Getenv)
-}
-
-func getExpand(key string) string {
-	return os.ExpandEnv(os.Getenv(key))
-}
-
-func environOrDefault(envKey, defaultValue string) string {
-	val := getExpand(envKey)
-	if strings.TrimSpace(val) == "" {
-		return defaultValue
-	}
-	return val
-}
-
 // NewConfigFiles will get the list of candidate config files
 func NewConfigFiles() []string {
-	v := EnvConfig.Get()
-	if v == "" || v == noEnvironment {
-		return []string{}
-	}
-	if err := EnvConfig.Set(noEnvironment); err != nil {
-		return nil
-	}
+	v := os.Expand(os.Getenv(EnvConfig.Key()), os.Getenv)
 	if v != detectEnvironment {
 		return []string{v}
 	}
@@ -114,40 +89,6 @@ func NewConfigFiles() []string {
 	h, err := os.UserHomeDir()
 	pathAdder(h, err, homePaths)
 	return options
-}
-
-// IsUnset will indicate if a variable is an unset (and unset it) or return that it isn't
-func IsUnset(k, v string) (bool, error) {
-	if strings.TrimSpace(v) == "" {
-		return true, os.Unsetenv(k)
-	}
-	return false, nil
-}
-
-// Environ will list the current environment keys
-func Environ(set ...string) []string {
-	var results []string
-	filtered := len(set) > 0
-	for _, k := range os.Environ() {
-		for _, r := range registry {
-			rawKey := r.self().Key()
-			if rawKey == EnvConfig.Key() {
-				continue
-			}
-			key := fmt.Sprintf("%s=", rawKey)
-			if !strings.HasPrefix(k, key) {
-				continue
-			}
-			if filtered {
-				if !slices.Contains(set, rawKey) {
-					continue
-				}
-			}
-			results = append(results, k)
-		}
-	}
-	sort.Strings(results)
-	return results
 }
 
 func environmentRegister[T printer](obj T) T {
@@ -170,8 +111,8 @@ func formatterTOTP(key, value string) string {
 	if strings.HasPrefix(value, otpAuth) {
 		return value
 	}
-	override := environOrDefault(key, "")
-	if override != "" {
+	override, ok := store.GetString(key)
+	if ok {
 		return fmt.Sprintf(override, value)
 	}
 	v := url.Values{}
@@ -194,17 +135,9 @@ func CanColor() (bool, error) {
 	if _, noColor := os.LookupEnv("NO_COLOR"); noColor {
 		return false, nil
 	}
-	interactive, err := EnvInteractive.Get()
-	if err != nil {
-		return false, err
-	}
-	colors := interactive
+	colors := EnvInteractive.Get()
 	if colors {
-		isColored, err := EnvColorEnabled.Get()
-		if err != nil {
-			return false, err
-		}
-		colors = isColored
+		colors = EnvColorEnabled.Get()
 	}
 	return colors, nil
 }

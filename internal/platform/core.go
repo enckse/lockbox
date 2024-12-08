@@ -64,11 +64,11 @@ func NewSystem(candidate string) (System, error) {
 		}
 		if strings.TrimSpace(os.Getenv("WAYLAND_DISPLAY")) == "" {
 			if strings.TrimSpace(os.Getenv("DISPLAY")) == "" {
-				return unknownSystem, errors.New("unable to detect linux clipboard mode")
+				return unknownSystem, errors.New("unable to detect linux system")
 			}
 			return Systems.LinuxXSystem, nil
 		}
 		return Systems.LinuxWaylandSystem, nil
 	}
-	return unknownSystem, errors.New("unable to detect clipboard mode")
+	return unknownSystem, errors.New("unable to detect system")
 }

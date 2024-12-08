@@ -17,7 +17,7 @@ type (
 	Board struct {
 		copying []string
 		pasting []string
-		MaxTime int
+		MaxTime int64
 		isOSC52 bool
 	}
 )
@@ -32,29 +32,17 @@ func newBoard(copying, pasting []string) (Board, error) {
 
 // New will retrieve the commands to use for clipboard operations.
 func New() (Board, error) {
-	canClip, err := config.EnvClipEnabled.Get()
-	if err != nil {
-		return Board{}, err
-	}
-	if !canClip {
+	if !config.EnvClipEnabled.Get() {
 		return Board{}, errors.New("clipboard is off")
 	}
-	overridePaste, err := config.EnvClipPaste.Get()
-	if err != nil {
-		return Board{}, err
-	}
-	overrideCopy, err := config.EnvClipCopy.Get()
-	if err != nil {
-		return Board{}, err
-	}
-	if overrideCopy != nil && overridePaste != nil {
+	overridePaste := config.EnvClipPaste.Get()
+	overrideCopy := config.EnvClipCopy.Get()
+	setPaste := len(overridePaste) > 0
+	setCopy := len(overrideCopy) > 0
+	if setPaste && setCopy {
 		return newBoard(overrideCopy, overridePaste)
 	}
-	isOSC, err := config.EnvClipOSC52.Get()
-	if err != nil {
-		return Board{}, err
-	}
-	if isOSC {
+	if config.EnvClipOSC52.Get() {
 		c := Board{isOSC52: true}
 		return c, nil
 	}
@@ -81,10 +69,10 @@ func New() (Board, error) {
 	default:
 		return Board{}, errors.New("clipboard is unavailable")
 	}
-	if overridePaste != nil {
+	if setPaste {
 		pasting = overridePaste
 	}
-	if overrideCopy != nil {
+	if setCopy {
 		copying = overrideCopy
 	}
 	return newBoard(copying, pasting)

@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/backend"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 func TestHooks(t *testing.T) {
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "")
+	store.Clear()
 	h, err := backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -21,7 +22,7 @@ func TestHooks(t *testing.T) {
 	if _, err := backend.NewHook("", backend.InsertAction); err.Error() != "empty path is not allowed for hooks" {
 		t.Errorf("wrong error: %v", err)
 	}
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", "is_garbage")
+	store.SetString("LOCKBOX_HOOKS_DIRECTORY", "is_garbage")
 	if _, err := backend.NewHook("b", backend.InsertAction); err.Error() != "hook directory does NOT exist" {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -30,7 +31,7 @@ func TestHooks(t *testing.T) {
 	if err := os.MkdirAll(testPath, 0o755); err != nil {
 		t.Errorf("failed, mkdir: %v", err)
 	}
-	t.Setenv("LOCKBOX_HOOKS_DIRECTORY", testPath)
+	store.SetString("LOCKBOX_HOOKS_DIRECTORY", testPath)
 	h, err = backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -59,7 +60,7 @@ func TestHooks(t *testing.T) {
 	if err := h.Run(backend.HookPre); strings.Contains("fork/exec", err.Error()) {
 		t.Errorf("wrong error: %v", err)
 	}
-	t.Setenv("LOCKBOX_HOOKS_ENABLED", "false")
+	store.SetBool("LOCKBOX_HOOKS_ENABLED", false)
 	h, err = backend.NewHook("a", backend.InsertAction)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)

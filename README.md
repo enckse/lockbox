@@ -17,25 +17,16 @@ via other tooling if needed.
 
 ## configuration
 
-There are two ways to configure `lb`:
-- TOML configuration file(s)
-- Environment variables
-
-The TOML configuration files have higher priority over environment variables
-(if both are set) where the TOML files are ultimately loaded into the
-processes environment itself (once parsed). To run `lb` at least the
-following variables must be set:
+`lb` uses TOML configuration file(s)
 
 ```
 config.toml
 ---
 # database to read
-# this can also be set via LOCKBOX_STORE
 store = "$HOME/.passwords/secrets.kdbx"
 
 [credentials]
 # the keying object to use to ACTUALLY unlock the passwords (e.g. using a gpg encrypted file with the password inside of it)
-# this can also be set via LOCKBOX_KEY
 # alternative credential settings for key files are also available
 password = ["gpg", "--decrypt", "$HOME/.secrets/key.gpg"]
 ```

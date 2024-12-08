@@ -8,9 +8,11 @@ import (
 	"testing"
 
 	"github.com/seanenck/lockbox/internal/app"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 func setupGenScript() string {
+	store.Clear()
 	os.Clearenv()
 	const pwgenScript = "pwgen.sh"
 	pwgenPath := filepath.Join("testdata", pwgenScript)
@@ -25,31 +27,31 @@ done
 func TestGenerateError(t *testing.T) {
 	m := newMockCommand(t)
 	pwgenPath := setupGenScript()
-	t.Setenv("LOCKBOX_PWGEN_WORD_COUNT", "0")
+	store.SetInt64("LOCKBOX_PWGEN_WORD_COUNT", 0)
 	if err := app.GeneratePassword(m); err == nil || err.Error() != "word count must be > 0" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_WORD_COUNT", "1")
+	store.SetInt64("LOCKBOX_PWGEN_WORD_COUNT", 1)
 	if err := app.GeneratePassword(m); err == nil || err.Error() != "word list command must set" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", "1 x")
-	if err := app.GeneratePassword(m); err == nil || !strings.Contains(err.Error(), "exec: \"1\":") {
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{"1 x"})
+	if err := app.GeneratePassword(m); err == nil || !strings.Contains(err.Error(), "exec: \"1 x\":") {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", pwgenPath)
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath})
 	if err := app.GeneratePassword(m); err == nil || err.Error() != "no sources given" {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s 1", pwgenPath))
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "1"})
 	if err := app.GeneratePassword(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s aloj 1", pwgenPath))
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "aloj", "1"})
 	if err := app.GeneratePassword(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_PWGEN_ENABLED", "false")
+	store.SetBool("LOCKBOX_PWGEN_ENABLED", false)
 	if err := app.GeneratePassword(m); err == nil || err.Error() != "password generation is disabled" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -68,33 +70,31 @@ func testPasswordGen(t *testing.T, expect string) {
 
 func TestGenerate(t *testing.T) {
 	pwgenPath := setupGenScript()
-	t.Setenv("LOCKBOX_PWGEN_WORD_COUNT", "1")
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s 1", pwgenPath))
+	store.SetInt64("LOCKBOX_PWGEN_WORD_COUNT", 1)
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "1"})
 	testPasswordGen(t, "1")
-	t.Setenv("LOCKBOX_PWGEN_WORD_COUNT", "10")
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s 1 1 1 1 1 1 1 1 1 1 1 1", pwgenPath))
+	store.SetInt64("LOCKBOX_PWGEN_WORD_COUNT", 10)
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "1 1 1 1 1 1 1 1 1 1 1 1"})
 	testPasswordGen(t, "1-1-1-1-1-1-1-1-1-1")
-	t.Setenv("LOCKBOX_PWGEN_WORD_COUNT", "4")
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "true")
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s a a a a a a a a a a a a a a a", pwgenPath))
+	store.SetInt64("LOCKBOX_PWGEN_WORD_COUNT", 4)
+	store.SetBool("LOCKBOX_PWGEN_TITLE", true)
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "a a a a a a a a a a a a a a a a a a a a a a"})
 	testPasswordGen(t, "A-A-A-A")
-	t.Setenv("LOCKBOX_PWGEN_CHARACTERS", "bc")
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s abc abc abc abc abc aaa aaa aa a", pwgenPath))
+	store.SetString("LOCKBOX_PWGEN_CHARACTERS", "bc")
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "abc abc abc abc abc abc aaa aa aaa a"})
 	testPasswordGen(t, "Bc-Bc-Bc-Bc")
-	os.Unsetenv("LOCKBOX_PWGEN_CHARACTERS")
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s a a a a a a a a a a a a a a a", pwgenPath))
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "false")
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "false")
+	store.SetString("LOCKBOX_PWGEN_CHARACTERS", "")
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "a a a a a a a a a a a a a a a a a a a a a a"})
+	store.SetBool("LOCKBOX_PWGEN_TITLE", false)
 	testPasswordGen(t, "a-a-a-a")
 	// NOTE: this allows templating below in golang
-	t.Setenv("DOLLAR", "$")
-	t.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range ${DOLLAR}idx, ${DOLLAR}val := .}}{{if lt ${DOLLAR}idx 5}}-{{end}}{{ ${DOLLAR}val.Text }}{{ ${DOLLAR}val.Position.Start }}{{ ${DOLLAR}val.Position.End }}{{end}}")
+	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range $idx, $val := .}}{{if lt $idx 5}}-{{end}}{{ $val.Text }}{{ $val.Position.Start }}{{ $val.Position.End }}{{end}}")
 	testPasswordGen(t, "-a01-a12-a23-a34")
-	t.Setenv("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val.Text }}{{end}}")
+	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range [%]idx, [%]val := .}}{{if lt [%]idx 5}}-{{end}}{{ [%]val.Text }}{{end}}")
 	testPasswordGen(t, "-a-a-a-a")
-	os.Unsetenv("LOCKBOX_PWGEN_TEMPLATE")
-	t.Setenv("LOCKBOX_PWGEN_TITLE", "true")
-	t.Setenv("LOCKBOX_PWGEN_WORDS_COMMAND", fmt.Sprintf("%s abc axy axY aZZZ aoijafea aoiajfoea afaeoa", pwgenPath))
+	store.Clear()
+	store.SetBool("LOCKBOX_PWGEN_TITLE", true)
+	store.SetArray("LOCKBOX_PWGEN_WORDS_COMMAND", []string{pwgenPath, "abc axy axY aZZZ aoijafea aoiajfoea afeafa"})
 	m := newMockCommand(t)
 	if err := app.GeneratePassword(m); err != nil {
 		t.Errorf("invalid error: %v", err)

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 type (
@@ -15,7 +17,7 @@ type (
 	AskPassword func() (string, error)
 	// Key is a wrapper to help manage the returned key
 	Key struct {
-		inputKey string
+		inputKey []string
 		mode     KeyModeType
 		valid    bool
 	}
@@ -35,7 +37,6 @@ const (
 
 // NewKey will create a new key
 func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
-	useKey := envPassword.Get()
 	keyMode := EnvPasswordMode.Get()
 	if keyMode == "" {
 		keyMode = string(defaultKeyModeType)
@@ -43,15 +44,12 @@ func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	requireEmptyKey := false
 	switch keyMode {
 	case string(IgnoreKeyMode):
-		return Key{mode: IgnoreKeyMode, inputKey: "", valid: true}, nil
+		return Key{mode: IgnoreKeyMode, inputKey: []string{}, valid: true}, nil
 	case string(noKeyMode):
 		requireEmptyKey = true
 	case string(commandKeyMode), string(plainKeyMode):
 	case string(AskKeyMode):
-		isInteractive, err := EnvInteractive.Get()
-		if err != nil {
-			return Key{}, err
-		}
+		isInteractive := EnvInteractive.Get()
 		if !isInteractive {
 			return Key{}, errors.New("ask key mode requested in non-interactive mode")
 		}
@@ -59,7 +57,13 @@ func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	default:
 		return Key{}, fmt.Errorf("unknown key mode: %s", keyMode)
 	}
-	isEmpty := strings.TrimSpace(useKey) == ""
+	useKey, ok := store.GetArray(envPassword.Key())
+	isEmpty := !ok || len(useKey) == 0
+	if !isEmpty {
+		if strings.TrimSpace(useKey[0]) == "" {
+			isEmpty = true
+		}
+	}
 	if requireEmptyKey {
 		if !isEmpty {
 			return Key{}, errors.New("key can NOT be set in this key mode")
@@ -92,7 +96,10 @@ func (k Key) Read(ask AskPassword) (string, error) {
 	if k.empty() && !k.Ask() {
 		return "", nil
 	}
-	useKey := k.inputKey
+	var useKey string
+	if len(k.inputKey) > 0 {
+		useKey = k.inputKey[0]
+	}
 	switch k.mode {
 	case AskKeyMode:
 		read, err := ask()
@@ -101,11 +108,15 @@ func (k Key) Read(ask AskPassword) (string, error) {
 		}
 		useKey = read
 	case commandKeyMode:
-		parts, err := shlex(useKey)
-		if err != nil {
-			return "", err
+		exe := k.inputKey[0]
+		var args []string
+		for idx, k := range k.inputKey {
+			if idx == 0 {
+				continue
+			}
+			args = append(args, k)
 		}
-		cmd := exec.Command(parts[0], parts[1:]...)
+		cmd := exec.Command(exe, args...)
 		b, err := cmd.Output()
 		if err != nil {
 			return "", fmt.Errorf("key command failed: %w", err)
@@ -113,7 +124,7 @@ func (k Key) Read(ask AskPassword) (string, error) {
 		useKey = string(b)
 	}
 	key := strings.TrimSpace(useKey)
-	if strings.TrimSpace(key) == "" {
+	if key == "" {
 		return "", errors.New("key is empty")
 	}
 	return key, nil

@@ -14,6 +14,7 @@ import (
 	"github.com/seanenck/lockbox/internal/app/completions"
 	"github.com/seanenck/lockbox/internal/app/help"
 	"github.com/seanenck/lockbox/internal/config"
+	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 // Info will report help/bash/env details
@@ -81,11 +82,15 @@ func info(command string, args []string) ([]string, error) {
 		default:
 			return nil, errors.New("invalid env command, too many arguments")
 		}
-		env := config.Environ(set...)
-		if len(env) == 0 {
-			env = []string{""}
+		var results []string
+		for _, item := range store.List(set...) {
+			value := fmt.Sprintf("%s=%v", item.Key, item.Value)
+			results = append(results, value)
 		}
-		return env, nil
+		if len(results) == 0 {
+			results = []string{""}
+		}
+		return results, nil
 	case commands.Completions:
 		shell := ""
 		exe, err := exeName()
