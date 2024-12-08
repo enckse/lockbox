@@ -34,6 +34,13 @@ const (
 	unset              = "(unset)"
 )
 
+const (
+	canDefaultFlag = iota
+	canExpandFlag
+	isArrayFlag
+	isCommandFlag
+)
+
 var (
 	exampleColorWindows = []string{fmt.Sprintf("[%s]", strings.Join([]string{exampleColorWindow, exampleColorWindow, exampleColorWindow + "..."}, util.TimeWindowDelimiter))}
 	configDirFile       = filepath.Join("lockbox", "config.toml")
@@ -61,7 +68,8 @@ var (
 )
 
 type (
-	printer interface {
+	stringsFlags int
+	printer      interface {
 		display() metaData
 		self() environmentBase
 	}

@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/seanenck/lockbox/internal/config/store"
@@ -31,10 +32,8 @@ type (
 	// EnvironmentStrings are string-based settings
 	EnvironmentStrings struct {
 		environmentDefault[string]
-		canDefault bool
-		allowed    []string
-		isArray    bool
-		canExpand  bool
+		flags   []stringsFlags
+		allowed []string
 	}
 	// EnvironmentFormatter allows for sending a string into a get request
 	EnvironmentFormatter struct {
@@ -91,18 +90,22 @@ func (e EnvironmentInt) Get() (int64, error) {
 func (e EnvironmentStrings) Get() string {
 	val, ok := store.GetString(e.Key())
 	if !ok {
-		if !e.canDefault {
-			return ""
+		flags := e.flattenFlags()
+		if slices.Contains(flags, canDefaultFlag) {
+			val = e.value
 		}
-		val = e.value
 	}
 	return val
 }
 
+// AsArray indicates the item should be queried as an array
 func (e EnvironmentStrings) AsArray() []string {
 	val, ok := store.GetArray(e.Key())
-	if !ok && e.canDefault {
-		val = []string{e.value}
+	if !ok {
+		flags := e.flattenFlags()
+		if slices.Contains(flags, canDefaultFlag) {
+			val = []string{e.value}
+		}
 	}
 	return val
 }
@@ -118,10 +121,12 @@ func (e EnvironmentStrings) display() metaData {
 	v := "\"\""
 	show := e.allowed
 	value := e.value
-	if e.isArray {
+	flags := e.flattenFlags()
+	canExpand := slices.Contains(flags, canExpandFlag)
+	if slices.Contains(flags, isArrayFlag) {
 		t = tomlArray
 		v = "[]"
-		if e.canExpand {
+		if canExpand {
 			if len(show) == 0 {
 				show = []string{"[cmd args...]"}
 			}
@@ -135,7 +140,7 @@ func (e EnvironmentStrings) display() metaData {
 		allowed:   show,
 		tomlType:  t,
 		tomlValue: v,
-		canExpand: e.canExpand,
+		canExpand: canExpand,
 	}
 }
 
@@ -175,4 +180,12 @@ func (e EnvironmentFormatter) display() metaData {
 		tomlValue: "\"\"",
 		canExpand: false,
 	}
+}
+
+func (e EnvironmentStrings) flattenFlags() []stringsFlags {
+	flags := e.flags
+	if slices.Contains(e.flags, isCommandFlag) {
+		flags = append(flags, canExpandFlag, isArrayFlag)
+	}
+	return flags
 }
