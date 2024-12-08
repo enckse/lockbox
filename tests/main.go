@@ -330,6 +330,9 @@ func test(profile string) error {
 	r.writeConfig(c)
 	r.run("", "pwgen")
 
+	// what is env
+	r.run("", fmt.Sprintf("var | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
+
 	// cleanup and diff results
 	tmpFile := fmt.Sprintf("%s.tmp", r.log)
 	for _, item := range []string{"'s/\"modtime\": \"[0-9].*$/\"modtime\": \"XXXX-XX-XX\",/g'", "'s/^[0-9][0-9][0-9][0-9][0-9][0-9]$/XXXXXX/g'"} {

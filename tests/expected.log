@@ -167,3 +167,16 @@ no store set
 keys/k/one2
 Abc
 bb
+']
+LOCKBOX_CLIP_COPY_COMMAND=[touch testdata/datadir/clip.copy]
+LOCKBOX_CLIP_PASTE_COMMAND=[touch testdata/datadir/clip.paste]
+LOCKBOX_CLIP_TIMEOUT=3
+LOCKBOX_INTERACTIVE=false
+LOCKBOX_JSON_HASH_LENGTH=3
+LOCKBOX_JSON_MODE=hash
+LOCKBOX_PWGEN_CHARACTERS=b
+LOCKBOX_PWGEN_TEMPLATE={{range $idx, $val := .}}{{if lt $val.Position.End 5}}{{ $val.Text }}{{end}}{{end}}
+LOCKBOX_PWGEN_TITLE=false
+LOCKBOX_PWGEN_WORDS_COMMAND=[/bin/sh -c echo abc abc | tr ' ' '
+LOCKBOX_PWGEN_WORD_COUNT=2
+LOCKBOX_STORE=testdata/datadir/pass.kdbx
