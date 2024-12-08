@@ -31,7 +31,7 @@ func GeneratePassword(cmd CommandOptions) error {
 		return fmt.Errorf("word count must be >= 1")
 	}
 	tmplString := config.EnvPasswordGenTemplate.Get()
-	wordList := config.EnvPasswordGenWordList.Get()
+	wordList := config.EnvPasswordGenWordList.AsArray()
 	if len(wordList) == 0 {
 		return errors.New("word list command must set")
 	}

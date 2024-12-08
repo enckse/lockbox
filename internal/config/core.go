@@ -31,6 +31,7 @@ const (
 	ModTimeFormat      = time.RFC3339
 	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
 	detectedValue      = "(detected)"
+	unset              = "(unset)"
 )
 
 var (

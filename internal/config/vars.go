@@ -18,8 +18,7 @@ var (
 					key:         clipCategory + "TIMEOUT",
 					description: "Override the amount of time before totp clears the clipboard (seconds).",
 				}),
-			short:   "clipboard max time",
-			canZero: false,
+			short: "clipboard max time",
 		})
 	// EnvJSONHashLength handles the hashing output length
 	EnvJSONHashLength = environmentRegister(
@@ -108,7 +107,7 @@ var (
 		})
 	// EnvTOTPEntry is the leaf token to use to store TOTP tokens
 	EnvTOTPEntry = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment("totp",
 				environmentBase{
 					key:         totpCategory + "ENTRY",
@@ -119,18 +118,17 @@ var (
 		})
 	// EnvPlatform is the platform that the application is running on
 	EnvPlatform = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment(detectedValue,
 				environmentBase{
 					key:         "PLATFORM",
 					description: "Override the detected platform.",
 				}),
-			allowed:    platform.Systems.List(),
-			canDefault: false,
+			allowed: platform.Systems.List(),
 		})
 	// EnvStore is the location of the keepass file/store
 	EnvStore = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
@@ -138,12 +136,11 @@ var (
 					description: "Directory to the database file.",
 					requirement: "must be set",
 				}),
-			canDefault: false,
-			allowed:    []string{fileExample},
+			allowed: []string{fileExample},
 		})
 	// EnvHookDir is the directory of hooks to execute
 	EnvHookDir = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
@@ -154,18 +151,28 @@ var (
 			canDefault: true,
 		})
 	// EnvClipCopy allows overriding the clipboard copy command
-	EnvClipCopy = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
-		key:         clipCategory + "COPY_COMMAND",
-		description: "Override the detected platform copy command.",
-	}})
+	EnvClipCopy = environmentRegister(EnvironmentStrings{
+		environmentDefault: newDefaultedEnvironment("",
+			environmentBase{
+				key:         clipCategory + "COPY_COMMAND",
+				description: "Override the detected platform copy command.",
+			}),
+		isArray:   true,
+		canExpand: true,
+	})
 	// EnvClipPaste allows overriding the clipboard paste command
-	EnvClipPaste = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
-		key:         clipCategory + "PASTE_COMMAND",
-		description: "Override the detected platform paste command.",
-	}})
+	EnvClipPaste = environmentRegister(EnvironmentStrings{
+		environmentDefault: newDefaultedEnvironment("",
+			environmentBase{
+				key:         clipCategory + "PASTE_COMMAND",
+				description: "Override the detected platform paste command.",
+			}),
+		isArray:   true,
+		canExpand: true,
+	})
 	// EnvTOTPColorBetween handles terminal coloring for TOTP windows (seconds)
 	EnvTOTPColorBetween = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment(TOTPDefaultBetween,
 				environmentBase{
 					key: totpCategory + "COLOR_WINDOWS",
@@ -179,7 +186,7 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 		})
 	// EnvKeyFile is an keyfile for the database
 	EnvKeyFile = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			canExpand: true,
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
@@ -192,7 +199,7 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 		})
 	// EnvDefaultModTime is modtime override ability for entries
 	EnvDefaultModTime = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         defaultCategory + "MODTIME",
@@ -203,7 +210,7 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 		})
 	// EnvJSONMode controls how JSON is output in the 'data' field
 	EnvJSONMode = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment(string(output.JSONModes.Hash),
 				environmentBase{
 					key:         jsonCategory + "MODE",
@@ -219,7 +226,7 @@ and '%s' allows for multiple windows.`, util.TimeWindowSpan, util.TimeWindowDeli
 	}, fxn: formatterTOTP, allowed: "otpauth//url/%s/args..."})
 	// EnvPasswordMode indicates how the password is read
 	EnvPasswordMode = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment(string(DefaultKeyMode),
 				environmentBase{
 					key:         credsCategory + "PASSWORD_MODE",
@@ -231,9 +238,9 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			canDefault: true,
 		})
 	envPassword = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			canExpand: true,
-			environmentDefault: newDefaultedEnvironment("",
+			environmentDefault: newDefaultedEnvironment(unset,
 				environmentBase{
 					requirement: requiredKeyOrKeyFile,
 					key:         credsCategory + "PASSWORD",
@@ -241,9 +248,8 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 						plainKeyMode,
 						commandKeyMode),
 				}),
-			isArray:    true,
-			allowed:    []string{commandArgsExample, "password"},
-			canDefault: false,
+			allowed: []string{commandArgsExample, "password"},
+			isArray: true,
 		})
 	// EnvPasswordGenWordCount is the number of words that will be selected for password generation
 	EnvPasswordGenWordCount = environmentRegister(
@@ -253,8 +259,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 					key:         genCategory + "WORD_COUNT",
 					description: "Number of words to select and include in the generated password.",
 				}),
-			short:   "word count",
-			canZero: false,
+			short: "word count",
 		})
 	// EnvPasswordGenTitle indicates if titling (e.g. uppercasing) will occur to words
 	EnvPasswordGenTitle = environmentRegister(
@@ -267,7 +272,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		})
 	// EnvPasswordGenTemplate is the output template for controlling how output words are placed together
 	EnvPasswordGenTemplate = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment("{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}",
 				environmentBase{
 					key:         genCategory + "TEMPLATE",
@@ -277,13 +282,18 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			canDefault: true,
 		})
 	// EnvPasswordGenWordList is the command text to generate the word list
-	EnvPasswordGenWordList = environmentRegister(EnvironmentArray{environmentBase: environmentBase{
-		key:         genCategory + "WORDS_COMMAND",
-		description: "Command to retrieve the word list to use for password generation (must be split by newline).",
-	}})
+	EnvPasswordGenWordList = environmentRegister(EnvironmentStrings{
+		environmentDefault: newDefaultedEnvironment("",
+			environmentBase{
+				key:         genCategory + "WORDS_COMMAND",
+				description: "Command to retrieve the word list to use for password generation (must be split by newline).",
+			}),
+		isArray:   true,
+		canExpand: true,
+	})
 	// EnvLanguage is the language to use for everything
 	EnvLanguage = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment("en-US",
 				environmentBase{
 					key:         "LANGUAGE",
@@ -303,7 +313,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		})
 	// EnvPasswordGenChars allows for restricting which characters can be used
 	EnvPasswordGenChars = environmentRegister(
-		EnvironmentString{
+		EnvironmentStrings{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         genCategory + "CHARACTERS",

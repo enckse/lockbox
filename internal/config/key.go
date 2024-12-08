@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
-
-	"github.com/seanenck/lockbox/internal/config/store"
 )
 
 type (
@@ -57,8 +55,8 @@ func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	default:
 		return Key{}, fmt.Errorf("unknown key mode: %s", keyMode)
 	}
-	useKey, ok := store.GetArray(envPassword.Key())
-	isEmpty := !ok || len(useKey) == 0
+	useKey := envPassword.AsArray()
+	isEmpty := len(useKey) == 0
 	if !isEmpty {
 		if strings.TrimSpace(useKey[0]) == "" {
 			isEmpty = true

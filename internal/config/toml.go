@@ -105,7 +105,7 @@ func generateDetailText(data printer) (string, error) {
 	md := data.display()
 	value := md.value
 	if len(value) == 0 {
-		value = "(unset)"
+		value = unset
 	}
 	key := env.Key()
 	description := strings.TrimSpace(util.TextWrap(2, env.description))

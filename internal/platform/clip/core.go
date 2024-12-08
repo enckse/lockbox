@@ -35,8 +35,8 @@ func New() (Board, error) {
 	if !config.EnvClipEnabled.Get() {
 		return Board{}, errors.New("clipboard is off")
 	}
-	overridePaste := config.EnvClipPaste.Get()
-	overrideCopy := config.EnvClipCopy.Get()
+	overridePaste := config.EnvClipPaste.AsArray()
+	overrideCopy := config.EnvClipCopy.AsArray()
 	setPaste := len(overridePaste) > 0
 	setCopy := len(overrideCopy) > 0
 	if setPaste && setCopy {

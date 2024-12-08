@@ -28,17 +28,13 @@ type (
 	EnvironmentBool struct {
 		environmentDefault[bool]
 	}
-	// EnvironmentString are string-based settings
-	EnvironmentString struct {
+	// EnvironmentStrings are string-based settings
+	EnvironmentStrings struct {
 		environmentDefault[string]
 		canDefault bool
 		allowed    []string
 		isArray    bool
 		canExpand  bool
-	}
-	// EnvironmentArray are settings that are parsed as shell commands
-	EnvironmentArray struct {
-		environmentBase
 	}
 	// EnvironmentFormatter allows for sending a string into a get request
 	EnvironmentFormatter struct {
@@ -92,7 +88,7 @@ func (e EnvironmentInt) Get() (int64, error) {
 }
 
 // Get will read the string from the environment
-func (e EnvironmentString) Get() string {
+func (e EnvironmentStrings) Get() string {
 	val, ok := store.GetString(e.Key())
 	if !ok {
 		if !e.canDefault {
@@ -103,11 +99,10 @@ func (e EnvironmentString) Get() string {
 	return val
 }
 
-// Get will read (and shlex) the value if set
-func (e EnvironmentArray) Get() []string {
+func (e EnvironmentStrings) AsArray() []string {
 	val, ok := store.GetArray(e.Key())
-	if !ok {
-		return []string{}
+	if !ok && e.canDefault {
+		val = []string{e.value}
 	}
 	return val
 }
@@ -117,17 +112,27 @@ func (e EnvironmentFormatter) Get(value string) string {
 	return e.fxn(e.Key(), value)
 }
 
-func (e EnvironmentString) display() metaData {
+func (e EnvironmentStrings) display() metaData {
 	var t tomlType
 	t = tomlString
 	v := "\"\""
+	show := e.allowed
+	value := e.value
 	if e.isArray {
 		t = tomlArray
 		v = "[]"
+		if e.canExpand {
+			if len(show) == 0 {
+				show = []string{"[cmd args...]"}
+			}
+			if value == "" {
+				value = "(detected)"
+			}
+		}
 	}
 	return metaData{
-		value:     e.value,
-		allowed:   e.allowed,
+		value:     value,
+		allowed:   show,
 		tomlType:  t,
 		tomlValue: v,
 		canExpand: e.canExpand,
@@ -169,15 +174,5 @@ func (e EnvironmentFormatter) display() metaData {
 		tomlType:  tomlString,
 		tomlValue: "\"\"",
 		canExpand: false,
-	}
-}
-
-func (e EnvironmentArray) display() metaData {
-	return metaData{
-		value:     detectedValue,
-		allowed:   []string{commandArgsExample},
-		tomlType:  tomlArray,
-		tomlValue: "[]",
-		canExpand: true,
 	}
 }
