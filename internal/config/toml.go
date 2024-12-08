@@ -205,16 +205,15 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{
 	includes, ok := m[isInclude]
 	if ok {
 		delete(m, isInclude)
-		including, err := parseStringArray(includes, false)
+		including, err := parseStringArray(includes, true)
 		if err != nil {
 			return nil, err
 		}
 		if len(including) > 0 {
 			for _, s := range including {
-				use := os.Expand(s, os.Getenv)
-				files := []string{use}
-				if strings.Contains(use, "*") {
-					matched, err := filepath.Glob(use)
+				files := []string{s}
+				if strings.Contains(s, "*") {
+					matched, err := filepath.Glob(s)
 					if err != nil {
 						return nil, err
 					}
