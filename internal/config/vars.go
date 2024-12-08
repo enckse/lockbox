@@ -132,7 +132,7 @@ var (
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         "STORE",
-					description: "Directory to the database file.",
+					description: "The kdbx file to operate on.",
 					requirement: "must be set",
 				}),
 			allowed: []string{fileExample},
@@ -144,7 +144,7 @@ var (
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
 					key:         hookCategory + "DIRECTORY",
-					description: "The path to hooks to execute on actions against the database.",
+					description: "The path to a directory of hooks to execute on actions against the database.",
 				}),
 			allowed: []string{"<directory>"},
 			flags:   []stringsFlags{canDefaultFlag, canExpandFlag},
@@ -238,7 +238,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				environmentBase{
 					requirement: requiredKeyOrKeyFile,
 					key:         credsCategory + "PASSWORD",
-					description: fmt.Sprintf("The database key ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
+					description: fmt.Sprintf("The database password itself ('%s' mode) or command to run ('%s' mode) to retrieve the database password.",
 						plainKeyMode,
 						commandKeyMode),
 				}),
