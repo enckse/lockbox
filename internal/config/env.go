@@ -19,6 +19,11 @@ type (
 		environmentBase
 		value T
 	}
+	environmentStrings struct {
+		environmentDefault[string]
+		flags   []stringsFlags
+		allowed []string
+	}
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {
 		environmentDefault[int]
@@ -29,17 +34,19 @@ type (
 	EnvironmentBool struct {
 		environmentDefault[bool]
 	}
-	// EnvironmentStrings are string-based settings
-	EnvironmentStrings struct {
-		environmentDefault[string]
-		flags   []stringsFlags
-		allowed []string
-	}
 	// EnvironmentFormatter allows for sending a string into a get request
 	EnvironmentFormatter struct {
 		environmentBase
 		allowed string
 		fxn     func(string, string) string
+	}
+	// EnvironmentString represents a string variable
+	EnvironmentString struct {
+		environmentStrings
+	}
+	// EnvironmentArray is an array of strings variable
+	EnvironmentArray struct {
+		environmentStrings
 	}
 	metaData struct {
 		value     string
@@ -87,20 +94,20 @@ func (e EnvironmentInt) Get() (int64, error) {
 }
 
 // Get will read the string from the environment
-func (e EnvironmentStrings) Get() string {
-	return stringsGet(e, store.GetString, func(val string) string {
+func (e EnvironmentString) Get() string {
+	return stringsGet(e.environmentStrings, store.GetString, func(val string) string {
 		return val
 	})
 }
 
-// AsArray indicates the item should be queried as an array
-func (e EnvironmentStrings) AsArray() []string {
-	return stringsGet(e, store.GetArray, func(val string) []string {
+// Get indicates the item should be queried as an array
+func (e EnvironmentArray) Get() []string {
+	return stringsGet(e.environmentStrings, store.GetArray, func(val string) []string {
 		return strings.Split(val, arrayDelimiter)
 	})
 }
 
-func stringsGet[T string | []string](e EnvironmentStrings, getter func(string) (T, bool), conv func(string) T) T {
+func stringsGet[T string | []string](e environmentStrings, getter func(string) (T, bool), conv func(string) T) T {
 	val, ok := getter(e.Key())
 	if !ok {
 		flags := e.flattenFlags()
@@ -116,7 +123,15 @@ func (e EnvironmentFormatter) Get(value string) string {
 	return e.fxn(e.Key(), value)
 }
 
-func (e EnvironmentStrings) display() metaData {
+func (e EnvironmentArray) display() metaData {
+	return e.environmentStrings.display(true)
+}
+
+func (e EnvironmentString) display() metaData {
+	return e.environmentStrings.display(false)
+}
+
+func (e environmentStrings) display(isArray bool) metaData {
 	var t tomlType
 	t = tomlString
 	v := "\"\""
@@ -124,7 +139,7 @@ func (e EnvironmentStrings) display() metaData {
 	value := e.value
 	flags := e.flattenFlags()
 	canExpand := slices.Contains(flags, canExpandFlag)
-	if slices.Contains(flags, isArrayFlag) {
+	if isArray {
 		t = tomlArray
 		v = "[]"
 		if slices.Contains(flags, isCommandFlag) {
@@ -183,10 +198,10 @@ func (e EnvironmentFormatter) display() metaData {
 	}
 }
 
-func (e EnvironmentStrings) flattenFlags() []stringsFlags {
+func (e environmentStrings) flattenFlags() []stringsFlags {
 	flags := e.flags
 	if slices.Contains(e.flags, isCommandFlag) {
-		flags = append(flags, canExpandFlag, isArrayFlag)
+		flags = append(flags, canExpandFlag)
 	}
 	return flags
 }

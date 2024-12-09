@@ -55,7 +55,7 @@ func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	default:
 		return Key{}, fmt.Errorf("unknown key mode: %s", keyMode)
 	}
-	useKey := envPassword.AsArray()
+	useKey := envPassword.Get()
 	isEmpty := len(useKey) == 0
 	if !isEmpty {
 		if strings.TrimSpace(useKey[0]) == "" {

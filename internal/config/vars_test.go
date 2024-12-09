@@ -142,12 +142,12 @@ func checkInt(e config.EnvironmentInt, key, text string, def int64, allowZero bo
 
 func TestTOTPWindows(t *testing.T) {
 	store.Clear()
-	val := config.EnvTOTPColorBetween.AsArray()
+	val := config.EnvTOTPColorBetween.Get()
 	if slices.Compare(val, config.TOTPDefaultBetween) != 0 {
 		t.Errorf("invalid read: %v", val)
 	}
 	store.SetArray("LOCKBOX_TOTP_COLOR_WINDOWS", []string{"1", "2", "3"})
-	val = config.EnvTOTPColorBetween.AsArray()
+	val = config.EnvTOTPColorBetween.Get()
 	if len(val) != 3 {
 		t.Errorf("invalid read: %v", val)
 	}
@@ -155,17 +155,17 @@ func TestTOTPWindows(t *testing.T) {
 
 func TestUnsetArrays(t *testing.T) {
 	store.Clear()
-	for _, i := range []config.EnvironmentStrings{
+	for _, i := range []config.EnvironmentArray{
 		config.EnvClipCopy,
 		config.EnvClipPaste,
 		config.EnvPasswordGenWordList,
 	} {
-		val := i.AsArray()
+		val := i.Get()
 		if len(val) != 0 {
 			t.Errorf("invalid array: %v (%s)", val, i.Key())
 		}
 		store.SetArray(i.Key(), []string{"a"})
-		val = i.AsArray()
+		val = i.Get()
 		if len(val) != 1 {
 			t.Errorf("invalid array: %v (%s)", val, i.Key())
 		}
@@ -174,7 +174,7 @@ func TestUnsetArrays(t *testing.T) {
 
 func TestDefaultStrings(t *testing.T) {
 	store.Clear()
-	for k, v := range map[string]config.EnvironmentStrings{
+	for k, v := range map[string]config.EnvironmentString{
 		"totp":    config.EnvTOTPEntry,
 		"hash":    config.EnvJSONMode,
 		"en-US":   config.EnvLanguage,
@@ -195,7 +195,7 @@ func TestDefaultStrings(t *testing.T) {
 
 func TestEmptyStrings(t *testing.T) {
 	store.Clear()
-	for _, v := range []config.EnvironmentStrings{
+	for _, v := range []config.EnvironmentString{
 		config.EnvPlatform,
 		config.EnvStore,
 		config.EnvKeyFile,

@@ -79,7 +79,7 @@ func clearFunc() {
 }
 
 func colorWhenRules() ([]util.TimeWindow, error) {
-	envTime := config.EnvTOTPColorBetween.AsArray()
+	envTime := config.EnvTOTPColorBetween.Get()
 	if slices.Compare(envTime, config.TOTPDefaultBetween) == 0 {
 		return config.TOTPDefaultColorWindow, nil
 	}

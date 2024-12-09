@@ -38,7 +38,6 @@ const (
 const (
 	canDefaultFlag = iota
 	canExpandFlag
-	isArrayFlag
 	isCommandFlag
 )
 
