@@ -140,46 +140,76 @@ func checkInt(e config.EnvironmentInt, key, text string, def int64, allowZero bo
 	}
 }
 
-func TestStringsGetDefault(t *testing.T) {
-	store.Clear()
-	val := config.EnvPlatform.Get()
-	if val != "" {
-		t.Errorf("invalid read: %v", val)
-	}
-	val = config.EnvJSONMode.Get()
-	if val != "hash" {
-		t.Errorf("invalid read: %v", val)
-	}
-	store.SetString("LOCKBOX_PLATFORM", "1")
-	store.SetString("LOCKBOX_JSON_MODE", "a")
-	val = config.EnvPlatform.Get()
-	if val != "1" {
-		t.Errorf("invalid read: %v", val)
-	}
-	val = config.EnvJSONMode.Get()
-	if val != "a" {
-		t.Errorf("invalid read: %v", val)
-	}
-}
-
-func TestStringsArray(t *testing.T) {
+func TestTOTPWindows(t *testing.T) {
 	store.Clear()
 	val := config.EnvTOTPColorBetween.AsArray()
 	if slices.Compare(val, config.TOTPDefaultBetween) != 0 {
 		t.Errorf("invalid read: %v", val)
 	}
-	val = config.EnvClipCopy.AsArray()
-	if len(val) != 0 {
-		t.Errorf("invalid read: %v", val)
-	}
-	store.SetArray("LOCKBOX_CLIP_COPY_COMMAND", []string{"1"})
 	store.SetArray("LOCKBOX_TOTP_COLOR_WINDOWS", []string{"1", "2", "3"})
 	val = config.EnvTOTPColorBetween.AsArray()
 	if len(val) != 3 {
 		t.Errorf("invalid read: %v", val)
 	}
-	val = config.EnvClipCopy.AsArray()
-	if len(val) != 1 {
-		t.Errorf("invalid read: %v", val)
+}
+
+func TestUnsetArrays(t *testing.T) {
+	store.Clear()
+	for _, i := range []config.EnvironmentStrings{
+		config.EnvClipCopy,
+		config.EnvClipPaste,
+		config.EnvPasswordGenWordList,
+	} {
+		val := i.AsArray()
+		if len(val) != 0 {
+			t.Errorf("invalid array: %v (%s)", val, i.Key())
+		}
+		store.SetArray(i.Key(), []string{"a"})
+		val = i.AsArray()
+		if len(val) != 1 {
+			t.Errorf("invalid array: %v (%s)", val, i.Key())
+		}
+	}
+}
+
+func TestDefaultStrings(t *testing.T) {
+	store.Clear()
+	for k, v := range map[string]config.EnvironmentStrings{
+		"totp":    config.EnvTOTPEntry,
+		"hash":    config.EnvJSONMode,
+		"en-US":   config.EnvLanguage,
+		"command": config.EnvPasswordMode,
+		"{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}": config.EnvPasswordGenTemplate,
+	} {
+		val := v.Get()
+		if val != k {
+			t.Errorf("invalid string: %s (%s)", val, v.Key())
+		}
+		store.SetString(v.Key(), "TEST")
+		val = v.Get()
+		if val != "TEST" {
+			t.Errorf("invalid string: %s (%s)", val, v.Key())
+		}
+	}
+}
+
+func TestEmptyStrings(t *testing.T) {
+	store.Clear()
+	for _, v := range []config.EnvironmentStrings{
+		config.EnvPlatform,
+		config.EnvStore,
+		config.EnvKeyFile,
+		config.EnvDefaultModTime,
+		config.EnvPasswordGenChars,
+	} {
+		val := v.Get()
+		if val != "" {
+			t.Errorf("invalid string: %s (%s)", val, v.Key())
+		}
+		store.SetString(v.Key(), "TEST")
+		val = v.Get()
+		if val != "TEST" {
+			t.Errorf("invalid string: %s (%s)", val, v.Key())
+		}
 	}
 }
