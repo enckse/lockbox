@@ -93,8 +93,7 @@ var (
 				key:         totpCategory + "TIMEOUT",
 				description: "Time, in seconds, to show a TOTP token before automatically exiting.",
 			}),
-		short:   "max totp time",
-		canZero: false,
+		short: "max totp time",
 	})
 	// EnvTOTPEntry is the leaf token to use to store TOTP tokens
 	EnvTOTPEntry = environmentRegister(EnvironmentString{
