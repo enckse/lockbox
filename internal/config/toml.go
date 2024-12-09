@@ -7,11 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/config/store"
 	"github.com/seanenck/lockbox/internal/util"
 )
@@ -107,7 +105,6 @@ func generateDetailText(data printer) (string, error) {
 	if len(value) == 0 {
 		value = unset
 	}
-	key := env.Key()
 	description := strings.TrimSpace(util.TextWrap(2, env.description))
 	requirement := "optional/default"
 	r := strings.TrimSpace(env.requirement)
@@ -115,14 +112,16 @@ func generateDetailText(data printer) (string, error) {
 		requirement = r
 	}
 	var text []string
+	extra := ""
+	if md.canExpand {
+		extra = " (shell expansions)"
+	}
 	for _, line := range []string{
 		fmt.Sprintf("description:\n%s\n", description),
 		fmt.Sprintf("requirement: %s", requirement),
 		fmt.Sprintf("option: %s", strings.Join(md.allowed, "|")),
-		fmt.Sprintf("%s name: %s", commands.Env, key),
 		fmt.Sprintf("default: %s", value),
-		fmt.Sprintf("expands: %s", strconv.FormatBool(md.canExpand)),
-		fmt.Sprintf("type: %s", md.tomlType),
+		fmt.Sprintf("type: %s%s", md.tomlType, extra),
 		"",
 		"NOTE: the following value is NOT a default, it is an empty TOML placeholder",
 	} {
