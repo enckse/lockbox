@@ -3,6 +3,7 @@ target  := "target"
 version := `git log -n 1 --format=%h`
 object  := target / "lb"
 ldflags := env_var_or_default("LDFLAGS", "")
+gotest  := "LOCKBOX_CONFIG_TOML=fake go test"
 
 default: build
 
@@ -11,14 +12,14 @@ build:
   go build {{goflags}} -ldflags "{{ldflags}} -X main.version={{version}}" -o "{{object}}" cmd/main.go
 
 unittest:
-  LOCKBOX_CONFIG_TOML=fake go test ./...
+  {{gotest}} ./...
 
 check: unittest tests
 
 tests: build
-  cd tests && LOCKBOX_CONFIG_TOML=fake go run main.go
+  {{gotest}} cmd/main_test.go
 
 clean:
   rm -f "{{object}}"
-  find internal/ tests/ -type f -wholename "*testdata*" -delete
-  find internal/ tests/ -type d -empty -delete
+  find internal/ cmd/ -type f -wholename "*testdata*" -delete
+  find internal/ cmd/ -type d -empty -delete

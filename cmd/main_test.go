@@ -1,7 +1,10 @@
-// Package main runs tests for all of lb
-package main
+//go:build integration
+// +build integration
+
+package main_test
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"testing"
 	"time"
 
 	"github.com/seanenck/lockbox/internal/platform"
@@ -24,9 +28,14 @@ const (
 	reKeyKeyData   = "rekeyfile"
 	clipWait       = 1
 	clipTries      = 6
+	hookDir        = "hooks"
 )
 
-var binary = filepath.Join("..", "target", "lb")
+var (
+	binary = filepath.Join("..", "target", "lb")
+	//go:embed tests/*
+	testingFiles embed.FS
+)
 
 type (
 	conf   map[string]string
@@ -50,33 +59,22 @@ func newRunner(profile string) (runner, error) {
 	return runner{l, t, filepath.Join(t, "config.toml"), filepath.Join(t, "pass.kdbx")}, nil
 }
 
-func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "tests failed: %v\n", err)
-		os.Exit(1)
-	}
+func TestPass(t *testing.T) {
+	run(t, passProfile)
 }
 
-func run() error {
-	args := os.Args
-	set := []string{passProfile, keyFileProfile, bothProfile}
-	if len(args) > 1 {
-		set = args[1:]
+func TestKeyFile(t *testing.T) {
+	run(t, keyFileProfile)
+}
+
+func TestBoth(t *testing.T) {
+	run(t, bothProfile)
+}
+
+func run(t *testing.T, profile string) {
+	if err := test(profile); err != nil {
+		t.Errorf("%s failed: %v", profile, err)
 	}
-	var failures []string
-	for _, item := range set {
-		fmt.Printf("%-10s -> ", item)
-		status := "passed"
-		if err := test(item); err != nil {
-			status = "failed"
-			failures = append(failures, item)
-		}
-		fmt.Println(status)
-	}
-	if len(failures) > 0 {
-		return fmt.Errorf("profiles failed: %v", failures)
-	}
-	return nil
 }
 
 func setConfig(config string) {
@@ -120,11 +118,45 @@ func (c conf) quoteString(s string) string {
 	return fmt.Sprintf("\"%s\"", s)
 }
 
+func unpackDir(dir, under string, mode os.FileMode) error {
+	dirs, err := testingFiles.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, d := range dirs {
+		name := d.Name()
+		if d.IsDir() {
+			if name != hookDir {
+				return fmt.Errorf("unexpected embedded dir: %s", name)
+			}
+			if err := unpackDir(filepath.Join(dir, name), filepath.Join(under, name), 0o755); err != nil {
+				return err
+			}
+			continue
+		}
+		data, err := testingFiles.ReadFile(filepath.Join(dir, name))
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(under, 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(under, name), data, mode); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func test(profile string) error {
 	r, err := newRunner(profile)
 	if err != nil {
 		return err
 	}
+	if err := unpackDir("tests", r.testDir, 0o644); err != nil {
+		return err
+	}
+
 	setConfig(filepath.Join(r.testDir, "invalid"))
 	if err := r.raw("", "help", "/dev/null", "/dev/null"); err != nil {
 		return err
@@ -224,13 +256,8 @@ func test(profile string) error {
 	r.run("echo test |", "insert keys/k2/t1/one")
 	r.run("echo test2 |", "insert keys/k2/t2/one2")
 
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
 	// test hooks
-	c["hooks.directory"] = c.quoteString(filepath.Join(wd, "hooks"))
+	c["hooks.directory"] = c.quoteString(filepath.Join(r.testDir, hookDir))
 	r.writeConfig(c)
 	r.run("echo test |", "insert keys/k2/t2/one")
 	r.logAppend("echo")
@@ -339,7 +366,7 @@ func test(profile string) error {
 		exec.Command("/bin/sh", "-c", fmt.Sprintf("sed %s %s > %s", item, r.log, tmpFile)).Run()
 		exec.Command("mv", tmpFile, r.log).Run()
 	}
-	diff := exec.Command("diff", "-u", "expected.log", r.log)
+	diff := exec.Command("diff", "-u", filepath.Join(r.testDir, "expected.log"), r.log)
 	diff.Stdout = os.Stdout
 	diff.Stderr = os.Stderr
 	return diff.Run()
