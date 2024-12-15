@@ -30,14 +30,6 @@ func Info(w io.Writer, command string, args []string) (bool, error) {
 	return false, nil
 }
 
-func exeName() (string, error) {
-	exe, err := os.Executable()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Base(exe), nil
-}
-
 func info(command string, args []string) ([]string, error) {
 	switch command {
 	case commands.Help:
@@ -59,11 +51,7 @@ func info(command string, args []string) ([]string, error) {
 				return nil, errors.New("invalid help option")
 			}
 		}
-		exe, err := exeName()
-		if err != nil {
-			return nil, err
-		}
-		results, err := help.Usage(isAdvanced, exe)
+		results, err := help.Usage(isAdvanced, commands.Executable)
 		if err != nil {
 			return nil, err
 		}
@@ -93,10 +81,6 @@ func info(command string, args []string) ([]string, error) {
 		return results, nil
 	case commands.Completions:
 		shell := ""
-		exe, err := exeName()
-		if err != nil {
-			return nil, err
-		}
 		switch len(args) {
 		case 0:
 			shell = filepath.Base(os.Getenv("SHELL"))
@@ -108,7 +92,7 @@ func info(command string, args []string) ([]string, error) {
 		if !slices.Contains(commands.CompletionTypes, shell) {
 			return nil, fmt.Errorf("unknown completion type: %s", shell)
 		}
-		return completions.Generate(shell, exe)
+		return completions.Generate(shell, commands.Executable)
 	}
 	return nil, nil
 }

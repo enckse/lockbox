@@ -4,10 +4,10 @@ package clip
 import (
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 
 	osc "github.com/aymanbagabas/go-osc52"
+	"github.com/seanenck/lockbox/internal/app/commands"
 	"github.com/seanenck/lockbox/internal/config"
 	"github.com/seanenck/lockbox/internal/platform"
 )
@@ -88,11 +88,7 @@ func (c Board) CopyTo(value string) error {
 	pipeTo(cmd, value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
-		exe, err := os.Executable()
-		if err != nil {
-			return err
-		}
-		pipeTo(exe, value, false, "clear")
+		pipeTo(commands.Executable, value, false, "clear")
 	}
 	return nil
 }

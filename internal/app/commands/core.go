@@ -60,6 +60,8 @@ const (
 	CompletionsFish = "fish"
 	// PasswordGenerate is the command to do password generation
 	PasswordGenerate = "pwgen"
+	// Executable is the name of the executable
+	Executable = "lb"
 )
 
 var (
