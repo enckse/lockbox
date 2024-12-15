@@ -32,7 +32,8 @@ const (
 )
 
 var (
-	binary = filepath.Join("..", "target", "lb")
+	target = filepath.Join("..", "target")
+	binary = filepath.Join(target, "lb")
 	//go:embed tests/*
 	testingFiles embed.FS
 )
@@ -50,6 +51,11 @@ type (
 func newRunner(profile string) (runner, error) {
 	t := filepath.Join("testdata", profile)
 	l := filepath.Join(t, "actual.log")
+	wd, err := os.Getwd()
+	if err != nil {
+		return runner{}, err
+	}
+	os.Setenv("PATH", fmt.Sprintf("%s%c%s", filepath.Join(wd, target), os.PathListSeparator, os.Getenv("PATH")))
 	if err := os.RemoveAll(t); err != nil {
 		return runner{}, err
 	}

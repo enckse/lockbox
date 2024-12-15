@@ -17,7 +17,7 @@ unittest:
 check: unittest tests
 
 tests: build
-  PATH="$PWD/{{target}}:$PATH" {{gotest}} cmd/main_test.go
+  {{gotest}} cmd/main_test.go
 
 clean:
   rm -f "{{object}}"
