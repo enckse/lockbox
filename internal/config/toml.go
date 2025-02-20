@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -134,15 +135,13 @@ func generateDetailText(data printer) (string, error) {
 
 // LoadConfig will read the input reader and use the loader to source configuration files
 func LoadConfig(r io.Reader, loader Loader) error {
-	maps, err := readConfigs(r, 1, loader)
+	mapped, err := readConfigs(r, 1, loader)
 	if err != nil {
 		return err
 	}
-	m := make(map[string]interface{})
-	for _, config := range maps {
-		for k, v := range flatten(config, "") {
-			m[k] = v
-		}
+	m := make(map[string]any)
+	for _, config := range mapped {
+		maps.Copy(m, flatten(config, ""))
 	}
 	for k, v := range m {
 		export := environmentPrefix + strings.ToUpper(k)
@@ -191,16 +190,16 @@ func LoadConfig(r io.Reader, loader Loader) error {
 	return nil
 }
 
-func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{}, error) {
+func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error) {
 	if depth > maxDepth {
 		return nil, fmt.Errorf("too many nested includes (%d > %d)", depth, maxDepth)
 	}
 	d := toml.NewDecoder(r)
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	if _, err := d.Decode(&m); err != nil {
 		return nil, err
 	}
-	maps := []map[string]interface{}{m}
+	maps := []map[string]any{m}
 	includes, ok := m[isInclude]
 	if ok {
 		delete(m, isInclude)
@@ -235,10 +234,10 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]interface{
 	return maps, nil
 }
 
-func parseStringArray(value interface{}, expand bool) ([]string, error) {
+func parseStringArray(value any, expand bool) ([]string, error) {
 	var res []string
 	switch t := value.(type) {
-	case []interface{}:
+	case []any:
 		for _, item := range t {
 			switch s := item.(type) {
 			case string:
@@ -257,8 +256,8 @@ func parseStringArray(value interface{}, expand bool) ([]string, error) {
 	return res, nil
 }
 
-func flatten(m map[string]interface{}, prefix string) map[string]interface{} {
-	flattened := make(map[string]interface{})
+func flatten(m map[string]any, prefix string) map[string]any {
+	flattened := make(map[string]any)
 
 	for k, v := range m {
 		key := k
@@ -267,10 +266,8 @@ func flatten(m map[string]interface{}, prefix string) map[string]interface{} {
 		}
 
 		switch to := v.(type) {
-		case map[string]interface{}:
-			for subKey, subVal := range flatten(to, key) {
-				flattened[subKey] = subVal
-			}
+		case map[string]any:
+			maps.Copy(flattened, flatten(to, key))
 		default:
 			flattened[key] = v
 		}

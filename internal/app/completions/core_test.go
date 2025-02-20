@@ -2,6 +2,7 @@ package completions_test
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -39,14 +40,7 @@ func TestConditionals(t *testing.T) {
 		case "LOCKBOX_CREDENTIALS_PASSWORD_MODE":
 			value = "ask"
 		}
-		found := false
-		for _, f := range fields {
-			if fmt.Sprintf(`[ "$%s" != "%s" ]`, n, value) == f {
-				found = true
-				break
-			}
-		}
-		if !found {
+		if !slices.Contains(fields, fmt.Sprintf(`[ "$%s" != "%s" ]`, n, value)) {
 			t.Errorf("needed conditional %s not found: %v", n, fields)
 		}
 	}
