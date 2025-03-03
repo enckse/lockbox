@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/platform"
+	"codeberg.org/enckse/lockbox/internal/platform"
 )
 
 func TestPathExist(t *testing.T) {

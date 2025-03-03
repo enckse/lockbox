@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/config/store"
 )
 
 func TestNewEnvFiles(t *testing.T) {

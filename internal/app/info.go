@@ -10,11 +10,11 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/seanenck/lockbox/internal/app/commands"
-	"github.com/seanenck/lockbox/internal/app/completions"
-	"github.com/seanenck/lockbox/internal/app/help"
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/app/commands"
+	"codeberg.org/enckse/lockbox/internal/app/completions"
+	"codeberg.org/enckse/lockbox/internal/app/help"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/config/store"
 )
 
 // Info will report help/bash/env details

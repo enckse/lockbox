@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/app"
-	"github.com/seanenck/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/app"
+	"codeberg.org/enckse/lockbox/internal/config/store"
 )
 
 func setupGenScript() string {

@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/backend"
-	"github.com/seanenck/lockbox/internal/config/store"
-	"github.com/seanenck/lockbox/internal/platform"
+	"codeberg.org/enckse/lockbox/internal/backend"
+	"codeberg.org/enckse/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/platform"
 )
 
 const (

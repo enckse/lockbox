@@ -9,9 +9,9 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/seanenck/lockbox/internal/app/commands"
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/util"
+	"codeberg.org/enckse/lockbox/internal/app/commands"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/util"
 )
 
 type (

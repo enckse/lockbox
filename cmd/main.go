@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/seanenck/lockbox/internal/app"
-	"github.com/seanenck/lockbox/internal/app/commands"
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/platform"
-	"github.com/seanenck/lockbox/internal/platform/clip"
+	"codeberg.org/enckse/lockbox/internal/app"
+	"codeberg.org/enckse/lockbox/internal/app/commands"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/platform"
+	"codeberg.org/enckse/lockbox/internal/platform/clip"
 )
 
 var version string

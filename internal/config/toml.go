@@ -10,9 +10,9 @@ import (
 	"sort"
 	"strings"
 
+	"codeberg.org/enckse/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/util"
 	"github.com/BurntSushi/toml"
-	"github.com/seanenck/lockbox/internal/config/store"
-	"github.com/seanenck/lockbox/internal/util"
 )
 
 const (

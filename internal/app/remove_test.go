@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/app"
+	"codeberg.org/enckse/lockbox/internal/app"
 )
 
 func TestRemove(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/output"
+	"codeberg.org/enckse/lockbox/internal/output"
 )
 
 func TestJSONList(t *testing.T) {

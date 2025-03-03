@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os/exec"
 
+	"codeberg.org/enckse/lockbox/internal/app/commands"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/platform"
 	osc "github.com/aymanbagabas/go-osc52"
-	"github.com/seanenck/lockbox/internal/app/commands"
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/platform"
 )
 
 type (

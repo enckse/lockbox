@@ -11,11 +11,11 @@ import (
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
 
-	"github.com/seanenck/lockbox/internal/app/commands"
-	"github.com/seanenck/lockbox/internal/backend"
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/platform/clip"
-	"github.com/seanenck/lockbox/internal/util"
+	"codeberg.org/enckse/lockbox/internal/app/commands"
+	"codeberg.org/enckse/lockbox/internal/backend"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/platform/clip"
+	"codeberg.org/enckse/lockbox/internal/util"
 )
 
 var (

@@ -1,4 +1,4 @@
-module github.com/seanenck/lockbox
+module codeberg.org/enckse/lockbox
 
 go 1.23.0
 

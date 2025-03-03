@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/config"
-	"github.com/seanenck/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/config"
+	"codeberg.org/enckse/lockbox/internal/config/store"
 )
 
 func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bool) {

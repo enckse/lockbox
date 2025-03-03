@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/seanenck/lockbox/internal/util"
+	"codeberg.org/enckse/lockbox/internal/util"
 )
 
 // JSONModes are the JSON data output types for exporting/output of values

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/app/completions"
-	"github.com/seanenck/lockbox/internal/util"
+	"codeberg.org/enckse/lockbox/internal/app/completions"
+	"codeberg.org/enckse/lockbox/internal/util"
 )
 
 func TestCompletions(t *testing.T) {

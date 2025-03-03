@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/util"
+	"codeberg.org/enckse/lockbox/internal/util"
 )
 
 func TestParseWindows(t *testing.T) {

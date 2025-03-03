@@ -3,9 +3,9 @@ package clip_test
 import (
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/config/store"
-	"github.com/seanenck/lockbox/internal/platform"
-	"github.com/seanenck/lockbox/internal/platform/clip"
+	"codeberg.org/enckse/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/platform"
+	"codeberg.org/enckse/lockbox/internal/platform/clip"
 )
 
 func TestNoClipboard(t *testing.T) {

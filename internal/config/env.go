@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/seanenck/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/config/store"
 )
 
 type (

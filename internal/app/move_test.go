@@ -5,8 +5,8 @@ import (
 	"io"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/app"
-	"github.com/seanenck/lockbox/internal/backend"
+	"codeberg.org/enckse/lockbox/internal/app"
+	"codeberg.org/enckse/lockbox/internal/backend"
 )
 
 type (

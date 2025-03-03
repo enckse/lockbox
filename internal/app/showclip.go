@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/seanenck/lockbox/internal/backend"
-	"github.com/seanenck/lockbox/internal/platform/clip"
+	"codeberg.org/enckse/lockbox/internal/backend"
+	"codeberg.org/enckse/lockbox/internal/platform/clip"
 )
 
 // ShowClip will handle showing/clipping an entry

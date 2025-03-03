@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/seanenck/lockbox/internal/backend"
+	"codeberg.org/enckse/lockbox/internal/backend"
 )
 
 func TestLoad(t *testing.T) {

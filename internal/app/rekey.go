@@ -6,7 +6,7 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/seanenck/lockbox/internal/app/commands"
+	"codeberg.org/enckse/lockbox/internal/app/commands"
 )
 
 // ReKey handles entry rekeying

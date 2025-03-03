@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/seanenck/lockbox/internal/config/store"
-	"github.com/seanenck/lockbox/internal/util"
+	"codeberg.org/enckse/lockbox/internal/config/store"
+	"codeberg.org/enckse/lockbox/internal/util"
 )
 
 const (
