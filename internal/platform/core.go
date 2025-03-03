@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 // Systems are the known platforms for lockbox

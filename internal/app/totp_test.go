@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/app"
-	"codeberg.org/enckse/lockbox/internal/backend"
-	"codeberg.org/enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/app"
+	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/config/store"
 )
 
 type (

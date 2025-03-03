@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/config/store"
 )
 
 func TestClear(t *testing.T) {

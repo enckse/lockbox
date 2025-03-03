@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/enckse/lockbox/internal/backend"
-	"codeberg.org/enckse/lockbox/internal/platform"
+	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 type (

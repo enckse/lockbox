@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 type mockReadFile struct{}

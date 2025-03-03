@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 type mock struct {

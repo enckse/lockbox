@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"codeberg.org/enckse/lockbox/internal/config"
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

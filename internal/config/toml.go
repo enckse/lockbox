@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"codeberg.org/enckse/lockbox/internal/config/store"
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 	"github.com/BurntSushi/toml"
 )
 

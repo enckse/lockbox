@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"codeberg.org/enckse/lockbox/internal/app/commands"
-	"codeberg.org/enckse/lockbox/internal/config"
-	"codeberg.org/enckse/lockbox/internal/platform"
+	"git.sr.ht/~enckse/lockbox/internal/app/commands"
+	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 	osc "github.com/aymanbagabas/go-osc52"
 )
 

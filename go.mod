@@ -1,4 +1,4 @@
-module codeberg.org/enckse/lockbox
+module git.sr.ht/~enckse/lockbox
 
 go 1.23.0
 

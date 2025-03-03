@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"codeberg.org/enckse/lockbox/internal/output"
-	"codeberg.org/enckse/lockbox/internal/platform"
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/output"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 var (

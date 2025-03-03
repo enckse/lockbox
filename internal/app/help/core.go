@@ -10,10 +10,10 @@ import (
 	"strings"
 	"text/template"
 
-	"codeberg.org/enckse/lockbox/internal/app/commands"
-	"codeberg.org/enckse/lockbox/internal/backend"
-	"codeberg.org/enckse/lockbox/internal/config"
-	"codeberg.org/enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/app/commands"
+	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 const (

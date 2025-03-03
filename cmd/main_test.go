@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"codeberg.org/enckse/lockbox/internal/platform"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 const (

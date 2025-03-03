@@ -3,7 +3,7 @@ package platform_test
 import (
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/platform"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 func TestPlatformList(t *testing.T) {

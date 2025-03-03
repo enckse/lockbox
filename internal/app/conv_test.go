@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/app"
+	"git.sr.ht/~enckse/lockbox/internal/app"
 )
 
 func TestConv(t *testing.T) {

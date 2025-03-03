@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"codeberg.org/enckse/lockbox/internal/config"
-	"codeberg.org/enckse/lockbox/internal/output"
+	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/output"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 

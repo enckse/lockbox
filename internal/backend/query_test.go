@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/enckse/lockbox/internal/backend"
-	"codeberg.org/enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/config/store"
 )
 
 func setupInserts(t *testing.T) {

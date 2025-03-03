@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"codeberg.org/enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/backend"
 )
 
 // Conv will convert 1-N files
