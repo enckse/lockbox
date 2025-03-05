@@ -4,6 +4,7 @@ version := `git log -n 1 --format=%h`
 object  := target / "lb"
 ldflags := env_var_or_default("LDFLAGS", "")
 gotest  := "LOCKBOX_CONFIG_TOML=fake go test"
+files   := `find . -type f -name "*.go" | tr '\n' ' '`
 
 default: build
 
@@ -23,3 +24,10 @@ clean:
   rm -f "{{object}}"
   find internal/ cmd/ -type f -wholename "*testdata*" -delete
   find internal/ cmd/ -type d -empty -delete
+
+lint:
+    @go tool revive ./...
+    @go tool staticcheck -checks all -debug.run-quickfix-analyzers ./...
+    @go tool gofumpt -l -extra {{files}} 
+    @go tool modernize -test ./...
+    @go vet ./...
