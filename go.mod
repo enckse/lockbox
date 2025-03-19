@@ -5,7 +5,7 @@ go 1.23.4
 toolchain go1.24.1
 
 require (
-	github.com/BurntSushi/toml v1.4.1-0.20240526193622-a339e1f7089c
+	github.com/BurntSushi/toml v1.5.0
 	github.com/aymanbagabas/go-osc52 v1.2.2
 	github.com/pquerna/otp v1.4.0
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
