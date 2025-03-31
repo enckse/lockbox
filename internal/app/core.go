@@ -28,8 +28,8 @@ type (
 
 	// DefaultCommand is the default CLI app type for actual execution
 	DefaultCommand struct {
-		args []string
 		tx   *backend.Transaction
+		args []string
 	}
 )
 

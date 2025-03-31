@@ -11,11 +11,11 @@ import (
 
 type (
 	mockKeyer struct {
+		t       *testing.T
 		pass    string
-		confirm bool
 		args    []string
 		buf     bytes.Buffer
-		t       *testing.T
+		confirm bool
 		pipe    bool
 	}
 )

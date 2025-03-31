@@ -11,11 +11,11 @@ import (
 
 type (
 	mockCommand struct {
+		t         *testing.T
+		args      []string
+		buf       bytes.Buffer
 		confirmed bool
 		confirm   bool
-		args      []string
-		t         *testing.T
-		buf       bytes.Buffer
 	}
 )
 

@@ -16,8 +16,8 @@ type (
 		requirement string
 	}
 	environmentDefault[T any] struct {
-		environmentBase
 		value T
+		environmentBase
 	}
 	environmentStrings struct {
 		environmentDefault[string]
@@ -27,8 +27,8 @@ type (
 	// EnvironmentInt are environment settings that are integers
 	EnvironmentInt struct {
 		environmentDefault[int]
-		canZero bool
 		short   string
+		canZero bool
 	}
 	// EnvironmentBool are environment settings that are booleans
 	EnvironmentBool struct {
@@ -36,9 +36,9 @@ type (
 	}
 	// EnvironmentFormatter allows for sending a string into a get request
 	EnvironmentFormatter struct {
+		fxn func(string, string) string
 		environmentBase
 		allowed string
-		fxn     func(string, string) string
 	}
 	// EnvironmentString represents a string variable
 	EnvironmentString struct {
@@ -50,9 +50,9 @@ type (
 	}
 	metaData struct {
 		value     string
-		allowed   []string
 		tomlType  tomlType
 		tomlValue string
+		allowed   []string
 		canExpand bool
 	}
 )

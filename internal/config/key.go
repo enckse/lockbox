@@ -15,8 +15,8 @@ type (
 	AskPassword func() (string, error)
 	// Key is a wrapper to help manage the returned key
 	Key struct {
-		inputKey []string
 		mode     KeyModeType
+		inputKey []string
 		valid    bool
 	}
 )

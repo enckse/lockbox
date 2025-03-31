@@ -76,6 +76,6 @@ var (
 
 // ReKeyArgs is the base definition of re-keying args
 type ReKeyArgs struct {
-	NoKey   bool
 	KeyFile string
+	NoKey   bool
 }

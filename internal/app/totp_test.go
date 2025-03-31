@@ -14,8 +14,8 @@ import (
 
 type (
 	mockOptions struct {
-		buf bytes.Buffer
 		tx  *backend.Transaction
+		buf bytes.Buffer
 	}
 )
 

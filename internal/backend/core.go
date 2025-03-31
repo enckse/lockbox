@@ -30,8 +30,8 @@ type (
 	QuerySeq2 iter.Seq2[Entity, error]
 	// Transaction handles the overall operation of the transaction
 	Transaction struct {
-		valid    bool
 		file     string
+		valid    bool
 		exists   bool
 		write    bool
 		readonly bool

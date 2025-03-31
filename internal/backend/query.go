@@ -17,9 +17,9 @@ import (
 type (
 	// QueryOptions indicates how to find entities
 	QueryOptions struct {
+		Criteria string
 		Mode     QueryMode
 		Values   ValueMode
-		Criteria string
 	}
 	// JSON is an entry as a JSON string
 	JSON struct {

@@ -15,8 +15,8 @@ type (
 
 	// KeyValue are values exportable for interrogation beyond the store
 	KeyValue struct {
-		Key   string
 		Value any
+		Key   string
 	}
 )
 

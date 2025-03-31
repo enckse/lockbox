@@ -20,8 +20,8 @@ type (
 	Hook struct {
 		path    string
 		mode    ActionMode
-		enabled bool
 		scripts []string
+		enabled bool
 	}
 )
 

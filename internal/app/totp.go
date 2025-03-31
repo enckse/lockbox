@@ -30,13 +30,13 @@ type (
 	Mode int
 	// TOTPArguments are the parsed TOTP call arguments
 	TOTPArguments struct {
-		Mode  Mode
 		Entry string
 		token string
+		Mode  Mode
 	}
 	totpWrapper struct {
-		opts otp.ValidateOpts
 		code string
+		opts otp.ValidateOpts
 	}
 	// TOTPOptions are TOTP call options
 	TOTPOptions struct {
