@@ -23,7 +23,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517 // indirect
-	github.com/mgechev/revive v1.8.0 // indirect
+	github.com/mgechev/revive v1.9.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/spf13/afero v1.14.0 // indirect

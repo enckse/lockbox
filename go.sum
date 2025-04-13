@@ -33,8 +33,8 @@ github.com/mattn/go-runewidth v0.0.16 h1:E5ScNMtiwvlvB5paMFdw9p4kSQzbXFikJ5SQO6T
 github.com/mattn/go-runewidth v0.0.16/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517 h1:zpIH83+oKzcpryru8ceC6BxnoG8TBrhgAvRg8obzup0=
 github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517/go.mod h1:KQ7+USdGKfpPjXk4Ga+5XxQM4Lm4e3gAogrreFAYpOg=
-github.com/mgechev/revive v1.8.0 h1:GRtZfbR+USnEs9kiTgokw0LKEQfPPM3EJpu/88IcXl4=
-github.com/mgechev/revive v1.8.0/go.mod h1:AEte1jB8fAHGObV1BshB7WSfp3x/WZwAu/xNiClBK2Y=
+github.com/mgechev/revive v1.9.0 h1:8LaA62XIKrb8lM6VsBSQ92slt/o92z5+hTw3CmrvSrM=
+github.com/mgechev/revive v1.9.0/go.mod h1:LAPq3+MgOf7GcL5PlWIkHb0PT7XH4NuC2LdWymhb9Mo=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
