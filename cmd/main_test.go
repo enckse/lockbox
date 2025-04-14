@@ -352,7 +352,7 @@ func test(profile string) error {
 	r.run("", "ls")
 
 	// pwgen
-	c["pwgen.words_command"] = "[\"/bin/sh\", \"-c\", \"echo abc abc | tr ' ' '\\n'\"]"
+	c["pwgen.word_command"] = "[\"/bin/sh\", \"-c\", \"echo abc abc | tr ' ' '\\n'\"]"
 	c["pwgen.word_count"] = "1"
 	r.writeConfig(c)
 	r.run("", "pwgen")

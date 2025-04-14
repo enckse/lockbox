@@ -284,7 +284,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 		environmentStrings: environmentStrings{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					key:         genCategory + "WORDS_COMMAND",
+					key:         genCategory + "WORD_COMMAND",
 					description: "Command to retrieve the word list to use for password generation (must be split by newline).",
 				}),
 			flags: []stringsFlags{isCommandFlag},
