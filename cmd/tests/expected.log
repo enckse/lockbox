@@ -177,6 +177,6 @@ LOCKBOX_JSON_MODE=hash
 LOCKBOX_PWGEN_CHARACTERS=b
 LOCKBOX_PWGEN_TEMPLATE={{range $idx, $val := .}}{{if lt $val.Position.End 5}}{{ $val.Text }}{{end}}{{end}}
 LOCKBOX_PWGEN_TITLE=false
-LOCKBOX_PWGEN_WORDS_COMMAND=[/bin/sh -c echo abc abc | tr ' ' '
 LOCKBOX_PWGEN_WORD_COUNT=2
+LOCKBOX_PWGEN_WORDS_COMMAND=[/bin/sh -c echo abc abc | tr ' ' '
 LOCKBOX_STORE=testdata/datadir/pass.kdbx

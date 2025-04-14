@@ -36,7 +36,7 @@ require (
 	golang.org/x/tools v0.32.0 // indirect
 	golang.org/x/tools/gopls v0.18.1 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
-	mvdan.cc/gofumpt v0.7.0 // indirect
+	mvdan.cc/gofumpt v0.8.0 // indirect
 )
 
 tool (
