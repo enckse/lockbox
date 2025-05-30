@@ -13,8 +13,6 @@ import (
 
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/util"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // GeneratePassword generates a password
@@ -37,12 +35,7 @@ func GeneratePassword(cmd CommandOptions) error {
 	if len(wordList) > 1 {
 		args = wordList[1:]
 	}
-	capitalize := config.EnvPasswordGenTitle.Get()
 	wordResults, err := exec.Command(exe, args...).Output()
-	if err != nil {
-		return err
-	}
-	lang, err := language.Parse(config.EnvLanguage.Get())
 	if err != nil {
 		return err
 	}
@@ -54,7 +47,6 @@ func GeneratePassword(cmd CommandOptions) error {
 			allowedChars = append(allowedChars, c)
 		}
 	}
-	caser := cases.Title(lang)
 	var choices []string
 	for _, line := range strings.Split(string(wordResults), "\n") {
 		t := strings.TrimSpace(line)
@@ -73,9 +65,6 @@ func GeneratePassword(cmd CommandOptions) error {
 				continue
 			}
 			use = res
-		}
-		if capitalize {
-			use = caser.String(use)
 		}
 		choices = append(choices, use)
 	}

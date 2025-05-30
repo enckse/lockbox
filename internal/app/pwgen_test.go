@@ -77,15 +77,13 @@ func TestGenerate(t *testing.T) {
 	store.SetArray("LOCKBOX_PWGEN_WORD_COMMAND", []string{pwgenPath, "1 1 1 1 1 1 1 1 1 1 1 1"})
 	testPasswordGen(t, "1-1-1-1-1-1-1-1-1-1")
 	store.SetInt64("LOCKBOX_PWGEN_WORD_COUNT", 4)
-	store.SetBool("LOCKBOX_PWGEN_TITLE", true)
 	store.SetArray("LOCKBOX_PWGEN_WORD_COMMAND", []string{pwgenPath, "a a a a a a a a a a a a a a a a a a a a a a"})
-	testPasswordGen(t, "A-A-A-A")
+	testPasswordGen(t, "a-a-a-a")
 	store.SetString("LOCKBOX_PWGEN_CHARACTERS", "bc")
 	store.SetArray("LOCKBOX_PWGEN_WORD_COMMAND", []string{pwgenPath, "abc abc abc abc abc abc aaa aa aaa a"})
-	testPasswordGen(t, "Bc-Bc-Bc-Bc")
+	testPasswordGen(t, "bc-bc-bc-bc")
 	store.SetString("LOCKBOX_PWGEN_CHARACTERS", "")
 	store.SetArray("LOCKBOX_PWGEN_WORD_COMMAND", []string{pwgenPath, "a a a a a a a a a a a a a a a a a a a a a a"})
-	store.SetBool("LOCKBOX_PWGEN_TITLE", false)
 	testPasswordGen(t, "a-a-a-a")
 	// NOTE: this allows templating below in golang
 	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range $idx, $val := .}}{{if lt $idx 5}}-{{end}}{{ $val.Text }}{{ $val.Position.Start }}{{ $val.Position.End }}{{end}}")
@@ -93,14 +91,13 @@ func TestGenerate(t *testing.T) {
 	store.SetString("LOCKBOX_PWGEN_TEMPLATE", "{{range $idx, $val := .}}{{if lt $idx 5}}-{{end}}{{ $val.Text }}{{end}}")
 	testPasswordGen(t, "-a-a-a-a")
 	store.Clear()
-	store.SetBool("LOCKBOX_PWGEN_TITLE", true)
 	store.SetArray("LOCKBOX_PWGEN_WORD_COMMAND", []string{pwgenPath, "abc axy axY aZZZ aoijafea aoiajfoea afeafa"})
 	m := newMockCommand(t)
 	if err := app.GeneratePassword(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	s := m.buf.String()
-	if s[0] != 'A' {
+	if s[0] != 'a' {
 		t.Errorf("no title: %s", s)
 	}
 	if len(s) < 5 {

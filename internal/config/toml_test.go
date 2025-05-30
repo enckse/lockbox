@@ -13,6 +13,10 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
 )
 
+var emptyRead = func(_ string) (io.Reader, error) {
+	return nil, nil
+}
+
 func TestLoadIncludes(t *testing.T) {
 	store.Clear()
 	defer os.Clearenv()
@@ -92,10 +96,7 @@ func TestArrayLoad(t *testing.T) {
 copy_command = ["'xyz/$TEST'", "s", 1]
 `
 	r := strings.NewReader(data)
-	err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err == nil || err.Error() != "value is not string in array: 1" {
+	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "value is not string in array: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -104,9 +105,7 @@ store="xyz"
 copy_command = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.LoadConfig(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -126,9 +125,7 @@ store="xyz"
 copy_command = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.LoadConfig(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -151,10 +148,7 @@ func TestReadInt(t *testing.T) {
 timeout = true
 `
 	r := strings.NewReader(data)
-	err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err == nil || err.Error() != "non-int64 found where expected: true" {
+	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-int64 found where expected: true" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -162,9 +156,7 @@ timeout = true
 timeout = 1
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.LoadConfig(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -179,10 +171,7 @@ timeout = 1
 timeout = -1
 `
 	r = strings.NewReader(data)
-	err = config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err == nil || err.Error() != "-1 is negative (not allowed here)" {
+	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "-1 is negative (not allowed here)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -194,10 +183,7 @@ func TestReadBool(t *testing.T) {
 enabled = 1
 `
 	r := strings.NewReader(data)
-	err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err == nil || err.Error() != "non-bool found where expected: 1" {
+	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-bool found where expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -205,9 +191,7 @@ enabled = 1
 enabled = true
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.LoadConfig(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -222,9 +206,7 @@ enabled = true
 enabled = false
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.LoadConfig(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -243,10 +225,7 @@ func TestBadValues(t *testing.T) {
 enabled = "false"
 `
 	r := strings.NewReader(data)
-	err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err == nil || err.Error() != "unknown key: totsp_enabled (LOCKBOX_TOTSP_ENABLED)" {
+	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "unknown key: totsp_enabled (LOCKBOX_TOTSP_ENABLED)" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -254,10 +233,7 @@ enabled = "false"
 otp_format = -1
 `
 	r = strings.NewReader(data)
-	err = config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	})
-	if err == nil || err.Error() != "non-string found where expected: -1" {
+	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-string found where expected: -1" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -275,7 +251,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(store.List()) != 30 {
+	if len(store.List()) != 28 {
 		t.Errorf("invalid environment after load")
 	}
 }
@@ -290,9 +266,7 @@ clip.copy_command = ["$TEST", "$TEST"]
 otp_format = "$TEST"
 `
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.LoadConfig(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 3 {

@@ -56,10 +56,6 @@ func TestIsNoGeneratePassword(t *testing.T) {
 	checkYesNo("LOCKBOX_PWGEN_ENABLED", t, config.EnvPasswordGenEnabled, true)
 }
 
-func TestIsTitle(t *testing.T) {
-	checkYesNo("LOCKBOX_PWGEN_TITLE", t, config.EnvPasswordGenTitle, true)
-}
-
 func TestTOTP(t *testing.T) {
 	store.Clear()
 	if config.EnvTOTPEntry.Get() != "totp" {
@@ -177,7 +173,6 @@ func TestDefaultStrings(t *testing.T) {
 	for k, v := range map[string]config.EnvironmentString{
 		"totp":    config.EnvTOTPEntry,
 		"hash":    config.EnvJSONMode,
-		"en-US":   config.EnvLanguage,
 		"command": config.EnvPasswordMode,
 		"{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}": config.EnvPasswordGenTemplate,
 	} {

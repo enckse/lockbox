@@ -259,14 +259,6 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			}),
 		short: "word count",
 	})
-	// EnvPasswordGenTitle indicates if titling (e.g. uppercasing) will occur to words
-	EnvPasswordGenTitle = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(true,
-			environmentBase{
-				key:         genCategory + "TITLE",
-				description: "Title words during password generation.",
-			}),
-	})
 	// EnvPasswordGenTemplate is the output template for controlling how output words are placed together
 	EnvPasswordGenTemplate = environmentRegister(EnvironmentString{
 		environmentStrings: environmentStrings{
@@ -288,18 +280,6 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 					description: "Command to retrieve the word list to use for password generation (must be split by newline).",
 				}),
 			flags: []stringsFlags{isCommandFlag},
-		},
-	})
-	// EnvLanguage is the language to use for everything
-	EnvLanguage = environmentRegister(EnvironmentString{
-		environmentStrings: environmentStrings{
-			environmentDefault: newDefaultedEnvironment("en-US",
-				environmentBase{
-					key:         "LANGUAGE",
-					description: "Language to run under.",
-				}),
-			allowed: []string{"<language code>"},
-			flags:   []stringsFlags{canDefaultFlag},
 		},
 	})
 	// EnvPasswordGenEnabled indicates if password generation is enabled
