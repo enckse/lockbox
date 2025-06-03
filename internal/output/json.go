@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/reflect"
 )
 
 // JSONModes are the JSON data output types for exporting/output of values
@@ -29,7 +29,7 @@ type (
 
 // List will list the output modes on the struct
 func (p JSONTypes) List() []string {
-	return util.ListFields(p)
+	return reflect.ListFields(p)
 }
 
 // ParseJSONMode handles detecting the JSON output mode

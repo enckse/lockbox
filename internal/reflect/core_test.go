@@ -1,10 +1,10 @@
-package util_test
+package reflect_test
 
 import (
 	"fmt"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/reflect"
 )
 
 type mock struct {
@@ -13,7 +13,7 @@ type mock struct {
 }
 
 func TestListFields(t *testing.T) {
-	fields := util.ListFields(mock{"abc", "xyz"})
+	fields := reflect.ListFields(mock{"abc", "xyz"})
 	if len(fields) != 2 || fmt.Sprintf("%v", fields) != "[abc xyz]" {
 		t.Errorf("invalid fields: %v", fields)
 	}

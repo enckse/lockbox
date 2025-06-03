@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/completions"
-	"git.sr.ht/~enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/reflect"
 )
 
 func TestCompletions(t *testing.T) {
@@ -28,7 +28,7 @@ func TestConditionals(t *testing.T) {
 	if len(c.Exported) != len(need) || fmt.Sprintf("%v", c.Exported) != fmt.Sprintf("%v", need) {
 		t.Errorf("invalid exports: %v", c.Exported)
 	}
-	fields := util.ListFields(c.Not)
+	fields := reflect.ListFields(c.Not)
 	if len(fields) != len(need)+1 {
 		t.Errorf("invalid fields: %v", fields)
 	}

@@ -1,5 +1,5 @@
-// Package util has reflection helpers
-package util
+// Package reflect has reflection helpers
+package reflect
 
 import (
 	"fmt"
