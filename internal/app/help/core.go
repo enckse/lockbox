@@ -149,7 +149,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 }
 
 func processDoc(header, file string, doc Documentation) (string, error) {
-	b, err := util.ReadDirFile(docDir, file, docs)
+	b, err := docs.ReadFile(filepath.Join(docDir, file))
 	if err != nil {
 		return "", err
 	}

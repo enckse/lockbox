@@ -5,13 +5,13 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"path/filepath"
 	"slices"
 	"sort"
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 type (
@@ -134,11 +134,12 @@ func Generate(completionType, exe string) ([]string, error) {
 			commands.TOTPClip:   c.Conditionals.Not.CanClip,
 			commands.TOTPInsert: c.Conditionals.Not.ReadOnly,
 		})
-	using, err := util.ReadDirFile("shell", fmt.Sprintf("%s.sh", completionType), shell)
+
+	using, err := shell.ReadFile(filepath.Join("shell", fmt.Sprintf("%s.sh", completionType)))
 	if err != nil {
 		return nil, err
 	}
-	s, err := templateScript(using, c)
+	s, err := templateScript(string(using), c)
 	if err != nil {
 		return nil, err
 	}
