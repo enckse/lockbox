@@ -13,7 +13,7 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/backend"
 	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/output"
 )
 
 const (
@@ -161,7 +161,7 @@ func processDoc(header, file string, doc Documentation) (string, error) {
 	if err := t.Execute(&buf, doc); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s\n%s", header, util.TextWrap(0, buf.String())), nil
+	return fmt.Sprintf("%s\n%s", header, output.TextWrap(0, buf.String())), nil
 }
 
 func setDocFlag(f string) string {

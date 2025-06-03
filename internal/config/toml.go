@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
-	"git.sr.ht/~enckse/lockbox/internal/util"
+	"git.sr.ht/~enckse/lockbox/internal/output"
 	"github.com/BurntSushi/toml"
 )
 
@@ -106,7 +106,7 @@ func generateDetailText(data printer) (string, error) {
 	if len(value) == 0 {
 		value = unset
 	}
-	description := strings.TrimSpace(util.TextWrap(2, env.description))
+	description := strings.TrimSpace(output.TextWrap(2, env.description))
 	requirement := "optional/default"
 	r := strings.TrimSpace(env.requirement)
 	if r != "" {

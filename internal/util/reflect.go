@@ -5,6 +5,20 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
+)
+
+type (
+	// Position is the start/end of a word in a greater set
+	Position struct {
+		Start int
+		End   int
+	}
+	// Word is the text and position in a greater position
+	Word struct {
+		Text     string
+		Position Position
+	}
 )
 
 // ListFields will get the values of strings on an "all string" struct
@@ -29,4 +43,9 @@ func readNested(v reflect.Type, root string) []string {
 		}
 	}
 	return fields
+}
+
+// TextPositionFields is the displayable set of templated fields
+func TextPositionFields() string {
+	return strings.Join(readNested(reflect.TypeOf(Word{}), ""), ", ")
 }
