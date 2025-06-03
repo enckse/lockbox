@@ -172,7 +172,7 @@ var (
 				environmentBase{
 					key: totpCategory + "COLOR_WINDOWS",
 					description: fmt.Sprintf(`Override when to set totp generated outputs to different colors,
-must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each).`, util.TimeWindowSpan),
+must be a list of one (or more) rules where a '%s' delimits the start and end second (0-60 for each).`, TimeWindowSpan),
 				}),
 			flags:   []stringsFlags{canDefaultFlag},
 			allowed: exampleColorWindows,

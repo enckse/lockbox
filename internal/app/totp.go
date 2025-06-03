@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/backend"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
-	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 var (
@@ -78,12 +78,12 @@ func clearFunc() {
 	fmt.Print("\033[H\033[2J")
 }
 
-func colorWhenRules() ([]util.TimeWindow, error) {
+func colorWhenRules() ([]config.TimeWindow, error) {
 	envTime := config.EnvTOTPColorBetween.Get()
 	if slices.Compare(envTime, config.TOTPDefaultBetween) == 0 {
 		return config.TOTPDefaultColorWindow, nil
 	}
-	return util.ParseTimeWindow(envTime...)
+	return ParseTimeWindow(envTime...)
 }
 
 func (w totpWrapper) generateCode() (string, error) {
@@ -283,4 +283,35 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 		}
 	}
 	return opts, nil
+}
+
+// ParseTimeWindow will handle parsing a window of colors for TOTP operations
+func ParseTimeWindow(windows ...string) ([]config.TimeWindow, error) {
+	var rules []config.TimeWindow
+	for _, item := range windows {
+		line := strings.TrimSpace(item)
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, config.TimeWindowSpan)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid colorization rule found: %s", line)
+		}
+		s, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return nil, err
+		}
+		e, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return nil, err
+		}
+		if s < 0 || e < 0 || e < s || s > 59 || e > 59 {
+			return nil, fmt.Errorf("invalid time found for colorization rule: %s", line)
+		}
+		rules = append(rules, config.TimeWindow{Start: s, End: e})
+	}
+	if len(rules) == 0 {
+		return nil, errors.New("invalid colorization rules for totp, none found")
+	}
+	return rules, nil
 }

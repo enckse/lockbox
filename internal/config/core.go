@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
-	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 const (
@@ -29,10 +28,12 @@ const (
 	requiredKeyOrKeyFile = "a key, a key file, or both must be set"
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat      = time.RFC3339
-	exampleColorWindow = "start" + util.TimeWindowSpan + "end"
+	exampleColorWindow = "start" + TimeWindowSpan + "end"
 	detectedValue      = "(detected)"
 	unset              = "(unset)"
 	arrayDelimiter     = " "
+	// TimeWindowSpan indicates the delineation between start -> end (start:end)
+	TimeWindowSpan = ":"
 )
 
 const (
@@ -56,18 +57,24 @@ var (
 	// NoValue is the string variant of 'No' (or false) items
 	NoValue = strconv.FormatBool(false)
 	// TOTPDefaultColorWindow is the default coloring rules for totp
-	TOTPDefaultColorWindow = []util.TimeWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
+	TOTPDefaultColorWindow = []TimeWindow{{Start: 0, End: 5}, {Start: 30, End: 35}}
 	// TOTPDefaultBetween is the default color window as a string
 	TOTPDefaultBetween = func() []string {
 		var results []string
 		for _, w := range TOTPDefaultColorWindow {
-			results = append(results, fmt.Sprintf("%d%s%d", w.Start, util.TimeWindowSpan, w.End))
+			results = append(results, fmt.Sprintf("%d%s%d", w.Start, TimeWindowSpan, w.End))
 		}
 		return results
 	}()
 )
 
 type (
+	// TimeWindow for handling terminal colors based on timing
+	TimeWindow struct {
+		Start int
+		End   int
+	}
+
 	stringsFlags int
 	printer      interface {
 		display() metaData
