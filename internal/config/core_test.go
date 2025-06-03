@@ -62,3 +62,10 @@ func TestCanColor(t *testing.T) {
 		t.Error("should NOT be able to color")
 	}
 }
+
+func TestTextFields(t *testing.T) {
+	v := config.TextPositionFields()
+	if v != "Text, Position.Start, Position.End" {
+		t.Errorf("unexpected fields: %s", v)
+	}
+}

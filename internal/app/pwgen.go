@@ -12,7 +12,6 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 // GeneratePassword generates a password
@@ -72,13 +71,13 @@ func GeneratePassword(cmd CommandOptions) error {
 	if found == 0 {
 		return errors.New("no sources given")
 	}
-	var selected []util.Word
+	var selected []config.Word
 	var cnt int64
 	totalLength := 0
 	for cnt < length {
 		choice := choices[rand.Intn(found)]
 		textLength := len(choice)
-		selected = append(selected, util.Word{Text: choice, Position: util.Position{Start: totalLength, End: totalLength + textLength}})
+		selected = append(selected, config.Word{Text: choice, Position: config.Position{Start: totalLength, End: totalLength + textLength}})
 		totalLength += textLength
 		cnt++
 	}

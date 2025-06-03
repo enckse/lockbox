@@ -7,7 +7,6 @@ import (
 
 	"git.sr.ht/~enckse/lockbox/internal/output"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
-	"git.sr.ht/~enckse/lockbox/internal/util"
 )
 
 var (
@@ -265,7 +264,7 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			environmentDefault: newDefaultedEnvironment("{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}",
 				environmentBase{
 					key:         genCategory + "TEMPLATE",
-					description: fmt.Sprintf("The go text template to use to format the chosen words into a password. Available fields: %s.", util.TextPositionFields()),
+					description: fmt.Sprintf("The go text template to use to format the chosen words into a password. Available fields: %s.", TextPositionFields()),
 				}),
 			allowed: []string{"<go template>"},
 			flags:   []stringsFlags{canDefaultFlag},
