@@ -252,6 +252,7 @@ func test(profile string) error {
 	r.run("", "mv move/ma/ka3/* move/mac/")
 	r.run("", "mv key/a/one keyx/d/e")
 	r.run("", "ls")
+	r.run("", "find keyx")
 	r.run("echo y |", "rm move/*")
 	r.run("echo y |", "rm keyx/d/e")
 	r.logAppend("echo")

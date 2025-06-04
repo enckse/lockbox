@@ -71,8 +71,8 @@ func run() error {
 	switch command {
 	case commands.ReKey:
 		return app.ReKey(p)
-	case commands.List:
-		return app.List(p)
+	case commands.List, commands.Find:
+		return app.List(p, command == commands.Find)
 	case commands.Move:
 		return app.Move(p)
 	case commands.Insert, commands.MultiLine:

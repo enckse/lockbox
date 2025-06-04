@@ -3,6 +3,7 @@ package app_test
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
@@ -42,14 +43,56 @@ func setup(t *testing.T) *backend.Transaction {
 
 func TestList(t *testing.T) {
 	m := newMockCommand(t)
-	if err := app.List(m); err != nil {
+	if err := app.List(m, false); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
 		t.Error("nothing listed")
 	}
 	m.args = []string{"test"}
-	if err := app.List(m); err.Error() != "list does not support any arguments" {
+	if err := app.List(m, false); err == nil || err.Error() != "list does not support any arguments" {
 		t.Errorf("invalid error: %v", err)
+	}
+}
+
+func TestFind(t *testing.T) {
+	m := newMockCommand(t)
+	if err := app.List(m, true); err == nil || err.Error() != "find requires one argument" {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Error("something listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"["}
+	if err := app.List(m, true); err == nil || !strings.Contains(err.Error(), "missing closing") {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Error("something listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"test", "1"}
+	if err := app.List(m, true); err == nil || err.Error() != "find requires one argument" {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Error("something listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"[zzzzzz]"}
+	if err := app.List(m, true); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Error("something listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"test"}
+	if err := app.List(m, true); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() == "" {
+		t.Error("nothing listed")
 	}
 }
