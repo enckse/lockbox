@@ -4,6 +4,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -60,6 +61,8 @@ const (
 	MinimalTOTPMode
 	// ListTOTPMode lists the available tokens
 	ListTOTPMode
+	// FindTOTPMode is list but with a regexp filter
+	FindTOTPMode
 	// OnceTOTPMode will only show the token once and exit
 	OnceTOTPMode
 )
@@ -222,17 +225,32 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 	if !opts.CanTOTP() {
 		return ErrNoTOTP
 	}
-	if args.Mode == ListTOTPMode {
+	if args.Mode == ListTOTPMode || args.Mode == FindTOTPMode {
 		e, err := opts.app.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token)})
 		if err != nil {
 			return err
 		}
 		writer := opts.app.Writer()
+		printer := func(entity backend.Entity) {
+			fmt.Fprintf(writer, "%s\n", entity.Directory())
+		}
+		filter := printer
+		if args.Mode == FindTOTPMode {
+			re, err := regexp.Compile(args.Entry)
+			if err != nil {
+				return err
+			}
+			filter = func(entity backend.Entity) {
+				if re.MatchString(entity.Path) {
+					printer(entity)
+				}
+			}
+		}
 		for entry, err := range e {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(writer, "%s\n", entry.Directory())
+			filter(entry)
 		}
 		return nil
 	}
@@ -258,6 +276,8 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 			return nil, errors.New("list takes no arguments")
 		}
 		opts.Mode = ListTOTPMode
+	case commands.TOTPFind:
+		opts.Mode = FindTOTPMode
 	case commands.TOTPInsert:
 		opts.Mode = InsertTOTPMode
 	case commands.TOTPShow:

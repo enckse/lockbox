@@ -40,6 +40,7 @@ _{{ $.Executable }}() {
           ;;
         "{{ $.TOTPCommand }}")
           opts="{{ $.TOTPListCommand }} "
+          opts="{{ $.TOTPFindCommand }} "
 {{- range $key, $value := .TOTPSubCommands }}
           if {{ $value.Conditional }}; then
             opts="$opts {{ $value.Key }}"

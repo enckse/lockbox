@@ -100,6 +100,10 @@ func TestNewTOTPArguments(t *testing.T) {
 	if args.Mode != app.ListTOTPMode || args.Entry != "" {
 		t.Error("invalid args")
 	}
+	args, _ = app.NewTOTPArguments([]string{"find", "tesst"}, "test")
+	if args.Mode != app.FindTOTPMode || args.Entry == "" {
+		t.Error("invalid args")
+	}
 	args, _ = app.NewTOTPArguments([]string{"show", "test"}, "test")
 	if args.Mode != app.ShowTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
@@ -266,5 +270,25 @@ func TestParseWindows(t *testing.T) {
 	}
 	if _, err := app.ParseTimeWindow("1:2", " 11:22"); err != nil {
 		t.Errorf("invalid error: %v", err)
+	}
+}
+
+func TestTOTPFind(t *testing.T) {
+	setupTOTP(t)
+	args, _ := app.NewTOTPArguments([]string{"find", "test"}, "totp")
+	m, opts := newMock(t)
+	if err := args.Do(opts); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "test/test2\ntest/test3\n" {
+		t.Errorf("invalid list: %s", m.buf.String())
+	}
+	m.buf.Reset()
+	args, _ = app.NewTOTPArguments([]string{"find", "[zzzz]"}, "totp")
+	if err := args.Do(opts); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Errorf("invalid list: %s", m.buf.String())
 	}
 }

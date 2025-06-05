@@ -65,6 +65,7 @@ _{{ $.Executable }}() {
           case "$len" in
             3)
               compadd "$@" {{ $.TOTPListCommand }}
+              compadd "$@" {{ $.TOTPFindCommand }}
 {{- range $key, $value := .TOTPSubCommands }}
               if {{ $value.Conditional }}; then
                 compadd "$@" {{ $value.Key }}

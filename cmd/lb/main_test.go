@@ -228,6 +228,7 @@ func test(profile string) error {
 	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "totp insert test/k")
 	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "totp insert test/k/totp")
 	r.run("", "totp ls")
+	r.run("", "totp find test")
 	r.run("", "totp show test/k")
 	r.run("", "totp once test/k")
 	r.run("", "totp minimal test/k")

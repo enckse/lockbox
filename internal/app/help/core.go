@@ -107,6 +107,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPFind, isFilter, "find matching entries with totp settings"))
 	results = append(results, command(commands.Version, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}

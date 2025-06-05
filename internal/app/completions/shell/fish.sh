@@ -24,7 +24,8 @@ function {{ $.Executable }}-completion
     end
   end
   if {{ $.Conditionals.Not.CanTOTP }}
-    set -f totps ""
+    set -f totpbase "{{ $.TOTPFindCommand }} {{ $.TOTPListCommand }}"
+    set -f totps " $totpbase"
 {{- range $idx, $value := $.TOTPSubCommands }}
   {{- if gt $idx 0 }}
     set -f totps " $totps"
@@ -35,7 +36,7 @@ function {{ $.Executable }}-completion
 {{- end }}
     complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and not __fish_seen_subcommand_from $totps" -a "$totps"
     if {{ $.Conditionals.Not.AskMode }}
-      complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoTOTPList }})"
+      complete -c {{ $.Executable }} -n "__fish_seen_subcommand_from {{ $.TOTPCommand }}; and __fish_seen_subcommand_from $totps; and not __fish_seen_subcommand_from $totpbase; and test (count (commandline -opc)) -lt 4" -a "({{ $.DoTOTPList }})"
     end
   end
   if {{ $.Conditionals.Not.CanClip }} 

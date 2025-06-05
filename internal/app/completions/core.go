@@ -19,6 +19,7 @@ type (
 	Template struct {
 		InsertCommand       string
 		TOTPListCommand     string
+		TOTPFindCommand     string
 		RemoveCommand       string
 		ClipCommand         string
 		ShowCommand         string
@@ -104,6 +105,7 @@ func Generate(completionType, exe string) ([]string, error) {
 		InsertCommand:       commands.Insert,
 		RemoveCommand:       commands.Remove,
 		TOTPListCommand:     commands.TOTPList,
+		TOTPFindCommand:     commands.TOTPFind,
 		ClipCommand:         commands.Clip,
 		ShowCommand:         commands.Show,
 		MultiLineCommand:    commands.MultiLine,
