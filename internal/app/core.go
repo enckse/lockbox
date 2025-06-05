@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
 
 	"git.sr.ht/~enckse/lockbox/internal/backend"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
@@ -96,23 +95,4 @@ func (a DefaultCommand) Password() (string, error) {
 // Input will read user input
 func (a *DefaultCommand) Input(interactive bool) ([]byte, error) {
 	return platform.GetUserInputPassword(interactive)
-}
-
-func generatePrinter[T any](w io.Writer, isFilter bool, filter string, toMatch, toDisplay func(T) string) (func(T), error) {
-	printer := func(p T) {
-		fmt.Fprintf(w, "%s\n", toDisplay(p))
-	}
-	finder := printer
-	if isFilter {
-		re, err := regexp.Compile(filter)
-		if err != nil {
-			return nil, err
-		}
-		finder = func(p T) {
-			if re.MatchString(toMatch(p)) {
-				printer(p)
-			}
-		}
-	}
-	return finder, nil
 }

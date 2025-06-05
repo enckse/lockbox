@@ -3,6 +3,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 
 	"git.sr.ht/~enckse/lockbox/internal/backend"
 )
@@ -16,6 +17,7 @@ func List(cmd CommandOptions, isFind bool) error {
 		if len(args) != 1 {
 			return errors.New("find requires one argument")
 		}
+		opts.PathFilter = args[0]
 	} else {
 		if len(args) != 0 {
 			return errors.New("list does not support any arguments")
@@ -26,23 +28,11 @@ func List(cmd CommandOptions, isFind bool) error {
 		return err
 	}
 	w := cmd.Writer()
-	filter := ""
-	if isFind {
-		filter = args[0]
-	}
-	finder, err := generatePrinter(w, isFind, filter, func(p string) string {
-		return p
-	}, func(p string) string {
-		return p
-	})
-	if err != nil {
-		return err
-	}
 	for f, err := range e {
 		if err != nil {
 			return err
 		}
-		finder(f.Path)
+		fmt.Fprintf(w, "%s\n", f.Path)
 	}
 	return nil
 }

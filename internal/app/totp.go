@@ -225,24 +225,16 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListTOTPMode || args.Mode == FindTOTPMode {
-		e, err := opts.app.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token)})
+		e, err := opts.app.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token), PathFilter: args.Entry})
 		if err != nil {
 			return err
 		}
 		writer := opts.app.Writer()
-		filter, err := generatePrinter(writer, args.Mode == FindTOTPMode, args.Entry, func(e backend.Entity) string {
-			return e.Path
-		}, func(e backend.Entity) string {
-			return e.Directory()
-		})
-		if err != nil {
-			return err
-		}
 		for entry, err := range e {
 			if err != nil {
 				return err
 			}
-			filter(entry)
+			fmt.Fprintf(writer, "%s\n", entry.Directory())
 		}
 		return nil
 	}

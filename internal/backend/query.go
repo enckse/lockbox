@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -17,9 +18,10 @@ import (
 type (
 	// QueryOptions indicates how to find entities
 	QueryOptions struct {
-		Criteria string
-		Mode     QueryMode
-		Values   ValueMode
+		PathFilter string
+		Criteria   string
+		Mode       QueryMode
+		Values     ValueMode
 	}
 	// JSON is an entry as a JSON string
 	JSON struct {
@@ -129,6 +131,15 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	var entities []entity
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
+	hasPathFilter := args.PathFilter != ""
+	var pathFilter *regexp.Regexp
+	if hasPathFilter {
+		var err error
+		pathFilter, err = regexp.Compile(args.PathFilter)
+		if err != nil {
+			return nil, err
+		}
+	}
 	err := t.act(func(ctx Context) error {
 		forEach("", ctx.db.Content.Root.Groups[0].Groups, ctx.db.Content.Root.Groups[0].Entries, func(offset string, entry gokeepasslib.Entry) {
 			path := getPathName(entry)
@@ -155,6 +166,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					if path != args.Criteria {
 						return
 					}
+				}
+			}
+			if hasPathFilter {
+				if !pathFilter.MatchString(path) {
+					return
 				}
 			}
 			obj := entity{backing: entry, path: path}

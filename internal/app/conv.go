@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 
 	"git.sr.ht/~enckse/lockbox/internal/backend"
@@ -32,30 +31,17 @@ func Conv(cmd CommandOptions) error {
 }
 
 func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string) error {
-	e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.JSONValue})
+	e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.JSONValue, PathFilter: filter})
 	if err != nil {
 		return err
 	}
 	if isJSON {
 		fmt.Fprint(w, "{")
 	}
-	hasFilter := len(filter) > 0
-	var re *regexp.Regexp
-	if hasFilter {
-		re, err = regexp.Compile(filter)
-		if err != nil {
-			return err
-		}
-	}
 	printed := false
 	for item, err := range e {
 		if err != nil {
 			return err
-		}
-		if hasFilter {
-			if !re.MatchString(item.Path) {
-				continue
-			}
 		}
 		if printed {
 			if isJSON {

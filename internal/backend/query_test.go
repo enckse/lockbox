@@ -202,6 +202,19 @@ func TestQueryCallback(t *testing.T) {
 	if res[0].Path != "test/test/abc" {
 		t.Errorf("invalid results: %v", res)
 	}
+	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "test/test/abc", PathFilter: "abc"})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	res = testCollect(t, 1, seq)
+	if res[0].Path != "test/test/abc" {
+		t.Errorf("invalid results: %v", res)
+	}
+	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "test/test/abc", PathFilter: "abz"})
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	testCollect(t, 0, seq)
 	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "abczzz"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
