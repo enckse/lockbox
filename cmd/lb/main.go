@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -34,7 +35,17 @@ func handleEarly(command string, args []string) (bool, error) {
 	}
 	switch command {
 	case commands.Version:
-		fmt.Printf("version: %s\n", version)
+		vers := version
+		if vers == "" {
+			info, ok := debug.ReadBuildInfo()
+			if ok {
+				vers = info.Main.Version
+			}
+		}
+		if vers == "" {
+			vers = "(development)"
+		}
+		fmt.Printf("version: %s\n", vers)
 		return true, nil
 	case commands.Clear:
 		return true, clearClipboard()
