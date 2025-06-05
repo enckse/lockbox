@@ -3,8 +3,6 @@ package app
 
 import (
 	"errors"
-	"fmt"
-	"regexp"
 
 	"git.sr.ht/~enckse/lockbox/internal/backend"
 )
@@ -28,20 +26,17 @@ func List(cmd CommandOptions, isFind bool) error {
 		return err
 	}
 	w := cmd.Writer()
-	printer := func(p string) {
-		fmt.Fprintf(w, "%s\n", p)
-	}
-	finder := printer
+	filter := ""
 	if isFind {
-		re, err := regexp.Compile(args[0])
-		if err != nil {
-			return err
-		}
-		finder = func(p string) {
-			if re.MatchString(p) {
-				printer(p)
-			}
-		}
+		filter = args[0]
+	}
+	finder, err := generatePrinter(w, isFind, filter, func(p string) string {
+		return p
+	}, func(p string) string {
+		return p
+	})
+	if err != nil {
+		return err
 	}
 	for f, err := range e {
 		if err != nil {

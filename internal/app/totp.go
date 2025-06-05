@@ -4,7 +4,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -231,20 +230,13 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 			return err
 		}
 		writer := opts.app.Writer()
-		printer := func(entity backend.Entity) {
-			fmt.Fprintf(writer, "%s\n", entity.Directory())
-		}
-		filter := printer
-		if args.Mode == FindTOTPMode {
-			re, err := regexp.Compile(args.Entry)
-			if err != nil {
-				return err
-			}
-			filter = func(entity backend.Entity) {
-				if re.MatchString(entity.Path) {
-					printer(entity)
-				}
-			}
+		filter, err := generatePrinter(writer, args.Mode == FindTOTPMode, args.Entry, func(e backend.Entity) string {
+			return e.Path
+		}, func(e backend.Entity) string {
+			return e.Directory()
+		})
+		if err != nil {
+			return err
 		}
 		for entry, err := range e {
 			if err != nil {
