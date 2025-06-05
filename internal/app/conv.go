@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	"git.sr.ht/~enckse/lockbox/internal/backend"
@@ -39,13 +40,20 @@ func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string)
 		fmt.Fprint(w, "{")
 	}
 	hasFilter := len(filter) > 0
+	var re *regexp.Regexp
+	if hasFilter {
+		re, err = regexp.Compile(filter)
+		if err != nil {
+			return err
+		}
+	}
 	printed := false
 	for item, err := range e {
 		if err != nil {
 			return err
 		}
 		if hasFilter {
-			if !strings.Contains(item.Path, filter) {
+			if !re.MatchString(item.Path) {
 				continue
 			}
 		}

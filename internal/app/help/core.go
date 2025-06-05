@@ -76,8 +76,12 @@ func commandText(args, name, desc string) string {
 
 // Usage return usage information
 func Usage(verbose bool, exe string) ([]string, error) {
+	const (
+		isEntry  = "entry"
+		isFilter = "filter"
+	)
 	var results []string
-	results = append(results, command(commands.Clip, "entry", "copy the entry's value into the clipboard"))
+	results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
 	results = append(results, command(commands.Completions, "<shell>", "generate completions via auto-detection"))
 	for _, c := range commands.CompletionTypes {
 		results = append(results, subCommand(commands.Completions, c, "", fmt.Sprintf("generate %s completions", c)))
@@ -86,22 +90,23 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.Help, "", "show this usage information"))
 	results = append(results, subCommand(commands.Help, commands.HelpAdvanced, "", "display verbose help information"))
 	results = append(results, subCommand(commands.Help, commands.HelpConfig, "", "display verbose configuration information"))
-	results = append(results, command(commands.Insert, "entry", "insert a new entry into the store"))
-	results = append(results, command(commands.JSON, "filter", "display detailed information"))
+	results = append(results, command(commands.Insert, isEntry, "insert a new entry into the store"))
+	results = append(results, command(commands.JSON, isFilter, "display detailed information"))
 	results = append(results, command(commands.List, "", "list entries"))
+	results = append(results, command(commands.Find, isFilter, "find matching entries"))
 	results = append(results, command(commands.Move, "src dst", "move an entry from source to destination"))
-	results = append(results, command(commands.MultiLine, "entry", "insert a multiline entry into the store"))
+	results = append(results, command(commands.MultiLine, isEntry, "insert a multiline entry into the store"))
 	results = append(results, command(commands.PasswordGenerate, "", "generate a password"))
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
-	results = append(results, command(commands.Remove, "entry", "remove an entry from the store"))
-	results = append(results, command(commands.Show, "entry", "show the entry's value"))
-	results = append(results, command(commands.TOTP, "entry", "display an updating totp generated code"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPClip, "entry", "copy totp code to clipboard"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPInsert, "entry", "insert a new totp entry into the store"))
+	results = append(results, command(commands.Remove, isEntry, "remove an entry from the store"))
+	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
+	results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPInsert, isEntry, "insert a new totp entry into the store"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPList, "", "list entries with totp settings"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, "entry", "display the first generated code"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, "entry", "display one generated code (no details)"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, "entry", "show the totp entry"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
 	results = append(results, command(commands.Version, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
