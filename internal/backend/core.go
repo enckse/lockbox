@@ -138,9 +138,13 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 	return gokeepasslib.NewEncoder(f).Encode(db)
 }
 
+func isRestrictedField(key string) bool {
+	return key == notesKey || key == passKey || key == titleKey
+}
+
 func isTOTP(title string) (bool, error) {
 	t := config.EnvTOTPEntry.Get()
-	if t == notesKey || t == passKey || t == titleKey {
+	if isRestrictedField(t) {
 		return false, errors.New("invalid totp field, uses restricted name")
 	}
 	return NewSuffix(title) == NewSuffix(t), nil

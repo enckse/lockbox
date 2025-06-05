@@ -262,3 +262,94 @@ func TestSetModTime(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 }
+
+func TestAttributeModes(t *testing.T) {
+	store.Clear()
+	setupInserts(t)
+	fullSetup(t, true).Insert("test/test/totp", "atest")
+	q, err := fullSetup(t, true).Get("test/test/totp", backend.BlankValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if q.Value != "" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m := backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if m.Data != "d39e1526f86e69f9ff1f443f5a575b5ce516b66746773997fa11bd4aefb5facd0a6fa79d0b970cad3af342ff5a63f4df1a05ef110573631d84f174b7b1d17c63" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	if m.Attributes == nil || len(m.Attributes) != 1 {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	val, ok := m.Attributes["otp"]
+	if !ok || val != "7f8fd0e1a714f63da75206748d0ea1dd601fc8f92498bc87c9579b403c3004a0eefdd7ead976f7dbd6e5143c9aa7a569e24322d870ec7745a4605a154557458e" {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	if len(m.ModTime) < 20 {
+		t.Errorf("invalid date/time")
+	}
+	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
+	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if m.Data != "d39e1526f8" {
+		t.Errorf("invalid result value: %s", q.Value)
+	}
+	if m.Attributes == nil || len(m.Attributes) != 1 {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	val, ok = m.Attributes["otp"]
+	if !ok || val != "7f8fd0e1a7" {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	store.SetString("LOCKBOX_JSON_MODE", "PlAINtExt")
+	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(m.ModTime) < 20 || m.Data != "atest" {
+		t.Errorf("invalid json: %v", m)
+	}
+	if m.Attributes == nil || len(m.Attributes) != 1 {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	val, ok = m.Attributes["otp"]
+	if !ok || !strings.Contains(val, "otpauth://") {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	store.SetString("LOCKBOX_JSON_MODE", "emPty")
+	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	m = backend.JSON{}
+	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if len(m.ModTime) < 20 || m.Data != "" {
+		t.Errorf("invalid json: %v", m)
+	}
+	if m.Attributes == nil || len(m.Attributes) != 1 {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+	val, ok = m.Attributes["otp"]
+	if !ok || val != "" {
+		t.Errorf("invalid result value: %v", m.Attributes)
+	}
+}

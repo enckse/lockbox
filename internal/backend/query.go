@@ -25,8 +25,9 @@ type (
 	}
 	// JSON is an entry as a JSON string
 	JSON struct {
-		ModTime string `json:"modtime"`
-		Data    string `json:"data,omitempty"`
+		Attributes map[string]string `json:"attributes,omitempty"`
+		ModTime    string            `json:"modtime"`
+		Data       string            `json:"data,omitempty"`
 	}
 	// QueryMode indicates HOW an entity will be found
 	QueryMode int
@@ -199,14 +200,28 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		}
 		jsonMode = m
 	}
-	var hashLength int64
-	if jsonMode == output.JSONModes.Hash {
-		hashLength, err = config.EnvJSONHashLength.Get()
+	jsonHasher := func(string) string {
+		return ""
+	}
+	switch jsonMode {
+	case output.JSONModes.Raw:
+		jsonHasher = func(val string) string {
+			return val
+		}
+	case output.JSONModes.Hash:
+		hashLength, err := config.EnvJSONHashLength.Get()
 		if err != nil {
 			return nil, err
 		}
+		l := int(hashLength)
+		jsonHasher = func(val string) string {
+			data := fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+			if hashLength > 0 && len(data) > l {
+				data = data[0:hashLength]
+			}
+			return data
+		}
 	}
-	l := int(hashLength)
 	return func(yield func(Entity, error) bool) {
 		for _, item := range entities {
 			entity := Entity{Path: item.path}
@@ -218,18 +233,21 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 				}
 				switch args.Values {
 				case JSONValue:
-					data := ""
-					switch jsonMode {
-					case output.JSONModes.Raw:
-						data = val
-					case output.JSONModes.Hash:
-						data = fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
-						if hashLength > 0 && len(data) > l {
-							data = data[0:hashLength]
-						}
-					}
+					data := jsonHasher(val)
 					t := getValue(item.backing, modTimeKey)
-					s := JSON{ModTime: t, Data: data}
+					var attrs map[string]string
+					for _, v := range item.backing.Values {
+						if attrs == nil {
+							attrs = make(map[string]string)
+						}
+						key := v.Key
+						if isRestrictedField(key) || key == modTimeKey {
+							continue
+						}
+
+						attrs[key] = jsonHasher(v.Value.Content)
+					}
+					s := JSON{ModTime: t, Data: data, Attributes: attrs}
 					m, jErr := json.Marshal(s)
 					if jErr == nil {
 						entity.Value = string(m)
