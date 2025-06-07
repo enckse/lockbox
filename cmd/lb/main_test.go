@@ -28,7 +28,6 @@ const (
 	reKeyKeyData   = "rekeyfile"
 	clipWait       = 1
 	clipTries      = 6
-	hookDir        = "hooks"
 )
 
 var (
@@ -132,13 +131,7 @@ func unpackDir(dir, under string, mode os.FileMode) error {
 	for _, d := range dirs {
 		name := d.Name()
 		if d.IsDir() {
-			if name != hookDir {
-				return fmt.Errorf("unexpected embedded dir: %s", name)
-			}
-			if err := unpackDir(filepath.Join(dir, name), filepath.Join(under, name), 0o755); err != nil {
-				return err
-			}
-			continue
+			return fmt.Errorf("unexpected embedded dir: %s", name)
 		}
 		data, err := testingFiles.ReadFile(filepath.Join(dir, name))
 		if err != nil {

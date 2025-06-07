@@ -69,14 +69,6 @@ var (
 				description: "Enable terminal colors.",
 			}),
 	})
-	// EnvHooksEnabled indicates if hooks are enabled
-	EnvHooksEnabled = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(true,
-			environmentBase{
-				key:         hookCategory + "ENABLED",
-				description: "Enable hooks",
-			}),
-	})
 	// EnvInteractive indicates if operating in interactive mode
 	EnvInteractive = environmentRegister(EnvironmentBool{
 		environmentDefault: newDefaultedEnvironment(true,
@@ -116,18 +108,6 @@ var (
 				}),
 			allowed: []string{fileExample},
 			flags:   []stringsFlags{canExpandFlag},
-		},
-	})
-	// EnvHookDir is the directory of hooks to execute
-	EnvHookDir = environmentRegister(EnvironmentString{
-		environmentStrings: environmentStrings{
-			environmentDefault: newDefaultedEnvironment("",
-				environmentBase{
-					key:         hookCategory + "DIRECTORY",
-					description: "The path to a directory of hooks to execute on actions against the database.",
-				}),
-			allowed: []string{"<directory>"},
-			flags:   []stringsFlags{canDefaultFlag, canExpandFlag},
 		},
 	})
 	// EnvClipCopy allows overriding the clipboard copy command

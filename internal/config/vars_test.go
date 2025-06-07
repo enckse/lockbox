@@ -28,10 +28,6 @@ func TestColorSetting(t *testing.T) {
 	checkYesNo("LOCKBOX_COLOR_ENABLED", t, config.EnvColorEnabled, true)
 }
 
-func TestNoHook(t *testing.T) {
-	checkYesNo("LOCKBOX_HOOKS_ENABLED", t, config.EnvHooksEnabled, true)
-}
-
 func TestInteractiveSetting(t *testing.T) {
 	checkYesNo("LOCKBOX_INTERACTIVE", t, config.EnvInteractive, true)
 }

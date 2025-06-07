@@ -1,9 +1,0 @@
-When hooks are enabled the files in the specified hook directory
-are executed with the following parameters (in this order):
-
-- string: "{{ .Hooks.Mode.Pre }}" or "{{ .Hooks.Mode.Post }}" representing when the hook is executing.
-
-- string: "{{ .Hooks.Action.Move }}", "{{ .Hooks.Action.Insert }}", or "{{
-  .Hooks.Action.Remove }}" indicating the user action
-
-- string: the path to the entry being operated on

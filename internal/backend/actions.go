@@ -14,18 +14,7 @@ import (
 )
 
 type (
-	// ActionMode represents activities performed via transactions
-	ActionMode string
-	action     func(t Context) error
-)
-
-const (
-	// MoveAction represents changes via moves, like the Move command
-	MoveAction ActionMode = "mv"
-	// InsertAction represents changes via inserts, like the Insert command
-	InsertAction ActionMode = "insert"
-	// RemoveAction represents changes via deletions, like Remove or globbed remove commands
-	RemoveAction ActionMode = "rm"
+	action func(t Context) error
 )
 
 func (t *Transaction) act(cb action) error {
@@ -224,20 +213,10 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 	if err != nil {
 		return err
 	}
-	action := MoveAction
-	if dst == src.Path {
-		action = InsertAction
-	}
-	hook, err := NewHook(src.Path, action)
-	if err != nil {
-		return err
-	}
-	if err := hook.Run(HookPre); err != nil {
-		return err
-	}
-	err = t.change(func(c Context) error {
+	isMove := dst != src.Path
+	return t.change(func(c Context) error {
 		c.removeEntity(sOffset, sTitle)
-		if action == MoveAction {
+		if isMove {
 			c.removeEntity(dOffset, dTitle)
 		}
 		e := gokeepasslib.NewEntry()
@@ -259,10 +238,6 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 		c.alterEntities(true, dOffset, dTitle, &e)
 		return nil
 	})
-	if err != nil {
-		return err
-	}
-	return hook.Run(HookPost)
 }
 
 // Insert is a move to the same location
@@ -284,30 +259,18 @@ func (t *Transaction) RemoveAll(entities []Entity) error {
 		return errors.New("no entities given")
 	}
 	type removal struct {
-		parts []string
 		title string
-		hook  Hook
+		parts []string
 	}
 	removals := []removal{}
-	hasHooks := false
 	for _, entity := range entities {
 		offset, title, err := splitComponents(entity.Path)
 		if err != nil {
 			return err
 		}
-		hook, err := NewHook(entity.Path, RemoveAction)
-		if err != nil {
-			return err
-		}
-		if err := hook.Run(HookPre); err != nil {
-			return err
-		}
-		if hook.enabled {
-			hasHooks = true
-		}
-		removals = append(removals, removal{parts: offset, title: title, hook: hook})
+		removals = append(removals, removal{parts: offset, title: title})
 	}
-	err := t.change(func(c Context) error {
+	return t.change(func(c Context) error {
 		for _, entity := range removals {
 			if ok := c.removeEntity(entity.parts, entity.title); !ok {
 				return errors.New("failed to remove entity")
@@ -315,15 +278,4 @@ func (t *Transaction) RemoveAll(entities []Entity) error {
 		}
 		return nil
 	})
-	if err != nil {
-		return err
-	}
-	if hasHooks {
-		for _, entity := range removals {
-			if err := entity.hook.Run(HookPost); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }

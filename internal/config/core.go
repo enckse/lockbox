@@ -22,7 +22,6 @@ const (
 	jsonCategory         = "JSON_"
 	credsCategory        = "CREDENTIALS_"
 	defaultCategory      = "DEFAULTS_"
-	hookCategory         = "HOOKS_"
 	environmentPrefix    = "LOCKBOX_"
 	commandArgsExample   = "[cmd args...]"
 	fileExample          = "<file>"

@@ -11,7 +11,6 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/output"
 )
@@ -43,17 +42,6 @@ type (
 		ReKey struct {
 			KeyFile string
 			NoKey   string
-		}
-		Hooks struct {
-			Mode struct {
-				Pre  string
-				Post string
-			}
-			Action struct {
-				Remove string
-				Insert string
-				Move   string
-			}
 		}
 	}
 )
@@ -127,11 +115,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		document.Config.XDG = config.ConfigXDG
 		document.ReKey.KeyFile = setDocFlag(commands.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = commands.ReKeyFlags.NoKey
-		document.Hooks.Mode.Pre = string(backend.HookPre)
-		document.Hooks.Mode.Post = string(backend.HookPost)
-		document.Hooks.Action.Insert = string(backend.InsertAction)
-		document.Hooks.Action.Remove = string(backend.RemoveAction)
-		document.Hooks.Action.Move = string(backend.MoveAction)
 		files, err := docs.ReadDir(docDir)
 		if err != nil {
 			return nil, err
