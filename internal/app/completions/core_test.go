@@ -14,7 +14,6 @@ import (
 func TestCompletions(t *testing.T) {
 	for k, v := range map[string]string{
 		"zsh":  "typeset -A opt_args",
-		"fish": "set -f commands",
 		"bash": "local cur opts",
 	} {
 		testCompletion(t, k, v)

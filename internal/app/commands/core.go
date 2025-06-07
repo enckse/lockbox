@@ -54,8 +54,6 @@ const (
 	JSON = "json"
 	// CompletionsZsh is the command to generate zsh completions
 	CompletionsZsh = "zsh"
-	// CompletionsFish is the command to generate fish completions
-	CompletionsFish = "fish"
 	// PasswordGenerate is the command to do password generation
 	PasswordGenerate = "pwgen"
 	// Executable is the name of the executable
@@ -68,7 +66,7 @@ const (
 
 var (
 	// CompletionTypes are shell completions that are known
-	CompletionTypes = []string{CompletionsBash, CompletionsFish, CompletionsZsh}
+	CompletionTypes = []string{CompletionsBash, CompletionsZsh}
 	// ReKeyFlags are the flags used for re-keying
 	ReKeyFlags = struct {
 		KeyFile string

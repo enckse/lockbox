@@ -38,7 +38,7 @@ Use `lb help verbose` for additional information about functionality and
 
 `lb` should work on combinations of the following:
 - linux/macOS/WSL
-- zsh/bash/fish (for completions)
+- zsh/bash (for completions)
 - amd64/arm64
 
 ## usage
