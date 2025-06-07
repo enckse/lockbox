@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
@@ -21,7 +21,7 @@ func testFile() string {
 	return file
 }
 
-func fullSetup(t *testing.T, keep bool) *backend.Transaction {
+func fullSetup(t *testing.T, keep bool) *kdbx.Transaction {
 	file := testFile()
 	if !keep {
 		os.Remove(file)
@@ -30,14 +30,14 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
-	tr, err := backend.NewTransaction()
+	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
 	return tr
 }
 
-func setup(t *testing.T) *backend.Transaction {
+func setup(t *testing.T) *kdbx.Transaction {
 	return fullSetup(t, false)
 }
 

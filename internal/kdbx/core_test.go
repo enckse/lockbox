@@ -1,118 +1,118 @@
-package backend_test
+package kdbx_test
 
 import (
 	"errors"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 func TestLoad(t *testing.T) {
-	if _, err := backend.Load("  "); err.Error() != "no store set" {
+	if _, err := kdbx.Load("  "); err.Error() != "no store set" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := backend.Load("garbage"); err.Error() != "should use a .kdbx extension" {
+	if _, err := kdbx.Load("garbage"); err.Error() != "should use a .kdbx extension" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := backend.Load("garbage.kdbx"); err.Error() != "invalid file, does not exist" {
+	if _, err := kdbx.Load("garbage.kdbx"); err.Error() != "invalid file, does not exist" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestIsDirectory(t *testing.T) {
-	if backend.IsDirectory("") {
+	if kdbx.IsDirectory("") {
 		t.Error("invalid directory detection")
 	}
-	if !backend.IsDirectory("/") {
+	if !kdbx.IsDirectory("/") {
 		t.Error("invalid directory detection")
 	}
-	if backend.IsDirectory("/a") {
+	if kdbx.IsDirectory("/a") {
 		t.Error("invalid directory detection")
 	}
 }
 
 func TestBase(t *testing.T) {
-	b := backend.Base("")
+	b := kdbx.Base("")
 	if b != "" {
 		t.Error("invalid base")
 	}
-	b = backend.Base("aaa")
+	b = kdbx.Base("aaa")
 	if b != "aaa" {
 		t.Error("invalid base")
 	}
-	b = backend.Base("aaa/")
+	b = kdbx.Base("aaa/")
 	if b != "" {
 		t.Error("invalid base")
 	}
-	b = backend.Base("aaa/a")
+	b = kdbx.Base("aaa/a")
 	if b != "a" {
 		t.Error("invalid base")
 	}
 }
 
 func TestDirectory(t *testing.T) {
-	b := backend.Directory("")
+	b := kdbx.Directory("")
 	if b != "" {
 		t.Error("invalid directory")
 	}
-	b = backend.Directory("/")
+	b = kdbx.Directory("/")
 	if b != "" {
 		t.Error("invalid directory")
 	}
-	b = backend.Directory("/a")
+	b = kdbx.Directory("/a")
 	if b != "" {
 		t.Error("invalid directory")
 	}
-	b = backend.Directory("a")
+	b = kdbx.Directory("a")
 	if b != "" {
 		t.Error("invalid directory")
 	}
-	b = backend.Directory("b/a")
+	b = kdbx.Directory("b/a")
 	if b != "b" {
 		t.Error("invalid directory")
 	}
 }
 
 func TestIsLeafAttr(t *testing.T) {
-	if backend.IsLeafAttribute("axyz", "z") {
+	if kdbx.IsLeafAttribute("axyz", "z") {
 		t.Error("invalid result")
 	}
-	if !backend.IsLeafAttribute("axy/z", "z") {
+	if !kdbx.IsLeafAttribute("axy/z", "z") {
 		t.Error("invalid result")
 	}
 }
 
 func TestNewPath(t *testing.T) {
-	p := backend.NewPath("abc", "xyz")
-	if p != backend.NewPath("abc", "xyz") {
+	p := kdbx.NewPath("abc", "xyz")
+	if p != kdbx.NewPath("abc", "xyz") {
 		t.Error("invalid new path")
 	}
 }
 
 func TestNewSuffix(t *testing.T) {
-	if backend.NewSuffix("test") != "/test" {
+	if kdbx.NewSuffix("test") != "/test" {
 		t.Error("invalid suffix")
 	}
 }
 
-func generateTestSeq(hasError, extra bool) backend.QuerySeq2 {
-	return func(yield func(backend.Entity, error) bool) {
-		if !yield(backend.Entity{}, nil) {
+func generateTestSeq(hasError, extra bool) kdbx.QuerySeq2 {
+	return func(yield func(kdbx.Entity, error) bool) {
+		if !yield(kdbx.Entity{}, nil) {
 			return
 		}
-		if !yield(backend.Entity{}, nil) {
+		if !yield(kdbx.Entity{}, nil) {
 			return
 		}
 		if hasError {
-			if !yield(backend.Entity{}, errors.New("test collect error")) {
+			if !yield(kdbx.Entity{}, errors.New("test collect error")) {
 				return
 			}
 		}
-		if !yield(backend.Entity{}, nil) {
+		if !yield(kdbx.Entity{}, nil) {
 			return
 		}
 		if extra {
-			if !yield(backend.Entity{}, nil) {
+			if !yield(kdbx.Entity{}, nil) {
 				return
 			}
 		}
@@ -137,7 +137,7 @@ func TestQuerySeq2Collect(t *testing.T) {
 }
 
 func TestEntityValue(t *testing.T) {
-	e := backend.Entity{}
+	e := kdbx.Entity{}
 	if _, ok := e.Value("key"); ok {
 		t.Error("values are nil")
 	}

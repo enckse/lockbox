@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 func TestUnset(t *testing.T) {
 	m := newMockCommand(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "testz"), map[string]string{"notes": "something"})
+	fullSetup(t, true).Insert(kdbx.NewPath("test", "test2", "testz"), map[string]string{"notes": "something"})
 	if err := app.Unset(m); err == nil || err.Error() != "invalid unset, no entry given" {
 		t.Errorf("invalid error: %v", err)
 	}

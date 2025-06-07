@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 // Remove will remove an entry
@@ -18,7 +18,7 @@ func Remove(cmd CommandOptions) error {
 	return remove(cmd.Transaction(), cmd.Writer(), args[0], cmd)
 }
 
-func remove(t *backend.Transaction, w io.Writer, entry string, cmd CommandOptions) error {
+func remove(t *kdbx.Transaction, w io.Writer, entry string, cmd CommandOptions) error {
 	deleting := entry
 	postfixRemove := "y"
 	existings, err := t.MatchPath(deleting)

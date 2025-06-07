@@ -1,5 +1,5 @@
 // Package backend handles kdbx interactions
-package backend
+package kdbx
 
 import (
 	"errors"

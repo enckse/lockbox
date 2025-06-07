@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 type (
@@ -56,7 +56,7 @@ func (m *mockInsert) IsNoTOTP() (bool, error) {
 	return m.noTOTP()
 }
 
-func (m *mockInsert) Transaction() *backend.Transaction {
+func (m *mockInsert) Transaction() *kdbx.Transaction {
 	return m.command.Transaction()
 }
 

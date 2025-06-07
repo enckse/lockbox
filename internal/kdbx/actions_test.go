@@ -1,4 +1,4 @@
-package backend_test
+package kdbx_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
@@ -23,7 +23,7 @@ func testFile(name string) string {
 	return file
 }
 
-func fullSetup(t *testing.T, keep bool) *backend.Transaction {
+func fullSetup(t *testing.T, keep bool) *kdbx.Transaction {
 	file := testFile("test.kdbx")
 	if !keep {
 		os.Remove(file)
@@ -33,7 +33,7 @@ func fullSetup(t *testing.T, keep bool) *backend.Transaction {
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
-	tr, err := backend.NewTransaction()
+	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
@@ -52,30 +52,30 @@ func TestKeyFile(t *testing.T) {
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	os.WriteFile(keyFile, []byte("test"), 0o644)
-	tr, err := backend.NewTransaction()
+	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if err := tr.Insert(backend.NewPath("a", "b"), map[string]string{"password": "t"}); err != nil {
+	if err := tr.Insert(kdbx.NewPath("a", "b"), map[string]string{"password": "t"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 }
 
-func setup(t *testing.T) *backend.Transaction {
+func setup(t *testing.T) *kdbx.Transaction {
 	return fullSetup(t, false)
 }
 
 func TestNoWriteOnRO(t *testing.T) {
 	setup(t)
 	store.SetBool("LOCKBOX_READONLY", true)
-	tr, _ := backend.NewTransaction()
+	tr, _ := kdbx.NewTransaction()
 	if err := tr.Insert("a/a/a", map[string]string{"password": "xyz"}); err.Error() != "unable to alter database in readonly mode" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
 
 func TestBadAction(t *testing.T) {
-	tr := &backend.Transaction{}
+	tr := &kdbx.Transaction{}
 	if err := tr.Insert("a/a/a", map[string]string{"notes": "xyz"}); err.Error() != "invalid transaction" {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -83,25 +83,25 @@ func TestBadAction(t *testing.T) {
 
 func TestMove(t *testing.T) {
 	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), map[string]string{"passworD": "pass"})
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), map[string]string{"NoTES": "pass", "password": "xxx"})
+	fullSetup(t, true).Insert(kdbx.NewPath("test", "test2", "test1"), map[string]string{"passworD": "pass"})
+	fullSetup(t, true).Insert(kdbx.NewPath("test", "test2", "test3"), map[string]string{"NoTES": "pass", "password": "xxx"})
 	if err := fullSetup(t, true).Move(nil, ""); err == nil || err.Error() != "source entity is not set" {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test3"), Values: map[string]string{"Notes": "abc"}}, backend.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(&kdbx.Entity{Path: kdbx.NewPath("test", "test2", "test3"), Values: map[string]string{"Notes": "abc"}}, kdbx.NewPath("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	q, err := fullSetup(t, true).Get(backend.NewPath("test1", "test2", "test3"), backend.SecretValue)
+	q, err := fullSetup(t, true).Get(kdbx.NewPath("test1", "test2", "test3"), kdbx.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if val, ok := q.Value("notes"); !ok || val != "abc" {
 		t.Errorf("invalid retrieval")
 	}
-	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test1"), Values: map[string]string{"password": "test"}}, backend.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(&kdbx.Entity{Path: kdbx.NewPath("test", "test2", "test1"), Values: map[string]string{"password": "test"}}, kdbx.NewPath("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	q, err = fullSetup(t, true).Get(backend.NewPath("test1", "test2", "test3"), backend.SecretValue)
+	q, err = fullSetup(t, true).Get(kdbx.NewPath("test1", "test2", "test3"), kdbx.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
@@ -138,23 +138,23 @@ func TestInserts(t *testing.T) {
 	if err := setup(t).Insert("a", make(map[string]string)); err.Error() != "empty secrets not allowed" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert(backend.NewPath("test", "offset", "value"), map[string]string{"password": "pass"}); err != nil {
+	if err := setup(t).Insert(kdbx.NewPath("test", "offset", "value"), map[string]string{"password": "pass"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "value"), map[string]string{"NoTes": "pass2"}); err != nil {
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset", "value"), map[string]string{"NoTes": "pass2"}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "value2"), map[string]string{"NOTES": "pass\npass", "password": "xxx", "otP": "zzz"}); err != nil {
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset", "value2"), map[string]string{"NOTES": "pass\npass", "password": "xxx", "otP": "zzz"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	q, err := fullSetup(t, true).Get(backend.NewPath("test", "offset", "value"), backend.SecretValue)
+	q, err := fullSetup(t, true).Get(kdbx.NewPath("test", "offset", "value"), kdbx.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if val, ok := q.Value("notes"); !ok || val != "pass2" {
 		t.Errorf("invalid retrieval")
 	}
-	q, err = fullSetup(t, true).Get(backend.NewPath("test", "offset", "value2"), backend.SecretValue)
+	q, err = fullSetup(t, true).Get(kdbx.NewPath("test", "offset", "value2"), kdbx.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
@@ -167,13 +167,13 @@ func TestInserts(t *testing.T) {
 	if val, ok := q.Value("otp"); !ok || val != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=zzz" {
 		t.Errorf("invalid retrieval: %s", val)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset"), map[string]string{"otp": "5ae472sabqdekjqykoyxk7hvc2leklq5n"}); err != nil {
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"otp": "5ae472sabqdekjqykoyxk7hvc2leklq5n"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset"), map[string]string{"OTP": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "otp can NOT be multi-line" {
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"OTP": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "otp can NOT be multi-line" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset"), map[string]string{"password": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "password can NOT be multi-line" {
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"password": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "password can NOT be multi-line" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
@@ -182,61 +182,61 @@ func TestRemoves(t *testing.T) {
 	if err := setup(t).Remove(nil); err.Error() != "entity is empty/invalid" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Remove(&backend.Entity{}); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Remove(&kdbx.Entity{}); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
-	tx := backend.Entity{Path: backend.NewPath("test1", "test2", "test3")}
+	tx := kdbx.Entity{Path: kdbx.NewPath("test1", "test2", "test3")}
 	if err := setup(t).Remove(&tx); err.Error() != "failed to remove entity" {
 		t.Errorf("wrong error: %v", err)
 	}
 	setup(t)
 	for _, i := range []string{"test1", "test2"} {
-		fullSetup(t, true).Insert(backend.NewPath(i, i, i), map[string]string{"PASSWORD": "pass"})
+		fullSetup(t, true).Insert(kdbx.NewPath(i, i, i), map[string]string{"PASSWORD": "pass"})
 	}
-	tx = backend.Entity{Path: backend.NewPath("test1", "test1", "test1")}
+	tx = kdbx.Entity{Path: kdbx.NewPath("test1", "test1", "test1")}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := check(t, backend.NewPath("test2", "test2", "test2")); err != nil {
+	if err := check(t, kdbx.NewPath("test2", "test2", "test2")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.Entity{Path: backend.NewPath("test2", "test2", "test2")}
+	tx = kdbx.Entity{Path: kdbx.NewPath("test2", "test2", "test2")}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
 	setup(t)
-	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
+	for _, i := range []string{kdbx.NewPath("test", "test", "test1"), kdbx.NewPath("test", "test", "test2"), kdbx.NewPath("test", "test", "test3"), kdbx.NewPath("test", "test1", "test2"), kdbx.NewPath("test", "test1", "test5")} {
 		fullSetup(t, true).Insert(i, map[string]string{"password": "pass"})
 	}
-	tx = backend.Entity{Path: "test/test/test3"}
+	tx = kdbx.Entity{Path: "test/test/test3"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {
+	if err := check(t, kdbx.NewPath("test", "test", "test2"), kdbx.NewPath("test", "test", "test1"), kdbx.NewPath("test", "test1", "test2"), kdbx.NewPath("test", "test1", "test5")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.Entity{Path: "test/test/test1"}
+	tx = kdbx.Entity{Path: "test/test/test1"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {
+	if err := check(t, kdbx.NewPath("test", "test", "test2"), kdbx.NewPath("test", "test1", "test2"), kdbx.NewPath("test", "test1", "test5")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.Entity{Path: "test/test1/test5"}
+	tx = kdbx.Entity{Path: "test/test1/test5"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2")); err != nil {
+	if err := check(t, kdbx.NewPath("test", "test", "test2"), kdbx.NewPath("test", "test1", "test2")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.Entity{Path: "test/test1/test2"}
+	tx = kdbx.Entity{Path: "test/test1/test2"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := check(t, backend.NewPath("test", "test", "test2")); err != nil {
+	if err := check(t, kdbx.NewPath("test", "test", "test2")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
-	tx = backend.Entity{Path: "test/test/test2"}
+	tx = kdbx.Entity{Path: "test/test/test2"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
@@ -246,17 +246,17 @@ func TestRemoveAlls(t *testing.T) {
 	if err := setup(t).RemoveAll(nil); err.Error() != "no entities given" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).RemoveAll([]backend.Entity{}); err.Error() != "no entities given" {
+	if err := setup(t).RemoveAll([]kdbx.Entity{}); err.Error() != "no entities given" {
 		t.Errorf("wrong error: %v", err)
 	}
 	setup(t)
-	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
+	for _, i := range []string{kdbx.NewPath("test", "test", "test1"), kdbx.NewPath("test", "test", "test2"), kdbx.NewPath("test", "test", "test3"), kdbx.NewPath("test", "test1", "test2"), kdbx.NewPath("test", "test1", "test5")} {
 		fullSetup(t, true).Insert(i, map[string]string{"PaSsWoRd": "pass"})
 	}
-	if err := fullSetup(t, true).RemoveAll([]backend.Entity{{Path: "test/test/test3"}, {Path: "test/test/test1"}}); err != nil {
+	if err := fullSetup(t, true).RemoveAll([]kdbx.Entity{{Path: "test/test/test3"}, {Path: "test/test/test1"}}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := check(t, backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")); err != nil {
+	if err := check(t, kdbx.NewPath("test", "test", "test2"), kdbx.NewPath("test", "test1", "test2"), kdbx.NewPath("test", "test1", "test5")); err != nil {
 		t.Errorf("invalid check: %v", err)
 	}
 }
@@ -264,7 +264,7 @@ func TestRemoveAlls(t *testing.T) {
 func check(t *testing.T, checks ...string) error {
 	tr := fullSetup(t, true)
 	for _, c := range checks {
-		q, err := tr.Get(c, backend.BlankValue)
+		q, err := tr.Get(c, kdbx.BlankValue)
 		if err != nil {
 			return err
 		}
@@ -298,12 +298,12 @@ func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 		store.SetString("LOCKBOX_CREDENTIALS_KEY_FILE", key)
 		os.WriteFile(key, []byte("test"), 0o644)
 	}
-	tr, err := backend.NewTransaction()
+	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
 	invalid := !key && !keyFile
-	err = tr.Insert(backend.NewPath("a", "b"), map[string]string{"password": "t"})
+	err = tr.Insert(kdbx.NewPath("a", "b"), map[string]string{"password": "t"})
 	if invalid {
 		if err == nil || err.Error() != "key and/or keyfile must be set" {
 			t.Errorf("invalid error: %v", err)
@@ -324,7 +324,7 @@ func TestReKey(t *testing.T) {
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
-	tr, err := backend.NewTransaction()
+	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}

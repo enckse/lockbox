@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 // List will list/find entries
@@ -27,8 +27,8 @@ func List(cmd CommandOptions, groups bool) error {
 }
 
 func doList(attr, filter string, cmd CommandOptions, groups bool) error {
-	opts := backend.QueryOptions{}
-	opts.Mode = backend.ListMode
+	opts := kdbx.QueryOptions{}
+	opts.Mode = kdbx.ListMode
 	opts.PathFilter = filter
 	e, err := cmd.Transaction().QueryCallback(opts)
 	if err != nil {
@@ -54,7 +54,7 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 					continue
 				}
 			}
-			results = append(results, backend.NewPath(f.Path, k))
+			results = append(results, kdbx.NewPath(f.Path, k))
 		}
 		if len(results) == 0 {
 			continue

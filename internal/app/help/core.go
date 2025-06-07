@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/output"
 )
@@ -118,7 +118,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		document.ReKey.KeyFile = setDocFlag(commands.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = commands.ReKeyFlags.NoKey
 		var fields []string
-		for _, field := range backend.AllowedFields {
+		for _, field := range kdbx.AllowedFields {
 			fields = append(fields, strings.ToLower(field))
 		}
 		sort.Strings(fields)

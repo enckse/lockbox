@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
 
@@ -39,9 +39,9 @@ func ShowClip(cmd CommandOptions, isShow bool) error {
 }
 
 func getEntity(entry string, cmd CommandOptions) (string, error) {
-	base := backend.Base(entry)
-	dir := backend.Directory(entry)
-	existing, err := cmd.Transaction().Get(dir, backend.SecretValue)
+	base := kdbx.Base(entry)
+	dir := kdbx.Directory(entry)
+	existing, err := cmd.Transaction().Get(dir, kdbx.SecretValue)
 	if err != nil {
 		return "", err
 	}

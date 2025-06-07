@@ -13,7 +13,7 @@ import (
 	otp "github.com/pquerna/otp/totp"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
@@ -97,7 +97,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if !interactive && clipMode {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
-	if !backend.IsLeafAttribute(args.Entry, backend.OTPField) {
+	if !kdbx.IsLeafAttribute(args.Entry, kdbx.OTPField) {
 		return fmt.Errorf("'%s' is not a TOTP entry", args.Entry)
 	}
 	entity, err := getEntity(args.Entry, opts.app)
@@ -219,7 +219,7 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListTOTPMode {
-		return doList(backend.OTPField, args.Entry, opts.app, false)
+		return doList(kdbx.OTPField, args.Entry, opts.app, false)
 	}
 	return args.display(opts)
 }

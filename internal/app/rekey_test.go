@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 type (
@@ -24,7 +24,7 @@ func (m *mockKeyer) Confirm(string) bool {
 	return m.confirm
 }
 
-func (m *mockKeyer) Transaction() *backend.Transaction {
+func (m *mockKeyer) Transaction() *kdbx.Transaction {
 	return fullSetup(m.t, true)
 }
 

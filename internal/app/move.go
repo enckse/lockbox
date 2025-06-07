@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 type (
@@ -37,17 +37,17 @@ func Move(cmd CommandOptions) error {
 	case 0:
 		break
 	default:
-		if !backend.IsDirectory(dst) {
+		if !kdbx.IsDirectory(dst) {
 			return fmt.Errorf("%s must be a path, not an entry", dst)
 		}
-		srcDir := backend.Directory(src)
-		dir := backend.Directory(dst)
+		srcDir := kdbx.Directory(src)
+		dir := kdbx.Directory(dst)
 		for _, e := range m {
-			srcPath := backend.Directory(e.Path)
+			srcPath := kdbx.Directory(e.Path)
 			if srcPath != srcDir {
 				return fmt.Errorf("multiple moves can only be done at a leaf level")
 			}
-			r := moveRequest{cmd: cmd, src: e.Path, dst: backend.NewPath(dir, backend.Base(e.Path)), overwrite: false}
+			r := moveRequest{cmd: cmd, src: e.Path, dst: kdbx.NewPath(dir, kdbx.Base(e.Path)), overwrite: false}
 			if err := r.do(true); err != nil {
 				return err
 			}
@@ -69,21 +69,21 @@ func Move(cmd CommandOptions) error {
 func (r moveRequest) do(dryRun bool) error {
 	tx := r.cmd.Transaction()
 	if !dryRun {
-		use, err := backend.NewTransaction()
+		use, err := kdbx.NewTransaction()
 		if err != nil {
 			return err
 		}
 		tx = use
 
 	}
-	srcExists, err := tx.Get(r.src, backend.SecretValue)
+	srcExists, err := tx.Get(r.src, kdbx.SecretValue)
 	if err != nil {
 		return errors.New("unable to get source entry")
 	}
 	if srcExists == nil {
 		return errors.New("no source object found")
 	}
-	dstExists, err := tx.Get(r.dst, backend.BlankValue)
+	dstExists, err := tx.Get(r.dst, kdbx.BlankValue)
 	if err != nil {
 		return errors.New("unable to get destination object")
 	}

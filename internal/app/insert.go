@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 // Insert will execute an insert
@@ -18,15 +18,15 @@ func Insert(cmd UserInputOptions) error {
 		return errors.New("invalid insert, no entry given")
 	}
 	entry := args[0]
-	base := backend.Base(entry)
-	if !slices.ContainsFunc(backend.AllowedFields, func(v string) bool {
+	base := kdbx.Base(entry)
+	if !slices.ContainsFunc(kdbx.AllowedFields, func(v string) bool {
 		return base == strings.ToLower(v)
 	}) {
 		return fmt.Errorf("'%s' is not an allowed field name", base)
 	}
 
-	dir := backend.Directory(entry)
-	existing, err := t.Get(dir, backend.SecretValue)
+	dir := kdbx.Directory(entry)
+	existing, err := t.Get(dir, kdbx.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -40,11 +40,11 @@ func Insert(cmd UserInputOptions) error {
 			}
 		}
 	}
-	password, err := cmd.Input(!isPipe && !strings.EqualFold(base, backend.NotesField))
+	password, err := cmd.Input(!isPipe && !strings.EqualFold(base, kdbx.NotesField))
 	if err != nil {
 		return fmt.Errorf("invalid input: %w", err)
 	}
-	vals := make(backend.EntityValues)
+	vals := make(kdbx.EntityValues)
 	if existing != nil {
 		vals = existing.Values
 	}

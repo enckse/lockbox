@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
@@ -15,7 +15,7 @@ type (
 	CommandOptions interface {
 		Confirm(string) bool
 		Args() []string
-		Transaction() *backend.Transaction
+		Transaction() *kdbx.Transaction
 		Writer() io.Writer
 	}
 
@@ -28,14 +28,14 @@ type (
 
 	// DefaultCommand is the default CLI app type for actual execution
 	DefaultCommand struct {
-		tx   *backend.Transaction
+		tx   *kdbx.Transaction
 		args []string
 	}
 )
 
 // NewDefaultCommand creates a new app command
 func NewDefaultCommand(args []string) (*DefaultCommand, error) {
-	t, err := backend.NewTransaction()
+	t, err := kdbx.NewTransaction()
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (a *DefaultCommand) Writer() io.Writer {
 }
 
 // Transaction will return the backend transaction
-func (a *DefaultCommand) Transaction() *backend.Transaction {
+func (a *DefaultCommand) Transaction() *kdbx.Transaction {
 	return a.tx
 }
 

@@ -1,5 +1,5 @@
 // Package backend handles querying a store
-package backend
+package kdbx
 
 import (
 	"crypto/sha512"

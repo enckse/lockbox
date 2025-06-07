@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 // Unset enables clearing an entry
@@ -16,9 +16,9 @@ func Unset(cmd CommandOptions) error {
 		return errors.New("invalid unset, no entry given")
 	}
 	entry := args[0]
-	base := backend.Base(entry)
-	dir := backend.Directory(entry)
-	existing, err := t.Get(dir, backend.SecretValue)
+	base := kdbx.Base(entry)
+	dir := kdbx.Directory(entry)
+	existing, err := t.Get(dir, kdbx.SecretValue)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func Unset(cmd CommandOptions) error {
 		return fmt.Errorf("%s does not exist", entry)
 	}
 	w := cmd.Writer()
-	unsetRemove := func(v backend.EntityValues) (bool, error) {
+	unsetRemove := func(v kdbx.EntityValues) (bool, error) {
 		if len(v) == 0 {
 			fmt.Fprintf(w, "removing empty group: %s\n", dir)
 			return true, remove(t, w, dir, cmd)

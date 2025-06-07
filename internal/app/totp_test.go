@@ -8,20 +8,20 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
 )
 
 type (
 	mockOptions struct {
-		tx  *backend.Transaction
+		tx  *kdbx.Transaction
 		buf bytes.Buffer
 	}
 )
 
 func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
-	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test3", "totp"), map[string]string{"password": "pass", "otp": "5ae472abqdekjqykoyxk7hvc2leklq5n"})
-	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test2", "totp"), map[string]string{"password": "pass", "otp": "5ae472abqdekjqykoyxk7hvc2leklq5n"})
+	fullTOTPSetup(t, true).Insert(kdbx.NewPath("test", "test3", "totp"), map[string]string{"password": "pass", "otp": "5ae472abqdekjqykoyxk7hvc2leklq5n"})
+	fullTOTPSetup(t, true).Insert(kdbx.NewPath("test", "test2", "totp"), map[string]string{"password": "pass", "otp": "5ae472abqdekjqykoyxk7hvc2leklq5n"})
 	m := &mockOptions{
 		buf: bytes.Buffer{},
 		tx:  fullTOTPSetup(t, true),
@@ -38,7 +38,7 @@ func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
 	return m, opts
 }
 
-func fullTOTPSetup(t *testing.T, keep bool) *backend.Transaction {
+func fullTOTPSetup(t *testing.T, keep bool) *kdbx.Transaction {
 	store.Clear()
 	file := testFile()
 	if !keep {
@@ -49,7 +49,7 @@ func fullTOTPSetup(t *testing.T, keep bool) *backend.Transaction {
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	store.SetInt64("LOCKBOX_TOTP_TIMEOUT", 1)
-	tr, err := backend.NewTransaction()
+	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
@@ -64,7 +64,7 @@ func (m *mockOptions) Args() []string {
 	return nil
 }
 
-func (m *mockOptions) Transaction() *backend.Transaction {
+func (m *mockOptions) Transaction() *kdbx.Transaction {
 	return m.tx
 }
 
@@ -72,7 +72,7 @@ func (m *mockOptions) Writer() io.Writer {
 	return &m.buf
 }
 
-func setupTOTP(t *testing.T) *backend.Transaction {
+func setupTOTP(t *testing.T) *kdbx.Transaction {
 	return fullTOTPSetup(t, false)
 }
 

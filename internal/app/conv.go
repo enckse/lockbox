@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/backend"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 // Conv will convert 1-N files
@@ -19,7 +19,7 @@ func Conv(cmd CommandOptions) error {
 	}
 	w := cmd.Writer()
 	for _, a := range args {
-		t, err := backend.Load(a)
+		t, err := kdbx.Load(a)
 		if err != nil {
 			return err
 		}
@@ -30,8 +30,8 @@ func Conv(cmd CommandOptions) error {
 	return nil
 }
 
-func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string) error {
-	e, err := tx.QueryCallback(backend.QueryOptions{Mode: backend.ListMode, Values: backend.JSONValue, PathFilter: filter})
+func serialize(w io.Writer, tx *kdbx.Transaction, isJSON bool, filter string) error {
+	e, err := tx.QueryCallback(kdbx.QueryOptions{Mode: kdbx.ListMode, Values: kdbx.JSONValue, PathFilter: filter})
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string)
 		if isJSON {
 			fmt.Fprint(w, "\n")
 		}
-		b, err := json.MarshalIndent(map[string]backend.EntityValues{item.Path: item.Values}, "", "  ")
+		b, err := json.MarshalIndent(map[string]kdbx.EntityValues{item.Path: item.Values}, "", "  ")
 		if err != nil {
 			return err
 		}
