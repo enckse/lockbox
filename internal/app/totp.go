@@ -31,7 +31,6 @@ type (
 	// TOTPArguments are the parsed TOTP call arguments
 	TOTPArguments struct {
 		Entry string
-		token string
 		Mode  Mode
 	}
 	totpWrapper struct {
@@ -50,8 +49,6 @@ type (
 const (
 	// UnknownTOTPMode is an unknown command
 	UnknownTOTPMode Mode = iota
-	// InsertTOTPMode is inserting a new totp token
-	InsertTOTPMode
 	// ShowTOTPMode will show the token
 	ShowTOTPMode
 	// ClipTOTPMode will copy to clipboard
@@ -102,15 +99,14 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if !interactive && clipMode {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
-	entity, err := opts.app.Transaction().Get(backend.NewPath(args.Entry, args.token), backend.SecretValue)
+	if !backend.IsLeafAttribute(args.Entry, backend.OTP) {
+		return fmt.Errorf("'%s' is not a TOTP entry", args.Entry)
+	}
+	entity, err := getEntity(args.Entry, opts.app)
 	if err != nil {
 		return err
 	}
-	if entity == nil {
-		return errors.New("object does not exist")
-	}
-	totpToken := string(entity.Value)
-	k, err := coreotp.NewKeyFromURL(config.EnvTOTPFormat.Get(totpToken))
+	k, err := coreotp.NewKeyFromURL(config.EnvTOTPFormat.Get(entity))
 	if err != nil {
 		return err
 	}
@@ -225,32 +221,17 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 		return ErrNoTOTP
 	}
 	if args.Mode == ListTOTPMode || args.Mode == FindTOTPMode {
-		e, err := opts.app.Transaction().QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: backend.NewSuffix(args.token), PathFilter: args.Entry})
-		if err != nil {
-			return err
-		}
-		writer := opts.app.Writer()
-		for entry, err := range e {
-			if err != nil {
-				return err
-			}
-			fmt.Fprintf(writer, "%s\n", entry.Directory())
-		}
-		return nil
+		return doList(backend.OTP, args.Entry, opts.app, false)
 	}
 	return args.display(opts)
 }
 
 // NewTOTPArguments will parse the input arguments
-func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
+func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 	if len(args) == 0 {
 		return nil, errors.New("not enough arguments for totp")
 	}
-	if strings.TrimSpace(tokenType) == "" {
-		return nil, errors.New("invalid token type, not set?")
-	}
 	opts := &TOTPArguments{Mode: UnknownTOTPMode}
-	opts.token = tokenType
 	sub := args[0]
 	needs := true
 	switch sub {
@@ -262,8 +243,6 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 		opts.Mode = ListTOTPMode
 	case commands.TOTPFind:
 		opts.Mode = FindTOTPMode
-	case commands.TOTPInsert:
-		opts.Mode = InsertTOTPMode
 	case commands.TOTPShow:
 		opts.Mode = ShowTOTPMode
 	case commands.TOTPClip:
@@ -280,11 +259,6 @@ func NewTOTPArguments(args []string, tokenType string) (*TOTPArguments, error) {
 			return nil, errors.New("invalid arguments")
 		}
 		opts.Entry = args[1]
-		if opts.Mode == InsertTOTPMode {
-			if !strings.HasSuffix(opts.Entry, tokenType) {
-				opts.Entry = backend.NewPath(opts.Entry, tokenType)
-			}
-		}
 	}
 	return opts, nil
 }

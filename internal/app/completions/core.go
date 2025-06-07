@@ -21,6 +21,7 @@ type (
 		TOTPListCommand     string
 		TOTPFindCommand     string
 		RemoveCommand       string
+		UnsetCommand        string
 		ClipCommand         string
 		ShowCommand         string
 		MultiLineCommand    string
@@ -28,6 +29,7 @@ type (
 		TOTPCommand         string
 		DoTOTPList          string
 		DoList              string
+		DoGroups            string
 		Executable          string
 		JSONCommand         string
 		HelpCommand         string
@@ -103,12 +105,12 @@ func Generate(completionType, exe string) ([]string, error) {
 	c := Template{
 		Executable:          exe,
 		InsertCommand:       commands.Insert,
+		UnsetCommand:        commands.Unset,
 		RemoveCommand:       commands.Remove,
 		TOTPListCommand:     commands.TOTPList,
 		TOTPFindCommand:     commands.TOTPFind,
 		ClipCommand:         commands.Clip,
 		ShowCommand:         commands.Show,
-		MultiLineCommand:    commands.MultiLine,
 		JSONCommand:         commands.JSON,
 		HelpCommand:         commands.Help,
 		HelpAdvancedCommand: commands.HelpAdvanced,
@@ -116,25 +118,25 @@ func Generate(completionType, exe string) ([]string, error) {
 		TOTPCommand:         commands.TOTP,
 		MoveCommand:         commands.Move,
 		DoList:              fmt.Sprintf("%s %s", exe, commands.List),
+		DoGroups:            fmt.Sprintf("%s %s", exe, commands.Groups),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, commands.TOTP, commands.TOTPList),
 		ExportCommand:       fmt.Sprintf("%s %s %s", exe, commands.Env, commands.Completions),
 	}
 	c.Conditionals = NewConditionals()
 
-	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Find},
+	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Find, commands.Groups},
 		map[string]string{
 			commands.Clip:             c.Conditionals.Not.CanClip,
 			commands.TOTP:             c.Conditionals.Not.CanTOTP,
 			commands.Move:             c.Conditionals.Not.ReadOnly,
 			commands.Remove:           c.Conditionals.Not.ReadOnly,
 			commands.Insert:           c.Conditionals.Not.ReadOnly,
-			commands.MultiLine:        c.Conditionals.Not.ReadOnly,
+			commands.Unset:            c.Conditionals.Not.ReadOnly,
 			commands.PasswordGenerate: c.Conditionals.Not.CanPasswordGen,
 		})
 	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow},
 		map[string]string{
-			commands.TOTPClip:   c.Conditionals.Not.CanClip,
-			commands.TOTPInsert: c.Conditionals.Not.ReadOnly,
+			commands.TOTPClip: c.Conditionals.Not.CanClip,
 		})
 
 	using, err := shell.ReadFile(filepath.Join("shell", fmt.Sprintf("%s.sh", completionType)))

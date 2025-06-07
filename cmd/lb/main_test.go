@@ -185,7 +185,7 @@ func test(profile string) error {
 		}
 	}
 	r.writeConfig(c)
-	r.run("echo test2 |", "insert keys/k/one2")
+	r.run("echo testing |", "insert test1/key1/password")
 	if hasPass {
 		delete(c, "credentials.password")
 		c["interactive"] = "true"
@@ -208,76 +208,54 @@ func test(profile string) error {
 		}
 	}
 	r.writeConfig(c)
-	for _, k := range []string{"keys/k/one", "key/a/one", "keys/k/one", "keys/k/one/", "/keys/k/one", "keys/aa/b//s////e"} {
-		r.run("echo test |", fmt.Sprintf("insert %s", k))
+	for _, k := range []string{"test2/key1/password", "test2/key1/notes", "test3", "test3/invalid/", "test3/invalid/still"} {
+		r.run("echo testing2 |", fmt.Sprintf("insert %s", k))
 	}
-	for _, k := range []string{"insert keys2/k/three", "multiline keys2/k/three"} {
-		r.run(`printf "test3\ntest4\n" |`, k)
+	for _, k := range []string{"insert test4/multiline/notes", "insert test5/multiline/notes", "insert test5/multiline/otp", "insert test5/multiline/password"} {
+		r.run(`printf "testing3\ntesting4\n" |`, k)
+	}
+	for _, k := range []string{"insert test6/multiline/password", "insert test6/multiline/notes", "insert test7/deeper/rooted/notes", "insert test8/unset/password", "insert test8/unset/notes", "insert test9/key1/sub1/password", "insert test9/key1/sub2/password", "insert test9/key2/sub1/password"} {
+		r.run(`printf "testing5" |`, k)
+		r.run("", fmt.Sprintf("show %s", strings.ReplaceAll(k, "insert ", "")))
 	}
 	r.run("", "ls")
-	r.run("echo y |", "rm keys/k/one")
+	r.run("", "groups")
+	r.run("echo y |", "rm test2/key1")
 	r.logAppend("echo")
 	r.run("", "ls")
-	r.run("", "ls | grep e")
 	r.run("", "json")
+	r.run("", "json 'multiline'")
 	r.logAppend("echo")
-	r.run("", "show keys/k/one2")
-	r.run("", "show keys2/k/three")
-	r.run("", "json keys2/k/three")
-	r.logAppend("echo")
-	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "totp insert test/k")
-	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "totp insert test/k/totp")
+	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "insert test6/multiline/otp")
 	r.run("", "totp ls")
-	r.run("", "totp find test")
-	r.run("", "totp show test/k")
-	r.run("", "totp once test/k")
-	r.run("", "totp minimal test/k")
+	r.run("", "totp find multiline")
+	r.run("", "totp show test6/multiline/otp")
+	r.run("", "totp once test6/multiline/otp")
+	r.run("", "totp minimal test6/multiline/otp")
 	r.run("", fmt.Sprintf("conv \"%s\"", r.store))
-	r.run("echo y |", "rm keys2/k/three")
+	r.run("echo y |", "rm test7/deeper")
+	r.run("echo y |", "rm test7/deeper/ro")
+	r.run("echo y |", "rm test1/key1/password")
+	r.run("echo y |", "rm test1/key1")
 	r.logAppend("echo")
-	r.run("echo y |", "rm test/k/totp")
-	r.logAppend("echo")
-	r.run("echo y |", "rm test/k/one")
-	r.logAppend("echo")
-	r.logAppend("echo")
-	r.run("echo test2 |", "insert move/m/ka/abc")
-	r.run("echo test |", "insert move/m/ka/xyz")
-	r.run("echo test2 |", "insert move/ma/ka/yyy")
-	r.run("echo test |", "insert move/ma/ka/zzz")
-	r.run("echo test |", "insert move/ma/ka2/zzz")
-	r.run("echo test |", "insert move/ma/ka3/yyy")
-	r.run("echo test |", "insert move/ma/ka3/zzz")
-	r.run("", "mv move/m/* move/mac/")
-	r.run("", "mv move/ma/ka/* move/mac/")
-	r.run("", "mv move/ma/ka2/* move/mac/")
-	r.run("", "mv move/ma/ka3/* move/mac/")
-	r.run("", "mv key/a/one keyx/d/e")
-	r.run("", "ls")
-	r.run("", "find keyx")
-	r.run("echo y |", "rm move/*")
-	r.run("echo y |", "rm keyx/d/e")
+	r.run("echo y |", "rm test7/deeper/*")
 	r.logAppend("echo")
 	r.run("", "ls")
-	r.run("echo test2 |", "insert keys/k2/one2")
-	r.run("echo test |", "insert keys/k2/one")
-	r.run("echo test2 |", "insert keys/k2/t1/one2")
-	r.run("echo test |", "insert keys/k2/t1/one")
-	r.run("echo test2 |", "insert keys/k2/t2/one2")
-
-	// test hooks
-	c["hooks.directory"] = c.quoteString(filepath.Join(r.testDir, hookDir))
-	r.writeConfig(c)
-	r.run("echo test |", "insert keys/k2/t2/one")
+	r.run("", "groups")
+	r.run("echo y |", "unset test8/unset/password")
 	r.logAppend("echo")
 	r.run("", "ls")
-	r.run("echo y |", "rm keys/k2/t1/*")
+	r.run("", "groups")
+	r.run("echo y |", "unset test8/unset/notes")
 	r.logAppend("echo")
 	r.run("", "ls")
-	r.run("echo y |", "rm keys/k2/*")
-	r.logAppend("echo")
+	r.run("", "groups")
+	r.run("", "mv test9/key1/* test9/")
+	r.run("", "mv test9/key2/sub1 test9/sub3")
 	r.run("", "ls")
+	r.run("", "groups")
+	r.run("echo y |", "rm test9/*")
 	r.logAppend("echo")
-	delete(c, "hooks.directory")
 
 	// test rekeying
 	reKeyArgs := []string{}
@@ -299,17 +277,19 @@ func test(profile string) error {
 	r.writeConfig(c)
 	r.logAppend("echo")
 	r.run("", "ls")
-	r.run("", "show keys/k/one2")
+	r.run("", "show test6/multiline/password")
+
+	// test json modes
 	c["json.mode"] = c.quoteString("plaintext")
 	r.writeConfig(c)
-	r.run("", "json k")
+	r.run("", "json test6")
 	c["json.mode"] = c.quoteString("empty")
 	r.writeConfig(c)
-	r.run("", "json k")
+	r.run("", "json test6")
 	c["json.mode"] = c.quoteString("hash")
 	c["json.hash_length"] = "3"
 	r.writeConfig(c)
-	r.run("", "json k")
+	r.run("", "json test6")
 
 	// clipboard
 	copyFile := filepath.Join(r.testDir, "clip.copy")
@@ -318,7 +298,7 @@ func test(profile string) error {
 	c["clip.paste_command"] = fmt.Sprintf("[\"touch\", \"%s\"]", pasteFile)
 	c["clip.timeout"] = "3"
 	r.writeConfig(c)
-	r.run("", "clip keys/k/one2")
+	r.run("", "clip test6/multiline/password")
 	clipPassed := false
 	tries := 0
 	for tries < clipTries {
@@ -333,6 +313,7 @@ func test(profile string) error {
 		return errors.New("clipboard test failed unexpectedly")
 	}
 
+	// invalid configuration
 	invalid := r.newConf()
 	for k, v := range c {
 		invalid[k] = v
@@ -352,17 +333,6 @@ func test(profile string) error {
 	r.run("", "ls")
 	setConfig(r.config)
 	r.run("", "ls")
-
-	// pwgen
-	c["pwgen.word_command"] = "[\"/bin/sh\", \"-c\", \"echo abc abc | tr ' ' '\\n'\"]"
-	c["pwgen.word_count"] = "1"
-	r.writeConfig(c)
-	r.run("", "pwgen")
-	c["pwgen.template"] = "\"{{range $idx, $val := .}}{{if lt $val.Position.End 5}}{{ $val.Text }}{{end}}{{end}}\""
-	c["pwgen.characters"] = c.quoteString("b")
-	c["pwgen.word_count"] = "2"
-	r.writeConfig(c)
-	r.run("", "pwgen")
 
 	// what is env
 	r.run("", fmt.Sprintf("vars | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))

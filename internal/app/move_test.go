@@ -21,12 +21,12 @@ type (
 
 func newMockCommand(t *testing.T) *mockCommand {
 	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test2"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "test2"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test4", "test5"), "pass")
+	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), map[string]string{"notes": "something", "password": "pass"})
+	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test2"), map[string]string{"notes": "something", "password": "pass"})
+	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), map[string]string{"notes": "something", "password": "pass"})
+	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "test1"), map[string]string{"notes": "something", "password": "pass"})
+	fullSetup(t, true).Insert(backend.NewPath("test", "test3", "test2"), map[string]string{"notes": "something", "password": "pass"})
+	fullSetup(t, true).Insert(backend.NewPath("test", "test4", "test5"), map[string]string{"notes": "something", "password": "pass"})
 	return &mockCommand{t: t, confirmed: false, confirm: true}
 }
 

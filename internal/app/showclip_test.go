@@ -13,7 +13,7 @@ func TestShowClip(t *testing.T) {
 	if err := app.ShowClip(m, true); err.Error() != "only one argument supported" {
 		t.Errorf("invalid error: %v", err)
 	}
-	m.args = []string{"test/test2/test1"}
+	m.args = []string{"test/test2/test1/password"}
 	if err := app.ShowClip(m, true); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

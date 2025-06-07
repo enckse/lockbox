@@ -20,9 +20,8 @@ type (
 )
 
 func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
-	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test3", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n")
-	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test2", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n")
+	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test3", "totp"), map[string]string{"password": "pass", "otp": "5ae472abqdekjqykoyxk7hvc2leklq5n"})
+	fullTOTPSetup(t, true).Insert(backend.NewPath("test", "test2", "totp"), map[string]string{"password": "pass", "otp": "5ae472abqdekjqykoyxk7hvc2leklq5n"})
 	m := &mockOptions{
 		buf: bytes.Buffer{},
 		tx:  fullTOTPSetup(t, true),
@@ -78,55 +77,44 @@ func setupTOTP(t *testing.T) *backend.Transaction {
 }
 
 func TestNewTOTPArgumentsErrors(t *testing.T) {
-	if _, err := app.NewTOTPArguments(nil, ""); err == nil || err.Error() != "not enough arguments for totp" {
+	if _, err := app.NewTOTPArguments(nil); err == nil || err.Error() != "not enough arguments for totp" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := app.NewTOTPArguments([]string{"test"}, ""); err == nil || err.Error() != "invalid token type, not set?" {
+	if _, err := app.NewTOTPArguments([]string{"test"}); err == nil || err.Error() != "unknown totp mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := app.NewTOTPArguments([]string{"test"}, "a"); err == nil || err.Error() != "unknown totp mode" {
+	if _, err := app.NewTOTPArguments([]string{"ls", "test"}); err == nil || err.Error() != "list takes no arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := app.NewTOTPArguments([]string{"ls", "test"}, "a"); err == nil || err.Error() != "list takes no arguments" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if _, err := app.NewTOTPArguments([]string{"show"}, "a"); err == nil || err.Error() != "invalid arguments" {
+	if _, err := app.NewTOTPArguments([]string{"show"}); err == nil || err.Error() != "invalid arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestNewTOTPArguments(t *testing.T) {
-	args, _ := app.NewTOTPArguments([]string{"ls"}, "test")
+	args, _ := app.NewTOTPArguments([]string{"ls"})
 	if args.Mode != app.ListTOTPMode || args.Entry != "" {
 		t.Error("invalid args")
 	}
-	args, _ = app.NewTOTPArguments([]string{"find", "tesst"}, "test")
+	args, _ = app.NewTOTPArguments([]string{"find", "tesst"})
 	if args.Mode != app.FindTOTPMode || args.Entry == "" {
 		t.Error("invalid args")
 	}
-	args, _ = app.NewTOTPArguments([]string{"show", "test"}, "test")
+	args, _ = app.NewTOTPArguments([]string{"show", "test"})
 	if args.Mode != app.ShowTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
-	args, _ = app.NewTOTPArguments([]string{"clip", "test"}, "test")
+	args, _ = app.NewTOTPArguments([]string{"clip", "test"})
 	if args.Mode != app.ClipTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
-	args, _ = app.NewTOTPArguments([]string{"minimal", "test"}, "test")
+	args, _ = app.NewTOTPArguments([]string{"minimal", "test"})
 	if args.Mode != app.MinimalTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
-	args, _ = app.NewTOTPArguments([]string{"once", "test"}, "test")
+	args, _ = app.NewTOTPArguments([]string{"once", "test"})
 	if args.Mode != app.OnceTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
-	}
-	args, _ = app.NewTOTPArguments([]string{"insert", "test2"}, "test")
-	if args.Mode != app.InsertTOTPMode || args.Entry != "test2/test" {
-		t.Errorf("invalid args: %s", args.Entry)
-	}
-	args, _ = app.NewTOTPArguments([]string{"insert", "test2/test"}, "test")
-	if args.Mode != app.InsertTOTPMode || args.Entry != "test2/test" {
-		t.Errorf("invalid args: %s", args.Entry)
 	}
 }
 
@@ -161,20 +149,28 @@ func TestDoErrors(t *testing.T) {
 
 func TestTOTPList(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"ls"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"ls"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if m.buf.String() != "test/test2\ntest/test3\n" {
+	if m.buf.String() != "test/test2/totp/otp\ntest/test3/totp/otp\n" {
 		t.Errorf("invalid list: %s", m.buf.String())
 	}
 }
 
 func TestNonListError(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"clip", "test"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"show", "test/test3"})
 	_, opts := newMock(t)
+	opts.IsInteractive = func() bool {
+		return false
+	}
+	if err := args.Do(opts); err == nil || err.Error() != "'test/test3' is not a TOTP entry" {
+		t.Errorf("invalid error: %v", err)
+	}
+	args, _ = app.NewTOTPArguments([]string{"clip", "test/test3/otp"})
+	_, opts = newMock(t)
 	opts.IsInteractive = func() bool {
 		return false
 	}
@@ -184,14 +180,14 @@ func TestNonListError(t *testing.T) {
 	opts.IsInteractive = func() bool {
 		return true
 	}
-	if err := args.Do(opts); err == nil || err.Error() != "object does not exist" {
+	if err := args.Do(opts); err == nil || err.Error() != "entry does not exist" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
 
 func TestMinimal(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"minimal", "test/test3"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"minimal", "test/test3/totp/otp"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -203,7 +199,7 @@ func TestMinimal(t *testing.T) {
 
 func TestNonInteractive(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"show", "test/test3"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"show", "test/test3/totp/otp"})
 	m, opts := newMock(t)
 	opts.IsInteractive = func() bool {
 		return false
@@ -218,7 +214,7 @@ func TestNonInteractive(t *testing.T) {
 
 func TestOnce(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"once", "test/test3"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"once", "test/test3/totp/otp"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -230,7 +226,7 @@ func TestOnce(t *testing.T) {
 
 func TestShow(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"show", "test/test3"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"show", "test/test3/totp/otp"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -275,16 +271,16 @@ func TestParseWindows(t *testing.T) {
 
 func TestTOTPFind(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"find", "test"}, "totp")
+	args, _ := app.NewTOTPArguments([]string{"find", "test"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if m.buf.String() != "test/test2\ntest/test3\n" {
+	if m.buf.String() != "test/test2/totp/otp\ntest/test3/totp/otp\n" {
 		t.Errorf("invalid list: %s", m.buf.String())
 	}
 	m.buf.Reset()
-	args, _ = app.NewTOTPArguments([]string{"find", "[zzzz]"}, "totp")
+	args, _ = app.NewTOTPArguments([]string{"find", "[zzzz]"})
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

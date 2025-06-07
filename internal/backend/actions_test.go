@@ -56,7 +56,7 @@ func TestKeyFile(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed: %v", err)
 	}
-	if err := tr.Insert(backend.NewPath("a", "b"), "t"); err != nil {
+	if err := tr.Insert(backend.NewPath("a", "b"), map[string]string{"password": "t"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 }
@@ -69,104 +69,111 @@ func TestNoWriteOnRO(t *testing.T) {
 	setup(t)
 	store.SetBool("LOCKBOX_READONLY", true)
 	tr, _ := backend.NewTransaction()
-	if err := tr.Insert("a/a/a", "a"); err.Error() != "unable to alter database in readonly mode" {
-		t.Errorf("wrong error: %v", err)
-	}
-}
-
-func TestBadTOTP(t *testing.T) {
-	tr := setup(t)
-	store.SetString("LOCKBOX_TOTP_ENTRY", "Title")
-	if err := tr.Insert("a/a/a", "a"); err.Error() != "invalid totp field, uses restricted name" {
+	if err := tr.Insert("a/a/a", map[string]string{"password": "xyz"}); err.Error() != "unable to alter database in readonly mode" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
 
 func TestBadAction(t *testing.T) {
 	tr := &backend.Transaction{}
-	if err := tr.Insert("a/a/a", "a"); err.Error() != "invalid transaction" {
+	if err := tr.Insert("a/a/a", map[string]string{"notes": "xyz"}); err.Error() != "invalid transaction" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
 
 func TestMove(t *testing.T) {
 	setup(t)
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), "pass")
-	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), "pass")
+	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test1"), map[string]string{"passworD": "pass"})
+	fullSetup(t, true).Insert(backend.NewPath("test", "test2", "test3"), map[string]string{"NoTES": "pass", "password": "xxx"})
 	if err := fullSetup(t, true).Move(nil, ""); err == nil || err.Error() != "source entity is not set" {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test3"), Value: "abc"}, backend.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test3"), Values: map[string]string{"Notes": "abc"}}, backend.NewPath("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err := fullSetup(t, true).Get(backend.NewPath("test1", "test2", "test3"), backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "abc" {
+	if val, ok := q.Value("notes"); !ok || val != "abc" {
 		t.Errorf("invalid retrieval")
 	}
-	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test1"), Value: "test"}, backend.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(&backend.Entity{Path: backend.NewPath("test", "test2", "test1"), Values: map[string]string{"password": "test"}}, backend.NewPath("test1", "test2", "test3")); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err = fullSetup(t, true).Get(backend.NewPath("test1", "test2", "test3"), backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "test" {
+	if val, ok := q.Value("password"); !ok || val != "test" {
 		t.Errorf("invalid retrieval")
 	}
 }
 
 func TestInserts(t *testing.T) {
-	if err := setup(t).Insert("", ""); err.Error() != "empty path not allowed" {
+	if err := setup(t).Insert("", nil); err.Error() != "empty path not allowed" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("tests", "test"); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Insert("a", map[string]string{"randomfield": "1"}); err.Error() != "unknown entity field: randomfield" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("tests//l", "test"); err.Error() != "unwilling to operate on path with empty segment" {
+	if err := setup(t).Insert("tests", map[string]string{"notes": "1"}); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("tests/", "test"); err.Error() != "path can NOT end with separator" {
+	if err := setup(t).Insert("tests//l", map[string]string{"notes": "test"}); err.Error() != "unwilling to operate on path with empty segment" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("/tests", "test"); err.Error() != "path can NOT be rooted" {
+	if err := setup(t).Insert("tests/", map[string]string{"password": "test"}); err.Error() != "path can NOT end with separator" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("test", "test"); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Insert("/tests", map[string]string{"password": "test"}); err.Error() != "path can NOT be rooted" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("a", ""); err.Error() != "empty secret not allowed" {
+	if err := setup(t).Insert("test", map[string]string{"otp": "test"}); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert(backend.NewPath("test", "offset", "value"), "pass"); err != nil {
+	if err := setup(t).Insert("a", nil); err.Error() != "empty secrets not allowed" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert("a", make(map[string]string)); err.Error() != "empty secrets not allowed" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := setup(t).Insert(backend.NewPath("test", "offset", "value"), map[string]string{"password": "pass"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "value"), "pass2"); err != nil {
+	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "value"), map[string]string{"NoTes": "pass2"}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "value2"), "pass\npass"); err != nil {
+	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "value2"), map[string]string{"NOTES": "pass\npass", "password": "xxx", "otP": "zzz"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err := fullSetup(t, true).Get(backend.NewPath("test", "offset", "value"), backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "pass2" {
+	if val, ok := q.Value("notes"); !ok || val != "pass2" {
 		t.Errorf("invalid retrieval")
 	}
 	q, err = fullSetup(t, true).Get(backend.NewPath("test", "offset", "value2"), backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "pass\npass" {
-		t.Errorf("invalid retrieval")
+	if val, ok := q.Value("notes"); !ok || val != "pass\npass" {
+		t.Errorf("invalid retrieval: %s", val)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "totp"), "5ae472abqdekjqykoyxk7hvc2leklq5n"); err != nil {
+	if val, ok := q.Value("password"); !ok || val != "xxx" {
+		t.Errorf("invalid retrieval: %s", val)
+	}
+	if val, ok := q.Value("otp"); !ok || val != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=zzz" {
+		t.Errorf("invalid retrieval: %s", val)
+	}
+	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset"), map[string]string{"otp": "5ae472sabqdekjqykoyxk7hvc2leklq5n"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset", "totp"), "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"); err.Error() != "totp tokens can NOT be multi-line" {
+	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset"), map[string]string{"OTP": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "otp can NOT be multi-line" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := fullSetup(t, true).Insert(backend.NewPath("test", "offset"), map[string]string{"password": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "password can NOT be multi-line" {
 		t.Errorf("wrong error: %v", err)
 	}
 }
@@ -184,7 +191,7 @@ func TestRemoves(t *testing.T) {
 	}
 	setup(t)
 	for _, i := range []string{"test1", "test2"} {
-		fullSetup(t, true).Insert(backend.NewPath(i, i, i), "pass")
+		fullSetup(t, true).Insert(backend.NewPath(i, i, i), map[string]string{"PASSWORD": "pass"})
 	}
 	tx = backend.Entity{Path: backend.NewPath("test1", "test1", "test1")}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
@@ -199,7 +206,7 @@ func TestRemoves(t *testing.T) {
 	}
 	setup(t)
 	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
-		fullSetup(t, true).Insert(i, "pass")
+		fullSetup(t, true).Insert(i, map[string]string{"password": "pass"})
 	}
 	tx = backend.Entity{Path: "test/test/test3"}
 	if err := fullSetup(t, true).Remove(&tx); err != nil {
@@ -244,7 +251,7 @@ func TestRemoveAlls(t *testing.T) {
 	}
 	setup(t)
 	for _, i := range []string{backend.NewPath("test", "test", "test1"), backend.NewPath("test", "test", "test2"), backend.NewPath("test", "test", "test3"), backend.NewPath("test", "test1", "test2"), backend.NewPath("test", "test1", "test5")} {
-		fullSetup(t, true).Insert(i, "pass")
+		fullSetup(t, true).Insert(i, map[string]string{"PaSsWoRd": "pass"})
 	}
 	if err := fullSetup(t, true).RemoveAll([]backend.Entity{{Path: "test/test/test3"}, {Path: "test/test/test1"}}); err != nil {
 		t.Errorf("wrong error: %v", err)
@@ -296,7 +303,7 @@ func keyAndOrKeyFile(t *testing.T, key, keyFile bool) {
 		t.Errorf("failed: %v", err)
 	}
 	invalid := !key && !keyFile
-	err = tr.Insert(backend.NewPath("a", "b"), "t")
+	err = tr.Insert(backend.NewPath("a", "b"), map[string]string{"password": "t"})
 	if invalid {
 		if err == nil || err.Error() != "key and/or keyfile must be set" {
 			t.Errorf("invalid error: %v", err)

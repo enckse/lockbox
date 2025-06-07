@@ -73,22 +73,12 @@ func TestDirectory(t *testing.T) {
 	}
 }
 
-func TestEntityDir(t *testing.T) {
-	q := backend.Entity{Path: backend.NewPath("abc", "xyz")}
-	if q.Directory() != "abc" {
-		t.Error("invalid query directory")
+func TestIsLeafAttr(t *testing.T) {
+	if backend.IsLeafAttribute("axyz", "z") {
+		t.Error("invalid result")
 	}
-	q = backend.Entity{Path: backend.NewPath("abc", "xyz", "111")}
-	if q.Directory() != "abc/xyz" {
-		t.Error("invalid query directory")
-	}
-	q = backend.Entity{Path: ""}
-	if q.Directory() != "" {
-		t.Error("invalid query directory")
-	}
-	q = backend.Entity{Path: backend.NewPath("abc")}
-	if q.Directory() != "" {
-		t.Error("invalid query directory")
+	if !backend.IsLeafAttribute("axy/z", "z") {
+		t.Error("invalid result")
 	}
 }
 
@@ -143,5 +133,23 @@ func TestQuerySeq2Collect(t *testing.T) {
 	c, err = seq.Collect()
 	if err != nil || len(c) != 4 {
 		t.Errorf("invalid collect: %v %v %d", c, err, len(c))
+	}
+}
+
+func TestEntityValue(t *testing.T) {
+	e := backend.Entity{}
+	if _, ok := e.Value("key"); ok {
+		t.Error("values are nil")
+	}
+	e.Values = make(map[string]string)
+	if _, ok := e.Value("key"); ok {
+		t.Error("values are not set")
+	}
+	e.Values["key2"] = "1"
+	if _, ok := e.Value("key"); ok {
+		t.Error("values are not matching")
+	}
+	if val, ok := e.Value("key2"); !ok || val != "1" {
+		t.Error("values are not set")
 	}
 }

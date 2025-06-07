@@ -51,7 +51,7 @@ func serialize(w io.Writer, tx *backend.Transaction, isJSON bool, filter string)
 		if isJSON {
 			fmt.Fprint(w, "\n")
 		}
-		b, err := json.MarshalIndent(map[string]json.RawMessage{item.Path: json.RawMessage([]byte(item.Value))}, "", "  ")
+		b, err := json.MarshalIndent(map[string]backend.EntityValues{item.Path: item.Values}, "", "  ")
 		if err != nil {
 			return err
 		}

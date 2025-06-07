@@ -1,186 +1,271 @@
-password: keys/k/one2
-path can NOT end with separator
-path can NOT be rooted
-unwilling to operate on path with empty segment
-key/a/one
-keys/k/one
-keys/k/one2
-keys2/k/three
+password: test1/key1/password
+input paths must contain at LEAST 2 components
+unknown entity field: 
+unknown entity field: still
+otp can NOT be multi-line
+password can NOT be multi-line
+testing5
+testing5
+testing5
+testing5
+testing5
+testing5
+testing5
+testing5
+test1/key1/password
+test2/key1/notes
+test2/key1/password
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/password
+test7/deeper/rooted/notes
+test8/unset/notes
+test8/unset/password
+test9/key1/sub1/password
+test9/key1/sub2/password
+test9/key2/sub1/password
+test1/key1
+test2/key1
+test4/multiline
+test5/multiline
+test6/multiline
+test7/deeper/rooted
+test8/unset
+test9/key1/sub1
+test9/key1/sub2
+test9/key2/sub1
 delete entry? (y/N) 
-key/a/one
-keys/k/one2
-keys2/k/three
-key/a/one
-keys/k/one2
-keys2/k/three
+test1/key1/password
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/password
+test7/deeper/rooted/notes
+test8/unset/notes
+test8/unset/password
+test9/key1/sub1/password
+test9/key1/sub2/password
+test9/key2/sub1/password
 {
-  "key/a/one": {
+  "test1/key1": {
     "modtime": "XXXX-XX-XX",
-    "data": "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff"
+    "password": "521b9ccefbcd14d179e7a1bb877752870a6d620938b28a66a107eac6e6805b9d0989f45b5730508041aa5e710847d439ea74cd312c9355f1f2dae08d40e41d50"
   },
-  "keys/k/one2": {
+  "test4/multiline": {
     "modtime": "XXXX-XX-XX",
-    "data": "6d201beeefb589b08ef0672dac82353d0cbd9ad99e1642c83a1601f3d647bcca003257b5e8f31bdc1d73fbec84fb085c79d6e2677b7ff927e823a54e789140d9"
+    "notes": "fdb05182a34667e207ad36cf4688d046951a5877482da0b8dfaf1baa112369ede0fd29786e2cf771e0e00d968837d449ce7e373642a945d0675d888403178b77"
   },
-  "keys2/k/three": {
+  "test5/multiline": {
     "modtime": "XXXX-XX-XX",
-    "data": "132ab0244293c495a027cec12d0050598616daca888449920fc652719be0987830827d069ef78cc613e348de37c9b592d3406e2fb8d99a6961bf0c58da8a334f"
+    "notes": "fdb05182a34667e207ad36cf4688d046951a5877482da0b8dfaf1baa112369ede0fd29786e2cf771e0e00d968837d449ce7e373642a945d0675d888403178b77"
+  },
+  "test6/multiline": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+    "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  },
+  "test7/deeper/rooted": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  },
+  "test8/unset": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+    "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  },
+  "test9/key1/sub1": {
+    "modtime": "XXXX-XX-XX",
+    "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  },
+  "test9/key1/sub2": {
+    "modtime": "XXXX-XX-XX",
+    "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  },
+  "test9/key2/sub1": {
+    "modtime": "XXXX-XX-XX",
+    "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  }
+}
+{
+  "test4/multiline": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "fdb05182a34667e207ad36cf4688d046951a5877482da0b8dfaf1baa112369ede0fd29786e2cf771e0e00d968837d449ce7e373642a945d0675d888403178b77"
+  },
+  "test5/multiline": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "fdb05182a34667e207ad36cf4688d046951a5877482da0b8dfaf1baa112369ede0fd29786e2cf771e0e00d968837d449ce7e373642a945d0675d888403178b77"
+  },
+  "test6/multiline": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+    "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
   }
 }
 
-test2
-test3
-test4
-{
-  "keys2/k/three": {
-    "modtime": "XXXX-XX-XX",
-    "data": "132ab0244293c495a027cec12d0050598616daca888449920fc652719be0987830827d069ef78cc613e348de37c9b592d3406e2fb8d99a6961bf0c58da8a334f"
-  }
-}
-
-test/k
-test/k
+test6/multiline/otp
+test6/multiline/otp
 XXXXXX
 XXXXXX
 XXXXXX
-"key/a/one": {
+"test1/key1": {
   "modtime": "XXXX-XX-XX",
-  "data": "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff"
+  "password": "521b9ccefbcd14d179e7a1bb877752870a6d620938b28a66a107eac6e6805b9d0989f45b5730508041aa5e710847d439ea74cd312c9355f1f2dae08d40e41d50"
 }
-"keys/k/one2": {
+"test4/multiline": {
   "modtime": "XXXX-XX-XX",
-  "data": "6d201beeefb589b08ef0672dac82353d0cbd9ad99e1642c83a1601f3d647bcca003257b5e8f31bdc1d73fbec84fb085c79d6e2677b7ff927e823a54e789140d9"
+  "notes": "fdb05182a34667e207ad36cf4688d046951a5877482da0b8dfaf1baa112369ede0fd29786e2cf771e0e00d968837d449ce7e373642a945d0675d888403178b77"
 }
-"keys2/k/three": {
+"test5/multiline": {
   "modtime": "XXXX-XX-XX",
-  "data": "132ab0244293c495a027cec12d0050598616daca888449920fc652719be0987830827d069ef78cc613e348de37c9b592d3406e2fb8d99a6961bf0c58da8a334f"
+  "notes": "fdb05182a34667e207ad36cf4688d046951a5877482da0b8dfaf1baa112369ede0fd29786e2cf771e0e00d968837d449ce7e373642a945d0675d888403178b77"
 }
-"test/k/totp": {
-  "attributes": {
-    "otp": "b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54b70c0acb0428d6db7205101e332f950ffb6b6d643aa37287c6aa5"
-  },
+"test6/multiline": {
   "modtime": "XXXX-XX-XX",
-  "data": "7ef183065ba70aaa417b87ea0a96b7e550a938a52440c640a07537f7794d8a89e50078eca6a7cbcfacabd97a2db06d11e82ddf7556ca909c4df9fc0d006013b1"
+  "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+  "otp": "b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54b70c0acb0428d6db7205101e332f950ffb6b6d643aa37287c6aa5",
+  "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
 }
+"test7/deeper/rooted": {
+  "modtime": "XXXX-XX-XX",
+  "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+}
+"test8/unset": {
+  "modtime": "XXXX-XX-XX",
+  "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+  "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+}
+"test9/key1/sub1": {
+  "modtime": "XXXX-XX-XX",
+  "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+}
+"test9/key1/sub2": {
+  "modtime": "XXXX-XX-XX",
+  "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+}
+"test9/key2/sub1": {
+  "modtime": "XXXX-XX-XX",
+  "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+}
+no entities matching: test7/deeper
+no entities matching: test7/deeper/ro
+no entities matching: test1/key1/password
 delete entry? (y/N) 
 delete entry? (y/N) 
-no entities matching: test/k/one
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/otp
+test6/multiline/password
+test8/unset/notes
+test8/unset/password
+test9/key1/sub1/password
+test9/key1/sub2/password
+test9/key2/sub1/password
+test4/multiline
+test5/multiline
+test6/multiline
+test8/unset
+test9/key1/sub1
+test9/key1/sub2
+test9/key2/sub1
+unset: test8/unset/password? (y/N) clearing value from: test8/unset/password
 
-
-multiple moves can only be done at a leaf level
-unable to get destination object
-unable to overwrite entries when moving multiple items
-keys/k/one2
-keyx/d/e
-move/m/ka/abc
-move/m/ka/xyz
-move/ma/ka2/zzz
-move/ma/ka3/yyy
-move/ma/ka3/zzz
-move/mac/yyy
-move/mac/zzz
-keyx/d/e
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/otp
+test6/multiline/password
+test8/unset/notes
+test9/key1/sub1/password
+test9/key1/sub2/password
+test9/key2/sub1/password
+test4/multiline
+test5/multiline
+test6/multiline
+test8/unset
+test9/key1/sub1
+test9/key1/sub2
+test9/key2/sub1
+removing empty group: test8/unset
+delete entry? (y/N) 
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/otp
+test6/multiline/password
+test9/key1/sub1/password
+test9/key1/sub2/password
+test9/key2/sub1/password
+test4/multiline
+test5/multiline
+test6/multiline
+test9/key1/sub1
+test9/key1/sub2
+test9/key2/sub1
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/otp
+test6/multiline/password
+test9/sub1/password
+test9/sub2/password
+test9/sub3/password
+test4/multiline
+test5/multiline
+test6/multiline
+test9/sub1
+test9/sub2
+test9/sub3
 selected entities:
- move/m/ka/abc
- move/m/ka/xyz
- move/ma/ka2/zzz
- move/ma/ka3/yyy
- move/ma/ka3/zzz
- move/mac/yyy
- move/mac/zzz
+ test9/sub1
+ test9/sub2
+ test9/sub3
 
-delete entries? (y/N) delete entry? (y/N) 
-keys/k/one2
-pre insert keys/k2/t2/one
-CALLED
-post insert keys/k2/t2/one
-CALLED
+delete entries? (y/N) 
 
-keys/k/one2
-keys/k2/one
-keys/k2/one2
-keys/k2/t1/one
-keys/k2/t1/one2
-keys/k2/t2/one
-keys/k2/t2/one2
-selected entities:
- keys/k2/t1/one
- keys/k2/t1/one2
-
-delete entries? (y/N) pre rm keys/k2/t1/one
-CALLED
-pre rm keys/k2/t1/one2
-CALLED
-post rm keys/k2/t1/one
-CALLED
-post rm keys/k2/t1/one2
-CALLED
-
-keys/k/one2
-keys/k2/one
-keys/k2/one2
-keys/k2/t2/one
-keys/k2/t2/one2
-selected entities:
- keys/k2/one
- keys/k2/one2
- keys/k2/t2/one
- keys/k2/t2/one2
-
-delete entries? (y/N) pre rm keys/k2/one
-CALLED
-pre rm keys/k2/one2
-CALLED
-pre rm keys/k2/t2/one
-CALLED
-pre rm keys/k2/t2/one2
-CALLED
-post rm keys/k2/one
-CALLED
-post rm keys/k2/one2
-CALLED
-post rm keys/k2/t2/one
-CALLED
-post rm keys/k2/t2/one2
-CALLED
-
-keys/k/one2
-
-
-keys/k/one2
-test2
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/otp
+test6/multiline/password
+testing5
 {
-  "keys/k/one2": {
+  "test6/multiline": {
     "modtime": "XXXX-XX-XX",
-    "data": "test2"
+    "notes": "testing5",
+    "otp": "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1\u0026digits=6\u0026issuer=lbissuer\u0026period=30\u0026secret=5ae472abqdekjqykoyxk7hvc2leklq5n",
+    "password": "testing5"
   }
 }
 {
-  "keys/k/one2": {
+  "test6/multiline": {
     "modtime": "XXXX-XX-XX",
+    "notes": "",
+    "otp": "",
+    "password": ""
   }
 }
 {
-  "keys/k/one2": {
+  "test6/multiline": {
     "modtime": "XXXX-XX-XX",
-    "data": "6d2"
+    "notes": "cbf",
+    "otp": "b6c",
+    "password": "cbf"
   }
 }
 clipboard will clear in 3 seconds
 Wrong password? HMAC-SHA256 of header mismatching
 no store set
-keys/k/one2
-abc
-bb
-']
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/otp
+test6/multiline/password
 LOCKBOX_CLIP_COPY_COMMAND=[touch testdata/datadir/clip.copy]
 LOCKBOX_CLIP_PASTE_COMMAND=[touch testdata/datadir/clip.paste]
 LOCKBOX_CLIP_TIMEOUT=3
 LOCKBOX_INTERACTIVE=false
 LOCKBOX_JSON_HASH_LENGTH=3
 LOCKBOX_JSON_MODE=hash
-LOCKBOX_PWGEN_CHARACTERS=b
-LOCKBOX_PWGEN_TEMPLATE={{range $idx, $val := .}}{{if lt $val.Position.End 5}}{{ $val.Text }}{{end}}{{end}}
-LOCKBOX_PWGEN_WORD_COMMAND=[/bin/sh -c echo abc abc | tr ' ' '
-LOCKBOX_PWGEN_WORD_COUNT=2
 LOCKBOX_STORE=testdata/datadir/pass.kdbx

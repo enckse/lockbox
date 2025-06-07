@@ -65,28 +65,28 @@ func TestInsertDo(t *testing.T) {
 	m.pipe = func() bool {
 		return false
 	}
-	m.command.args = []string{"test/test2"}
+	m.command.args = []string{"test/test2/test3"}
 	m.command.confirm = false
 	m.input = func() ([]byte, error) {
 		return nil, errors.New("failure")
 	}
 	m.command.buf = bytes.Buffer{}
-	if err := app.Insert(m, app.SingleLineInsert); err == nil || err.Error() != "invalid input: failure" {
+	if err := app.Insert(m); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.command.confirm = false
 	m.pipe = func() bool {
 		return true
 	}
-	if err := app.Insert(m, app.SingleLineInsert); err == nil || err.Error() != "invalid input: failure" {
+	if err := app.Insert(m); err == nil || err.Error() != "invalid input: failure" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.input = func() ([]byte, error) {
 		return []byte("TEST"), nil
 	}
 	m.command.confirm = true
-	m.command.args = []string{"a/b/c"}
-	if err := app.Insert(m, app.SingleLineInsert); err != nil {
+	m.command.args = []string{"a/b/password"}
+	if err := app.Insert(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.command.buf.String() != "" {
@@ -96,15 +96,15 @@ func TestInsertDo(t *testing.T) {
 		return false
 	}
 	m.command.buf = bytes.Buffer{}
-	if err := app.Insert(m, app.SingleLineInsert); err != nil {
+	if err := app.Insert(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.command.buf.String() == "" {
 		t.Error("invalid insert")
 	}
 	m.command.buf = bytes.Buffer{}
-	m.command.args = []string{"test/test2/test1"}
-	if err := app.Insert(m, app.SingleLineInsert); err != nil {
+	m.command.args = []string{"test/test2/test1/password"}
+	if err := app.Insert(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.command.buf.String() == "" {
@@ -112,8 +112,8 @@ func TestInsertDo(t *testing.T) {
 	}
 	m.command.confirm = false
 	m.command.buf = bytes.Buffer{}
-	m.command.args = []string{"test/test2/test1"}
-	if err := app.Insert(m, app.SingleLineInsert); err != nil {
+	m.command.args = []string{"test/test2/test1/password"}
+	if err := app.Insert(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.command.buf.String() != "" {
@@ -122,8 +122,8 @@ func TestInsertDo(t *testing.T) {
 	m.interactive = false
 	m.command.confirm = true
 	m.command.buf = bytes.Buffer{}
-	m.command.args = []string{"test/test2/test1"}
-	if err := app.Insert(m, app.SingleLineInsert); err != nil {
+	m.command.args = []string{"test/test2/test1/password"}
+	if err := app.Insert(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.command.buf.String() == "" || !m.interactive {
@@ -131,11 +131,11 @@ func TestInsertDo(t *testing.T) {
 	}
 	m.interactive = false
 	m.command.buf = bytes.Buffer{}
-	m.command.args = []string{"test/test2/test1"}
-	if err := app.Insert(m, app.MultiLineInsert); err != nil {
+	m.command.args = []string{"test/test2/test1/notes"}
+	if err := app.Insert(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.command.buf.String() == "" || m.interactive {
-		t.Error("invalid insert")
+		t.Errorf("invalid insert %s %v", m.command.buf.String(), m.interactive)
 	}
 }

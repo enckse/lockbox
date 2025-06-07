@@ -1,7 +1,8 @@
 package backend_test
 
 import (
-	"encoding/json"
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -9,12 +10,51 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
 )
 
+func compareEntity(actual *backend.Entity, expect backend.Entity) bool {
+	if err := compareToEntity(actual, expect); err != nil {
+		return false
+	}
+	return true
+}
+
+func compareToEntity(actual *backend.Entity, expect backend.Entity) error {
+	if actual == nil || actual.Values == nil {
+		return errors.New("invalid actual")
+	}
+	if actual.Path == "" || actual.Path != expect.Path {
+		return errors.New("invalid actual, no path")
+	}
+	for k, v := range actual.Values {
+		isMod := k == "modtime"
+		if isMod {
+			if len(v) < 20 {
+				return fmt.Errorf("%s invalid mod time", k)
+			}
+		}
+		e, ok := expect.Value(k)
+		if !ok {
+			if !isMod {
+				return fmt.Errorf("%s is missing from expected", k)
+			}
+		}
+		if e != v {
+			if isMod {
+				if e == "" {
+					continue
+				}
+			}
+			return fmt.Errorf("mismatch %s: (%s != %s)", k, e, v)
+		}
+	}
+	return nil
+}
+
 func setupInserts(t *testing.T) {
 	setup(t)
-	fullSetup(t, true).Insert("test/test/abc", "tedst")
-	fullSetup(t, true).Insert("test/test/abcx", "tedst")
-	fullSetup(t, true).Insert("test/test/ab11c", "tdest\ntest")
-	fullSetup(t, true).Insert("test/test/abc1ak", "atest")
+	fullSetup(t, true).Insert("test/test/abc", map[string]string{"password": "tedst", "notes": "xxx"})
+	fullSetup(t, true).Insert("test/test/abcx", map[string]string{"password": "tedst"})
+	fullSetup(t, true).Insert("test/test/ab11c", map[string]string{"password": "tedst", "notes": "tdest\ntest"})
+	fullSetup(t, true).Insert("test/test/abc1ak", map[string]string{"password": "atest", "notes": "atest"})
 }
 
 func TestMatchPath(t *testing.T) {
@@ -27,8 +67,13 @@ func TestMatchPath(t *testing.T) {
 	if len(q) != 1 {
 		t.Error("invalid entity result")
 	}
-	if q[0].Path != "test/test/abc" || q[0].Value != "" {
+	if q[0].Path != "test/test/abc" {
 		t.Error("invalid query result")
+	}
+	for _, k := range []string{"notes", "password"} {
+		if val, ok := q[0].Value(k); !ok || val != "" {
+			t.Errorf("invalid result value: %s", k)
+		}
 	}
 	q, err = fullSetup(t, true).MatchPath("test/test/abcxxx")
 	if err != nil {
@@ -62,8 +107,13 @@ func TestGet(t *testing.T) {
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Path != "test/test/abc" || q.Value != "" {
+	if q.Path != "test/test/abc" {
 		t.Error("invalid query result")
+	}
+	for _, k := range []string{"notes", "password"} {
+		if val, ok := q.Value(k); !ok || val != "" {
+			t.Errorf("invalid result value: %s", k)
+		}
 	}
 	q, err = fullSetup(t, true).Get("a/b/aaaa", backend.BlankValue)
 	if err != nil || q != nil {
@@ -81,76 +131,78 @@ func TestValueModes(t *testing.T) {
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "" {
-		t.Errorf("invalid result value: %s", q.Value)
+	for _, k := range []string{"notes", "password"} {
+		if val, ok := q.Value(k); !ok || val != "" {
+			t.Errorf("invalid result value: %s", k)
+		}
 	}
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m := backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if m.Data != "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e" {
-		t.Errorf("invalid result value: %s", q.Value)
-	}
-	if len(m.ModTime) < 20 {
-		t.Errorf("invalid date/time")
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/abc",
+		Values: map[string]string{
+			"notes":    "9057ff1aa9509b2a0af624d687461d2bbeb07e2f37d953b1ce4a9dc921a7f19c45dc35d7c5363b373792add57d0d7dc41596e1c585d6ef7844cdf8ae87af443f",
+			"password": "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if m.Data != "44276ba24d" {
-		t.Errorf("invalid result value: %s", q.Value)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/abc",
+		Values: map[string]string{
+			"notes":    "9057ff1aa9",
+			"password": "44276ba24d",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	q, err = fullSetup(t, true).Get("test/test/ab11c", backend.SecretValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "tdest\ntest" {
-		t.Errorf("invalid result value: %s", q.Value)
-	}
-	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
-	if err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if len(m.ModTime) < 20 || m.Data == "" {
-		t.Errorf("invalid json: %v", m)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/ab11c",
+		Values: map[string]string{
+			"notes":    "tdest\ntest",
+			"password": "tedst",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	store.SetString("LOCKBOX_JSON_MODE", "plAINtExt")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if len(m.ModTime) < 20 || m.Data != "tedst" {
-		t.Errorf("invalid json: %v", m)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/abc",
+		Values: map[string]string{
+			"notes":    "xxx",
+			"password": "tedst",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	store.SetString("LOCKBOX_JSON_MODE", "emPTY")
 	q, err = fullSetup(t, true).Get("test/test/abc", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if len(m.ModTime) < 20 || m.Data != "" {
-		t.Errorf("invalid json: %v", m)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/abc",
+		Values: map[string]string{
+			"notes":    "",
+			"password": "",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 }
 
@@ -186,14 +238,6 @@ func TestQueryCallback(t *testing.T) {
 	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc1ak" {
 		t.Errorf("invalid results: %v", res)
 	}
-	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.SuffixMode, Criteria: "c"})
-	if err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	res = testCollect(t, 2, seq)
-	if res[0].Path != "test/test/ab11c" || res[1].Path != "test/test/abc" {
-		t.Errorf("invalid results: %v", res)
-	}
 	seq, err = fullSetup(t, true).QueryCallback(backend.QueryOptions{Mode: backend.ExactMode, Criteria: "test/test/abc"})
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -227,37 +271,36 @@ func TestSetModTime(t *testing.T) {
 	testDateTime := "2022-12-30T12:34:56-05:00"
 	tr := fullSetup(t, false)
 	store.SetString("LOCKBOX_DEFAULTS_MODTIME", testDateTime)
-	tr.Insert("test/xyz", "test")
+	tr.Insert("test/xyz", map[string]string{"password": "test"})
 	q, err := fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m := backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if m.ModTime != testDateTime {
-		t.Errorf("invalid date/time")
+	if !compareEntity(q, backend.Entity{
+		Path: "test/xyz",
+		Values: map[string]string{
+			"password": "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff",
+			"modtime":  testDateTime,
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 
 	store.Clear()
 	tr = fullSetup(t, false)
-	tr.Insert("test/xyz", "test")
+	tr.Insert("test/xyz", map[string]string{"password": "test"})
 	q, err = fullSetup(t, true).Get("test/xyz", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if m.ModTime == testDateTime {
-		t.Errorf("invalid date/time")
+
+	if val, ok := q.Value("modtime"); !ok || len(val) < 20 || val == testDateTime {
+		t.Errorf("invalid mod: %s", val)
 	}
 
 	tr = fullSetup(t, false)
 	store.SetString("LOCKBOX_DEFAULTS_MODTIME", "garbage")
-	err = tr.Insert("test/xyz", "test")
+	err = tr.Insert("test/xyz", map[string]string{"password": "test"})
 	if err == nil || !strings.Contains(err.Error(), "parsing time") {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -266,90 +309,68 @@ func TestSetModTime(t *testing.T) {
 func TestAttributeModes(t *testing.T) {
 	store.Clear()
 	setupInserts(t)
-	fullSetup(t, true).Insert("test/test/totp", "atest")
+	fullSetup(t, true).Insert("test/test/totp", map[string]string{"otp": "atest"})
 	q, err := fullSetup(t, true).Get("test/test/totp", backend.BlankValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	if q.Value != "" {
-		t.Errorf("invalid result value: %s", q.Value)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/totp",
+		Values: map[string]string{
+			"otp": "",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m := backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if m.Data != "d39e1526f86e69f9ff1f443f5a575b5ce516b66746773997fa11bd4aefb5facd0a6fa79d0b970cad3af342ff5a63f4df1a05ef110573631d84f174b7b1d17c63" {
-		t.Errorf("invalid result value: %s", q.Value)
-	}
-	if m.Attributes == nil || len(m.Attributes) != 1 {
-		t.Errorf("invalid result value: %v", m.Attributes)
-	}
-	val, ok := m.Attributes["otp"]
-	if !ok || val != "7f8fd0e1a714f63da75206748d0ea1dd601fc8f92498bc87c9579b403c3004a0eefdd7ead976f7dbd6e5143c9aa7a569e24322d870ec7745a4605a154557458e" {
-		t.Errorf("invalid result value: %v", m.Attributes)
-	}
-	if len(m.ModTime) < 20 {
-		t.Errorf("invalid date/time")
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/totp",
+		Values: map[string]string{
+			"otp": "7f8fd0e1a714f63da75206748d0ea1dd601fc8f92498bc87c9579b403c3004a0eefdd7ead976f7dbd6e5143c9aa7a569e24322d870ec7745a4605a154557458e",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
 	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if m.Data != "d39e1526f8" {
-		t.Errorf("invalid result value: %s", q.Value)
-	}
-	if m.Attributes == nil || len(m.Attributes) != 1 {
-		t.Errorf("invalid result value: %v", m.Attributes)
-	}
-	val, ok = m.Attributes["otp"]
-	if !ok || val != "7f8fd0e1a7" {
-		t.Errorf("invalid result value: %v", m.Attributes)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/totp",
+		Values: map[string]string{
+			"otp": "7f8fd0e1a7",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	store.SetString("LOCKBOX_JSON_MODE", "PlAINtExt")
 	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if len(m.ModTime) < 20 || m.Data != "atest" {
-		t.Errorf("invalid json: %v", m)
-	}
-	if m.Attributes == nil || len(m.Attributes) != 1 {
-		t.Errorf("invalid result value: %v", m.Attributes)
-	}
-	val, ok = m.Attributes["otp"]
-	if !ok || !strings.Contains(val, "otpauth://") {
-		t.Errorf("invalid result value: %v", m.Attributes)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/totp",
+		Values: map[string]string{
+			"otp": "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=atest",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 	store.SetString("LOCKBOX_JSON_MODE", "emPty")
 	q, err = fullSetup(t, true).Get("test/test/totp", backend.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
-	m = backend.JSON{}
-	if err := json.Unmarshal([]byte(q.Value), &m); err != nil {
-		t.Errorf("no error: %v", err)
-	}
-	if len(m.ModTime) < 20 || m.Data != "" {
-		t.Errorf("invalid json: %v", m)
-	}
-	if m.Attributes == nil || len(m.Attributes) != 1 {
-		t.Errorf("invalid result value: %v", m.Attributes)
-	}
-	val, ok = m.Attributes["otp"]
-	if !ok || val != "" {
-		t.Errorf("invalid result value: %v", m.Attributes)
+	if !compareEntity(q, backend.Entity{
+		Path: "test/test/totp",
+		Values: map[string]string{
+			"otp": "",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
 	}
 }

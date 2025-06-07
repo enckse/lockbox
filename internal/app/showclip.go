@@ -24,19 +24,33 @@ func ShowClip(cmd CommandOptions, isShow bool) error {
 			return fmt.Errorf("unable to get clipboard: %w", err)
 		}
 	}
-	existing, err := cmd.Transaction().Get(entry, backend.SecretValue)
+	val, err := getEntity(entry, cmd)
 	if err != nil {
 		return err
 	}
-	if existing == nil {
-		return errors.New("entry does not exist")
-	}
 	if isShow {
-		fmt.Fprintln(cmd.Writer(), existing.Value)
+		fmt.Fprintln(cmd.Writer(), val)
 		return nil
 	}
-	if err := clipboard.CopyTo(existing.Value); err != nil {
+	if err := clipboard.CopyTo(val); err != nil {
 		return fmt.Errorf("clipboard operation failed: %w", err)
 	}
 	return nil
+}
+
+func getEntity(entry string, cmd CommandOptions) (string, error) {
+	base := backend.Base(entry)
+	dir := backend.Directory(entry)
+	existing, err := cmd.Transaction().Get(dir, backend.SecretValue)
+	if err != nil {
+		return "", err
+	}
+	if existing == nil {
+		return "", errors.New("entry does not exist")
+	}
+	val, ok := existing.Value(base)
+	if !ok {
+		return "", fmt.Errorf("entity value invalid: %s (%s)", base, entry)
+	}
+	return val, nil
 }

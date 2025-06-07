@@ -4,6 +4,9 @@ package app
 import (
 	"errors"
 	"fmt"
+	"io"
+
+	"git.sr.ht/~enckse/lockbox/internal/backend"
 )
 
 // Remove will remove an entry
@@ -12,8 +15,11 @@ func Remove(cmd CommandOptions) error {
 	if len(args) != 1 {
 		return errors.New("remove requires an entry")
 	}
-	t := cmd.Transaction()
-	deleting := args[0]
+	return remove(cmd.Transaction(), cmd.Writer(), args[0], cmd)
+}
+
+func remove(t *backend.Transaction, w io.Writer, entry string, cmd CommandOptions) error {
+	deleting := entry
 	postfixRemove := "y"
 	existings, err := t.MatchPath(deleting)
 	if err != nil {
@@ -22,7 +28,6 @@ func Remove(cmd CommandOptions) error {
 	if len(existings) == 0 {
 		return fmt.Errorf("no entities matching: %s", deleting)
 	}
-	w := cmd.Writer()
 	if len(existings) > 1 {
 		postfixRemove = "ies"
 		fmt.Fprintln(w, "selected entities:")

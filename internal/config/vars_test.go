@@ -56,17 +56,6 @@ func TestIsNoGeneratePassword(t *testing.T) {
 	checkYesNo("LOCKBOX_PWGEN_ENABLED", t, config.EnvPasswordGenEnabled, true)
 }
 
-func TestTOTP(t *testing.T) {
-	store.Clear()
-	if config.EnvTOTPEntry.Get() != "totp" {
-		t.Error("invalid totp token field")
-	}
-	store.SetString("LOCKBOX_TOTP_ENTRY", "abc")
-	if config.EnvTOTPEntry.Get() != "abc" {
-		t.Error("invalid totp token field")
-	}
-}
-
 func TestFormatTOTP(t *testing.T) {
 	store.Clear()
 	otp := config.EnvTOTPFormat.Get("otpauth://abc")
@@ -171,7 +160,6 @@ func TestUnsetArrays(t *testing.T) {
 func TestDefaultStrings(t *testing.T) {
 	store.Clear()
 	for k, v := range map[string]config.EnvironmentString{
-		"totp":    config.EnvTOTPEntry,
 		"hash":    config.EnvJSONMode,
 		"command": config.EnvPasswordMode,
 		"{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}": config.EnvPasswordGenTemplate,

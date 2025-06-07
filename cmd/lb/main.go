@@ -82,16 +82,14 @@ func run() error {
 	switch command {
 	case commands.ReKey:
 		return app.ReKey(p)
-	case commands.List, commands.Find:
-		return app.List(p, command == commands.Find)
+	case commands.List, commands.Find, commands.Groups:
+		return app.List(p, command == commands.Find, command == commands.Groups)
+	case commands.Unset:
+		return app.Unset(p)
 	case commands.Move:
 		return app.Move(p)
-	case commands.Insert, commands.MultiLine:
-		mode := app.SingleLineInsert
-		if command == commands.MultiLine {
-			mode = app.MultiLineInsert
-		}
-		return app.Insert(p, mode)
+	case commands.Insert:
+		return app.Insert(p)
 	case commands.Remove:
 		return app.Remove(p)
 	case commands.JSON:
@@ -101,13 +99,9 @@ func run() error {
 	case commands.Conv:
 		return app.Conv(p)
 	case commands.TOTP:
-		args, err := app.NewTOTPArguments(sub, config.EnvTOTPEntry.Get())
+		args, err := app.NewTOTPArguments(sub)
 		if err != nil {
 			return err
-		}
-		if args.Mode == app.InsertTOTPMode {
-			p.SetArgs(args.Entry)
-			return app.Insert(p, app.TOTPInsert)
 		}
 		return args.Do(app.NewDefaultTOTPOptions(p))
 	case commands.PasswordGenerate:

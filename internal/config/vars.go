@@ -94,18 +94,6 @@ var (
 			}),
 		short: "max totp time",
 	})
-	// EnvTOTPEntry is the leaf token to use to store TOTP tokens
-	EnvTOTPEntry = environmentRegister(EnvironmentString{
-		environmentStrings: environmentStrings{
-			environmentDefault: newDefaultedEnvironment("totp",
-				environmentBase{
-					key:         totpCategory + "ENTRY",
-					description: "Entry name to store TOTP tokens within the database.",
-				}),
-			allowed: []string{"<string>"},
-			flags:   []stringsFlags{canDefaultFlag},
-		},
-	})
 	// EnvPlatform is the platform that the application is running on
 	EnvPlatform = environmentRegister(EnvironmentString{
 		environmentStrings: environmentStrings{

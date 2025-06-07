@@ -3,7 +3,6 @@ package backend
 
 import (
 	"crypto/sha512"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -22,12 +21,6 @@ type (
 		Criteria   string
 		Mode       QueryMode
 		Values     ValueMode
-	}
-	// JSON is an entry as a JSON string
-	JSON struct {
-		Attributes map[string]string `json:"attributes,omitempty"`
-		ModTime    string            `json:"modtime"`
-		Data       string            `json:"data,omitempty"`
 	}
 	// QueryMode indicates HOW an entity will be found
 	QueryMode int
@@ -52,8 +45,6 @@ const (
 	FindMode
 	// ExactMode means an entity must MATCH the string exactly
 	ExactMode
-	// SuffixMode will look for an entity ending in a specific value
-	SuffixMode
 	// PrefixMode allows for entities starting with a specific value
 	PrefixMode
 )
@@ -153,10 +144,6 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					if !strings.Contains(path, args.Criteria) {
 						return
 					}
-				case SuffixMode:
-					if !strings.HasSuffix(path, args.Criteria) {
-						return
-					}
 				case PrefixMode:
 					if !strings.HasPrefix(path, args.Criteria) {
 						return
@@ -226,38 +213,26 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		for _, item := range entities {
 			entity := Entity{Path: item.path}
 			var err error
-			if args.Values != BlankValue {
-				val := getValue(item.backing, notesKey)
-				if strings.TrimSpace(val) == "" {
-					val = item.backing.GetPassword()
-				}
-				switch args.Values {
-				case JSONValue:
-					data := jsonHasher(val)
-					t := getValue(item.backing, modTimeKey)
-					var attrs map[string]string
-					for _, v := range item.backing.Values {
-						if attrs == nil {
-							attrs = make(map[string]string)
-						}
-						key := v.Key
-						if isRestrictedField(key) || key == modTimeKey {
-							continue
-						}
-
-						attrs[key] = jsonHasher(v.Value.Content)
+			values := make(EntityValues)
+			for _, v := range item.backing.Values {
+				val := ""
+				key := v.Key
+				if args.Values != BlankValue {
+					if args.Values == JSONValue {
+						values["modtime"] = getValue(item.backing, modTimeKey)
 					}
-					s := JSON{ModTime: t, Data: data, Attributes: attrs}
-					m, jErr := json.Marshal(s)
-					if jErr == nil {
-						entity.Value = string(m)
-					} else {
-						err = jErr
+					val = v.Value.Content
+					switch args.Values {
+					case JSONValue:
+						val = jsonHasher(val)
 					}
-				case SecretValue:
-					entity.Value = val
 				}
+				if key == modTimeKey || key == titleKey {
+					continue
+				}
+				values[strings.ToLower(key)] = val
 			}
+			entity.Values = values
 			if !yield(entity, err) {
 				return
 			}

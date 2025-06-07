@@ -45,7 +45,14 @@ _{{ $.Executable }}() {
             compadd "$@" "{{ $.HelpConfigCommand }}"
           fi
         ;;
-        "{{ $.InsertCommand }}" | "{{ $.MultiLineCommand }}" | "{{ $.RemoveCommand }}")
+        "{{ $.RemoveCommand }}")
+          if [ "$len" -eq 3 ]; then
+            if {{ $.Conditionals.Not.AskMode }}; then
+              compadd "$@" $({{ $.DoGroups }})
+            fi
+          fi
+        ;;
+        "{{ $.InsertCommand }}" | "{{ $.UnsetCommand }}")
           if [ "$len" -eq 3 ]; then
             if {{ $.Conditionals.Not.AskMode }}; then
               compadd "$@" $({{ $.DoList }})
@@ -56,7 +63,7 @@ _{{ $.Executable }}() {
           case "$len" in
             3 | 4)
               if {{ $.Conditionals.Not.AskMode }}; then
-                compadd "$@" $({{ $.DoList }})
+                compadd "$@" $({{ $.DoGroups }})
               fi
             ;;
           esac

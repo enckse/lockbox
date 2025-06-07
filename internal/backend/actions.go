@@ -3,6 +3,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -189,8 +190,22 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 	if strings.TrimSpace(src.Path) == "" {
 		return errors.New("empty path not allowed")
 	}
-	if strings.TrimSpace(src.Value) == "" {
-		return errors.New("empty secret not allowed")
+	if len(src.Values) == 0 {
+		return errors.New("empty secrets not allowed")
+	}
+	values := make(map[string]string)
+	for k, v := range src.Values {
+		found := false
+		for _, mapping := range allowedFields {
+			if strings.EqualFold(k, mapping) {
+				values[mapping] = v
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("unknown entity field: %s", k)
+		}
 	}
 	mod := config.EnvDefaultModTime.Get()
 	modTime := time.Now()
@@ -220,7 +235,6 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 	if err := hook.Run(HookPre); err != nil {
 		return err
 	}
-	multi := len(strings.Split(strings.TrimSpace(src.Value), "\n")) > 1
 	err = t.change(func(c Context) error {
 		c.removeEntity(sOffset, sTitle)
 		if action == MoveAction {
@@ -228,24 +242,20 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 		}
 		e := gokeepasslib.NewEntry()
 		e.Values = append(e.Values, value(titleKey, dTitle))
-		field := passKey
-		if multi {
-			field = notesKey
-		}
-		v := src.Value
-		ok, err := isTOTP(dTitle)
-		if err != nil {
-			return err
-		}
-		if ok {
-			if multi {
-				return errors.New("totp tokens can NOT be multi-line")
-			}
-			otp := config.EnvTOTPFormat.Get(v)
-			e.Values = append(e.Values, protectedValue("otp", otp))
-		}
-		e.Values = append(e.Values, protectedValue(field, v))
 		e.Values = append(e.Values, value(modTimeKey, modTime.Format(time.RFC3339)))
+		for k, v := range values {
+			val := v
+			switch k {
+			case otpKey, passKey:
+				if strings.Contains(val, "\n") {
+					return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
+				}
+				if k == otpKey {
+					val = config.EnvTOTPFormat.Get(v)
+				}
+			}
+			e.Values = append(e.Values, protectedValue(k, val))
+		}
 		c.alterEntities(true, dOffset, dTitle, &e)
 		return nil
 	})
@@ -256,8 +266,8 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 }
 
 // Insert is a move to the same location
-func (t *Transaction) Insert(path, val string) error {
-	return t.Move(&Entity{Path: path, Value: val}, path)
+func (t *Transaction) Insert(path string, val EntityValues) error {
+	return t.Move(&Entity{Path: path, Values: val}, path)
 }
 
 // Remove will remove a single entity

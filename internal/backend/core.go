@@ -14,7 +14,10 @@ import (
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )
 
-var errPath = errors.New("input paths must contain at LEAST 2 components")
+var (
+	errPath       = errors.New("input paths must contain at LEAST 2 components")
+	allowedFields = []string{notesKey, passKey, otpKey}
+)
 
 const (
 	notesKey   = "Notes"
@@ -23,9 +26,16 @@ const (
 	pathSep    = "/"
 	isGlob     = pathSep + "*"
 	modTimeKey = "ModTime"
+	otpKey     = "otp"
+	// OTP is the totp storage attribute
+	OTP = otpKey
+	// Notes is the multiline notes key
+	Notes = notesKey
 )
 
 type (
+	// EntityValues are what is stored, from an entity, into kdbx backing store
+	EntityValues map[string]string
 	// QuerySeq2 wraps the iteration for query entities
 	QuerySeq2 iter.Seq2[Entity, error]
 	// Transaction handles the overall operation of the transaction
@@ -42,8 +52,8 @@ type (
 	}
 	// Entity are database objects from results and transactional changes
 	Entity struct {
-		Path  string
-		Value string
+		Values EntityValues
+		Path   string
 	}
 )
 
@@ -138,18 +148,6 @@ func encode(f *os.File, db *gokeepasslib.Database) error {
 	return gokeepasslib.NewEncoder(f).Encode(db)
 }
 
-func isRestrictedField(key string) bool {
-	return key == notesKey || key == passKey || key == titleKey
-}
-
-func isTOTP(title string) (bool, error) {
-	t := config.EnvTOTPEntry.Get()
-	if isRestrictedField(t) {
-		return false, errors.New("invalid totp field, uses restricted name")
-	}
-	return NewSuffix(title) == NewSuffix(t), nil
-}
-
 func getPathName(entry gokeepasslib.Entry) string {
 	return entry.GetTitle()
 }
@@ -175,9 +173,13 @@ func NewPath(segments ...string) string {
 	return strings.Join(segments, pathSep)
 }
 
-// Directory gets the offset location of the entry without the 'name'
-func (e Entity) Directory() string {
-	return Directory(e.Path)
+// Value will read an entity value
+func (e Entity) Value(key string) (string, bool) {
+	if e.Values == nil {
+		return "", false
+	}
+	val, ok := e.Values[key]
+	return val, ok
 }
 
 // Base will get the base name of input path
@@ -206,6 +208,11 @@ func getValue(e gokeepasslib.Entry, key string) string {
 // IsDirectory will indicate if a path looks like a group/directory
 func IsDirectory(path string) bool {
 	return strings.HasSuffix(path, pathSep)
+}
+
+// IsLeafAttribute indicates if a path is leaved with a certain name
+func IsLeafAttribute(path, attr string) bool {
+	return strings.HasSuffix(path, pathSep+attr)
 }
 
 // Collect will create a slice from an iterable set of query sequence results

@@ -48,12 +48,8 @@ const (
 	Completions = "completions"
 	// ReKey will rekey the underlying database
 	ReKey = "rekey"
-	// MultiLine handles multi-line inserts (when not piped)
-	MultiLine = "multiline"
 	// TOTPShow is for showing the TOTP token
 	TOTPShow = Show
-	// TOTPInsert is for inserting totp tokens
-	TOTPInsert = Insert
 	// JSON handles JSON outputs
 	JSON = "json"
 	// CompletionsZsh is the command to generate zsh completions
@@ -64,6 +60,10 @@ const (
 	PasswordGenerate = "pwgen"
 	// Executable is the name of the executable
 	Executable = "lb"
+	// Unset indicates a value should be unset (removed) from an entity
+	Unset = "unset"
+	// Groups handles getting a list of groups
+	Groups = "groups"
 )
 
 var (
