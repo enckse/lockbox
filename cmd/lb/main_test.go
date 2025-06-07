@@ -226,6 +226,7 @@ func test(profile string) error {
 	r.run("", "totp show test6/multiline/otp")
 	r.run("", "totp once test6/multiline/otp")
 	r.run("", "totp minimal test6/multiline/otp")
+	r.run("", "totp url test6/multiline/otp")
 	r.run("", fmt.Sprintf("conv \"%s\"", r.store))
 	r.run("echo y |", "rm test7/deeper")
 	r.run("echo y |", "rm test7/deeper/ro")

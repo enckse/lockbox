@@ -55,7 +55,8 @@ const (
 	// Unset indicates a value should be unset (removed) from an entity
 	Unset = "unset"
 	// Groups handles getting a list of groups
-	Groups = "groups"
+	Groups     = "groups"
+	TOTPURL = "url"
 )
 
 var (

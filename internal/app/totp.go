@@ -13,8 +13,8 @@ import (
 	otp "github.com/pquerna/otp/totp"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
 
@@ -59,6 +59,8 @@ const (
 	ListTOTPMode
 	// OnceTOTPMode will only show the token once and exit
 	OnceTOTPMode
+	// URLTOTPMode will dump the URL details
+	URLTOTPMode
 )
 
 // NewDefaultTOTPOptions gets the default option set
@@ -89,7 +91,7 @@ func (w totpWrapper) generateCode() (string, error) {
 
 func (args *TOTPArguments) display(opts TOTPOptions) error {
 	interactive := opts.IsInteractive()
-	if args.Mode == MinimalTOTPMode {
+	if args.Mode == MinimalTOTPMode || args.Mode == URLTOTPMode {
 		interactive = false
 	}
 	once := args.Mode == OnceTOTPMode
@@ -115,6 +117,14 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	wrapper.opts.Algorithm = k.Algorithm()
 	wrapper.opts.Period = uint(k.Period())
 	writer := opts.app.Writer()
+	if args.Mode == URLTOTPMode {
+		fmt.Fprintf(writer, "url:       %s\n", k.URL())
+		fmt.Fprintf(writer, "seed:      %s\n", wrapper.code)
+		fmt.Fprintf(writer, "digits:    %s\n", wrapper.opts.Digits)
+		fmt.Fprintf(writer, "algorithm: %s\n", wrapper.opts.Algorithm)
+		fmt.Fprintf(writer, "period:    %d\n", wrapper.opts.Period)
+		return nil
+	}
 	if !interactive {
 		code, err := wrapper.generateCode()
 		if err != nil {
@@ -243,6 +253,8 @@ func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 			}
 		}
 		opts.Mode = ListTOTPMode
+	case commands.TOTPURL:
+		opts.Mode = URLTOTPMode
 	case commands.TOTPShow:
 		opts.Mode = ShowTOTPMode
 	case commands.TOTPClip:

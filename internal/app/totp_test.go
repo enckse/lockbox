@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 type (
@@ -116,6 +116,10 @@ func TestNewTOTPArguments(t *testing.T) {
 	if args.Mode != app.OnceTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
+	args, _ = app.NewTOTPArguments([]string{"url", "test"})
+	if args.Mode != app.URLTOTPMode || args.Entry != "test" {
+		t.Error("invalid args")
+	}
 }
 
 func TestDoErrors(t *testing.T) {
@@ -182,6 +186,18 @@ func TestNonListError(t *testing.T) {
 	}
 	if err := args.Do(opts); err == nil || err.Error() != "entry does not exist" {
 		t.Errorf("invalid error: %v", err)
+	}
+}
+
+func TestURL(t *testing.T) {
+	setupTOTP(t)
+	args, _ := app.NewTOTPArguments([]string{"url", "test/test3/totp/otp"})
+	m, opts := newMock(t)
+	if err := args.Do(opts); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if !strings.Contains(m.buf.String(), "url") {
+		t.Errorf("invalid short: %s", m.buf.String())
 	}
 }
 
