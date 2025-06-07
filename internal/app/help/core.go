@@ -64,7 +64,7 @@ func commandText(args, name, desc string) string {
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
-	return fmt.Sprintf("  %-18s %-10s    %s", name, arguments, desc)
+	return fmt.Sprintf("  %-17s %-13s    %s", name, arguments, desc)
 }
 
 // Usage return usage information
@@ -72,6 +72,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	const (
 		isEntry  = "entry"
 		isFilter = "filter"
+		isGroup  = "group"
 	)
 	var results []string
 	results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
@@ -88,9 +89,9 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.JSON, isFilter, "display detailed information"))
 	results = append(results, command(commands.List, isFilter, "list entries"))
 	results = append(results, command(commands.Groups, isFilter, "list groups"))
-	results = append(results, command(commands.Move, "src dst", "move a group from source to destination"))
+	results = append(results, command(commands.Move, fmt.Sprintf("%s %s", isGroup, isGroup), "move a group from source to destination"))
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
-	results = append(results, command(commands.Remove, "group", "remove an entry from the store"))
+	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
 	results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
