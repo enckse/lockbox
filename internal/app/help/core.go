@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
+	"git.sr.ht/~enckse/lockbox/internal/backend"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/output"
 )
@@ -42,6 +43,10 @@ type (
 		ReKey struct {
 			KeyFile string
 			NoKey   string
+		}
+		Database struct {
+			Fields   string
+			Examples string
 		}
 	}
 )
@@ -112,6 +117,19 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		document.Config.XDG = config.ConfigXDG
 		document.ReKey.KeyFile = setDocFlag(commands.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = commands.ReKeyFlags.NoKey
+		var fields []string
+		for _, field := range backend.AllowedFields {
+			fields = append(fields, strings.ToLower(field))
+		}
+		sort.Strings(fields)
+		document.Database.Fields = strings.Join(fields, ", ")
+		var examples []string
+		for _, example := range []string{commands.Insert, commands.Show} {
+			for _, field := range fields {
+				examples = append(examples, fmt.Sprintf("%s %s my/path/%s", document.Executable, example, field))
+			}
+		}
+		document.Database.Examples = strings.Join(examples, "\n\n")
 		files, err := docs.ReadDir(docDir)
 		if err != nil {
 			return nil, err

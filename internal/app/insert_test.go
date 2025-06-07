@@ -65,7 +65,7 @@ func TestInsertDo(t *testing.T) {
 	m.pipe = func() bool {
 		return false
 	}
-	m.command.args = []string{"test/test2/test3"}
+	m.command.args = []string{"test/test2/test3ss/password"}
 	m.command.confirm = false
 	m.input = func() ([]byte, error) {
 		return nil, errors.New("failure")
@@ -75,10 +75,19 @@ func TestInsertDo(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.command.confirm = false
+	m.command.args = []string{"test/test2/test3/password"}
 	m.pipe = func() bool {
 		return true
 	}
 	if err := app.Insert(m); err == nil || err.Error() != "invalid input: failure" {
+		t.Errorf("invalid error: %v", err)
+	}
+	m.command.confirm = false
+	m.command.args = []string{"test/test2/test3/Password"}
+	m.pipe = func() bool {
+		return true
+	}
+	if err := app.Insert(m); err == nil || err.Error() != "'Password' is not an allowed field name" {
 		t.Errorf("invalid error: %v", err)
 	}
 	m.input = func() ([]byte, error) {

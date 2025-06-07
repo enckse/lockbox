@@ -185,7 +185,7 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 	values := make(map[string]string)
 	for k, v := range src.Values {
 		found := false
-		for _, mapping := range allowedFields {
+		for _, mapping := range AllowedFields {
 			if strings.EqualFold(k, mapping) {
 				values[mapping] = v
 				found = true
@@ -225,11 +225,11 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 		for k, v := range values {
 			val := v
 			switch k {
-			case otpKey, passKey:
+			case OTPField, PasswordField:
 				if strings.Contains(val, "\n") {
 					return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
 				}
-				if k == otpKey {
+				if k == OTPField {
 					val = config.EnvTOTPFormat.Get(v)
 				}
 			}

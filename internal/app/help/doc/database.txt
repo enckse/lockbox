@@ -6,3 +6,10 @@ is possible to use the database in those applications, just take caution when
 changing it outside of '{{ $.Executable }}' usage. If a database not normally used by '{{ $.Executable }}' is
 to be used by '{{ $.Executable }}', try using the various readonly settings to control
 interactions.
+
+When using `{{ $.Executable }}` one can only insert/manage the following
+fields: {{ $.Database.Fields }}
+
+Example commands:
+
+{{ $.Database.Examples }}

@@ -1,7 +1,7 @@
 password: test1/key1/password
-input paths must contain at LEAST 2 components
-unknown entity field: 
-unknown entity field: still
+'test3' is not an allowed field name
+'' is not an allowed field name
+'still' is not an allowed field name
 otp can NOT be multi-line
 password can NOT be multi-line
 testing5

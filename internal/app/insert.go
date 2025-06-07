@@ -4,6 +4,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"git.sr.ht/~enckse/lockbox/internal/backend"
@@ -18,6 +19,12 @@ func Insert(cmd UserInputOptions) error {
 	}
 	entry := args[0]
 	base := backend.Base(entry)
+	if !slices.ContainsFunc(backend.AllowedFields, func(v string) bool {
+		return base == strings.ToLower(v)
+	}) {
+		return fmt.Errorf("'%s' is not an allowed field name", base)
+	}
+
 	dir := backend.Directory(entry)
 	existing, err := t.Get(dir, backend.SecretValue)
 	if err != nil {
@@ -33,7 +40,7 @@ func Insert(cmd UserInputOptions) error {
 			}
 		}
 	}
-	password, err := cmd.Input(!isPipe && !strings.EqualFold(base, backend.Notes))
+	password, err := cmd.Input(!isPipe && !strings.EqualFold(base, backend.NotesField))
 	if err != nil {
 		return fmt.Errorf("invalid input: %w", err)
 	}

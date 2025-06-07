@@ -15,22 +15,22 @@ import (
 )
 
 var (
-	errPath       = errors.New("input paths must contain at LEAST 2 components")
-	allowedFields = []string{notesKey, passKey, otpKey}
+	errPath = errors.New("input paths must contain at LEAST 2 components")
+	// AllowedFields are the same of allowed names for storing in a kdbx entry
+	AllowedFields = []string{NotesField, OTPField, PasswordField}
 )
 
 const (
-	notesKey   = "Notes"
 	titleKey   = "Title"
-	passKey    = "Password"
 	pathSep    = "/"
 	isGlob     = pathSep + "*"
 	modTimeKey = "ModTime"
-	otpKey     = "otp"
-	// OTP is the totp storage attribute
-	OTP = otpKey
-	// Notes is the multiline notes key
-	Notes = notesKey
+	// OTPField is the totp storage attribute
+	OTPField = "otp"
+	// NotesField is the multiline notes key
+	NotesField = "Notes"
+	// PasswordField is where the password is stored
+	PasswordField = "Password"
 )
 
 type (
