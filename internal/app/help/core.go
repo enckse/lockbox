@@ -97,6 +97,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPURL, isEntry, "display TOTP url information"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPSeed, isEntry, "show the TOTP seed (only)"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
 	results = append(results, command(commands.Version, "", "display version information"))
 	sort.Strings(results)

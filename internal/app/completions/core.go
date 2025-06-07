@@ -129,7 +129,7 @@ func Generate(completionType, exe string) ([]string, error) {
 			commands.Insert: c.Conditionals.Not.ReadOnly,
 			commands.Unset:  c.Conditionals.Not.ReadOnly,
 		})
-	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow},
+	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed},
 		map[string]string{
 			commands.TOTPClip: c.Conditionals.Not.CanClip,
 		})

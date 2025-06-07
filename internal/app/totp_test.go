@@ -120,6 +120,10 @@ func TestNewTOTPArguments(t *testing.T) {
 	if args.Mode != app.URLTOTPMode || args.Entry != "test" {
 		t.Error("invalid args")
 	}
+	args, _ = app.NewTOTPArguments([]string{"seed", "test"})
+	if args.Mode != app.SeedTOTPMode || args.Entry != "test" {
+		t.Error("invalid args")
+	}
 }
 
 func TestDoErrors(t *testing.T) {
@@ -189,6 +193,18 @@ func TestNonListError(t *testing.T) {
 	}
 }
 
+func TestSeed(t *testing.T) {
+	setupTOTP(t)
+	args, _ := app.NewTOTPArguments([]string{"seed", "test/test3/totp/otp"})
+	m, opts := newMock(t)
+	if err := args.Do(opts); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "5ae472abqdekjqykoyxk7hvc2leklq5n\n" {
+		t.Errorf("invalid seed: %s", m.buf.String())
+	}
+}
+
 func TestURL(t *testing.T) {
 	setupTOTP(t)
 	args, _ := app.NewTOTPArguments([]string{"url", "test/test3/totp/otp"})
@@ -197,7 +213,7 @@ func TestURL(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	if !strings.Contains(m.buf.String(), "url") {
-		t.Errorf("invalid short: %s", m.buf.String())
+		t.Errorf("invalid url dump: %s", m.buf.String())
 	}
 }
 

@@ -61,6 +61,7 @@ const (
 	OnceTOTPMode
 	// URLTOTPMode will dump the URL details
 	URLTOTPMode
+	SeedTOTPMode
 )
 
 // NewDefaultTOTPOptions gets the default option set
@@ -91,7 +92,7 @@ func (w totpWrapper) generateCode() (string, error) {
 
 func (args *TOTPArguments) display(opts TOTPOptions) error {
 	interactive := opts.IsInteractive()
-	if args.Mode == MinimalTOTPMode || args.Mode == URLTOTPMode {
+	if args.Mode == MinimalTOTPMode || args.Mode == URLTOTPMode || args.Mode == SeedTOTPMode {
 		interactive = false
 	}
 	once := args.Mode == OnceTOTPMode
@@ -117,7 +118,11 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	wrapper.opts.Algorithm = k.Algorithm()
 	wrapper.opts.Period = uint(k.Period())
 	writer := opts.app.Writer()
-	if args.Mode == URLTOTPMode {
+	switch args.Mode {
+	case SeedTOTPMode:
+		fmt.Fprintln(writer, wrapper.code)
+		return nil
+	case URLTOTPMode:
 		fmt.Fprintf(writer, "url:       %s\n", k.URL())
 		fmt.Fprintf(writer, "seed:      %s\n", wrapper.code)
 		fmt.Fprintf(writer, "digits:    %s\n", wrapper.opts.Digits)
@@ -255,6 +260,8 @@ func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 		opts.Mode = ListTOTPMode
 	case commands.TOTPURL:
 		opts.Mode = URLTOTPMode
+	case commands.TOTPSeed:
+		opts.Mode = SeedTOTPMode
 	case commands.TOTPShow:
 		opts.Mode = ShowTOTPMode
 	case commands.TOTPClip:
