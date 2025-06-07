@@ -10,8 +10,6 @@ const (
 	Clear = "clear"
 	// Clip will copy values to the clipboard
 	Clip = "clip"
-	// Find is for simplistic searching of entries
-	Find = "find"
 	// Insert adds a value
 	Insert = "insert"
 	// List lists all entries
@@ -38,8 +36,6 @@ const (
 	TOTPMinimal = "minimal"
 	// TOTPList will list the totp-enabled entries
 	TOTPList = List
-	// TOTPFind allows a filter search of TOTP listed entries
-	TOTPFind = Find
 	// TOTPOnce will perform like a normal totp request but not refresh
 	TOTPOnce = "once"
 	// CompletionsBash is the command to generate bash completions

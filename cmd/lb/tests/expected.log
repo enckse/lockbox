@@ -7,6 +7,7 @@ password can NOT be multi-line
 testing5
 testing5
 testing5
+otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=testing5
 testing5
 testing5
 testing5
@@ -20,6 +21,7 @@ test5/multiline/notes
 test6/multiline/notes
 test6/multiline/password
 test7/deeper/rooted/notes
+test7/deeper/rooted/otp
 test8/unset/notes
 test8/unset/password
 test9/key1/sub1/password
@@ -42,11 +44,16 @@ test5/multiline/notes
 test6/multiline/notes
 test6/multiline/password
 test7/deeper/rooted/notes
+test7/deeper/rooted/otp
 test8/unset/notes
 test8/unset/password
 test9/key1/sub1/password
 test9/key1/sub2/password
 test9/key2/sub1/password
+test4/multiline/notes
+test5/multiline/notes
+test6/multiline/notes
+test6/multiline/password
 {
   "test1/key1": {
     "modtime": "XXXX-XX-XX",
@@ -67,7 +74,8 @@ test9/key2/sub1/password
   },
   "test7/deeper/rooted": {
     "modtime": "XXXX-XX-XX",
-    "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+    "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+    "otp": "3d126ef25692664fd102e72f4ebaebef79c0cf6a8ea442af099dd47d0a89fab9c9b2cb9b77e605b1d00d91c666c1f7d651a9bb2e3a06406fdd1f6155861eae55"
   },
   "test8/unset": {
     "modtime": "XXXX-XX-XX",
@@ -104,7 +112,8 @@ test9/key2/sub1/password
 }
 
 test6/multiline/otp
-test6/multiline/otp
+test7/deeper/rooted/otp
+test7/deeper/rooted/otp
 XXXXXX
 XXXXXX
 XXXXXX
@@ -128,7 +137,8 @@ XXXXXX
 }
 "test7/deeper/rooted": {
   "modtime": "XXXX-XX-XX",
-  "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
+  "otp": "3d126ef25692664fd102e72f4ebaebef79c0cf6a8ea442af099dd47d0a89fab9c9b2cb9b77e605b1d00d91c666c1f7d651a9bb2e3a06406fdd1f6155861eae55"
 }
 "test8/unset": {
   "modtime": "XXXX-XX-XX",
@@ -166,6 +176,9 @@ test4/multiline
 test5/multiline
 test6/multiline
 test8/unset
+test9/key1/sub1
+test9/key1/sub2
+test9/key2/sub1
 test9/key1/sub1
 test9/key1/sub2
 test9/key2/sub1

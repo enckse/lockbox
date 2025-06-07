@@ -11,21 +11,16 @@ import (
 )
 
 // List will list/find entries
-func List(cmd CommandOptions, isFind, groups bool) error {
-	if isFind && groups {
-		return errors.New("groups+find not supported")
-	}
+func List(cmd CommandOptions, groups bool) error {
 	args := cmd.Args()
 	filter := ""
-	if isFind {
-		if len(args) != 1 {
-			return errors.New("find requires one argument")
-		}
+	switch len(args) {
+	case 0:
+		break
+	case 1:
 		filter = args[0]
-	} else {
-		if len(args) != 0 {
-			return errors.New("arguments not supported")
-		}
+	default:
+		return errors.New("too many arguments (none or filter)")
 	}
 
 	return doList("", filter, cmd, groups)

@@ -57,8 +57,6 @@ const (
 	MinimalTOTPMode
 	// ListTOTPMode lists the available tokens
 	ListTOTPMode
-	// FindTOTPMode is list but with a regexp filter
-	FindTOTPMode
 	// OnceTOTPMode will only show the token once and exit
 	OnceTOTPMode
 )
@@ -220,7 +218,7 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 	if !opts.CanTOTP() {
 		return ErrNoTOTP
 	}
-	if args.Mode == ListTOTPMode || args.Mode == FindTOTPMode {
+	if args.Mode == ListTOTPMode {
 		return doList(backend.OTP, args.Entry, opts.app, false)
 	}
 	return args.display(opts)
@@ -234,15 +232,17 @@ func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 	opts := &TOTPArguments{Mode: UnknownTOTPMode}
 	sub := args[0]
 	needs := true
+	length := len(args)
 	switch sub {
 	case commands.TOTPList:
 		needs = false
-		if len(args) != 1 {
-			return nil, errors.New("list takes no arguments")
+		if length != 1 {
+			needs = true
+			if length != 2 {
+				return nil, errors.New("list takes only a filter (if any)")
+			}
 		}
 		opts.Mode = ListTOTPMode
-	case commands.TOTPFind:
-		opts.Mode = FindTOTPMode
 	case commands.TOTPShow:
 		opts.Mode = ShowTOTPMode
 	case commands.TOTPClip:
@@ -255,7 +255,7 @@ func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 		return nil, ErrUnknownTOTPMode
 	}
 	if needs {
-		if len(args) != 2 {
+		if length != 2 {
 			return nil, errors.New("invalid arguments")
 		}
 		opts.Entry = args[1]

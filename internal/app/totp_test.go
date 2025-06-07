@@ -83,7 +83,7 @@ func TestNewTOTPArgumentsErrors(t *testing.T) {
 	if _, err := app.NewTOTPArguments([]string{"test"}); err == nil || err.Error() != "unknown totp mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := app.NewTOTPArguments([]string{"ls", "test"}); err == nil || err.Error() != "list takes no arguments" {
+	if _, err := app.NewTOTPArguments([]string{"ls", "test", "xxx"}); err == nil || err.Error() != "list takes only a filter (if any)" {
 		t.Errorf("invalid error: %v", err)
 	}
 	if _, err := app.NewTOTPArguments([]string{"show"}); err == nil || err.Error() != "invalid arguments" {
@@ -96,8 +96,8 @@ func TestNewTOTPArguments(t *testing.T) {
 	if args.Mode != app.ListTOTPMode || args.Entry != "" {
 		t.Error("invalid args")
 	}
-	args, _ = app.NewTOTPArguments([]string{"find", "tesst"})
-	if args.Mode != app.FindTOTPMode || args.Entry == "" {
+	args, _ = app.NewTOTPArguments([]string{"ls", "xyz"})
+	if args.Mode != app.ListTOTPMode || args.Entry != "xyz" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"show", "test"})
@@ -269,9 +269,9 @@ func TestParseWindows(t *testing.T) {
 	}
 }
 
-func TestTOTPFind(t *testing.T) {
+func TestTOTPListFilter(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"find", "test"})
+	args, _ := app.NewTOTPArguments([]string{"ls", "test"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
@@ -280,7 +280,7 @@ func TestTOTPFind(t *testing.T) {
 		t.Errorf("invalid list: %s", m.buf.String())
 	}
 	m.buf.Reset()
-	args, _ = app.NewTOTPArguments([]string{"find", "[zzzz]"})
+	args, _ = app.NewTOTPArguments([]string{"ls", "[zzzz]"})
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

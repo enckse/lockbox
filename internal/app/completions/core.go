@@ -19,7 +19,6 @@ type (
 	Template struct {
 		InsertCommand       string
 		TOTPListCommand     string
-		TOTPFindCommand     string
 		RemoveCommand       string
 		UnsetCommand        string
 		ClipCommand         string
@@ -108,7 +107,6 @@ func Generate(completionType, exe string) ([]string, error) {
 		UnsetCommand:        commands.Unset,
 		RemoveCommand:       commands.Remove,
 		TOTPListCommand:     commands.TOTPList,
-		TOTPFindCommand:     commands.TOTPFind,
 		ClipCommand:         commands.Clip,
 		ShowCommand:         commands.Show,
 		JSONCommand:         commands.JSON,
@@ -124,7 +122,7 @@ func Generate(completionType, exe string) ([]string, error) {
 	}
 	c.Conditionals = NewConditionals()
 
-	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Find, commands.Groups},
+	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups},
 		map[string]string{
 			commands.Clip:             c.Conditionals.Not.CanClip,
 			commands.TOTP:             c.Conditionals.Not.CanTOTP,

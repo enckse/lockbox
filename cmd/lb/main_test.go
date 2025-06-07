@@ -207,7 +207,7 @@ func test(profile string) error {
 	for _, k := range []string{"insert test4/multiline/notes", "insert test5/multiline/notes", "insert test5/multiline/otp", "insert test5/multiline/password"} {
 		r.run(`printf "testing3\ntesting4\n" |`, k)
 	}
-	for _, k := range []string{"insert test6/multiline/password", "insert test6/multiline/notes", "insert test7/deeper/rooted/notes", "insert test8/unset/password", "insert test8/unset/notes", "insert test9/key1/sub1/password", "insert test9/key1/sub2/password", "insert test9/key2/sub1/password"} {
+	for _, k := range []string{"insert test6/multiline/password", "insert test6/multiline/notes", "insert test7/deeper/rooted/notes", "insert test7/deeper/rooted/otp", "insert test8/unset/password", "insert test8/unset/notes", "insert test9/key1/sub1/password", "insert test9/key1/sub2/password", "insert test9/key2/sub1/password"} {
 		r.run(`printf "testing5" |`, k)
 		r.run("", fmt.Sprintf("show %s", strings.ReplaceAll(k, "insert ", "")))
 	}
@@ -216,12 +216,13 @@ func test(profile string) error {
 	r.run("echo y |", "rm test2/key1")
 	r.logAppend("echo")
 	r.run("", "ls")
+	r.run("", "ls multiline")
 	r.run("", "json")
 	r.run("", "json 'multiline'")
 	r.logAppend("echo")
 	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "insert test6/multiline/otp")
 	r.run("", "totp ls")
-	r.run("", "totp find multiline")
+	r.run("", "totp ls rooted")
 	r.run("", "totp show test6/multiline/otp")
 	r.run("", "totp once test6/multiline/otp")
 	r.run("", "totp minimal test6/multiline/otp")
@@ -235,6 +236,7 @@ func test(profile string) error {
 	r.logAppend("echo")
 	r.run("", "ls")
 	r.run("", "groups")
+	r.run("", "groups test9")
 	r.run("echo y |", "unset test8/unset/password")
 	r.logAppend("echo")
 	r.run("", "ls")

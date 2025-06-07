@@ -82,8 +82,8 @@ func run() error {
 	switch command {
 	case commands.ReKey:
 		return app.ReKey(p)
-	case commands.List, commands.Find, commands.Groups:
-		return app.List(p, command == commands.Find, command == commands.Groups)
+	case commands.List, commands.Groups:
+		return app.List(p, command == commands.Groups)
 	case commands.Unset:
 		return app.Unset(p)
 	case commands.Move:
