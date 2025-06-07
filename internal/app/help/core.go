@@ -11,8 +11,8 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/output"
 )
 

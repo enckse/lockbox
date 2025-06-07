@@ -1,4 +1,4 @@
-// Package backend handles querying a store
+// Package kdbx handles querying a store
 package kdbx
 
 import (

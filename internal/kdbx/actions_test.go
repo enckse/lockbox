@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 

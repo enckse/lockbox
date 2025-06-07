@@ -1,4 +1,4 @@
-// Package backend handles kdbx interactions
+// Package kdbx handles kdbx interactions
 package kdbx
 
 import (

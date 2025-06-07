@@ -55,8 +55,10 @@ const (
 	// Unset indicates a value should be unset (removed) from an entity
 	Unset = "unset"
 	// Groups handles getting a list of groups
-	Groups   = "groups"
-	TOTPURL  = "url"
+	Groups = "groups"
+	// TOTPURL will display TOTP URL information
+	TOTPURL = "url"
+	// TOTPSeed will display the seed for the TOTP tokens
 	TOTPSeed = "seed"
 )
 

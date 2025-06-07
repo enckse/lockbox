@@ -61,6 +61,7 @@ const (
 	OnceTOTPMode
 	// URLTOTPMode will dump the URL details
 	URLTOTPMode
+	// SeedTOTPMode will show the TOTP URL seed
 	SeedTOTPMode
 )
 

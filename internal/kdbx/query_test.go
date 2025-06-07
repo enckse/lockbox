@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
 func compareEntity(actual *kdbx.Entity, expect kdbx.Entity) bool {
