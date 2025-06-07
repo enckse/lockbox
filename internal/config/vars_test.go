@@ -48,10 +48,6 @@ func TestIsNoClip(t *testing.T) {
 	checkYesNo("LOCKBOX_CLIP_ENABLED", t, config.EnvClipEnabled, true)
 }
 
-func TestIsNoGeneratePassword(t *testing.T) {
-	checkYesNo("LOCKBOX_PWGEN_ENABLED", t, config.EnvPasswordGenEnabled, true)
-}
-
 func TestFormatTOTP(t *testing.T) {
 	store.Clear()
 	otp := config.EnvTOTPFormat.Get("otpauth://abc")
@@ -83,10 +79,6 @@ func TestHashLength(t *testing.T) {
 
 func TestMaxTOTP(t *testing.T) {
 	checkInt(config.EnvTOTPTimeout, "LOCKBOX_TOTP_TIMEOUT", "max totp time", 120, false, t)
-}
-
-func TestWordCount(t *testing.T) {
-	checkInt(config.EnvPasswordGenWordCount, "LOCKBOX_PWGEN_WORD_COUNT", "word count", 8, false, t)
 }
 
 func checkInt(e config.EnvironmentInt, key, text string, def int64, allowZero bool, t *testing.T) {
@@ -139,7 +131,6 @@ func TestUnsetArrays(t *testing.T) {
 	for _, i := range []config.EnvironmentArray{
 		config.EnvClipCopy,
 		config.EnvClipPaste,
-		config.EnvPasswordGenWordList,
 	} {
 		val := i.Get()
 		if len(val) != 0 {
@@ -158,7 +149,6 @@ func TestDefaultStrings(t *testing.T) {
 	for k, v := range map[string]config.EnvironmentString{
 		"hash":    config.EnvJSONMode,
 		"command": config.EnvPasswordMode,
-		"{{range $i, $val := .}}{{if $i}}-{{end}}{{$val.Text}}{{end}}": config.EnvPasswordGenTemplate,
 	} {
 		val := v.Get()
 		if val != k {
@@ -179,7 +169,6 @@ func TestEmptyStrings(t *testing.T) {
 		config.EnvStore,
 		config.EnvKeyFile,
 		config.EnvDefaultModTime,
-		config.EnvPasswordGenChars,
 	} {
 		val := v.Get()
 		if val != "" {

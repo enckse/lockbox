@@ -13,7 +13,7 @@ keyring or command for password input over using a GPG key and uses a keepass da
 While `lb` uses a `.kdbx` formatted file that can be opened by a variety of tools, it is highly opinionated on how to store data in the database. Any
 `.kdbx` used with `lb` should be managed by `lb` with a fallback ability to use other tools to alter the/view the file otherwise. Mainly lockbox itself
 is using a common format so that it doesn't lock a user into a custom file format or dealing with gpg, age, etc. files and instead COULD be recovered
-via other tooling if needed.
+via other tooling if needed. `lb` does try to place nice with standard fields used within kdbx files, but it may disagree how to manage/store/update them.
 
 ## configuration
 
@@ -54,10 +54,7 @@ lb clip my/secret/password
 
 Create a new entry
 ```
-lb insert my/new/key
-# or
-lb multiline my/new/multi
-# for multiline inserts
+lb insert my/new/key/password
 ```
 
 ### list
@@ -78,19 +75,19 @@ lb rm my/old/key
 
 To see the text of an entry
 ```
-lb show my/key/value
+lb show my/key/notes
 ```
 
 ### totp
 
 To get a totp token
 ```
-lb totp show token
+lb totp show token/path/otp
 ```
 
 The token can be automatically copied to the clipboard too
 ```
-lb totp clip token
+lb totp clip token/path/otp
 ```
 
 ### rekey

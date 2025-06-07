@@ -42,12 +42,11 @@ type (
 	// Conditionals help control completion flow
 	Conditionals struct {
 		Not struct {
-			ReadOnly       string
-			CanClip        string
-			CanTOTP        string
-			AskMode        string
-			Ever           string
-			CanPasswordGen string
+			ReadOnly string
+			CanClip  string
+			CanTOTP  string
+			AskMode  string
+			Ever     string
 		}
 		Exported []string
 	}
@@ -91,7 +90,6 @@ func NewConditionals() Conditionals {
 	c.Not.CanClip = registerIsNotEqual(config.EnvClipEnabled, config.NoValue)
 	c.Not.CanTOTP = registerIsNotEqual(config.EnvTOTPEnabled, config.NoValue)
 	c.Not.AskMode = registerIsNotEqual(config.EnvPasswordMode, string(config.AskKeyMode))
-	c.Not.CanPasswordGen = registerIsNotEqual(config.EnvPasswordGenEnabled, config.NoValue)
 	c.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
 	return c
 }
@@ -124,13 +122,12 @@ func Generate(completionType, exe string) ([]string, error) {
 
 	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups},
 		map[string]string{
-			commands.Clip:             c.Conditionals.Not.CanClip,
-			commands.TOTP:             c.Conditionals.Not.CanTOTP,
-			commands.Move:             c.Conditionals.Not.ReadOnly,
-			commands.Remove:           c.Conditionals.Not.ReadOnly,
-			commands.Insert:           c.Conditionals.Not.ReadOnly,
-			commands.Unset:            c.Conditionals.Not.ReadOnly,
-			commands.PasswordGenerate: c.Conditionals.Not.CanPasswordGen,
+			commands.Clip:   c.Conditionals.Not.CanClip,
+			commands.TOTP:   c.Conditionals.Not.CanTOTP,
+			commands.Move:   c.Conditionals.Not.ReadOnly,
+			commands.Remove: c.Conditionals.Not.ReadOnly,
+			commands.Insert: c.Conditionals.Not.ReadOnly,
+			commands.Unset:  c.Conditionals.Not.ReadOnly,
 		})
 	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow},
 		map[string]string{

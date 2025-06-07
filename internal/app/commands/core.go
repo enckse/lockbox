@@ -50,8 +50,6 @@ const (
 	JSON = "json"
 	// CompletionsZsh is the command to generate zsh completions
 	CompletionsZsh = "zsh"
-	// PasswordGenerate is the command to do password generation
-	PasswordGenerate = "pwgen"
 	// Executable is the name of the executable
 	Executable = "lb"
 	// Unset indicates a value should be unset (removed) from an entity

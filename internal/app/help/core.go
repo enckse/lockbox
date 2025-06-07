@@ -84,7 +84,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.List, isFilter, "list entries"))
 	results = append(results, command(commands.Groups, isFilter, "list groups"))
 	results = append(results, command(commands.Move, "src dst", "move a group from source to destination"))
-	results = append(results, command(commands.PasswordGenerate, "", "generate a password"))
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
 	results = append(results, command(commands.Remove, "group", "remove an entry from the store"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))

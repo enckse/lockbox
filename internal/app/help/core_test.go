@@ -9,11 +9,11 @@ import (
 
 func TestUsage(t *testing.T) {
 	u, _ := help.Usage(false, "lb")
-	if len(u) != 26 {
+	if len(u) != 25 {
 		t.Errorf("invalid usage, out of date? %d", len(u))
 	}
 	u, _ = help.Usage(true, "lb")
-	if len(u) != 90 {
+	if len(u) != 89 {
 		t.Errorf("invalid verbose usage, out of date? %d", len(u))
 	}
 	for _, usage := range u {

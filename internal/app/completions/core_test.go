@@ -23,7 +23,7 @@ func TestCompletions(t *testing.T) {
 func TestConditionals(t *testing.T) {
 	c := completions.NewConditionals()
 	sort.Strings(c.Exported)
-	need := []string{"LOCKBOX_CLIP_ENABLED", "LOCKBOX_CREDENTIALS_PASSWORD_MODE", "LOCKBOX_PWGEN_ENABLED", "LOCKBOX_READONLY", "LOCKBOX_TOTP_ENABLED"}
+	need := []string{"LOCKBOX_CLIP_ENABLED", "LOCKBOX_CREDENTIALS_PASSWORD_MODE", "LOCKBOX_READONLY", "LOCKBOX_TOTP_ENABLED"}
 	if len(c.Exported) != len(need) || fmt.Sprintf("%v", c.Exported) != fmt.Sprintf("%v", need) {
 		t.Errorf("invalid exports: %v", c.Exported)
 	}

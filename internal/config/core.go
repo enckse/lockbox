@@ -18,7 +18,6 @@ const (
 	// sub categories
 	clipCategory         = "CLIP_"
 	totpCategory         = "TOTP_"
-	genCategory          = "PWGEN_"
 	jsonCategory         = "JSON_"
 	credsCategory        = "CREDENTIALS_"
 	defaultCategory      = "DEFAULTS_"
