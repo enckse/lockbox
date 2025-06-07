@@ -93,35 +93,35 @@ func TestNewTOTPArgumentsErrors(t *testing.T) {
 
 func TestNewTOTPArguments(t *testing.T) {
 	args, _ := app.NewTOTPArguments([]string{"ls"})
-	if args.Mode != app.ListTOTPMode || args.Entry != "" {
+	if args.Mode != "ls" || args.Entry != "" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"ls", "xyz"})
-	if args.Mode != app.ListTOTPMode || args.Entry != "xyz" {
+	if args.Mode != "ls" || args.Entry != "xyz" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"show", "test"})
-	if args.Mode != app.ShowTOTPMode || args.Entry != "test" {
+	if args.Mode != "show" || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"clip", "test"})
-	if args.Mode != app.ClipTOTPMode || args.Entry != "test" {
+	if args.Mode != "clip" || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"minimal", "test"})
-	if args.Mode != app.MinimalTOTPMode || args.Entry != "test" {
+	if args.Mode != "minimal" || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"once", "test"})
-	if args.Mode != app.OnceTOTPMode || args.Entry != "test" {
+	if args.Mode != "once" || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"url", "test"})
-	if args.Mode != app.URLTOTPMode || args.Entry != "test" {
+	if args.Mode != "url" || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 	args, _ = app.NewTOTPArguments([]string{"seed", "test"})
-	if args.Mode != app.SeedTOTPMode || args.Entry != "test" {
+	if args.Mode != "seed" || args.Entry != "test" {
 		t.Error("invalid args")
 	}
 }
@@ -131,7 +131,7 @@ func TestDoErrors(t *testing.T) {
 	if err := args.Do(app.TOTPOptions{}); err == nil || err.Error() != "unknown totp mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	args.Mode = app.ShowTOTPMode
+	args.Mode = "show"
 	if err := args.Do(app.TOTPOptions{}); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)
 	}

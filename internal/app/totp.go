@@ -26,12 +26,10 @@ var (
 )
 
 type (
-	// Mode is the operating mode for TOTP operations
-	Mode int
 	// TOTPArguments are the parsed TOTP call arguments
 	TOTPArguments struct {
 		Entry string
-		Mode  Mode
+		Mode  string
 	}
 	totpWrapper struct {
 		code string
@@ -44,25 +42,6 @@ type (
 		CanTOTP       func() bool
 		IsInteractive func() bool
 	}
-)
-
-const (
-	// UnknownTOTPMode is an unknown command
-	UnknownTOTPMode Mode = iota
-	// ShowTOTPMode will show the token
-	ShowTOTPMode
-	// ClipTOTPMode will copy to clipboard
-	ClipTOTPMode
-	// MinimalTOTPMode will display minimal information to display the token
-	MinimalTOTPMode
-	// ListTOTPMode lists the available tokens
-	ListTOTPMode
-	// OnceTOTPMode will only show the token once and exit
-	OnceTOTPMode
-	// URLTOTPMode will dump the URL details
-	URLTOTPMode
-	// SeedTOTPMode will show the TOTP URL seed
-	SeedTOTPMode
 )
 
 // NewDefaultTOTPOptions gets the default option set
@@ -93,11 +72,11 @@ func (w totpWrapper) generateCode() (string, error) {
 
 func (args *TOTPArguments) display(opts TOTPOptions) error {
 	interactive := opts.IsInteractive()
-	if args.Mode == MinimalTOTPMode || args.Mode == URLTOTPMode || args.Mode == SeedTOTPMode {
+	if args.Mode == commands.TOTPMinimal || args.Mode == commands.TOTPSeed || args.Mode == commands.TOTPURL {
 		interactive = false
 	}
-	once := args.Mode == OnceTOTPMode
-	clipMode := args.Mode == ClipTOTPMode
+	once := args.Mode == commands.TOTPOnce
+	clipMode := args.Mode == commands.TOTPClip
 	if !interactive && clipMode {
 		return errors.New("clipboard not available in non-interactive mode")
 	}
@@ -120,10 +99,10 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	wrapper.opts.Period = uint(k.Period())
 	writer := opts.app.Writer()
 	switch args.Mode {
-	case SeedTOTPMode:
+	case commands.TOTPSeed:
 		fmt.Fprintln(writer, wrapper.code)
 		return nil
-	case URLTOTPMode:
+	case commands.TOTPURL:
 		fmt.Fprintf(writer, "url:       %s\n", k.URL())
 		fmt.Fprintf(writer, "seed:      %s\n", wrapper.code)
 		fmt.Fprintf(writer, "digits:    %s\n", wrapper.opts.Digits)
@@ -225,7 +204,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 
 // Do will perform the TOTP operation
 func (args *TOTPArguments) Do(opts TOTPOptions) error {
-	if args.Mode == UnknownTOTPMode {
+	if args.Mode == "" {
 		return ErrUnknownTOTPMode
 	}
 	if opts.Clear == nil || opts.CanTOTP == nil || opts.IsInteractive == nil {
@@ -234,7 +213,7 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 	if !opts.CanTOTP() {
 		return ErrNoTOTP
 	}
-	if args.Mode == ListTOTPMode {
+	if args.Mode == commands.TOTPList {
 		return doList(kdbx.OTPField, args.Entry, opts.app, false)
 	}
 	return args.display(opts)
@@ -245,7 +224,7 @@ func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 	if len(args) == 0 {
 		return nil, errors.New("not enough arguments for totp")
 	}
-	opts := &TOTPArguments{Mode: UnknownTOTPMode}
+	opts := &TOTPArguments{}
 	sub := args[0]
 	needs := true
 	length := len(args)
@@ -258,22 +237,16 @@ func NewTOTPArguments(args []string) (*TOTPArguments, error) {
 				return nil, errors.New("list takes only a filter (if any)")
 			}
 		}
-		opts.Mode = ListTOTPMode
 	case commands.TOTPURL:
-		opts.Mode = URLTOTPMode
 	case commands.TOTPSeed:
-		opts.Mode = SeedTOTPMode
 	case commands.TOTPShow:
-		opts.Mode = ShowTOTPMode
 	case commands.TOTPClip:
-		opts.Mode = ClipTOTPMode
 	case commands.TOTPMinimal:
-		opts.Mode = MinimalTOTPMode
 	case commands.TOTPOnce:
-		opts.Mode = OnceTOTPMode
 	default:
 		return nil, ErrUnknownTOTPMode
 	}
+	opts.Mode = sub
 	if needs {
 		if length != 2 {
 			return nil, errors.New("invalid arguments")
