@@ -4,6 +4,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -27,12 +28,26 @@ func List(cmd CommandOptions, groups bool) error {
 }
 
 func doList(attr, filter string, cmd CommandOptions, groups bool) error {
+	var re *regexp.Regexp
+	hasFilter := filter != ""
+	if hasFilter {
+		var err error
+		re, err = regexp.Compile(filter)
+		if err != nil {
+			return err
+		}
+	}
 	opts := kdbx.QueryOptions{}
 	opts.Mode = kdbx.ListMode
-	opts.PathFilter = filter
 	e, err := cmd.Transaction().QueryCallback(opts)
 	if err != nil {
 		return err
+	}
+	allowed := func(p string) bool {
+		if hasFilter {
+			return re.MatchString(p)
+		}
+		return true
 	}
 	w := cmd.Writer()
 	attrFilter := attr != ""
@@ -41,7 +56,9 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 			return err
 		}
 		if groups {
-			fmt.Fprintf(w, "%s\n", f.Path)
+			if allowed(f.Path) {
+				fmt.Fprintf(w, "%s\n", f.Path)
+			}
 			continue
 		}
 		if f.Values == nil {
@@ -54,7 +71,10 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 					continue
 				}
 			}
-			results = append(results, kdbx.NewPath(f.Path, k))
+			path := kdbx.NewPath(f.Path, k)
+			if allowed(path) {
+				results = append(results, path)
+			}
 		}
 		if len(results) == 0 {
 			continue

@@ -80,6 +80,22 @@ func TestFind(t *testing.T) {
 	if m.buf.String() == "" {
 		t.Error("nothing listed")
 	}
+	m.buf.Reset()
+	m.args = []string{"test"}
+	if err := app.List(m, true); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() == "" {
+		t.Error("nothing listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"[zzzz]"}
+	if err := app.List(m, true); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Error("something listed")
+	}
 }
 
 func TestGroups(t *testing.T) {

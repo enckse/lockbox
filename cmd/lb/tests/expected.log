@@ -58,6 +58,7 @@ test4/multiline/notes
 test5/multiline/notes
 test6/multiline/notes
 test6/multiline/password
+test7/deeper/root/url
 {
   "test1/key1": {
     "modtime": "XXXX-XX-XX",

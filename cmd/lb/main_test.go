@@ -217,6 +217,7 @@ func test(profile string) error {
 	r.logAppend("echo")
 	r.run("", "ls")
 	r.run("", "ls multiline")
+	r.run("", "ls url")
 	r.run("", "json")
 	r.run("", "json 'multiline'")
 	r.logAppend("echo")
