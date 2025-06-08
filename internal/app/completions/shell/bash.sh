@@ -33,12 +33,12 @@ _{{ $.Executable }}() {
         "{{ $.HelpCommand }}")
           opts="{{ $.HelpAdvancedCommand }} {{ $.HelpConfigCommand }}"
           ;;
-        "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
+        "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}" | "{{ $.InsertCommand }}")
           if {{ $.Conditionals.Not.AskMode }}; then
             opts="$opts $({{ $.DoGroups }})"
           fi
           ;;
-        "{{ $.InsertCommand }}" | "{{ $.UnsetCommand }}")
+        "{{ $.UnsetCommand }}")
           if {{ $.Conditionals.Not.AskMode }}; then
             opts="$opts $({{ $.DoList }})"
           fi
