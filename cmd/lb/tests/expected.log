@@ -120,9 +120,11 @@ test7/deeper/root/url
   }
 }
 
+test10/key1/otp
 test6/multiline/otp
 test7/deeper/rooted/otp
 test7/deeper/rooted/otp
+XXXXXX
 XXXXXX
 XXXXXX
 XXXXXX
@@ -132,9 +134,19 @@ digits:    6
 algorithm: SHA1
 period:    30
 5ae472abqdekjqykoyxk7hvc2leklq5n
+url:       otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=5ae472abqdekjqykoyxk7hvc2leklq5n
+seed:      5ae472abqdekjqykoyxk7hvc2leklq5n
+digits:    6
+algorithm: SHA1
+period:    30
+5ae472abqdekjqykoyxk7hvc2leklq5n
 "test1/key1": {
   "modtime": "XXXX-XX-XX",
   "password": "521b9ccefbcd14d179e7a1bb877752870a6d620938b28a66a107eac6e6805b9d0989f45b5730508041aa5e710847d439ea74cd312c9355f1f2dae08d40e41d50"
+}
+"test10/key1": {
+  "modtime": "XXXX-XX-XX",
+  "otp": "b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54b70c0acb0428d6db7205101e332f950ffb6b6d643aa37287c6aa5"
 }
 "test4/multiline": {
   "modtime": "XXXX-XX-XX",
@@ -176,6 +188,7 @@ period:    30
   "modtime": "XXXX-XX-XX",
   "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
 }
+delete entry? (y/N) 
 no entities matching: test7/deeper
 no entities matching: test7/deeper/ro
 no entities matching: test1/key1/password
