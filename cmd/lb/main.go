@@ -47,7 +47,7 @@ func handleEarly(command string, args []string) (bool, error) {
 		}
 		fmt.Printf("version: %s\n", vers)
 		return true, nil
-	case commands.Clear:
+	case commands.ClipManager:
 		return true, clearClipboard()
 	}
 	return false, nil

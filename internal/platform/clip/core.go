@@ -88,7 +88,7 @@ func (c Board) CopyTo(value string) error {
 	pipeTo(cmd, value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
-		pipeTo(commands.Executable, value, false, "clear")
+		pipeTo(commands.Executable, value, false, commands.ClipManager)
 	}
 	return nil
 }
