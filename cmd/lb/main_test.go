@@ -207,7 +207,7 @@ func test(profile string) error {
 	for _, k := range []string{"insert test4/multiline/notes", "insert test5/multiline/notes", "insert test5/multiline/otp", "insert test5/multiline/password"} {
 		r.run(`printf "testing3\ntesting4\n" |`, k)
 	}
-	for _, k := range []string{"insert test6/multiline/password", "insert test6/multiline/notes", "insert test7/deeper/rooted/notes", "insert test7/deeper/rooted/otp", "insert test8/unset/password", "insert test8/unset/notes", "insert test9/key1/sub1/password", "insert test9/key1/sub2/password", "insert test9/key2/sub1/password"} {
+	for _, k := range []string{"insert test6/multiline/password", "insert test6/multiline/notes", "insert test7/deeper/rooted/notes", "insert test7/deeper/rooted/otp", "insert test7/deeper/root/url", "insert test8/unset/password", "insert test8/unset/notes", "insert test9/key1/sub1/password", "insert test9/key1/sub2/password", "insert test9/key2/sub1/password"} {
 		r.run(`printf "testing5" |`, k)
 		r.run("", fmt.Sprintf("show %s", strings.ReplaceAll(k, "insert ", "")))
 	}

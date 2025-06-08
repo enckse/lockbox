@@ -225,7 +225,7 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 		for k, v := range values {
 			val := v
 			switch k {
-			case OTPField, PasswordField:
+			case OTPField, PasswordField, URLField:
 				if strings.Contains(val, "\n") {
 					return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
 				}

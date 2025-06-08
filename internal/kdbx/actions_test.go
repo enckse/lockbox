@@ -129,7 +129,7 @@ func TestInserts(t *testing.T) {
 	if err := setup(t).Insert("/tests", map[string]string{"password": "test"}); err.Error() != "path can NOT be rooted" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("test", map[string]string{"otp": "test"}); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Insert("test", map[string]string{"otp": "test", "url": "xyz"}); err.Error() != "input paths must contain at LEAST 2 components" {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := setup(t).Insert("a", nil); err.Error() != "empty secrets not allowed" {
@@ -144,7 +144,7 @@ func TestInserts(t *testing.T) {
 	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset", "value"), map[string]string{"NoTes": "pass2"}); err != nil {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset", "value2"), map[string]string{"NOTES": "pass\npass", "password": "xxx", "otP": "zzz"}); err != nil {
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset", "value2"), map[string]string{"NOTES": "pass\npass", "uRL": "123", "password": "xxx", "otP": "zzz"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err := fullSetup(t, true).Get(kdbx.NewPath("test", "offset", "value"), kdbx.SecretValue)
@@ -167,10 +167,16 @@ func TestInserts(t *testing.T) {
 	if val, ok := q.Value("otp"); !ok || val != "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=zzz" {
 		t.Errorf("invalid retrieval: %s", val)
 	}
+	if val, ok := q.Value("url"); !ok || val != "123" {
+		t.Errorf("invalid retrieval: %s", val)
+	}
 	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"otp": "5ae472sabqdekjqykoyxk7hvc2leklq5n"}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"OTP": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "otp can NOT be multi-line" {
+		t.Errorf("wrong error: %v", err)
+	}
+	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"urL": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "url can NOT be multi-line" {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := fullSetup(t, true).Insert(kdbx.NewPath("test", "offset"), map[string]string{"password": "ljaf\n5ae472abqdekjqykoyxk7hvc2leklq5n"}); err == nil || err.Error() != "password can NOT be multi-line" {

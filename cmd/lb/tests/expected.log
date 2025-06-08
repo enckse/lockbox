@@ -13,6 +13,7 @@ testing5
 testing5
 testing5
 testing5
+testing5
 test1/key1/password
 test2/key1/notes
 test2/key1/password
@@ -20,6 +21,7 @@ test4/multiline/notes
 test5/multiline/notes
 test6/multiline/notes
 test6/multiline/password
+test7/deeper/root/url
 test7/deeper/rooted/notes
 test7/deeper/rooted/otp
 test8/unset/notes
@@ -32,6 +34,7 @@ test2/key1
 test4/multiline
 test5/multiline
 test6/multiline
+test7/deeper/root
 test7/deeper/rooted
 test8/unset
 test9/key1/sub1
@@ -43,6 +46,7 @@ test4/multiline/notes
 test5/multiline/notes
 test6/multiline/notes
 test6/multiline/password
+test7/deeper/root/url
 test7/deeper/rooted/notes
 test7/deeper/rooted/otp
 test8/unset/notes
@@ -71,6 +75,10 @@ test6/multiline/password
     "modtime": "XXXX-XX-XX",
     "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
     "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+  },
+  "test7/deeper/root": {
+    "modtime": "XXXX-XX-XX",
+    "url": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
   },
   "test7/deeper/rooted": {
     "modtime": "XXXX-XX-XX",
@@ -141,6 +149,10 @@ period:    30
   "otp": "b6c44d5d8a75071d8e8a39df231b0b98584d1d42982b5cf230e44f94d9c48e2983e78955a54b70c0acb0428d6db7205101e332f950ffb6b6d643aa37287c6aa5",
   "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
 }
+"test7/deeper/root": {
+  "modtime": "XXXX-XX-XX",
+  "url": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
+}
 "test7/deeper/rooted": {
   "modtime": "XXXX-XX-XX",
   "notes": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633",
@@ -167,7 +179,11 @@ no entities matching: test7/deeper
 no entities matching: test7/deeper/ro
 no entities matching: test1/key1/password
 delete entry? (y/N) 
-delete entry? (y/N) 
+selected entities:
+ test7/deeper/root
+ test7/deeper/rooted
+
+delete entries? (y/N) 
 test4/multiline/notes
 test5/multiline/notes
 test6/multiline/notes
