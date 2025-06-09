@@ -1,14 +1,10 @@
 package completions_test
 
 import (
-	"fmt"
-	"slices"
-	"sort"
 	"strings"
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/completions"
-	"git.sr.ht/~enckse/lockbox/internal/reflect"
 )
 
 func TestCompletions(t *testing.T) {
@@ -17,29 +13,6 @@ func TestCompletions(t *testing.T) {
 		"bash": "local cur opts",
 	} {
 		testCompletion(t, k, v)
-	}
-}
-
-func TestConditionals(t *testing.T) {
-	c := completions.NewConditionals()
-	sort.Strings(c.Exported)
-	need := []string{"LOCKBOX_READONLY"}
-	if len(c.Exported) != len(need) || fmt.Sprintf("%v", c.Exported) != fmt.Sprintf("%v", need) {
-		t.Errorf("invalid exports: %v", c.Exported)
-	}
-	fields := reflect.ListFields(c.Not)
-	if len(fields) != len(need)+1 {
-		t.Errorf("invalid fields: %v", fields)
-	}
-	for _, n := range need {
-		value := "false"
-		switch n {
-		case "LOCKBOX_READONLY":
-			value = "true"
-		}
-		if !slices.Contains(fields, fmt.Sprintf(`[ "$%s" != "%s" ]`, n, value)) {
-			t.Errorf("needed conditional %s not found: %v", n, fields)
-		}
 	}
 }
 

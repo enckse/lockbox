@@ -83,14 +83,6 @@ func TestEnvInfo(t *testing.T) {
 	}
 	store.SetString("LOCKBOX_READONLY", "true")
 	buf = bytes.Buffer{}
-	ok, err = app.Info(&buf, "vars", []string{"completions"})
-	if !ok || err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if strings.TrimSpace(buf.String()) != "LOCKBOX_READONLY=true" {
-		t.Error("nothing written")
-	}
-	buf = bytes.Buffer{}
 	ok, err = app.Info(&buf, "vars", []string{"LOCKBOX_READONLY"})
 	if !ok || err != nil {
 		t.Errorf("invalid error: %v", err)

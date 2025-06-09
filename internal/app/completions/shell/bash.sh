@@ -2,13 +2,10 @@
 
 _{{ $.Executable }}() {
   local cur opts chosen found
-  source <({{ $.ExportCommand }}) 
   cur=${COMP_WORDS[COMP_CWORD]}
   if [ "$COMP_CWORD" -eq 1 ]; then
 {{- range $idx, $value := $.Options }}
-    if {{ $value.Conditional }}; then
-      opts="${opts}{{ $value.Key }} "
-    fi
+    opts="${opts}{{ $value }} "
 {{- end}}
     # shellcheck disable=SC2207
     COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
@@ -19,10 +16,8 @@ _{{ $.Executable }}() {
     chosen=${COMP_WORDS[1]}
     found=0
 {{- range $idx, $value := $.Options }}
-    if {{ $value.Conditional }}; then
-      if [ "$chosen" == "{{ $value.Key }}" ]; then
-        found=1
-      fi
+    if [ "$chosen" == "{{ $value }}" ]; then
+      found=1
     fi
 {{- end}}
     if [ "$found" -eq 0 ]; then
@@ -42,9 +37,7 @@ _{{ $.Executable }}() {
         "{{ $.TOTPCommand }}")
           opts="{{ $.TOTPListCommand }} "
 {{- range $key, $value := .TOTPSubCommands }}
-          if {{ $value.Conditional }}; then
-            opts="$opts {{ $value.Key }}"
-          fi
+          opts="$opts {{ $value }}"
 {{- end}}
           ;;
         "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
@@ -60,10 +53,8 @@ _{{ $.Executable }}() {
           "{{ $.TOTPCommand }}")
             case "${COMP_WORDS[2]}" in
 {{- range $key, $value := $.TOTPSubCommands }}
-              "{{ $value.Key }}")
-                if {{ $value.Conditional }}; then
-                  opts=$({{ $.DoTOTPList }})
-                fi
+              "{{ $value }}")
+                opts=$({{ $.DoTOTPList }})
                 ;;
 {{- end}}
             esac

@@ -11,7 +11,6 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/config"
 )
 
 type (
@@ -35,58 +34,13 @@ type (
 		HelpAdvancedCommand string
 		HelpConfigCommand   string
 		ExportCommand       string
-		Options             []CompletionOption
-		TOTPSubCommands     []CompletionOption
-		Conditionals        Conditionals
-	}
-	// Conditionals help control completion flow
-	Conditionals struct {
-		Not struct {
-			ReadOnly string
-			Ever     string
-		}
-		Exported []string
-	}
-	// CompletionOption are conditional wrapped logic for options that may be disabled
-	CompletionOption struct {
-		Conditional string
-		Key         string
+		Options             []string
+		TOTPSubCommands     []string
 	}
 )
 
 //go:embed shell/*
 var shell embed.FS
-
-func (c Template) newGenOptions(defaults []string, kv map[string]string) []CompletionOption {
-	opt := []CompletionOption{}
-	for _, a := range defaults {
-		opt = append(opt, CompletionOption{c.Conditionals.Not.Ever, a})
-	}
-	var keys []string
-	for k := range kv {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
-		check := kv[key]
-		opt = append(opt, CompletionOption{check, key})
-	}
-	return opt
-}
-
-// NewConditionals creates the conditional components of completions
-func NewConditionals() Conditionals {
-	const shellIsNotText = `[ "%s" != "%s" ]`
-	c := Conditionals{}
-	registerIsNotEqual := func(key interface{ Key() string }, right string) string {
-		k := key.Key()
-		c.Exported = append(c.Exported, k)
-		return fmt.Sprintf(shellIsNotText, fmt.Sprintf("$%s", k), right)
-	}
-	c.Not.ReadOnly = registerIsNotEqual(config.EnvReadOnly, config.YesValue)
-	c.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
-	return c
-}
 
 // Generate handles creating shell completion outputs
 func Generate(completionType, exe string) ([]string, error) {
@@ -112,16 +66,11 @@ func Generate(completionType, exe string) ([]string, error) {
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, commands.TOTP, commands.TOTPList),
 		ExportCommand:       fmt.Sprintf("%s %s %s", exe, commands.Env, commands.Completions),
 	}
-	c.Conditionals = NewConditionals()
 
-	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Clip, commands.TOTP},
-		map[string]string{
-			commands.Move:   c.Conditionals.Not.ReadOnly,
-			commands.Remove: c.Conditionals.Not.ReadOnly,
-			commands.Insert: c.Conditionals.Not.ReadOnly,
-			commands.Unset:  c.Conditionals.Not.ReadOnly,
-		})
-	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed, commands.TOTPClip}, nil)
+	c.Options = []string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Clip, commands.TOTP, commands.Move, commands.Remove, commands.Insert, commands.Unset}
+	c.TOTPSubCommands = []string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed, commands.TOTPClip}
+	sort.Strings(c.Options)
+	sort.Strings(c.TOTPSubCommands)
 
 	using, err := shell.ReadFile(filepath.Join("shell", fmt.Sprintf("%s.sh", completionType)))
 	if err != nil {

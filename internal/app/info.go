@@ -61,12 +61,7 @@ func info(command string, args []string) ([]string, error) {
 		switch len(args) {
 		case 0:
 		case 1:
-			sub := args[0]
-			if sub == commands.Completions {
-				set = completions.NewConditionals().Exported
-			} else {
-				set = []string{sub}
-			}
+			set = []string{args[0]}
 		default:
 			return nil, errors.New("invalid env command, too many arguments")
 		}

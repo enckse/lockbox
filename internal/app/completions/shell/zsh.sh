@@ -3,7 +3,6 @@
 _{{ $.Executable }}() {
   local curcontext="$curcontext" state len chosen found args
   typeset -A opt_args
-  source <({{ $.ExportCommand }}) 
   _arguments \
     '1: :->main'\
     '*: :->args'
@@ -13,12 +12,10 @@ _{{ $.Executable }}() {
     main)
       args=""
 {{- range $idx, $value := $.Options }}
-      if {{ $value.Conditional }}; then
-        if [ -n "$args" ]; then
-          args="$args "
-        fi
-        args="${args}{{ $value.Key }}"
+      if [ -n "$args" ]; then
+        args="$args "
       fi
+      args="${args}{{ $value }}"
 {{- end }}
       _arguments "1:main:($args)"
     ;;
@@ -29,10 +26,8 @@ _{{ $.Executable }}() {
       chosen=$words[2]
       found=0
 {{- range $idx, $value := $.Options }}
-      if {{ $value.Conditional }}; then
-        if [[ "$chosen" == "{{ $value.Key }}" ]]; then
-          found=1
-        fi
+      if [[ "$chosen" == "{{ $value }}" ]]; then
+        found=1
       fi
 {{- end }}
       if [ "$found" -eq 0 ]; then
@@ -67,18 +62,14 @@ _{{ $.Executable }}() {
             3)
               compadd "$@" {{ $.TOTPListCommand }}
 {{- range $key, $value := .TOTPSubCommands }}
-              if {{ $value.Conditional }}; then
-                compadd "$@" {{ $value.Key }}
-              fi
+              compadd "$@" {{ $value }}
 {{ end }}
             ;;
             4)
               case $words[3] in
 {{- range $key, $value := .TOTPSubCommands }}
-                "{{ $value.Key }}")
-                  if {{ $value.Conditional }}; then
-                    compadd "$@" $({{ $.DoTOTPList }})
-                  fi
+                "{{ $value }}")
+                  compadd "$@" $({{ $.DoTOTPList }})
                 ;;
 {{- end}}
               esac
