@@ -2,10 +2,24 @@ package kdbx_test
 
 import (
 	"errors"
+	"fmt"
+	"slices"
+	"strings"
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
+
+func TestAllowedSort(t *testing.T) {
+	set := fmt.Sprintf("%v", kdbx.AllowedFields)
+	have := kdbx.AllowedFields
+	slices.SortFunc(have, func(x, y string) int {
+		return strings.Compare(strings.ToLower(x), strings.ToLower(y))
+	})
+	if fmt.Sprintf("%v", have) != set {
+		t.Error("allowed fields has incorrect sort")
+	}
+}
 
 func TestLoad(t *testing.T) {
 	if _, err := kdbx.Load("  "); err.Error() != "no store set" {

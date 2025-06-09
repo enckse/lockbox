@@ -124,7 +124,6 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		for _, field := range kdbx.AllowedFields {
 			fields = append(fields, strings.ToLower(field))
 		}
-		sort.Strings(fields)
 		document.Database.Fields = strings.Join(fields, ", ")
 		var examples []string
 		for _, example := range []string{commands.Insert, commands.Show} {

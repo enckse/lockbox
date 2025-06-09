@@ -17,7 +17,7 @@ import (
 var (
 	errPath = errors.New("input paths must contain at LEAST 2 components")
 	// AllowedFields are the same of allowed names for storing in a kdbx entry
-	AllowedFields = []string{NotesField, OTPField, PasswordField, URLField}
+	AllowedFields = []string{NotesField, OTPField, "Password", "URL"}
 )
 
 const (
@@ -29,10 +29,6 @@ const (
 	OTPField = "otp"
 	// NotesField is the multiline notes key
 	NotesField = "Notes"
-	// PasswordField is where the password is stored
-	PasswordField = "Password"
-	// URLField is the URL field in the kdbx
-	URLField = "URL"
 )
 
 type (
