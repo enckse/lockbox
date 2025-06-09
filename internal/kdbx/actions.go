@@ -222,17 +222,13 @@ func (t *Transaction) Move(src *Entity, dst string) error {
 		e.Values = append(e.Values, value(titleKey, dTitle))
 		e.Values = append(e.Values, value(modTimeKey, modTime.Format(time.RFC3339)))
 		for k, v := range values {
-			val := v
-			switch k {
-			case OTPField, PasswordField, URLField:
-				if strings.Contains(val, "\n") {
-					return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
-				}
-				if k == OTPField {
-					val = config.EnvTOTPFormat.Get(v)
-				}
+			if k != NotesField && strings.Contains(v, "\n") {
+				return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
 			}
-			e.Values = append(e.Values, protectedValue(k, val))
+			if k == OTPField {
+				v = config.EnvTOTPFormat.Get(v)
+			}
+			e.Values = append(e.Values, protectedValue(k, v))
 		}
 		c.alterEntities(true, dOffset, dTitle, &e)
 		return nil
