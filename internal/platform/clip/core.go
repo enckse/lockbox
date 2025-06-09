@@ -32,9 +32,6 @@ func newBoard(copying, pasting []string) (Board, error) {
 
 // New will retrieve the commands to use for clipboard operations.
 func New() (Board, error) {
-	if !config.EnvClipEnabled.Get() {
-		return Board{}, errors.New("clipboard is off")
-	}
 	overridePaste := config.EnvClipPaste.Get()
 	overrideCopy := config.EnvClipCopy.Get()
 	setPaste := len(overridePaste) > 0

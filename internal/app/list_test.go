@@ -29,7 +29,6 @@ func fullSetup(t *testing.T, keep bool) *kdbx.Transaction {
 	store.SetString("LOCKBOX_STORE", file)
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	tr, err := kdbx.NewTransaction()
 	if err != nil {
 		t.Errorf("failed: %v", err)

@@ -37,36 +37,12 @@ var (
 				description: "Enable OSC52 clipboard mode.",
 			}),
 	})
-	// EnvTOTPEnabled indicates if TOTP is allowed
-	EnvTOTPEnabled = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(true,
-			environmentBase{
-				key:         totpCategory + "ENABLED",
-				description: "Enable TOTP integrations.",
-			}),
-	})
 	// EnvReadOnly indicates if in read-only mode
 	EnvReadOnly = environmentRegister(EnvironmentBool{
 		environmentDefault: newDefaultedEnvironment(false,
 			environmentBase{
 				key:         "READONLY",
 				description: "Operate in readonly mode.",
-			}),
-	})
-	// EnvClipEnabled indicates if clipboard is enabled
-	EnvClipEnabled = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(true,
-			environmentBase{
-				key:         clipCategory + "ENABLED",
-				description: "Enable clipboard operations.",
-			}),
-	})
-	// EnvColorEnabled indicates if colors are enabled
-	EnvColorEnabled = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(true,
-			environmentBase{
-				key:         "COLOR_ENABLED",
-				description: "Enable terminal colors.",
 			}),
 	})
 	// EnvInteractive indicates if operating in interactive mode

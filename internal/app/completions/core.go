@@ -43,8 +43,6 @@ type (
 	Conditionals struct {
 		Not struct {
 			ReadOnly string
-			CanClip  string
-			CanTOTP  string
 			Ever     string
 		}
 		Exported []string
@@ -86,8 +84,6 @@ func NewConditionals() Conditionals {
 		return fmt.Sprintf(shellIsNotText, fmt.Sprintf("$%s", k), right)
 	}
 	c.Not.ReadOnly = registerIsNotEqual(config.EnvReadOnly, config.YesValue)
-	c.Not.CanClip = registerIsNotEqual(config.EnvClipEnabled, config.NoValue)
-	c.Not.CanTOTP = registerIsNotEqual(config.EnvTOTPEnabled, config.NoValue)
 	c.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
 	return c
 }
@@ -118,19 +114,14 @@ func Generate(completionType, exe string) ([]string, error) {
 	}
 	c.Conditionals = NewConditionals()
 
-	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups},
+	c.Options = c.newGenOptions([]string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Clip, commands.TOTP},
 		map[string]string{
-			commands.Clip:   c.Conditionals.Not.CanClip,
-			commands.TOTP:   c.Conditionals.Not.CanTOTP,
 			commands.Move:   c.Conditionals.Not.ReadOnly,
 			commands.Remove: c.Conditionals.Not.ReadOnly,
 			commands.Insert: c.Conditionals.Not.ReadOnly,
 			commands.Unset:  c.Conditionals.Not.ReadOnly,
 		})
-	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed},
-		map[string]string{
-			commands.TOTPClip: c.Conditionals.Not.CanClip,
-		})
+	c.TOTPSubCommands = c.newGenOptions([]string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed, commands.TOTPClip}, nil)
 
 	using, err := shell.ReadFile(filepath.Join("shell", fmt.Sprintf("%s.sh", completionType)))
 	if err != nil {

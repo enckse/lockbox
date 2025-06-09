@@ -149,15 +149,11 @@ func formatterTOTP(key, value string) string {
 }
 
 // CanColor indicates if colorized output is allowed (or disabled)
-func CanColor() (bool, error) {
+func CanColor() bool {
 	if _, noColor := os.LookupEnv("NO_COLOR"); noColor {
-		return false, nil
+		return false
 	}
-	colors := EnvInteractive.Get()
-	if colors {
-		colors = EnvColorEnabled.Get()
-	}
-	return colors, nil
+	return EnvInteractive.Get()
 }
 
 func readNested(v reflect.Type, root string) []string {

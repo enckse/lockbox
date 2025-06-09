@@ -8,22 +8,10 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
 
-func TestNoClipboard(t *testing.T) {
-	store.Clear()
-	defer store.Clear()
-	store.SetBool("LOCKBOX_CLIP_OSC52", false)
-	store.SetBool("LOCKBOX_CLIP_ENABLED", false)
-	_, err := clip.New()
-	if err == nil || err.Error() != "clipboard is off" {
-		t.Errorf("invalid error: %v", err)
-	}
-}
-
 func TestMaxTime(t *testing.T) {
 	store.Clear()
 	defer store.Clear()
 	store.SetBool("LOCKBOX_CLIP_OSC52", false)
-	store.SetBool("LOCKBOX_CLIP_ENABLED", true)
 	store.SetString("LOCKBOX_PLATFORM", string(platform.Systems.LinuxWaylandSystem))
 	c, err := clip.New()
 	if err != nil {
@@ -51,7 +39,6 @@ func TestClipboardInstances(t *testing.T) {
 	store.Clear()
 	defer store.Clear()
 	store.SetBool("LOCKBOX_CLIP_OSC52", false)
-	store.SetBool("LOCKBOX_CLIP_ENABLED", true)
 	for _, item := range platform.Systems.List() {
 		store.SetString("LOCKBOX_PLATFORM", item)
 		_, err := clip.New()

@@ -39,7 +39,6 @@ type (
 	TOTPOptions struct {
 		app           CommandOptions
 		Clear         func()
-		CanTOTP       func() bool
 		IsInteractive func() bool
 	}
 )
@@ -50,7 +49,6 @@ func NewDefaultTOTPOptions(app CommandOptions) TOTPOptions {
 		app:           app,
 		Clear:         clearFunc,
 		IsInteractive: config.EnvInteractive.Get,
-		CanTOTP:       config.EnvTOTPEnabled.Get,
 	}
 }
 
@@ -141,10 +139,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
-	allowColor, err := config.CanColor()
-	if err != nil {
-		return err
-	}
+	allowColor := config.CanColor()
 	for {
 		if !first {
 			time.Sleep(500 * time.Millisecond)
@@ -207,11 +202,8 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 	if args.Mode == "" {
 		return ErrUnknownTOTPMode
 	}
-	if opts.Clear == nil || opts.CanTOTP == nil || opts.IsInteractive == nil {
+	if opts.Clear == nil || opts.IsInteractive == nil {
 		return errors.New("invalid option functions")
-	}
-	if !opts.CanTOTP() {
-		return ErrNoTOTP
 	}
 	if args.Mode == commands.TOTPList {
 		return doList(kdbx.OTPField, args.Entry, opts.app, false)

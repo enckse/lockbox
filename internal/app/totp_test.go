@@ -29,9 +29,6 @@ func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
 	opts := app.NewDefaultTOTPOptions(m)
 	opts.Clear = func() {
 	}
-	opts.CanTOTP = func() bool {
-		return true
-	}
 	opts.IsInteractive = func() bool {
 		return true
 	}
@@ -47,7 +44,6 @@ func fullTOTPSetup(t *testing.T, keep bool) *kdbx.Transaction {
 	store.SetString("LOCKBOX_STORE", file)
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
-	store.SetString("LOCKBOX_TOTP_ENTRY", "totp")
 	store.SetInt64("LOCKBOX_TOTP_TIMEOUT", 1)
 	tr, err := kdbx.NewTransaction()
 	if err != nil {
@@ -141,16 +137,13 @@ func TestDoErrors(t *testing.T) {
 	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)
 	}
-	opts.CanTOTP = func() bool {
-		return false
-	}
 	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
 		t.Errorf("invalid error: %v", err)
 	}
 	opts.IsInteractive = func() bool {
 		return false
 	}
-	if err := args.Do(opts); err == nil || err.Error() != "totp is disabled" {
+	if err := args.Do(opts); err == nil || err.Error() != "'' is not a TOTP entry" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

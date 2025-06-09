@@ -24,10 +24,6 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 	}
 }
 
-func TestColorSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_COLOR_ENABLED", t, config.EnvColorEnabled, true)
-}
-
 func TestInteractiveSetting(t *testing.T) {
 	checkYesNo("LOCKBOX_INTERACTIVE", t, config.EnvInteractive, true)
 }
@@ -38,14 +34,6 @@ func TestIsReadOnly(t *testing.T) {
 
 func TestIsOSC52(t *testing.T) {
 	checkYesNo("LOCKBOX_CLIP_OSC52", t, config.EnvClipOSC52, false)
-}
-
-func TestIsNoTOTP(t *testing.T) {
-	checkYesNo("LOCKBOX_TOTP_ENABLED", t, config.EnvTOTPEnabled, true)
-}
-
-func TestIsNoClip(t *testing.T) {
-	checkYesNo("LOCKBOX_CLIP_ENABLED", t, config.EnvClipEnabled, true)
 }
 
 func TestFormatTOTP(t *testing.T) {

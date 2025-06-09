@@ -179,16 +179,16 @@ timeout = -1
 func TestReadBool(t *testing.T) {
 	store.Clear()
 	data := `
-[totp]
-enabled = 1
+[clip]
+osc52 = 1
 `
 	r := strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-bool found where expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
-[totp]
-enabled = true
+[clip]
+osc52 = true
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -197,13 +197,13 @@ enabled = true
 	if len(store.List()) != 1 {
 		t.Errorf("invalid store")
 	}
-	val, ok := store.GetBool("LOCKBOX_TOTP_ENABLED")
+	val, ok := store.GetBool("LOCKBOX_CLIP_OSC52")
 	if !val || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
 	data = `include = []
-[totp]
-enabled = false
+[clip]
+osc52 = false
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -212,7 +212,7 @@ enabled = false
 	if len(store.List()) != 1 {
 		t.Errorf("invalid store")
 	}
-	val, ok = store.GetBool("LOCKBOX_TOTP_ENABLED")
+	val, ok = store.GetBool("LOCKBOX_CLIP_OSC52")
 	if val || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
@@ -251,8 +251,8 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(store.List()) != 20 {
-		t.Errorf("invalid environment after load")
+	if len(store.List()) != 17 {
+		t.Errorf("invalid environment after load: %d", len(store.List()))
 	}
 }
 
