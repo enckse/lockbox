@@ -1,3 +1,4 @@
+insert is not allowed in read-only
 'test3' is not an allowed field name
 '' is not an allowed field name
 'still' is not an allowed field name

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"time"
 
@@ -78,6 +79,11 @@ func run() error {
 	p, err := app.NewDefaultCommand(sub)
 	if err != nil {
 		return err
+	}
+	if slices.Contains(commands.IsReadOnly, command) {
+		if config.EnvReadOnly.Get() {
+			return fmt.Errorf("%s is not allowed in read-only", command)
+		}
 	}
 	switch command {
 	case commands.ReKey:

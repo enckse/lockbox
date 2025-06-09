@@ -72,6 +72,9 @@ var (
 	}{"keyfile", "nokey"}
 )
 
+// IsReadOnly are commands blocked in readonly mode
+var IsReadOnly = []string{Move, Insert, Unset, Remove}
+
 // ReKeyArgs is the base definition of re-keying args
 type ReKeyArgs struct {
 	KeyFile string

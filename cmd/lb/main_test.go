@@ -189,6 +189,12 @@ func test(profile string) error {
 			c["credentials.password_mode"] = c.quoteString("none")
 		}
 	}
+
+	c["readonly"] = "true"
+	r.writeConfig(c)
+	r.run("echo testing |", "insert test1/key1/password")
+
+	delete(c, "readonly")
 	c["totp.timeout"] = "1"
 	r.writeConfig(c)
 	for _, k := range []string{"test2/key1/password", "test2/key1/notes", "test3", "test3/invalid/", "test3/invalid/still"} {
