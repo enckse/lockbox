@@ -24,10 +24,6 @@ func checkYesNo(key string, t *testing.T, obj config.EnvironmentBool, onEmpty bo
 	}
 }
 
-func TestInteractiveSetting(t *testing.T) {
-	checkYesNo("LOCKBOX_INTERACTIVE", t, config.EnvInteractive, true)
-}
-
 func TestIsReadOnly(t *testing.T) {
 	checkYesNo("LOCKBOX_READONLY", t, config.EnvReadOnly, false)
 }

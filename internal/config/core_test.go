@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -41,21 +40,6 @@ func TestCanColor(t *testing.T) {
 	if can := config.CanColor(); !can {
 		t.Error("should be able to color")
 	}
-	for raw, expect := range map[string]bool{
-		"INTERACTIVE": true,
-	} {
-		store.Clear()
-		key := fmt.Sprintf("LOCKBOX_%s", raw)
-		store.SetBool(key, true)
-		if can := config.CanColor(); can != expect {
-			t.Errorf("expect != actual: %s", key)
-		}
-		store.SetBool(key, false)
-		if can := config.CanColor(); can == expect {
-			t.Errorf("expect == actual: %s", key)
-		}
-	}
-	store.Clear()
 	t.Setenv("NO_COLOR", "1")
 	if can := config.CanColor(); can {
 		t.Error("should NOT be able to color")

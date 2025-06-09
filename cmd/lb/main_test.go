@@ -162,7 +162,6 @@ func test(profile string) error {
 	}
 	setConfig(r.config)
 	c := r.newConf()
-	c["interactive"] = "false"
 	keyFile := filepath.Join(r.testDir, "key.file")
 	hasPass := profile == passProfile || profile == bothProfile
 	hasFile := profile == keyFileProfile || profile == bothProfile
@@ -180,7 +179,6 @@ func test(profile string) error {
 	r.writeConfig(c)
 	r.run("echo testing |", "insert test1/key1/password")
 	c = r.newConf()
-	c["interactive"] = "false"
 	if hasPass {
 		c["credentials.password_mode"] = c.quoteString("plaintext")
 		c["credentials.password"] = c.makePass(testPass)
@@ -191,6 +189,7 @@ func test(profile string) error {
 			c["credentials.password_mode"] = c.quoteString("none")
 		}
 	}
+	c["totp.timeout"] = "1"
 	r.writeConfig(c)
 	for _, k := range []string{"test2/key1/password", "test2/key1/notes", "test3", "test3/invalid/", "test3/invalid/still"} {
 		r.run("echo testing2 |", fmt.Sprintf("insert %s", k))
@@ -216,9 +215,10 @@ func test(profile string) error {
 	r.run(`printf "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=5ae472abqdekjqykoyxk7hvc2leklq5n" |`, "insert test10/key1/otp")
 	r.run("", "totp ls")
 	r.run("", "totp ls rooted")
-	r.run("", "totp show test6/multiline/otp")
-	r.run("", "totp show test10/key1/otp")
-	r.run("", "totp once test6/multiline/otp")
+	const grepTOTP = "| sed 's/^[[:space:]]*//g' | grep '^[0-9][0-9][0-9][0-9][0-9][0-9]$'"
+	r.run("", fmt.Sprintf("totp show test6/multiline/otp %s", grepTOTP))
+	r.run("", fmt.Sprintf("totp show test10/key1/otp %s", grepTOTP))
+	r.run("", fmt.Sprintf("totp once test6/multiline/otp %s", grepTOTP))
 	r.run("", "totp minimal test6/multiline/otp")
 	r.run("", "totp url test6/multiline/otp")
 	r.run("", "totp seed test6/multiline/otp")

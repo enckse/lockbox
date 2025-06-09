@@ -153,7 +153,7 @@ func CanColor() bool {
 	if _, noColor := os.LookupEnv("NO_COLOR"); noColor {
 		return false
 	}
-	return EnvInteractive.Get()
+	return true
 }
 
 func readNested(v reflect.Type, root string) []string {

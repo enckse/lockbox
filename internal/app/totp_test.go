@@ -29,9 +29,6 @@ func newMock(t *testing.T) (*mockOptions, app.TOTPOptions) {
 	opts := app.NewDefaultTOTPOptions(m)
 	opts.Clear = func() {
 	}
-	opts.IsInteractive = func() bool {
-		return true
-	}
 	return m, opts
 }
 
@@ -134,15 +131,6 @@ func TestDoErrors(t *testing.T) {
 	opts := app.TOTPOptions{}
 	opts.Clear = func() {
 	}
-	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
-		t.Errorf("invalid error: %v", err)
-	}
-	if err := args.Do(opts); err == nil || err.Error() != "invalid option functions" {
-		t.Errorf("invalid error: %v", err)
-	}
-	opts.IsInteractive = func() bool {
-		return false
-	}
 	if err := args.Do(opts); err == nil || err.Error() != "'' is not a TOTP entry" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -164,23 +152,11 @@ func TestNonListError(t *testing.T) {
 	setupTOTP(t)
 	args, _ := app.NewTOTPArguments([]string{"show", "test/test3"})
 	_, opts := newMock(t)
-	opts.IsInteractive = func() bool {
-		return false
-	}
 	if err := args.Do(opts); err == nil || err.Error() != "'test/test3' is not a TOTP entry" {
 		t.Errorf("invalid error: %v", err)
 	}
 	args, _ = app.NewTOTPArguments([]string{"clip", "test/test3/otp"})
 	_, opts = newMock(t)
-	opts.IsInteractive = func() bool {
-		return false
-	}
-	if err := args.Do(opts); err == nil || err.Error() != "clipboard not available in non-interactive mode" {
-		t.Errorf("invalid error: %v", err)
-	}
-	opts.IsInteractive = func() bool {
-		return true
-	}
 	if err := args.Do(opts); err == nil || err.Error() != "entry does not exist" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -214,21 +190,6 @@ func TestMinimal(t *testing.T) {
 	setupTOTP(t)
 	args, _ := app.NewTOTPArguments([]string{"minimal", "test/test3/totp/otp"})
 	m, opts := newMock(t)
-	if err := args.Do(opts); err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if len(m.buf.String()) != 7 {
-		t.Errorf("invalid short: %s", m.buf.String())
-	}
-}
-
-func TestNonInteractive(t *testing.T) {
-	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"show", "test/test3/totp/otp"})
-	m, opts := newMock(t)
-	opts.IsInteractive = func() bool {
-		return false
-	}
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

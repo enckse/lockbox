@@ -45,14 +45,6 @@ var (
 				description: "Operate in readonly mode.",
 			}),
 	})
-	// EnvInteractive indicates if operating in interactive mode
-	EnvInteractive = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(true,
-			environmentBase{
-				key:         "INTERACTIVE",
-				description: "Enable interactive mode.",
-			}),
-	})
 	// EnvTOTPTimeout indicates when TOTP display should timeout
 	EnvTOTPTimeout = environmentRegister(EnvironmentInt{
 		environmentDefault: newDefaultedEnvironment(120,
