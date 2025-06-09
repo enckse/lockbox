@@ -11,8 +11,6 @@ import (
 type (
 	// KeyModeType are valid ways to get the key
 	KeyModeType string
-	// AskPassword is a function to prompt for passwords (when required)
-	AskPassword func() (string, error)
 	// Key is a wrapper to help manage the returned key
 	Key struct {
 		mode     KeyModeType
@@ -23,9 +21,7 @@ type (
 
 const (
 	plainKeyMode KeyModeType = "plaintext"
-	// AskKeyMode is the mode in which the user is prompted for key input (each time)
-	AskKeyMode KeyModeType = "ask"
-	noKeyMode  KeyModeType = "none"
+	noKeyMode    KeyModeType = "none"
 	// IgnoreKeyMode will ignore the value set in the key (acts like no key)
 	IgnoreKeyMode  KeyModeType = "ignore"
 	commandKeyMode KeyModeType = "command"
@@ -46,12 +42,6 @@ func NewKey(defaultKeyModeType KeyModeType) (Key, error) {
 	case string(noKeyMode):
 		requireEmptyKey = true
 	case string(commandKeyMode), string(plainKeyMode):
-	case string(AskKeyMode):
-		isInteractive := EnvInteractive.Get()
-		if !isInteractive {
-			return Key{}, errors.New("ask key mode requested in non-interactive mode")
-		}
-		requireEmptyKey = true
 	default:
 		return Key{}, fmt.Errorf("unknown key mode: %s", keyMode)
 	}
@@ -78,20 +68,12 @@ func (k Key) empty() bool {
 	return k.valid && len(k.inputKey) == 0
 }
 
-// Ask will indicate if prompting is required to get the key
-func (k Key) Ask() bool {
-	return k.valid && k.mode == AskKeyMode
-}
-
 // Read will read the key as configured by the mode
-func (k Key) Read(ask AskPassword) (string, error) {
-	if ask == nil {
-		return "", errors.New("invalid function given")
-	}
+func (k Key) Read() (string, error) {
 	if !k.valid {
 		return "", errors.New("invalid key given")
 	}
-	if k.empty() && !k.Ask() {
+	if k.empty() {
 		return "", nil
 	}
 	var useKey string
@@ -99,12 +81,6 @@ func (k Key) Read(ask AskPassword) (string, error) {
 		useKey = k.inputKey[0]
 	}
 	switch k.mode {
-	case AskKeyMode:
-		read, err := ask()
-		if err != nil {
-			return "", err
-		}
-		useKey = read
 	case commandKeyMode:
 		exe := k.inputKey[0]
 		var args []string

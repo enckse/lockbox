@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"errors"
 	"strings"
 	"testing"
 
@@ -32,11 +31,6 @@ func TestNewKeyErrors(t *testing.T) {
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key can NOT be set in this key mode" {
 		t.Errorf("invalid error: %v", err)
 	}
-	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
-	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
-	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key can NOT be set in this key mode" {
-		t.Errorf("invalid error: %v", err)
-	}
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "command")
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{})
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key MUST be set in this key mode" {
@@ -45,59 +39,6 @@ func TestNewKeyErrors(t *testing.T) {
 	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "plaintext")
 	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"  "})
 	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "key MUST be set in this key mode" {
-		t.Errorf("invalid error: %v", err)
-	}
-	store.SetBool("LOCKBOX_INTERACTIVE", true)
-	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
-	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{})
-	if _, err := config.NewKey(config.IgnoreKeyMode); err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	store.SetBool("LOCKBOX_INTERACTIVE", false)
-	if _, err := config.NewKey(config.IgnoreKeyMode); err == nil || err.Error() != "ask key mode requested in non-interactive mode" {
-		t.Errorf("invalid error: %v", err)
-	}
-}
-
-func TestAskKey(t *testing.T) {
-	store.Clear()
-	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{"test"})
-	k, _ := config.NewKey(config.IgnoreKeyMode)
-	if k.Ask() {
-		t.Error("invalid ask key")
-	}
-	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
-	store.SetArray("LOCKBOX_CREDENTIALS_PASSWORD", []string{})
-	store.SetBool("LOCKBOX_INTERACTIVE", false)
-	k, _ = config.NewKey(config.IgnoreKeyMode)
-	if k.Ask() {
-		t.Error("invalid ask key")
-	}
-	store.SetString("LOCKBOX_CREDENTIALS_PASSWORD_MODE", "ask")
-	store.SetBool("LOCKBOX_INTERACTIVE", true)
-	k, _ = config.NewKey(config.IgnoreKeyMode)
-	if !k.Ask() {
-		t.Error("invalid ask key")
-	}
-	fxn := func() (string, error) {
-		return "", errors.New("TEST")
-	}
-	_, err := k.Read(fxn)
-	if err == nil || err.Error() != "TEST" {
-		t.Errorf("invalid error: %v", err)
-	}
-	fxn = func() (string, error) {
-		return "", nil
-	}
-	_, err = k.Read(fxn)
-	if err == nil || err.Error() != "key is empty" {
-		t.Errorf("invalid error: %v", err)
-	}
-	fxn = func() (string, error) {
-		return "abc", nil
-	}
-	val, err := k.Read(fxn)
-	if err != nil || val != "abc" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -119,13 +60,7 @@ func TestIgnoreKey(t *testing.T) {
 func TestReadErrors(t *testing.T) {
 	store.Clear()
 	k := config.Key{}
-	if _, err := k.Read(nil); err == nil || err.Error() != "invalid function given" {
-		t.Errorf("invalid error: %v", err)
-	}
-	fxn := func() (string, error) {
-		return "", nil
-	}
-	if _, err := k.Read(fxn); err == nil || err.Error() != "invalid key given" {
+	if _, err := k.Read(); err == nil || err.Error() != "invalid key given" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -138,10 +73,7 @@ func TestPlainKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	fxn := func() (string, error) {
-		return "", nil
-	}
-	val, err := k.Read(fxn)
+	val, err := k.Read()
 	if err != nil || val != "test" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -155,10 +87,7 @@ func TestReadIgnoreOrNoKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	fxn := func() (string, error) {
-		return "", nil
-	}
-	val, err := k.Read(fxn)
+	val, err := k.Read()
 	if err != nil || val != "" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -168,7 +97,7 @@ func TestReadIgnoreOrNoKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	val, err = k.Read(fxn)
+	val, err = k.Read()
 	if err != nil || val != "" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -177,7 +106,7 @@ func TestReadIgnoreOrNoKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	val, err = k.Read(fxn)
+	val, err = k.Read()
 	if err != nil || val != "" {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -191,10 +120,7 @@ func TestCommandKey(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	fxn := func() (string, error) {
-		return "", nil
-	}
-	_, err = k.Read(fxn)
+	_, err = k.Read()
 	if err == nil || !strings.HasPrefix(err.Error(), "key command failed:") {
 		t.Errorf("invalid error: %v", err)
 	}

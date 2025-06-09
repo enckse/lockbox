@@ -179,15 +179,6 @@ func test(profile string) error {
 	}
 	r.writeConfig(c)
 	r.run("echo testing |", "insert test1/key1/password")
-	if hasPass {
-		delete(c, "credentials.password")
-		c["interactive"] = "true"
-		c["credentials.password_mode"] = c.quoteString("ask")
-		r.writeConfig(c)
-	} else {
-		r.logAppend("printf \"password: \"")
-	}
-	r.raw(fmt.Sprintf("echo %s |", testPass), "ls", r.log, "/dev/null")
 	c = r.newConf()
 	c["interactive"] = "false"
 	if hasPass {

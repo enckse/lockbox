@@ -34,14 +34,10 @@ _{{ $.Executable }}() {
           opts="{{ $.HelpAdvancedCommand }} {{ $.HelpConfigCommand }}"
           ;;
         "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}" | "{{ $.InsertCommand }}")
-          if {{ $.Conditionals.Not.AskMode }}; then
-            opts="$opts $({{ $.DoGroups }})"
-          fi
+          opts="$opts $({{ $.DoGroups }})"
           ;;
         "{{ $.UnsetCommand }}")
-          if {{ $.Conditionals.Not.AskMode }}; then
-            opts="$opts $({{ $.DoList }})"
-          fi
+          opts="$opts $({{ $.DoList }})"
           ;;
         "{{ $.TOTPCommand }}")
           opts="{{ $.TOTPListCommand }} "
@@ -52,27 +48,21 @@ _{{ $.Executable }}() {
 {{- end}}
           ;;
         "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
-          if {{ $.Conditionals.Not.AskMode }}; then
-            opts=$({{ $.DoList }})
-          fi
+          opts=$({{ $.DoList }})
           ;;
       esac
     else
       if [ "$COMP_CWORD" -eq 3 ]; then
         case "$chosen" in
           "{{ $.MoveCommand }}")
-            if {{ $.Conditionals.Not.AskMode }}; then
-              opts=$({{ $.DoGroups }})
-            fi
+            opts=$({{ $.DoGroups }})
             ;;
           "{{ $.TOTPCommand }}")
             case "${COMP_WORDS[2]}" in
 {{- range $key, $value := $.TOTPSubCommands }}
               "{{ $value.Key }}")
                 if {{ $value.Conditional }}; then
-                  if {{ $.Conditionals.Not.AskMode }}; then
-                    opts=$({{ $.DoTOTPList }})
-                  fi
+                  opts=$({{ $.DoTOTPList }})
                 fi
                 ;;
 {{- end}}

@@ -199,7 +199,7 @@ must be a list of one (or more) rules where a '%s' delimits the start and end se
 					description: fmt.Sprintf(`How to retrieve the database store password. Set to '%s' when only using a key file.
 Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 				}),
-			allowed: []string{string(AskKeyMode), string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
+			allowed: []string{string(commandKeyMode), string(IgnoreKeyMode), string(noKeyMode), string(plainKeyMode)},
 			flags:   []stringsFlags{canDefaultFlag},
 		},
 	})

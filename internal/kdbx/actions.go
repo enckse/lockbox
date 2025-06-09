@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -25,7 +24,7 @@ func (t *Transaction) act(cb action) error {
 	if err != nil {
 		return err
 	}
-	k, err := key.Read(platform.ReadInteractivePassword)
+	k, err := key.Read()
 	if err != nil {
 		return err
 	}

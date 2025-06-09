@@ -45,7 +45,6 @@ type (
 			ReadOnly string
 			CanClip  string
 			CanTOTP  string
-			AskMode  string
 			Ever     string
 		}
 		Exported []string
@@ -89,7 +88,6 @@ func NewConditionals() Conditionals {
 	c.Not.ReadOnly = registerIsNotEqual(config.EnvReadOnly, config.YesValue)
 	c.Not.CanClip = registerIsNotEqual(config.EnvClipEnabled, config.NoValue)
 	c.Not.CanTOTP = registerIsNotEqual(config.EnvTOTPEnabled, config.NoValue)
-	c.Not.AskMode = registerIsNotEqual(config.EnvPasswordMode, string(config.AskKeyMode))
 	c.Not.Ever = fmt.Sprintf(shellIsNotText, "1", "0")
 	return c
 }
