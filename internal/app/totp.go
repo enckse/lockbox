@@ -67,10 +67,7 @@ func (w totpWrapper) generateCode() (string, error) {
 }
 
 func (args *TOTPArguments) display(opts TOTPOptions) error {
-	interactive := true
-	if args.Mode == commands.TOTPMinimal || args.Mode == commands.TOTPSeed || args.Mode == commands.TOTPURL {
-		interactive = false
-	}
+	interactive := !slices.Contains([]string{commands.TOTPMinimal, commands.TOTPSeed, commands.TOTPURL}, args.Mode)
 	once := args.Mode == commands.TOTPOnce
 	clipMode := args.Mode == commands.TOTPClip
 	if !interactive && clipMode {
