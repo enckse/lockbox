@@ -82,7 +82,7 @@ func NewTransaction() (*Transaction, error) {
 }
 
 func splitComponents(path string) ([]string, string, error) {
-	if len(SplitPath(path)) < 2 {
+	if len(splitPath(path)) < 2 {
 		return nil, "", errPath
 	}
 	if strings.HasPrefix(path, pathSep) {
@@ -95,7 +95,7 @@ func splitComponents(path string) ([]string, string, error) {
 		return nil, "", errors.New("unwilling to operate on path with empty segment")
 	}
 	title := Base(path)
-	parts := SplitPath(Directory(path))
+	parts := splitPath(Directory(path))
 	return parts, title, nil
 }
 
@@ -181,7 +181,7 @@ func (e Entity) Value(key string) (string, bool) {
 
 // Base will get the base name of input path
 func Base(s string) string {
-	parts := SplitPath(s)
+	parts := splitPath(s)
 	if len(parts) == 0 {
 		return s
 	}
@@ -190,7 +190,7 @@ func Base(s string) string {
 
 // Directory will get the directory/group for the given path
 func Directory(s string) string {
-	parts := SplitPath(s)
+	parts := splitPath(s)
 	return NewPath(parts[0 : len(parts)-1]...)
 }
 
@@ -212,8 +212,8 @@ func IsLeafAttribute(path, attr string) bool {
 	return strings.HasSuffix(path, pathSep+attr)
 }
 
-// SplitPath will split a path based on the separator
-func SplitPath(path string) []string {
+// splitPath will split a path based on the separator
+func splitPath(path string) []string {
 	return strings.Split(path, pathSep)
 }
 

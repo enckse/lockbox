@@ -167,14 +167,3 @@ func TestEntityValue(t *testing.T) {
 		t.Error("values are not set")
 	}
 }
-
-func TestSplitPath(t *testing.T) {
-	parts := kdbx.SplitPath("a")
-	if len(parts) != 1 || parts[0] != "a" {
-		t.Errorf("invalid split: %v", parts)
-	}
-	parts = kdbx.SplitPath("a/b")
-	if len(parts) != 2 || parts[0] != "a" || parts[1] != "b" {
-		t.Errorf("invalid split: %v", parts)
-	}
-}
