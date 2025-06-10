@@ -109,6 +109,10 @@ func (r runner) logAppend(command string) error {
 	return exec.Command("/bin/sh", "-c", fmt.Sprintf("%s >> %s", command, r.log)).Run()
 }
 
+func (r runner) section(header string) error {
+	return r.logAppend(fmt.Sprintf("echo '%s'", header))
+}
+
 func (r runner) newConf() conf {
 	c := make(conf)
 	c["store"] = c.quoteString(r.store)
@@ -177,6 +181,7 @@ func test(profile string) error {
 		}
 	}
 	r.writeConfig(c)
+	r.section("credentials")
 	r.run("echo testing |", "insert test1/key1/password")
 	c = r.newConf()
 	if hasPass {
@@ -197,6 +202,7 @@ func test(profile string) error {
 	delete(c, "readonly")
 	c["totp.timeout"] = "1"
 	r.writeConfig(c)
+	r.section("setting up tests")
 	for _, k := range []string{"test2/key1/password", "test2/key1/notes", "test3", "test3/invalid/", "test3/invalid/still"} {
 		r.run("echo testing2 |", fmt.Sprintf("insert %s", k))
 	}
@@ -207,6 +213,7 @@ func test(profile string) error {
 		r.run(`printf "testing5" |`, k)
 		r.run("", fmt.Sprintf("show %s", strings.ReplaceAll(k, "insert ", "")))
 	}
+	r.section("listing/outputs")
 	r.run("", "ls")
 	r.run("", "groups")
 	r.run("echo y |", "rm test2/key1")
@@ -216,6 +223,7 @@ func test(profile string) error {
 	r.run("", "ls url")
 	r.run("", "json")
 	r.run("", "json '*/multiline'")
+	r.section("totp")
 	r.logAppend("echo")
 	r.run("echo 5ae472abqdekjqykoyxk7hvc2leklq5n |", "insert test6/multiline/otp")
 	r.run(`printf "otpauth://totp/lbissuer:lbaccount?algorithm=SHA1&digits=6&issuer=lbissuer&period=30&secret=5ae472abqdekjqykoyxk7hvc2leklq5n" |`, "insert test10/key1/otp")
@@ -231,6 +239,7 @@ func test(profile string) error {
 	r.run("", "totp url test10/key1/otp")
 	r.run("", "totp seed test10/key1/otp")
 	r.run("", fmt.Sprintf("conv \"%s\"", r.store))
+	r.section("removing")
 	r.run("echo y |", "rm test10/*")
 	r.logAppend("echo")
 	r.run("echo y |", "rm test7/deeper/**/*")
@@ -240,6 +249,7 @@ func test(profile string) error {
 	r.logAppend("echo")
 	r.run("echo y |", "rm test7/deeper/*")
 	r.logAppend("echo")
+	r.section("unset")
 	r.run("", "ls")
 	r.run("", "groups")
 	r.run("", "groups 'test9/**/*'")
@@ -251,6 +261,7 @@ func test(profile string) error {
 	r.logAppend("echo")
 	r.run("", "ls")
 	r.run("", "groups")
+	r.section("moving")
 	r.run("", "mv test9/key1/* test9/")
 	r.run("", "mv test9/key2/sub1 test9/sub3")
 	r.run("", "ls")
@@ -258,7 +269,7 @@ func test(profile string) error {
 	r.run("echo y |", "rm test9/*")
 	r.logAppend("echo")
 
-	// test rekeying
+	r.section("rekey")
 	reKeyArgs := []string{}
 	reKeyFile := filepath.Join(r.testDir, "rekey.file")
 	if hasFile {
@@ -280,7 +291,7 @@ func test(profile string) error {
 	r.run("", "ls")
 	r.run("", "show test6/multiline/password")
 
-	// test json modes
+	r.section("json")
 	c["json.mode"] = c.quoteString("plaintext")
 	r.writeConfig(c)
 	r.run("", "json test6/*")
@@ -292,7 +303,7 @@ func test(profile string) error {
 	r.writeConfig(c)
 	r.run("", "json test6/*")
 
-	// clipboard
+	r.section("clipboard")
 	copyFile := filepath.Join(r.testDir, "clip.copy")
 	pasteFile := filepath.Join(r.testDir, "clip.paste")
 	c["clip.copy_command"] = fmt.Sprintf("[\"touch\", \"%s\"]", copyFile)
@@ -314,7 +325,7 @@ func test(profile string) error {
 		return errors.New("clipboard test failed unexpectedly")
 	}
 
-	// invalid configuration
+	r.section("invalids")
 	invalid := r.newConf()
 	for k, v := range c {
 		invalid[k] = v
@@ -335,7 +346,7 @@ func test(profile string) error {
 	setConfig(r.config)
 	r.run("", "ls")
 
-	// what is env
+	r.section("env")
 	r.run("", fmt.Sprintf("vars | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
 
 	// cleanup and diff results

@@ -1,4 +1,6 @@
+credentials
 insert is not allowed in read-only
+setting up tests
 'test3' is not an allowed field name
 '' is not an allowed field name
 'still' is not an allowed field name
@@ -14,6 +16,7 @@ testing5
 testing5
 testing5
 testing5
+listing/outputs
 test1/key1/password
 test2/key1/notes
 test2/key1/password
@@ -118,6 +121,7 @@ test6/multiline/password
     "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
   }
 }
+totp
 
 test10/key1/otp
 test6/multiline/otp
@@ -186,6 +190,7 @@ period:    30
   "modtime": "XXXX-XX-XX",
   "password": "cbf67e6da88d43f048050e36d7010080536372397b6ed0a0446cd2640340bf47cb616ddbc5d35ec3500e295f875f806fc20120a2d5497b3e729e904091424633"
 }
+removing
 delete entry? (y/N) 
 no entities matching: test7/deeper/**/*
 no entities matching: test7/deeper/ro**/*
@@ -196,6 +201,7 @@ selected entities:
  test7/deeper/rooted
 
 delete entries? (y/N) 
+unset
 test4/multiline/notes
 test5/multiline/notes
 test6/multiline/notes
@@ -250,6 +256,7 @@ test6/multiline
 test9/key1/sub1
 test9/key1/sub2
 test9/key2/sub1
+moving
 test4/multiline/notes
 test5/multiline/notes
 test6/multiline/notes
@@ -270,6 +277,7 @@ selected entities:
  test9/sub3
 
 delete entries? (y/N) 
+rekey
 
 test4/multiline/notes
 test5/multiline/notes
@@ -277,6 +285,7 @@ test6/multiline/notes
 test6/multiline/otp
 test6/multiline/password
 testing5
+json
 {
   "test6/multiline": {
     "modtime": "XXXX-XX-XX",
@@ -301,7 +310,9 @@ testing5
     "password": "cbf"
   }
 }
+clipboard
 clipboard will clear in 3 seconds
+invalids
 Wrong password? HMAC-SHA256 of header mismatching
 no store set
 test4/multiline/notes
@@ -309,6 +320,7 @@ test5/multiline/notes
 test6/multiline/notes
 test6/multiline/otp
 test6/multiline/password
+env
 LOCKBOX_CLIP_COPY_COMMAND=[touch testdata/datadir/clip.copy]
 LOCKBOX_CLIP_PASTE_COMMAND=[touch testdata/datadir/clip.paste]
 LOCKBOX_CLIP_TIMEOUT=3
