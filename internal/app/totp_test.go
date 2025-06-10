@@ -257,7 +257,7 @@ func TestParseWindows(t *testing.T) {
 
 func TestTOTPListFilter(t *testing.T) {
 	setupTOTP(t)
-	args, _ := app.NewTOTPArguments([]string{"ls", "test"})
+	args, _ := app.NewTOTPArguments([]string{"ls", "test/**/**/*"})
 	m, opts := newMock(t)
 	if err := args.Do(opts); err != nil {
 		t.Errorf("invalid error: %v", err)

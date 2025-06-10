@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -43,27 +44,13 @@ const (
 	FindMode
 	// ExactMode means an entity must MATCH the string exactly
 	ExactMode
-	// PrefixMode allows for entities starting with a specific value
-	PrefixMode
+	// GlobMode indicates use a glob/match to find results
+	GlobMode
 )
 
 // MatchPath will try to match 1 or more elements (more elements when globbing)
 func (t *Transaction) MatchPath(path string) ([]Entity, error) {
-	if !strings.HasSuffix(path, isGlob) {
-		e, err := t.Get(path, BlankValue)
-		if err != nil {
-			return nil, err
-		}
-		if e == nil {
-			return nil, nil
-		}
-		return []Entity{*e}, nil
-	}
-	prefix := strings.TrimSuffix(path, isGlob)
-	if strings.HasSuffix(prefix, pathSep) {
-		return nil, errors.New("invalid match criteria, too many path separators")
-	}
-	return t.queryCollect(QueryOptions{Mode: PrefixMode, Criteria: prefix + pathSep, Values: BlankValue})
+	return t.queryCollect(QueryOptions{Mode: GlobMode, Criteria: path, Values: BlankValue})
 }
 
 // Get will request a singular entity
@@ -86,7 +73,7 @@ func (t *Transaction) Get(path string, mode ValueMode) (*Entity, error) {
 	}
 }
 
-func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.Entry, cb func(string, gokeepasslib.Entry)) {
+func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.Entry, cb func(string, gokeepasslib.Entry) error) error {
 	for _, g := range groups {
 		o := ""
 		if offset == "" {
@@ -94,11 +81,16 @@ func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.
 		} else {
 			o = NewPath(offset, g.Name)
 		}
-		forEach(o, g.Groups, g.Entries, cb)
+		if err := forEach(o, g.Groups, g.Entries, cb); err != nil {
+			return err
+		}
 	}
 	for _, e := range entries {
-		cb(offset, e)
+		if err := cb(offset, e); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (t *Transaction) queryCollect(args QueryOptions) ([]Entity, error) {
@@ -107,6 +99,11 @@ func (t *Transaction) queryCollect(args QueryOptions) ([]Entity, error) {
 		return nil, err
 	}
 	return e.Collect()
+}
+
+// Glob is the baseline query for globbing for results
+func Glob(criteria, path string) (bool, error) {
+	return filepath.Match(criteria, path)
 }
 
 // QueryCallback will retrieve a query based on setting
@@ -122,7 +119,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	isSort := args.Mode != ExactMode
 	decrypt := args.Values != BlankValue
 	err := t.act(func(ctx Context) error {
-		forEach("", ctx.db.Content.Root.Groups[0].Groups, ctx.db.Content.Root.Groups[0].Entries, func(offset string, entry gokeepasslib.Entry) {
+		forEach("", ctx.db.Content.Root.Groups[0].Groups, ctx.db.Content.Root.Groups[0].Entries, func(offset string, entry gokeepasslib.Entry) error {
 			path := getPathName(entry)
 			if offset != "" {
 				path = NewPath(offset, path)
@@ -131,17 +128,21 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 				switch args.Mode {
 				case FindMode:
 					if !strings.Contains(path, args.Criteria) {
-						return
+						return nil
 					}
-				case PrefixMode:
-					if !strings.HasPrefix(path, args.Criteria) {
-						return
+				case GlobMode:
+					ok, err := Glob(args.Criteria, path)
+					if err != nil {
+						return err
+					}
+					if !ok {
+						return nil
 					}
 				}
 			} else {
 				if args.Mode == ExactMode {
 					if path != args.Criteria {
-						return
+						return nil
 					}
 				}
 			}
@@ -154,6 +155,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 			} else {
 				entities = append(entities, obj)
 			}
+			return nil
 		})
 		if decrypt {
 			return ctx.db.UnlockProtectedEntries()

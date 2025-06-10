@@ -4,7 +4,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 
@@ -28,26 +27,18 @@ func List(cmd CommandOptions, groups bool) error {
 }
 
 func doList(attr, filter string, cmd CommandOptions, groups bool) error {
-	var re *regexp.Regexp
-	hasFilter := filter != ""
-	if hasFilter {
-		var err error
-		re, err = regexp.Compile(filter)
-		if err != nil {
-			return err
-		}
-	}
+	hasFilter, selector := createFilter(filter)
 	opts := kdbx.QueryOptions{}
 	opts.Mode = kdbx.ListMode
 	e, err := cmd.Transaction().QueryCallback(opts)
 	if err != nil {
 		return err
 	}
-	allowed := func(p string) bool {
+	allowed := func(p string) (bool, error) {
 		if hasFilter {
-			return re.MatchString(p)
+			return selector(filter, p)
 		}
-		return true
+		return true, nil
 	}
 	w := cmd.Writer()
 	attrFilter := attr != ""
@@ -56,7 +47,11 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 			return err
 		}
 		if groups {
-			if allowed(f.Path) {
+			ok, err := allowed(f.Path)
+			if err != nil {
+				return err
+			}
+			if ok {
 				fmt.Fprintf(w, "%s\n", f.Path)
 			}
 			continue
@@ -72,7 +67,11 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 				}
 			}
 			path := kdbx.NewPath(f.Path, k)
-			if allowed(path) {
+			ok, err := allowed(path)
+			if err != nil {
+				return err
+			}
+			if ok {
 				results = append(results, path)
 			}
 		}
@@ -83,4 +82,11 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 		fmt.Fprintf(w, "%s\n", strings.Join(results, "\n"))
 	}
 	return nil
+}
+
+func createFilter(filter string) (bool, func(string, string) (bool, error)) {
+	if filter == "" {
+		return false, nil
+	}
+	return true, kdbx.Glob
 }

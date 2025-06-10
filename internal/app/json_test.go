@@ -24,7 +24,7 @@ func TestJSON(t *testing.T) {
 		t.Error("no data")
 	}
 	m.buf = bytes.Buffer{}
-	m.args = []string{"test2/test1"}
+	m.args = []string{"test/test2/*"}
 	if err := app.JSON(m); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}

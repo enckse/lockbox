@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
@@ -32,15 +31,7 @@ func Conv(cmd CommandOptions) error {
 }
 
 func serialize(w io.Writer, tx *kdbx.Transaction, isJSON bool, filter string) error {
-	var re *regexp.Regexp
-	hasFilter := filter != ""
-	if hasFilter {
-		var err error
-		re, err = regexp.Compile(filter)
-		if err != nil {
-			return err
-		}
-	}
+	hasFilter, selector := createFilter(filter)
 	e, err := tx.QueryCallback(kdbx.QueryOptions{Mode: kdbx.ListMode, Values: kdbx.JSONValue})
 	if err != nil {
 		return err
@@ -54,7 +45,11 @@ func serialize(w io.Writer, tx *kdbx.Transaction, isJSON bool, filter string) er
 			return err
 		}
 		if hasFilter {
-			if !re.MatchString(item.Path) {
+			ok, err := selector(filter, item.Path)
+			if err != nil {
+				return err
+			}
+			if !ok {
 				continue
 			}
 		}

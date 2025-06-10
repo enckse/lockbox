@@ -23,7 +23,7 @@ var (
 const (
 	titleKey   = "Title"
 	pathSep    = "/"
-	isGlob     = pathSep + "*"
+	isGlob     = "*"
 	modTimeKey = "ModTime"
 	// OTPField is the totp storage attribute
 	OTPField = "otp"

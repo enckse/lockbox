@@ -89,15 +89,27 @@ func TestMatchPath(t *testing.T) {
 	if len(q) != 4 {
 		t.Error("invalid entity result")
 	}
-	if _, err := fullSetup(t, true).MatchPath("test/test//*"); err.Error() != "invalid match criteria, too many path separators" {
-		t.Errorf("wrong error: %v", err)
-	}
 	q, err = fullSetup(t, true).MatchPath("test/test*")
 	if err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	if len(q) != 0 {
 		t.Error("invalid entity result")
+	}
+}
+
+func TestGlob(t *testing.T) {
+	_, err := kdbx.Glob("[", "x")
+	if err == nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	ok, err := kdbx.Glob("a", "b")
+	if ok || err != nil {
+		t.Errorf("invalid result/error: %v", err)
+	}
+	ok, err = kdbx.Glob("a/*", "a/b")
+	if !ok || err != nil {
+		t.Errorf("invalid result/error: %v", err)
 	}
 }
 

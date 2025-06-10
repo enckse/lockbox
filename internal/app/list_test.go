@@ -57,7 +57,7 @@ func TestList(t *testing.T) {
 func TestFind(t *testing.T) {
 	m := newMockCommand(t)
 	m.args = []string{"["}
-	if err := app.List(m, false); err == nil || !strings.Contains(err.Error(), "missing closing") {
+	if err := app.List(m, false); err == nil || !strings.Contains(err.Error(), "syntax error in pattern") {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() != "" {
@@ -72,7 +72,7 @@ func TestFind(t *testing.T) {
 		t.Error("something listed")
 	}
 	m.buf.Reset()
-	m.args = []string{"test"}
+	m.args = []string{"test/test2/**/*"}
 	if err := app.List(m, false); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestFind(t *testing.T) {
 		t.Error("nothing listed")
 	}
 	m.buf.Reset()
-	m.args = []string{"test"}
+	m.args = []string{"test/**/*"}
 	if err := app.List(m, true); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
