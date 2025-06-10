@@ -23,7 +23,6 @@ var (
 const (
 	titleKey   = "Title"
 	pathSep    = "/"
-	isGlob     = "*"
 	modTimeKey = "ModTime"
 	// OTPField is the totp storage attribute
 	OTPField = "otp"
@@ -83,7 +82,7 @@ func NewTransaction() (*Transaction, error) {
 }
 
 func splitComponents(path string) ([]string, string, error) {
-	if len(strings.Split(path, pathSep)) < 2 {
+	if len(SplitPath(path)) < 2 {
 		return nil, "", errPath
 	}
 	if strings.HasPrefix(path, pathSep) {
@@ -96,7 +95,7 @@ func splitComponents(path string) ([]string, string, error) {
 		return nil, "", errors.New("unwilling to operate on path with empty segment")
 	}
 	title := Base(path)
-	parts := strings.Split(Directory(path), pathSep)
+	parts := SplitPath(Directory(path))
 	return parts, title, nil
 }
 
@@ -182,7 +181,7 @@ func (e Entity) Value(key string) (string, bool) {
 
 // Base will get the base name of input path
 func Base(s string) string {
-	parts := strings.Split(s, pathSep)
+	parts := SplitPath(s)
 	if len(parts) == 0 {
 		return s
 	}
@@ -191,7 +190,7 @@ func Base(s string) string {
 
 // Directory will get the directory/group for the given path
 func Directory(s string) string {
-	parts := strings.Split(s, pathSep)
+	parts := SplitPath(s)
 	return NewPath(parts[0 : len(parts)-1]...)
 }
 
@@ -211,6 +210,11 @@ func IsDirectory(path string) bool {
 // IsLeafAttribute indicates if a path is leaved with a certain name
 func IsLeafAttribute(path, attr string) bool {
 	return strings.HasSuffix(path, pathSep+attr)
+}
+
+// SplitPath will split a path based on the separator
+func SplitPath(path string) []string {
+	return strings.Split(path, pathSep)
 }
 
 // Collect will create a slice from an iterable set of query sequence results

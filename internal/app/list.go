@@ -88,5 +88,13 @@ func createFilter(filter string) (bool, func(string, string) (bool, error)) {
 	if filter == "" {
 		return false, nil
 	}
-	return true, kdbx.Glob
+	parts := kdbx.SplitPath(filter)
+	for _, p := range parts {
+		if strings.ContainsAny(p, "*?[^]\\-") {
+			return true, kdbx.Glob
+		}
+	}
+	return true, func(criteria, path string) (bool, error) {
+		return strings.Contains(path, criteria), nil
+	}
 }
