@@ -16,6 +16,7 @@ import (
 
 const (
 	// sub categories
+	featureCategory      = "FEATURE_"
 	clipCategory         = "CLIP_"
 	totpCategory         = "TOTP_"
 	jsonCategory         = "JSON_"
@@ -33,6 +34,8 @@ const (
 	arrayDelimiter     = " "
 	// TimeWindowSpan indicates the delineation between start -> end (start:end)
 	TimeWindowSpan = ":"
+	// NoColorFlag is the common color disable flag
+	NoColorFlag = "NO_COLOR"
 )
 
 const (
@@ -150,7 +153,10 @@ func formatterTOTP(key, value string) string {
 
 // CanColor indicates if colorized output is allowed (or disabled)
 func CanColor() bool {
-	if _, noColor := os.LookupEnv("NO_COLOR"); noColor {
+	if !EnvFeatureColor.Get() {
+		return false
+	}
+	if _, noColor := os.LookupEnv(NoColorFlag); noColor {
 		return false
 	}
 	return true
@@ -172,4 +178,9 @@ func readNested(v reflect.Type, root string) []string {
 // TextPositionFields is the displayable set of templated fields
 func TextPositionFields() string {
 	return strings.Join(readNested(reflect.TypeOf(Word{}), ""), ", ")
+}
+
+// NewFeatureError creates an error if a feature is not enabled
+func NewFeatureError(name string) error {
+	return fmt.Errorf("%s feature is disabled", name)
 }

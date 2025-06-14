@@ -251,7 +251,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(store.List()) != 16 {
+	if len(store.List()) != 19 {
 		t.Errorf("invalid environment after load: %d", len(store.List()))
 	}
 }

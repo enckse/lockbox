@@ -12,7 +12,6 @@ import (
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/config/features"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/output"
 )
@@ -36,6 +35,7 @@ type (
 		CompletionsEnv     string
 		HelpCommand        string
 		HelpConfigCommand  string
+		NoColor            string
 		Config             struct {
 			Env  string
 			Home string
@@ -76,7 +76,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		isGroup  = "group"
 	)
 	var results []string
-	canClip := features.CanClip()
+	canClip := config.EnvFeatureClip.Get()
 	if canClip {
 		results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
 	}
@@ -97,7 +97,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
 	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
-	canTOTP := features.CanTOTP()
+	canTOTP := config.EnvFeatureTOTP.Get()
 	if canTOTP {
 		results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
 		if canClip {
@@ -114,6 +114,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {
+		canColor := config.EnvFeatureColor.Get()
 		results = append(results, "")
 		document := Documentation{
 			Executable:         filepath.Base(exe),
@@ -123,6 +124,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			CompletionsCommand: commands.Completions,
 			HelpCommand:        commands.Help,
 			HelpConfigCommand:  commands.HelpConfig,
+			NoColor:            config.NoColorFlag,
 		}
 		document.Config.Env = config.ConfigEnv
 		document.Config.Home = config.ConfigHome
@@ -161,6 +163,11 @@ func Usage(verbose bool, exe string) ([]string, error) {
 				if !canClip {
 					continue
 				}
+			case "color":
+				if !canColor {
+					continue
+				}
+
 			}
 			header := fmt.Sprintf("[%s]", section)
 			s, err := processDoc(header, n, document)

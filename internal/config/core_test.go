@@ -37,11 +37,17 @@ func TestNewEnvFiles(t *testing.T) {
 
 func TestCanColor(t *testing.T) {
 	store.Clear()
-	if can := config.CanColor(); !can {
+	defer store.Clear()
+	if !config.CanColor() {
 		t.Error("should be able to color")
 	}
+	store.SetBool("LOCKBOX_FEATURE_COLOR", false)
+	if config.CanColor() {
+		t.Error("should NOT be able to color")
+	}
+	store.Clear()
 	t.Setenv("NO_COLOR", "1")
-	if can := config.CanColor(); can {
+	if config.CanColor() {
 		t.Error("should NOT be able to color")
 	}
 }
@@ -50,5 +56,12 @@ func TestTextFields(t *testing.T) {
 	v := config.TextPositionFields()
 	if v != "Text, Position.Start, Position.End" {
 		t.Errorf("unexpected fields: %s", v)
+	}
+}
+
+func TestNewFeatureError(t *testing.T) {
+	err := config.NewFeatureError("abc")
+	if err == nil || err.Error() != "abc feature is disabled" {
+		t.Errorf("invalid error: %v", err)
 	}
 }

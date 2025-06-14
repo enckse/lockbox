@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/config/features"
+	"git.sr.ht/~enckse/lockbox/internal/config"
 )
 
 type (
@@ -69,11 +69,11 @@ func Generate(completionType, exe string) ([]string, error) {
 	}
 
 	c.Options = []string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Move, commands.Remove, commands.Insert, commands.Unset}
-	canClip := features.CanClip()
+	canClip := config.EnvFeatureClip.Get()
 	if canClip {
 		c.Options = append(c.Options, commands.Clip)
 	}
-	if features.CanTOTP() {
+	if config.EnvFeatureTOTP.Get() {
 		c.Options = append(c.Options, commands.TOTP)
 		c.TOTPSubCommands = []string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed}
 		if canClip {

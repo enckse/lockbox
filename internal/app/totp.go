@@ -14,7 +14,6 @@ import (
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/config/features"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
@@ -209,8 +208,8 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 
 // NewTOTPArguments will parse the input arguments
 func NewTOTPArguments(args []string) (*TOTPArguments, error) {
-	if !features.CanTOTP() {
-		return nil, features.NewError("totp")
+	if !config.EnvFeatureTOTP.Get() {
+		return nil, config.NewFeatureError("totp")
 	}
 	if len(args) == 0 {
 		return nil, errors.New("not enough arguments for totp")

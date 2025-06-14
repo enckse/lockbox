@@ -127,15 +127,3 @@ just
 ```
 
 _run `just check` to run tests_
-
-### features
-
-`lb` can have some features disabled via build tags:
-
-- 'noclip' will disable the clipboard functionalities
-- 'nototp' will disable the totp functionalities
-
-These are supported via the justfile
-```
-just tags=noclip
-```

@@ -8,6 +8,14 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
 
+func TestDisabled(t *testing.T) {
+	defer store.Clear()
+	store.SetBool("LOCKBOX_FEATURE_CLIP", false)
+	if _, err := clip.New(); err == nil || err.Error() != "clip feature is disabled" {
+		t.Errorf("invalid error: %v", err)
+	}
+}
+
 func TestMaxTime(t *testing.T) {
 	store.Clear()
 	defer store.Clear()

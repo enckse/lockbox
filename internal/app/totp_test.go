@@ -82,6 +82,11 @@ func TestNewTOTPArgumentsErrors(t *testing.T) {
 	if _, err := app.NewTOTPArguments([]string{"show"}); err == nil || err.Error() != "invalid arguments" {
 		t.Errorf("invalid error: %v", err)
 	}
+	defer store.Clear()
+	store.SetBool("LOCKBOX_FEATURE_TOTP", false)
+	if _, err := app.NewTOTPArguments([]string{"show"}); err == nil || err.Error() != "totp feature is disabled" {
+		t.Errorf("invalid error: %v", err)
+	}
 }
 
 func TestNewTOTPArguments(t *testing.T) {

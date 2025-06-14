@@ -10,6 +10,30 @@ import (
 )
 
 var (
+	// EnvFeatureTOTP allows disable TOTP feature
+	EnvFeatureTOTP = environmentRegister(EnvironmentBool{
+		environmentDefault: newDefaultedEnvironment(true,
+			environmentBase{
+				key:         featureCategory + "TOTP",
+				description: "Enable totp feature.",
+			}),
+	})
+	// EnvFeatureClip allows disabling clipboard feature
+	EnvFeatureClip = environmentRegister(EnvironmentBool{
+		environmentDefault: newDefaultedEnvironment(true,
+			environmentBase{
+				key:         featureCategory + "CLIP",
+				description: "Enable clipboard feature.",
+			}),
+	})
+	// EnvFeatureColor allows disabling color output
+	EnvFeatureColor = environmentRegister(EnvironmentBool{
+		environmentDefault: newDefaultedEnvironment(true,
+			environmentBase{
+				key:         featureCategory + "COLOR",
+				description: "Enable terminal color feature.",
+			}),
+	})
 	// EnvClipTimeout gets the maximum clipboard time
 	EnvClipTimeout = environmentRegister(EnvironmentInt{
 		environmentDefault: newDefaultedEnvironment(45,

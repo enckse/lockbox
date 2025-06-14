@@ -28,6 +28,18 @@ func TestIsReadOnly(t *testing.T) {
 	checkYesNo("LOCKBOX_READONLY", t, config.EnvReadOnly, false)
 }
 
+func TestTOTPFeature(t *testing.T) {
+	checkYesNo("LOCKBOX_FEATURE_TOTP", t, config.EnvFeatureTOTP, true)
+}
+
+func TestClipFeature(t *testing.T) {
+	checkYesNo("LOCKBOX_FEATURE_CLIP", t, config.EnvFeatureClip, true)
+}
+
+func TestColorFeature(t *testing.T) {
+	checkYesNo("LOCKBOX_FEATURE_COLOR", t, config.EnvFeatureColor, true)
+}
+
 func TestIsOSC52(t *testing.T) {
 	checkYesNo("LOCKBOX_CLIP_OSC52", t, config.EnvClipOSC52, false)
 }

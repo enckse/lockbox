@@ -1,3 +1,3 @@
 By default '{{ $.Executable }}' tries to use some reasonable defaults to setup/manage oauth
 token inputs and displaying of code outputs. Many of these settings can be
-changed via configuration.
+changed via configuration. This feature can be controlled by a configuration feature flag.
