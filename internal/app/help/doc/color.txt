@@ -1,0 +1,1 @@
+Color can be controlled via a feature flag and also respects {{ $.NoColor }}
