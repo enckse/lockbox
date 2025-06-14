@@ -76,7 +76,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		isGroup  = "group"
 	)
 	var results []string
-	if features.CanClip() {
+	canClip := features.CanClip()
+	if canClip {
 		results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
 	}
 	results = append(results, command(commands.Completions, "<shell>", "generate completions via auto-detection"))
@@ -96,9 +97,12 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
 	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
-	if features.CanTOTP() {
+	canTOTP := features.CanTOTP()
+	if canTOTP {
 		results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
-		results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
+		if canClip {
+			results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
+		}
 		results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
 		results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
 		results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
@@ -147,7 +151,18 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			if !strings.HasSuffix(n, textFile) {
 				continue
 			}
-			header := fmt.Sprintf("[%s]", strings.TrimSuffix(filepath.Base(n), textFile))
+			section := strings.TrimSuffix(filepath.Base(n), textFile)
+			switch section {
+			case "totp":
+				if !canTOTP {
+					continue
+				}
+			case "clipboard":
+				if !canClip {
+					continue
+				}
+			}
+			header := fmt.Sprintf("[%s]", section)
 			s, err := processDoc(header, n, document)
 			if err != nil {
 				return nil, err

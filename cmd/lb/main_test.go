@@ -105,8 +105,8 @@ func (r runner) raw(pipeIn, command, stdout, stderr string) error {
 	return cmd.Run()
 }
 
-func (r runner) feature(command, useBinary string) error {
-	text := fmt.Sprintf("%s %s >> %s 2>&1", fmt.Sprintf("%s-%s", binary, useBinary), command, r.log)
+func (r runner) feature(command, useBinary, grep string) error {
+	text := fmt.Sprintf("%s %s %s >> %s 2>&1", fmt.Sprintf("%s-%s", binary, useBinary), command, grep, r.log)
 	cmd := exec.Command("/bin/sh", "-c", text)
 	return cmd.Run()
 }
@@ -356,8 +356,13 @@ func test(profile string) error {
 	r.run("", fmt.Sprintf("vars | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
 
 	r.section("features")
-	r.feature("clip abc", "noclip")
-	r.feature("totp ls", "nototp")
+	feature := func(cmd, flag string) {
+		executable := fmt.Sprintf("no%s", flag)
+		r.feature(cmd, executable, "")
+		r.feature("help verbose", executable, fmt.Sprintf("| grep '%s'", flag))
+	}
+	feature("clip abc", "clip")
+	feature("totp ls", "totp")
 
 	// cleanup and diff results
 	tmpFile := fmt.Sprintf("%s.tmp", r.log)

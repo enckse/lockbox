@@ -69,12 +69,16 @@ func Generate(completionType, exe string) ([]string, error) {
 	}
 
 	c.Options = []string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Move, commands.Remove, commands.Insert, commands.Unset}
-	if features.CanClip() {
+	canClip := features.CanClip()
+	if canClip {
 		c.Options = append(c.Options, commands.Clip)
 	}
 	if features.CanTOTP() {
 		c.Options = append(c.Options, commands.TOTP)
-		c.TOTPSubCommands = []string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed, commands.TOTPClip}
+		c.TOTPSubCommands = []string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed}
+		if canClip {
+			c.TOTPSubCommands = append(c.TOTPSubCommands, commands.TOTPClip)
+		}
 	}
 	sort.Strings(c.Options)
 	sort.Strings(c.TOTPSubCommands)
