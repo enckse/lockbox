@@ -25,6 +25,7 @@ tests: features
 features: build
   just tags=noclip object={{target}}/lb-noclip
   just tags=nototp object={{target}}/lb-nototp
+  just tags=noclip,nototp object={{target}}/lb-nofeatures
 
 clean:
   rm -f "{{object}}"

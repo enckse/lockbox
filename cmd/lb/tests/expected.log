@@ -332,4 +332,6 @@ LOCKBOX_STORE=testdata/datadir/pass.kdbx
 LOCKBOX_TOTP_TIMEOUT=1
 features
 unable to get clipboard: clip feature is disabled
+unable to get clipboard: clip feature is disabled
+totp feature is disabled
 totp feature is disabled

@@ -358,8 +358,10 @@ func test(profile string) error {
 	r.section("features")
 	feature := func(cmd, flag string) {
 		executable := fmt.Sprintf("no%s", flag)
-		r.feature(cmd, executable, "")
-		r.feature("help verbose", executable, fmt.Sprintf("| grep '%s'", flag))
+		for _, e := range []string{executable, "nofeatures"} {
+			r.feature(cmd, e, "")
+			r.feature("help verbose", e, fmt.Sprintf("| grep '%s'", flag))
+		}
 	}
 	feature("clip abc", "clip")
 	feature("totp ls", "totp")
