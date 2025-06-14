@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
+	"git.sr.ht/~enckse/lockbox/internal/config/features"
 )
 
 type (
@@ -67,8 +68,14 @@ func Generate(completionType, exe string) ([]string, error) {
 		ExportCommand:       fmt.Sprintf("%s %s %s", exe, commands.Env, commands.Completions),
 	}
 
-	c.Options = []string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Clip, commands.TOTP, commands.Move, commands.Remove, commands.Insert, commands.Unset}
-	c.TOTPSubCommands = []string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed, commands.TOTPClip}
+	c.Options = []string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Move, commands.Remove, commands.Insert, commands.Unset}
+	if features.CanClip() {
+		c.Options = append(c.Options, commands.Clip)
+	}
+	if features.CanTOTP() {
+		c.Options = append(c.Options, commands.TOTP)
+		c.TOTPSubCommands = []string{commands.TOTPMinimal, commands.TOTPOnce, commands.TOTPShow, commands.TOTPURL, commands.TOTPSeed, commands.TOTPClip}
+	}
 	sort.Strings(c.Options)
 	sort.Strings(c.TOTPSubCommands)
 

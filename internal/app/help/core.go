@@ -12,6 +12,7 @@ import (
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/config/features"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/output"
 )
@@ -75,7 +76,9 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		isGroup  = "group"
 	)
 	var results []string
-	results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
+	if features.CanClip() {
+		results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
+	}
 	results = append(results, command(commands.Completions, "<shell>", "generate completions via auto-detection"))
 	for _, c := range commands.CompletionTypes {
 		results = append(results, subCommand(commands.Completions, c, "", fmt.Sprintf("generate %s completions", c)))
@@ -93,14 +96,16 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
 	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
-	results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPURL, isEntry, "display TOTP url information"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPSeed, isEntry, "show the TOTP seed (only)"))
-	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
+	if features.CanTOTP() {
+		results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPURL, isEntry, "display TOTP url information"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPSeed, isEntry, "show the TOTP seed (only)"))
+		results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
+	}
 	results = append(results, command(commands.Version, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}

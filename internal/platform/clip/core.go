@@ -8,6 +8,7 @@ import (
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
+	"git.sr.ht/~enckse/lockbox/internal/config/features"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
 	osc "github.com/aymanbagabas/go-osc52"
 )
@@ -30,8 +31,11 @@ func newBoard(copying, pasting []string) (Board, error) {
 	return Board{copying: copying, pasting: pasting, MaxTime: maximum, isOSC52: false}, nil
 }
 
-// New will retrieve the commands to use for clipboard operations.
+// New creates a new clipboard
 func New() (Board, error) {
+	if !features.CanClip() {
+		return Board{}, features.NewError("clip")
+	}
 	overridePaste := config.EnvClipPaste.Get()
 	overrideCopy := config.EnvClipCopy.Get()
 	setPaste := len(overridePaste) > 0

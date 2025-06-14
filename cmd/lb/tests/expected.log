@@ -330,3 +330,6 @@ LOCKBOX_JSON_HASH_LENGTH=3
 LOCKBOX_JSON_MODE=hash
 LOCKBOX_STORE=testdata/datadir/pass.kdbx
 LOCKBOX_TOTP_TIMEOUT=1
+features
+unable to get clipboard: clip feature is disabled
+totp feature is disabled

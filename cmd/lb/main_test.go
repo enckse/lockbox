@@ -105,6 +105,12 @@ func (r runner) raw(pipeIn, command, stdout, stderr string) error {
 	return cmd.Run()
 }
 
+func (r runner) feature(command, useBinary string) error {
+	text := fmt.Sprintf("%s %s >> %s 2>&1", fmt.Sprintf("%s-%s", binary, useBinary), command, r.log)
+	cmd := exec.Command("/bin/sh", "-c", text)
+	return cmd.Run()
+}
+
 func (r runner) logAppend(command string) error {
 	return exec.Command("/bin/sh", "-c", fmt.Sprintf("%s >> %s", command, r.log)).Run()
 }
@@ -348,6 +354,10 @@ func test(profile string) error {
 
 	r.section("env")
 	r.run("", fmt.Sprintf("vars | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
+
+	r.section("features")
+	r.feature("clip abc", "noclip")
+	r.feature("totp ls", "nototp")
 
 	// cleanup and diff results
 	tmpFile := fmt.Sprintf("%s.tmp", r.log)
