@@ -1,1 +1,2 @@
-Color can be controlled via a feature flag and also respects {{ $.NoColor }}
+Certain components of '{{ $.Executable }}' will output in color.
+This feature respects {{ $.NoColor }}

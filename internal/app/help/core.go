@@ -154,20 +154,23 @@ func Usage(verbose bool, exe string) ([]string, error) {
 				continue
 			}
 			section := strings.TrimSuffix(filepath.Base(n), textFile)
-			switch section {
-			case "totp":
-				if !canTOTP {
-					continue
+			skip := false
+			adding := ""
+			for k, v := range map[string]bool{
+				"totp":      canTOTP,
+				"color":     canColor,
+				"clipboard": canClip,
+			} {
+				if section == k {
+					if !v {
+						skip = true
+					}
+					adding = "This functionality can be controlled by a configuration feature flag."
+					break
 				}
-			case "clipboard":
-				if !canClip {
-					continue
-				}
-			case "color":
-				if !canColor {
-					continue
-				}
-
+			}
+			if skip {
+				continue
 			}
 			header := fmt.Sprintf("[%s]", section)
 			s, err := processDoc(header, n, document)
@@ -175,6 +178,9 @@ func Usage(verbose bool, exe string) ([]string, error) {
 				return nil, err
 			}
 			buf.WriteString(s)
+			if adding != "" {
+				buf.WriteString(fmt.Sprintf("%s\n\n", adding))
+			}
 		}
 		results = append(results, strings.Split(strings.TrimSpace(buf.String()), "\n")...)
 	}
