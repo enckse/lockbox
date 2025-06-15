@@ -1,0 +1,5 @@
+In readonly mode the underlying database will block any commands that
+write to the underlying store when `{{ $.Executable }}` is called. The
+following commands are not allowed in readonly mode: {{ $.ReadOnlyCommands }}
+
+This functionality can be controlled via configuration.

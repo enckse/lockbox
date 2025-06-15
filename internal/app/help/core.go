@@ -36,6 +36,7 @@ type (
 		HelpCommand        string
 		HelpConfigCommand  string
 		NoColor            string
+		ReadOnlyCommands   string
 		Config             struct {
 			Env  string
 			Home string
@@ -76,11 +77,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		isGroup  = "group"
 	)
 	var results []string
-	isReadOnly := config.EnvReadOnly.Get()
-	canClip := config.EnvFeatureClip.Get()
-	if canClip {
-		results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
-	}
+	results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
 	results = append(results, command(commands.Completions, "<shell>", "generate completions via auto-detection"))
 	for _, c := range commands.CompletionTypes {
 		results = append(results, subCommand(commands.Completions, c, "", fmt.Sprintf("generate %s completions", c)))
@@ -89,35 +86,27 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.Help, "", "show this usage information"))
 	results = append(results, subCommand(commands.Help, commands.HelpAdvanced, "", "display verbose help information"))
 	results = append(results, subCommand(commands.Help, commands.HelpConfig, "", "display verbose configuration information"))
-	if !isReadOnly {
-		results = append(results, command(commands.Insert, isEntry, "insert a new entry into the store"))
-		results = append(results, command(commands.Unset, isEntry, "clear an entry value"))
-		results = append(results, command(commands.Move, fmt.Sprintf("%s %s", isGroup, isGroup), "move a group from source to destination"))
-		results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
-		results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
-	}
+	results = append(results, command(commands.Insert, isEntry, "insert a new entry into the store"))
+	results = append(results, command(commands.Unset, isEntry, "clear an entry value"))
+	results = append(results, command(commands.Move, fmt.Sprintf("%s %s", isGroup, isGroup), "move a group from source to destination"))
+	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
+	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
 	results = append(results, command(commands.JSON, isFilter, "display detailed information"))
 	results = append(results, command(commands.List, isFilter, "list entries"))
 	results = append(results, command(commands.Groups, isFilter, "list groups"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
-	canTOTP := config.EnvFeatureTOTP.Get()
-	if canTOTP {
-		results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
-		if canClip {
-			results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
-		}
-		results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
-		results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
-		results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
-		results = append(results, subCommand(commands.TOTP, commands.TOTPURL, isEntry, "display TOTP url information"))
-		results = append(results, subCommand(commands.TOTP, commands.TOTPSeed, isEntry, "show the TOTP seed (only)"))
-		results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
-	}
+	results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPMinimal, isEntry, "display one generated code (no details)"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPURL, isEntry, "display TOTP url information"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPSeed, isEntry, "show the TOTP seed (only)"))
+	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
 	results = append(results, command(commands.Version, "", "display version information"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {
-		canColor := config.EnvFeatureColor.Get()
 		results = append(results, "")
 		document := Documentation{
 			Executable:         filepath.Base(exe),
@@ -128,6 +117,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			HelpCommand:        commands.Help,
 			HelpConfigCommand:  commands.HelpConfig,
 			NoColor:            config.NoColorFlag,
+			ReadOnlyCommands: strings.Join(commands.ReadOnly, ", "),
 		}
 		document.Config.Env = config.ConfigEnv
 		document.Config.Home = config.ConfigHome
@@ -156,29 +146,17 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			if !strings.HasSuffix(n, textFile) {
 				continue
 			}
-			section := strings.TrimSuffix(filepath.Base(n), textFile)
-			skip := false
 			adding := ""
-			for k, v := range map[string]bool{
-				"totp":      canTOTP,
-				"color":     canColor,
-				"clipboard": canClip,
+			section := strings.TrimSuffix(filepath.Base(n), textFile)
+			for _, key := range []string{
+				"totp",
+				"color",
+				"clipboard",
 			} {
-				if section == k {
-					if !v {
-						skip = true
-					}
+				if section == key {
 					adding = "This functionality can be controlled by a configuration feature flag."
 					break
 				}
-			}
-			if !skip {
-				if section == "rekey" || section == "globs" {
-					skip = isReadOnly
-				}
-			}
-			if skip {
-				continue
 			}
 			header := fmt.Sprintf("[%s]", section)
 			s, err := processDoc(header, n, document)

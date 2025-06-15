@@ -1,6 +1,8 @@
 package commands_test
 
 import (
+	"fmt"
+	"sort"
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
@@ -21,5 +23,14 @@ func TestIsReadOnly(t *testing.T) {
 	}
 	if res := commands.AllowedInReadOnly("show"); len(res) != 1 {
 		t.Error("invalid, is not readonly")
+	}
+}
+
+func TestReadOnlyOrder(t *testing.T) {
+	had := fmt.Sprintf("%v", commands.ReadOnly)
+	v := commands.ReadOnly
+	sort.Strings(v)
+	if had != fmt.Sprintf("%v", v) {
+		t.Error("invalid readonly sort")
 	}
 }

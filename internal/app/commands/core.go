@@ -76,6 +76,7 @@ var (
 		KeyFile string
 		NoKey   string
 	}{"keyfile", "nokey"}
+	ReadOnly = []string{Insert, Move, ReKey, Remove, Unset}
 )
 
 // AllowedInReadOnly indicates any commands that are allowed in readonly mode
@@ -83,7 +84,7 @@ func AllowedInReadOnly(cmds ...string) []string {
 	if config.EnvReadOnly.Get() {
 		var allowed []string
 		for _, item := range cmds {
-			if slices.Contains([]string{Move, Insert, Unset, Remove, ReKey}, item) {
+			if slices.Contains(ReadOnly, item) {
 				continue
 			}
 			allowed = append(allowed, item)
