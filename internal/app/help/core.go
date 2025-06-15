@@ -6,6 +6,7 @@ import (
 	"embed"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"text/template"
@@ -117,7 +118,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			HelpCommand:        commands.Help,
 			HelpConfigCommand:  commands.HelpConfig,
 			NoColor:            config.NoColorFlag,
-			ReadOnlyCommands: strings.Join(commands.ReadOnly, ", "),
+			ReadOnlyCommands:   strings.Join(commands.ReadOnly, ", "),
 		}
 		document.Config.Env = config.ConfigEnv
 		document.Config.Home = config.ConfigHome
@@ -148,15 +149,12 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			}
 			adding := ""
 			section := strings.TrimSuffix(filepath.Base(n), textFile)
-			for _, key := range []string{
+			if slices.Contains([]string{
 				"totp",
 				"color",
 				"clipboard",
-			} {
-				if section == key {
-					adding = "This functionality can be controlled by a configuration feature flag."
-					break
-				}
+			}, section) {
+				adding = "This functionality can be controlled by a configuration feature flag."
 			}
 			header := fmt.Sprintf("[%s]", section)
 			s, err := processDoc(header, n, document)

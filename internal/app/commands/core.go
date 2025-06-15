@@ -76,6 +76,7 @@ var (
 		KeyFile string
 		NoKey   string
 	}{"keyfile", "nokey"}
+	// ReadOnly are readonly commands (they don't work in readonly mode)
 	ReadOnly = []string{Insert, Move, ReKey, Remove, Unset}
 )
 
