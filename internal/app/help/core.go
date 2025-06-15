@@ -76,6 +76,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		isGroup  = "group"
 	)
 	var results []string
+	isReadOnly := config.EnvReadOnly.Get()
 	canClip := config.EnvFeatureClip.Get()
 	if canClip {
 		results = append(results, command(commands.Clip, isEntry, "copy the entry's value into the clipboard"))
@@ -88,14 +89,16 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.Help, "", "show this usage information"))
 	results = append(results, subCommand(commands.Help, commands.HelpAdvanced, "", "display verbose help information"))
 	results = append(results, subCommand(commands.Help, commands.HelpConfig, "", "display verbose configuration information"))
-	results = append(results, command(commands.Insert, isEntry, "insert a new entry into the store"))
-	results = append(results, command(commands.Unset, isEntry, "clear an entry value"))
+	if !isReadOnly {
+		results = append(results, command(commands.Insert, isEntry, "insert a new entry into the store"))
+		results = append(results, command(commands.Unset, isEntry, "clear an entry value"))
+		results = append(results, command(commands.Move, fmt.Sprintf("%s %s", isGroup, isGroup), "move a group from source to destination"))
+		results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
+		results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
+	}
 	results = append(results, command(commands.JSON, isFilter, "display detailed information"))
 	results = append(results, command(commands.List, isFilter, "list entries"))
 	results = append(results, command(commands.Groups, isFilter, "list groups"))
-	results = append(results, command(commands.Move, fmt.Sprintf("%s %s", isGroup, isGroup), "move a group from source to destination"))
-	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
-	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
 	canTOTP := config.EnvFeatureTOTP.Get()
 	if canTOTP {
@@ -167,6 +170,11 @@ func Usage(verbose bool, exe string) ([]string, error) {
 					}
 					adding = "This functionality can be controlled by a configuration feature flag."
 					break
+				}
+			}
+			if !skip {
+				if section == "rekey" || section == "globs" {
+					skip = isReadOnly
 				}
 			}
 			if skip {

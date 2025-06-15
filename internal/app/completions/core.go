@@ -68,7 +68,8 @@ func Generate(completionType, exe string) ([]string, error) {
 		ExportCommand:       fmt.Sprintf("%s %s %s", exe, commands.Env, commands.Completions),
 	}
 
-	c.Options = []string{commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Move, commands.Remove, commands.Insert, commands.Unset}
+	c.Options = commands.AllowedInReadOnly(commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Move, commands.Remove, commands.Insert, commands.Unset)
+
 	canClip := config.EnvFeatureClip.Get()
 	if canClip {
 		c.Options = append(c.Options, commands.Clip)

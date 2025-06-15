@@ -44,3 +44,28 @@ func TestFlags(t *testing.T) {
 		}
 	}
 }
+
+func TestReadOnly(t *testing.T) {
+	defer store.Clear()
+	check := func(require bool) {
+		u, _ := help.Usage(true, "lb")
+		text := strings.Join(u, "\n")
+		for _, need := range []string{"  mv ", "  rm ", "[rekey]", "  insert ", "  unset ", "[globs]"} {
+			has := strings.Contains(text, need)
+			if has {
+				if require {
+					continue
+				}
+				t.Errorf("has unwanted text: %s", need)
+			} else {
+				if require {
+					t.Errorf("missing required text: %s", need)
+				}
+			}
+		}
+	}
+
+	check(true)
+	store.SetBool("LOCKBOX_READONLY", true)
+	check(false)
+}

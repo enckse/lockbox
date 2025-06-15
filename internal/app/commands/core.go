@@ -1,6 +1,12 @@
 // Package commands defines available commands within the app
 package commands
 
+import (
+	"slices"
+
+	"git.sr.ht/~enckse/lockbox/internal/config"
+)
+
 const (
 	// TOTP is the parent of totp and by defaults generates a rotating token
 	TOTP = "totp"
@@ -72,8 +78,20 @@ var (
 	}{"keyfile", "nokey"}
 )
 
-// IsReadOnly are commands blocked in readonly mode
-var IsReadOnly = []string{Move, Insert, Unset, Remove}
+// AllowedInReadOnly indicates any commands that are allowed in readonly mode
+func AllowedInReadOnly(cmds ...string) []string {
+	if config.EnvReadOnly.Get() {
+		var allowed []string
+		for _, item := range cmds {
+			if slices.Contains([]string{Move, Insert, Unset, Remove, ReKey}, item) {
+				continue
+			}
+			allowed = append(allowed, item)
+		}
+		return allowed
+	}
+	return cmds
+}
 
 // ReKeyArgs is the base definition of re-keying args
 type ReKeyArgs struct {
