@@ -1,6 +1,9 @@
 image: alpine/edge
 packages:
+  - make
   - go
 tasks:
   - build: |
-      cd lockbox && go build -o target/ cmd/lb/main.go && LOCKBOX_CONFIG_TOML=fake go test -tags=integration ./...
+      cd lockbox && go build -o target/lb cmd/lb/main.go
+  - check: |
+      cd lockbox && LOCKBOX_CONFIG_TOML=fake go test -tags=integration ./...
