@@ -11,7 +11,7 @@ all: setup $(OBJECT)
 setup:
 	@test -d $(TARGET) || mkdir -p $(TARGET)
 
-$(OBJECT): go.* cmd/lb/*.go cmd/lb/tests/* internal/**/*.go internal/**/**/*.go internal/**/**/**/*.*
+$(OBJECT): go.* cmd/lb/*.go internal/**/*.go internal/**/**/*.go internal/**/**/**/*.*
 	go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
 
 unittest:
