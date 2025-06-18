@@ -4,6 +4,6 @@ packages:
   - go
 tasks:
   - build: |
-      cd lockbox && make
+      cd lockbox && go build -o target/ cmd/lb/main.go
   - check: |
-      cd lockbox && make check
+      cd lockbox && LOCKBOX_CONFIG_TOML=fake go test -tags=integration ./...
