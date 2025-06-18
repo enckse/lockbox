@@ -1,9 +1,9 @@
 image: alpine/edge
 packages:
-  - just
+  - make
   - go
 tasks:
   - build: |
-      cd lockbox && just
+      cd lockbox && make
   - check: |
-      cd lockbox && just check
+      cd lockbox && make check
