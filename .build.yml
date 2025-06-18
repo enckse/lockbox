@@ -1,6 +1,5 @@
 image: alpine/edge
 packages:
-  - make
   - go
 tasks:
   - build: |
