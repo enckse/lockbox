@@ -1,17 +1,18 @@
 GOFLAGS := -trimpath -buildmode=pie -mod=readonly -modcacherw -buildvcs=false
 TARGET  := target
-VERISON := `git log -n 1 --format=%h`
+VERSION := $(shell git log -n 1 --format=%h)
 OBJECT  := $(TARGET)/lb
-GOTEST  := LOCKBOX_CONFIG_TOML=fake go test
+GOTEST  := go test
 CMD     := cmd/lb
-cmd     := "cmd/lb"
+
+.PHONY: $(OBJECT)
 
 all: setup $(OBJECT)
 
 setup:
 	@test -d $(TARGET) || mkdir -p $(TARGET)
 
-$(OBJECT): go.* cmd/lb/*.go internal/**/*.go internal/**/**/*.go internal/**/**/**/*.*
+$(OBJECT):
 	go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
 
 unittest:
