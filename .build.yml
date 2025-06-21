@@ -1,8 +1,9 @@
 image: alpine/edge
 packages:
+  - make
   - go
 tasks:
   - build: |
-      cd lockbox && go build -o target/lb cmd/lb/main.go
+      cd lockbox && make
   - check: |
-      cd lockbox && go test -tags=integration ./...
+      cd lockbox && make check

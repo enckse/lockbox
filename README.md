@@ -116,3 +116,12 @@ Setup the `.gitattributes` for the repository to include
 ```
 *.kdbx diff=lb
 ```
+
+## build
+
+Clone this repository and:
+```
+make
+```
+
+_run `make check` to run tests_

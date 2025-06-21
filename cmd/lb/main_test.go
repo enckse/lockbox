@@ -77,7 +77,6 @@ func TestBoth(t *testing.T) {
 }
 
 func run(t *testing.T, profile string) {
-	os.Setenv("LOCKBOX_CONFIG_TOML", "fake")
 	if err := test(profile); err != nil {
 		t.Errorf("%s failed: %v", profile, err)
 	}
