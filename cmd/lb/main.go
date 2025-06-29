@@ -123,10 +123,7 @@ func clearClipboard() error {
 	if err != nil {
 		return err
 	}
-	pCmd, pArgs, valid := clipboard.Args(false)
-	if !valid {
-		return nil
-	}
+	pCmd, pArgs := clipboard.Args(false)
 	val = strings.TrimSpace(val)
 	for idx < clipboard.MaxTime {
 		idx++

@@ -9,7 +9,6 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
-	osc "github.com/aymanbagabas/go-osc52"
 )
 
 type (
@@ -18,7 +17,6 @@ type (
 		copying []string
 		pasting []string
 		MaxTime int64
-		isOSC52 bool
 	}
 )
 
@@ -27,7 +25,7 @@ func newBoard(copying, pasting []string) (Board, error) {
 	if err != nil {
 		return Board{}, err
 	}
-	return Board{copying: copying, pasting: pasting, MaxTime: maximum, isOSC52: false}, nil
+	return Board{copying: copying, pasting: pasting, MaxTime: maximum}, nil
 }
 
 // New creates a new clipboard
@@ -41,10 +39,6 @@ func New() (Board, error) {
 	setCopy := len(overrideCopy) > 0
 	if setPaste && setCopy {
 		return newBoard(overrideCopy, overridePaste)
-	}
-	if config.EnvClipOSC52.Get() {
-		c := Board{isOSC52: true}
-		return c, nil
 	}
 	sys, err := platform.NewSystem(config.EnvPlatform.Get())
 	if err != nil {
@@ -80,11 +74,7 @@ func New() (Board, error) {
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
 func (c Board) CopyTo(value string) error {
-	if c.isOSC52 {
-		osc.Copy(value)
-		return nil
-	}
-	cmd, args, _ := c.Args(true)
+	cmd, args := c.Args(true)
 	pipeTo(cmd, value, true, args...)
 	if value != "" {
 		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
@@ -94,10 +84,7 @@ func (c Board) CopyTo(value string) error {
 }
 
 // Args returns clipboard args for execution.
-func (c Board) Args(copying bool) (string, []string, bool) {
-	if c.isOSC52 {
-		return "", []string{}, false
-	}
+func (c Board) Args(copying bool) (string, []string) {
 	var using []string
 	if copying {
 		using = c.copying
@@ -108,7 +95,7 @@ func (c Board) Args(copying bool) (string, []string, bool) {
 	if len(using) > 1 {
 		args = using[1:]
 	}
-	return using[0], args, true
+	return using[0], args
 }
 
 func pipeTo(command, value string, wait bool, args ...string) error {

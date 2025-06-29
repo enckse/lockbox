@@ -179,16 +179,16 @@ timeout = -1
 func TestReadBool(t *testing.T) {
 	store.Clear()
 	data := `
-[clip]
-osc52 = 1
+[feature]
+clip = 1
 `
 	r := strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-bool found where expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
-[clip]
-osc52 = true
+[feature]
+clip = true
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -197,13 +197,13 @@ osc52 = true
 	if len(store.List()) != 1 {
 		t.Errorf("invalid store")
 	}
-	val, ok := store.GetBool("LOCKBOX_CLIP_OSC52")
+	val, ok := store.GetBool("LOCKBOX_FEATURE_CLIP")
 	if !val || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
 	data = `include = []
-[clip]
-osc52 = false
+[feature]
+clip = false
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -212,7 +212,7 @@ osc52 = false
 	if len(store.List()) != 1 {
 		t.Errorf("invalid store")
 	}
-	val, ok = store.GetBool("LOCKBOX_CLIP_OSC52")
+	val, ok = store.GetBool("LOCKBOX_FEATURE_CLIP")
 	if val || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
@@ -251,7 +251,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(store.List()) != 19 {
+	if len(store.List()) != 18 {
 		t.Errorf("invalid environment after load: %d", len(store.List()))
 	}
 }

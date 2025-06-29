@@ -6,7 +6,6 @@ toolchain go1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/aymanbagabas/go-osc52 v1.2.2
 	github.com/pquerna/otp v1.5.0
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
 )

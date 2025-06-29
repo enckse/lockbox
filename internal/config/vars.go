@@ -53,14 +53,6 @@ var (
 		short:   "hash length",
 		canZero: true,
 	})
-	// EnvClipOSC52 indicates if OSC52 clipboard mode is enabled
-	EnvClipOSC52 = environmentRegister(EnvironmentBool{
-		environmentDefault: newDefaultedEnvironment(false,
-			environmentBase{
-				key:         clipCategory + "OSC52",
-				description: "Enable OSC52 clipboard mode.",
-			}),
-	})
 	// EnvReadOnly indicates if in read-only mode
 	EnvReadOnly = environmentRegister(EnvironmentBool{
 		environmentDefault: newDefaultedEnvironment(false,

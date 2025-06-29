@@ -40,10 +40,6 @@ func TestColorFeature(t *testing.T) {
 	checkYesNo("LOCKBOX_FEATURE_COLOR", t, config.EnvFeatureColor, true)
 }
 
-func TestIsOSC52(t *testing.T) {
-	checkYesNo("LOCKBOX_CLIP_OSC52", t, config.EnvClipOSC52, false)
-}
-
 func TestFormatTOTP(t *testing.T) {
 	store.Clear()
 	otp := config.EnvTOTPFormat.Get("otpauth://abc")
