@@ -104,6 +104,14 @@ generate shell specific completions (via auto-detect using `SHELL`)
 lb completions
 ```
 
+## clipboard manager
+
+`lb` can manage the system clipboard by creating a simplistic daemonized
+process to clear the clipboard over time
+```
+lb clipmgr
+```
+
 ## git integration
 
 To manage the `.kdbx` file in a git repository and see _actual_ text diffs add this to a `.gitconfig`
