@@ -3,6 +3,8 @@ package platform_test
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -62,6 +64,10 @@ func (d *mock) Loader() platform.ClipboardLoader {
 	return mockLoader{name: "linux", runtime: "linux"}
 }
 
+func (d *mock) Checkpid(_ int) error {
+	return d.err
+}
+
 func TestErrors(t *testing.T) {
 	store.Clear()
 	defer store.Clear()
@@ -90,6 +96,26 @@ func TestStart(t *testing.T) {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.cmd != "lb" || fmt.Sprintf("%v", m.args) != "[clipmgrd]" {
+		t.Errorf("invalid calls: %s %v", m.cmd, m.args)
+	}
+	pidFile := "testdata"
+	os.MkdirAll(pidFile, 0o755)
+	pidFile = filepath.Join("testdata", "pidfile")
+	store.SetString("LOCKBOX_CLIP_PIDFILE", pidFile)
+	os.WriteFile(pidFile, []byte("123"), 0o644)
+	defer os.Remove(pidFile)
+	m.cmd = ""
+	m.args = []string{}
+	if err := platform.ClipboardManager(false, m); err == nil || !strings.Contains(err.Error(), "Atoi") {
+		t.Errorf("invalid error: %v", err)
+	}
+	m.data = "1234"
+	m.cmd = ""
+	m.args = []string{}
+	if err := platform.ClipboardManager(false, m); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.cmd != "" || fmt.Sprintf("%v", m.args) != "[]" {
 		t.Errorf("invalid calls: %s %v", m.cmd, m.args)
 	}
 }

@@ -51,6 +51,7 @@ var (
 					description: "Set the pidfile for clipboard management",
 				}),
 			allowed: []string{fileExample},
+			flags:   []stringsFlags{canExpandFlag},
 		},
 	})
 	// EnvJSONHashLength handles the hashing output length

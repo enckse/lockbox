@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
@@ -23,6 +25,7 @@ type (
 		Copy(Clipboard, string)
 		Sleep()
 		Loader() ClipboardLoader
+		Checkpid(int) error
 	}
 	// DefaultClipboardDaemon is the default functioning daemon
 	DefaultClipboardDaemon struct{}
@@ -68,6 +71,15 @@ func (d DefaultClipboardDaemon) Loader() ClipboardLoader {
 	return DefaultClipboardLoader{Full: true}
 }
 
+// Checkpid will check if a pid is still active
+func (d DefaultClipboardDaemon) Checkpid(pid int) error {
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return process.Signal(syscall.Signal(0))
+}
+
 // ClipboardManager handles the daemon runner
 func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
 	if manager == nil {
@@ -80,7 +92,28 @@ func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
 	if clipboard.PIDFile == "" {
 		return errors.New("pidfile is unset")
 	}
+	getProcess := func() (string, error) {
+		b, err := manager.ReadFile(clipboard.PIDFile)
+		if err != nil {
+			return "", err
+		}
+		val := strings.TrimSpace(string(b))
+		return val, nil
+	}
 	if !daemon {
+		if PathExists(clipboard.PIDFile) {
+			p, err := getProcess()
+			if err != nil {
+				return err
+			}
+			pid, err := strconv.Atoi(p)
+			if err != nil {
+				return err
+			}
+			if err := manager.Checkpid(pid); err == nil {
+				return nil
+			}
+		}
 		return manager.Start(commands.Executable, commands.ClipManagerDaemon)
 	}
 	paste, pasteArgs, err := clipboard.Args(false)
@@ -104,12 +137,8 @@ func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
 	}
 	pid := strings.TrimSpace(fmt.Sprintf("%d", manager.Getpid()))
 	isCurrentProcess := func() (bool, error) {
-		b, err := manager.ReadFile(clipboard.PIDFile)
-		if err != nil {
-			return false, err
-		}
-		val := strings.TrimSpace(string(b))
-		return val == pid, nil
+		val, err := getProcess()
+		return val == pid, err
 	}
 	manager.WriteFile(clipboard.PIDFile, pid)
 	var errs []error
