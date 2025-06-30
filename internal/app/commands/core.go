@@ -12,8 +12,10 @@ const (
 	TOTP = "totp"
 	// Conv handles text conversion of the data store
 	Conv = "conv"
-	// ClipManager is a callback to manage clipboard clearing
-	ClipManager = "clipmanager"
+	// ClipManager can handle simple clipboard management
+	ClipManager = "clipmgr"
+	// ClipManagerDaemon is the backing call to perform clipboard management
+	ClipManagerDaemon = "clipmgrd"
 	// Clip will copy values to the clipboard
 	Clip = "clip"
 	// Insert adds a value

@@ -62,7 +62,7 @@ func TestFormatTOTP(t *testing.T) {
 }
 
 func TestClipboardMax(t *testing.T) {
-	checkInt(config.EnvClipTimeout, "LOCKBOX_CLIP_TIMEOUT", "clipboard max time", 45, false, t)
+	checkInt(config.EnvClipTimeout, "LOCKBOX_CLIP_TIMEOUT", "clipboard entry max time", 120, false, t)
 }
 
 func TestHashLength(t *testing.T) {
@@ -161,6 +161,7 @@ func TestEmptyStrings(t *testing.T) {
 		config.EnvStore,
 		config.EnvKeyFile,
 		config.EnvDefaultModTime,
+		config.EnvClipProcessFile,
 	} {
 		val := v.Get()
 		if val != "" {

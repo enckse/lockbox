@@ -24,7 +24,7 @@ func TestMaxTime(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid clipboard: %v", err)
 	}
-	if c.MaxTime != 45 {
+	if c.MaxTime != 120 {
 		t.Error("invalid default")
 	}
 	store.SetInt64("LOCKBOX_CLIP_TIMEOUT", 1)
@@ -37,7 +37,7 @@ func TestMaxTime(t *testing.T) {
 	}
 	store.SetInt64("LOCKBOX_CLIP_TIMEOUT", -1)
 	_, err = clip.New()
-	if err == nil || err.Error() != "clipboard max time must be > 0" {
+	if err == nil || err.Error() != "clipboard entry max time must be > 0" {
 		t.Errorf("invalid max time error: %v", err)
 	}
 }
@@ -63,12 +63,12 @@ func TestArgsOverride(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	cmd, args := c.Args(true)
-	if cmd != "clip.exe" || len(args) != 0 {
+	cmd, args, err := c.Args(true)
+	if cmd != "clip.exe" || len(args) != 0 || err != nil {
 		t.Error("invalid parse")
 	}
-	cmd, args = c.Args(false)
-	if cmd != "abc" || len(args) != 2 || args[0] != "xyz" || args[1] != "111" {
+	cmd, args, err = c.Args(false)
+	if cmd != "abc" || len(args) != 2 || args[0] != "xyz" || args[1] != "111" || err != nil {
 		t.Error("invalid parse")
 	}
 	store.SetArray("LOCKBOX_CLIP_COPY_COMMAND", []string{"zzz", "lll", "123"})
@@ -76,12 +76,12 @@ func TestArgsOverride(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	cmd, args = c.Args(true)
-	if cmd != "zzz" || len(args) != 2 || args[0] != "lll" || args[1] != "123" {
+	cmd, args, err = c.Args(true)
+	if cmd != "zzz" || len(args) != 2 || args[0] != "lll" || args[1] != "123" || err != nil {
 		t.Error("invalid parse")
 	}
-	cmd, args = c.Args(false)
-	if cmd != "abc" || len(args) != 2 || args[0] != "xyz" || args[1] != "111" {
+	cmd, args, err = c.Args(false)
+	if cmd != "abc" || len(args) != 2 || args[0] != "xyz" || args[1] != "111" || err != nil {
 		t.Error("invalid parse")
 	}
 	store.Clear()
@@ -90,12 +90,16 @@ func TestArgsOverride(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	cmd, args = c.Args(true)
-	if cmd != "clip.exe" || len(args) != 0 {
+	cmd, args, err = c.Args(true)
+	if cmd != "clip.exe" || len(args) != 0 || err != nil {
 		t.Error("invalid parse")
 	}
-	cmd, args = c.Args(false)
-	if cmd != "powershell.exe" || len(args) != 2 || args[0] != "-command" || args[1] != "Get-Clipboard" {
+	cmd, args, err = c.Args(false)
+	if cmd != "powershell.exe" || len(args) != 2 || args[0] != "-command" || args[1] != "Get-Clipboard" || err != nil {
 		t.Errorf("invalid parse %s %v", cmd, args)
+	}
+	c = clip.Board{}
+	if _, _, err := c.Args(true); err == nil || err.Error() != "command is not set (copying? true)" {
+		t.Errorf("invalid error: %v", err)
 	}
 }

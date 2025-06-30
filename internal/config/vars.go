@@ -36,12 +36,23 @@ var (
 	})
 	// EnvClipTimeout gets the maximum clipboard time
 	EnvClipTimeout = environmentRegister(EnvironmentInt{
-		environmentDefault: newDefaultedEnvironment(45,
+		environmentDefault: newDefaultedEnvironment(120,
 			environmentBase{
 				key:         clipCategory + "TIMEOUT",
-				description: "Override the amount of time before totp clears the clipboard (seconds).",
+				description: "Override the amount of time before clearing the clipboard (seconds).",
 			}),
-		short: "clipboard max time",
+		short: "clipboard entry max time",
+	})
+	// EnvClipProcessFile configures the clip manager daemon pidfile
+	EnvClipProcessFile = environmentRegister(EnvironmentString{
+		environmentStrings: environmentStrings{
+			environmentDefault: newDefaultedEnvironment("",
+				environmentBase{
+					key:         clipCategory + "PIDFILE",
+					description: "Set the pidfile for clipboard management",
+				}),
+			allowed: []string{fileExample},
+		},
 	})
 	// EnvJSONHashLength handles the hashing output length
 	EnvJSONHashLength = environmentRegister(EnvironmentInt{

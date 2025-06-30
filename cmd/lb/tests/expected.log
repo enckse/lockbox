@@ -313,7 +313,6 @@ json
   }
 }
 clipboard
-clipboard will clear in 3 seconds
 invalids
 Wrong password? HMAC-SHA256 of header mismatching
 no store set

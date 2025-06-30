@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os/exec"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
@@ -14,6 +13,7 @@ import (
 type (
 	// Board represent system clipboard operations.
 	Board struct {
+		PIDFile string
 		copying []string
 		pasting []string
 		MaxTime int64
@@ -25,7 +25,8 @@ func newBoard(copying, pasting []string) (Board, error) {
 	if err != nil {
 		return Board{}, err
 	}
-	return Board{copying: copying, pasting: pasting, MaxTime: maximum}, nil
+	pid := config.EnvClipProcessFile.Get()
+	return Board{copying: copying, pasting: pasting, MaxTime: maximum, PIDFile: pid}, nil
 }
 
 // New creates a new clipboard
@@ -74,31 +75,33 @@ func New() (Board, error) {
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
 func (c Board) CopyTo(value string) error {
-	cmd, args := c.Args(true)
-	pipeTo(cmd, value, true, args...)
-	if value != "" {
-		fmt.Printf("clipboard will clear in %d seconds\n", c.MaxTime)
-		pipeTo(commands.Executable, value, false, commands.ClipManager)
+	cmd, args, err := c.Args(true)
+	if err != nil {
+		return err
 	}
+	pipeTo(cmd, value, args...)
 	return nil
 }
 
 // Args returns clipboard args for execution.
-func (c Board) Args(copying bool) (string, []string) {
+func (c Board) Args(copying bool) (string, []string, error) {
 	var using []string
 	if copying {
 		using = c.copying
 	} else {
 		using = c.pasting
 	}
+	if len(using) == 0 {
+		return "", nil, fmt.Errorf("command is not set (copying? %v)", copying)
+	}
 	var args []string
 	if len(using) > 1 {
 		args = using[1:]
 	}
-	return using[0], args
+	return using[0], args, nil
 }
 
-func pipeTo(command, value string, wait bool, args ...string) error {
+func pipeTo(command, value string, args ...string) error {
 	cmd := exec.Command(command, args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -111,14 +114,5 @@ func pipeTo(command, value string, wait bool, args ...string) error {
 			fmt.Printf("failed writing to stdin: %v\n", err)
 		}
 	}()
-	var ran error
-	if wait {
-		ran = cmd.Run()
-	} else {
-		ran = cmd.Start()
-	}
-	if ran != nil {
-		return errors.New("failed to run command")
-	}
-	return nil
+	return cmd.Run()
 }

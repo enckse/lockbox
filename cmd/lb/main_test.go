@@ -315,7 +315,7 @@ func test(profile string) error {
 	clipPassed := false
 	tries := 0
 	for tries < clipTries {
-		if platform.PathExists(copyFile) && platform.PathExists(pasteFile) {
+		if platform.PathExists(copyFile) {
 			clipPassed = true
 			break
 		}

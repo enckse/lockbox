@@ -5,10 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime/debug"
-	"strings"
-	"time"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
@@ -47,8 +44,8 @@ func handleEarly(command string, args []string) (bool, error) {
 		}
 		fmt.Printf("version: %s\n", vers)
 		return true, nil
-	case commands.ClipManager:
-		return true, clearClipboard()
+	case commands.ClipManager, commands.ClipManagerDaemon:
+		return true, clip.Manager(command == commands.ClipManagerDaemon, clip.DefaultDaemon{})
 	}
 	return false, nil
 }
@@ -111,30 +108,4 @@ func run() error {
 	default:
 		return fmt.Errorf("unknown command: %s", command)
 	}
-}
-
-func clearClipboard() error {
-	var idx int64
-	val, err := platform.Stdin(false)
-	if err != nil {
-		return err
-	}
-	clipboard, err := clip.New()
-	if err != nil {
-		return err
-	}
-	pCmd, pArgs := clipboard.Args(false)
-	val = strings.TrimSpace(val)
-	for idx < clipboard.MaxTime {
-		idx++
-		time.Sleep(1 * time.Second)
-		out, err := exec.Command(pCmd, pArgs...).Output()
-		if err != nil {
-			continue
-		}
-		if strings.TrimSpace(string(out)) != val {
-			return nil
-		}
-	}
-	return clipboard.CopyTo("")
 }
