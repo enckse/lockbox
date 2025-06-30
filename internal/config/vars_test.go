@@ -157,7 +157,6 @@ func TestDefaultStrings(t *testing.T) {
 func TestEmptyStrings(t *testing.T) {
 	store.Clear()
 	for _, v := range []config.EnvironmentString{
-		config.EnvPlatform,
 		config.EnvStore,
 		config.EnvKeyFile,
 		config.EnvDefaultModTime,

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"git.sr.ht/~enckse/lockbox/internal/output"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 var (
@@ -80,17 +79,6 @@ var (
 				description: "Time, in seconds, to show a TOTP token before automatically exiting.",
 			}),
 		short: "max totp time",
-	})
-	// EnvPlatform is the platform that the application is running on
-	EnvPlatform = environmentRegister(EnvironmentString{
-		environmentStrings: environmentStrings{
-			environmentDefault: newDefaultedEnvironment(detectedValue,
-				environmentBase{
-					key:         "PLATFORM",
-					description: "Override the detected platform.",
-				}),
-			allowed: platform.Systems.List(),
-		},
 	})
 	// EnvStore is the location of the keepass file/store
 	EnvStore = environmentRegister(EnvironmentString{

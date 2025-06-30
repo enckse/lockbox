@@ -22,6 +22,7 @@ type (
 		Getpid() int
 		Copy(Board, string)
 		Sleep()
+		Loader() Loader
 	}
 	// DefaultDaemon is the default functioning daemon
 	DefaultDaemon struct{}
@@ -62,12 +63,17 @@ func (d DefaultDaemon) Sleep() {
 	time.Sleep(1 * time.Second)
 }
 
+// Loader will get the backing loader to use
+func (d DefaultDaemon) Loader() Loader {
+	return DefaultLoader{Full: true}
+}
+
 // Manager handles the daemon runner
 func Manager(daemon bool, manager Daemon) error {
 	if manager == nil {
 		return errors.New("manager is nil")
 	}
-	clipboard, err := New()
+	clipboard, err := New(manager.Loader())
 	if err != nil {
 		return err
 	}
