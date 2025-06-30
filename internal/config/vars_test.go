@@ -61,10 +61,6 @@ func TestFormatTOTP(t *testing.T) {
 	}
 }
 
-func TestClipboardMax(t *testing.T) {
-	checkInt(config.EnvClipTimeout, "LOCKBOX_CLIP_TIMEOUT", "clipboard entry max time", 120, false, t)
-}
-
 func TestHashLength(t *testing.T) {
 	checkInt(config.EnvJSONHashLength, "LOCKBOX_JSON_HASH_LENGTH", "hash length", 0, true, t)
 }
@@ -122,7 +118,6 @@ func TestUnsetArrays(t *testing.T) {
 	store.Clear()
 	for _, i := range []config.EnvironmentArray{
 		config.EnvClipCopy,
-		config.EnvClipPaste,
 	} {
 		val := i.Get()
 		if len(val) != 0 {
@@ -160,7 +155,6 @@ func TestEmptyStrings(t *testing.T) {
 		config.EnvStore,
 		config.EnvKeyFile,
 		config.EnvDefaultModTime,
-		config.EnvClipProcessFile,
 	} {
 		val := v.Get()
 		if val != "" {

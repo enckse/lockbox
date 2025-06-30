@@ -93,7 +93,7 @@ func TestArrayLoad(t *testing.T) {
 	t.Setenv("TEST", "abc")
 	data := `store="xyz"
 [clip]
-copy_command = ["'xyz/$TEST'", "s", 1]
+copy = ["'xyz/$TEST'", "s", 1]
 `
 	r := strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "value is not string in array: 1" {
@@ -102,7 +102,7 @@ copy_command = ["'xyz/$TEST'", "s", 1]
 	data = `include = []
 store="xyz"
 [clip]
-copy_command = ["'xyz/$TEST'", "s"]
+copy = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -115,14 +115,14 @@ copy_command = ["'xyz/$TEST'", "s"]
 	if val != "xyz" || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
-	a, ok := store.GetArray("LOCKBOX_CLIP_COPY_COMMAND")
+	a, ok := store.GetArray("LOCKBOX_CLIP_COPY")
 	if fmt.Sprintf("%v", a) != "['xyz/abc' s]" || !ok {
 		t.Errorf("invalid object: %v", a)
 	}
 	data = `include = []
 store="xyz"
 [clip]
-copy_command = ["'xyz/$TEST'", "s"]
+copy = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -135,7 +135,7 @@ copy_command = ["'xyz/$TEST'", "s"]
 	if val != "xyz" || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
-	a, ok = store.GetArray("LOCKBOX_CLIP_COPY_COMMAND")
+	a, ok = store.GetArray("LOCKBOX_CLIP_COPY")
 	if fmt.Sprintf("%v", a) != "['xyz/abc' s]" || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
@@ -144,16 +144,16 @@ copy_command = ["'xyz/$TEST'", "s"]
 func TestReadInt(t *testing.T) {
 	store.Clear()
 	data := `
-[clip]
-timeout = true
+[json]
+hash_length = true
 `
 	r := strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-int64 found where expected: true" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
-[clip]
-timeout = 1
+[json]
+hash_length = 1
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err != nil {
@@ -162,13 +162,13 @@ timeout = 1
 	if len(store.List()) != 1 {
 		t.Errorf("invalid store")
 	}
-	val, ok := store.GetInt64("LOCKBOX_CLIP_TIMEOUT")
+	val, ok := store.GetInt64("LOCKBOX_JSON_HASH_LENGTH")
 	if val != 1 || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
 	data = `include = []
-[clip]
-timeout = -1
+[json]
+hash_length = -1
 `
 	r = strings.NewReader(data)
 	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "-1 is negative (not allowed here)" {
@@ -251,7 +251,7 @@ func TestDefaultTOMLToLoadFile(t *testing.T) {
 	if err := config.LoadConfigFile(file); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if len(store.List()) != 18 {
+	if len(store.List()) != 15 {
 		t.Errorf("invalid environment after load: %d", len(store.List()))
 	}
 }
@@ -261,7 +261,7 @@ func TestExpands(t *testing.T) {
 	t.Setenv("TEST", "1")
 	data := `include = []
 store = "$TEST"
-clip.copy_command = ["$TEST", "$TEST"]
+clip.copy = ["$TEST", "$TEST"]
 [totp]
 otp_format = "$TEST"
 `
@@ -280,7 +280,7 @@ otp_format = "$TEST"
 	if val != "1" || !ok {
 		t.Errorf("invalid object: %v", val)
 	}
-	a, ok := store.GetArray("LOCKBOX_CLIP_COPY_COMMAND")
+	a, ok := store.GetArray("LOCKBOX_CLIP_COPY")
 	if fmt.Sprintf("%v", a) != "[1 1]" || !ok {
 		t.Errorf("invalid object: %v", a)
 	}

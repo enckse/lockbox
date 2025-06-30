@@ -121,7 +121,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	}
 	clipboard := platform.Clipboard{}
 	if clipMode {
-		clipboard, err = platform.NewClipboard(platform.DefaultClipboardLoader{Full: false})
+		clipboard, err = platform.NewClipboard(platform.DefaultClipboardLoader{})
 		if err != nil {
 			return err
 		}

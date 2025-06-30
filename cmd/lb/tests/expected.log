@@ -322,9 +322,7 @@ test6/multiline/notes
 test6/multiline/otp
 test6/multiline/password
 env
-LOCKBOX_CLIP_COPY_COMMAND=[touch testdata/datadir/clip.copy]
-LOCKBOX_CLIP_PASTE_COMMAND=[touch testdata/datadir/clip.paste]
-LOCKBOX_CLIP_TIMEOUT=3
+LOCKBOX_CLIP_COPY=[touch testdata/datadir/clip.copy]
 LOCKBOX_JSON_HASH_LENGTH=3
 LOCKBOX_JSON_MODE=hash
 LOCKBOX_STORE=testdata/datadir/pass.kdbx

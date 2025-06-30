@@ -43,8 +43,6 @@ func handleEarly(command string, args []string) (bool, error) {
 		}
 		fmt.Printf("version: %s\n", vers)
 		return true, nil
-	case commands.ClipManager, commands.ClipManagerDaemon:
-		return true, platform.ClipboardManager(args, command == commands.ClipManagerDaemon, platform.DefaultClipboardDaemon{})
 	}
 	return false, nil
 }

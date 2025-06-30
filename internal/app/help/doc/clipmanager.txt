@@ -1,5 +1,0 @@
-The `{{ $.ClipManager }}` functionality allows running a local clipboard
-manager for the system that will monitor the clipboard and clear it when
-it has been idle for a (configured) period of time. This is specifically
-invoked via `{{ $.Executable }} {{ $.ClipManager }}` (and can be killed
-by adding `{{ $.ClipManagerStop }}` as an argument).

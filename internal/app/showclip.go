@@ -19,7 +19,7 @@ func ShowClip(cmd CommandOptions, isShow bool) error {
 	clipboard := platform.Clipboard{}
 	if !isShow {
 		var err error
-		clipboard, err = platform.NewClipboard(platform.DefaultClipboardLoader{Full: false})
+		clipboard, err = platform.NewClipboard(platform.DefaultClipboardLoader{})
 		if err != nil {
 			return fmt.Errorf("unable to get clipboard: %w", err)
 		}

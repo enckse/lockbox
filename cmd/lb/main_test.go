@@ -306,10 +306,7 @@ func test(profile string) error {
 
 	r.section("clipboard")
 	copyFile := filepath.Join(r.testDir, "clip.copy")
-	pasteFile := filepath.Join(r.testDir, "clip.paste")
-	c["clip.copy_command"] = fmt.Sprintf("[\"touch\", \"%s\"]", copyFile)
-	c["clip.paste_command"] = fmt.Sprintf("[\"touch\", \"%s\"]", pasteFile)
-	c["clip.timeout"] = "3"
+	c["clip.copy"] = fmt.Sprintf("[\"touch\", \"%s\"]", copyFile)
 	r.writeConfig(c)
 	r.run("", "clip test6/multiline/password")
 	clipPassed := false

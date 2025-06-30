@@ -33,27 +33,6 @@ var (
 				description: "Enable terminal color feature.",
 			}),
 	})
-	// EnvClipTimeout gets the maximum clipboard time
-	EnvClipTimeout = environmentRegister(EnvironmentInt{
-		environmentDefault: newDefaultedEnvironment(120,
-			environmentBase{
-				key:         clipCategory + "TIMEOUT",
-				description: "Override the amount of time before clearing the clipboard (seconds).",
-			}),
-		short: "clipboard entry max time",
-	})
-	// EnvClipProcessFile configures the clip manager daemon pidfile
-	EnvClipProcessFile = environmentRegister(EnvironmentString{
-		environmentStrings: environmentStrings{
-			environmentDefault: newDefaultedEnvironment("",
-				environmentBase{
-					key:         clipCategory + "PIDFILE",
-					description: "Set the pidfile for clipboard management",
-				}),
-			allowed: []string{fileExample},
-			flags:   []stringsFlags{canExpandFlag},
-		},
-	})
 	// EnvJSONHashLength handles the hashing output length
 	EnvJSONHashLength = environmentRegister(EnvironmentInt{
 		environmentDefault: newDefaultedEnvironment(0,
@@ -99,19 +78,8 @@ var (
 		environmentStrings: environmentStrings{
 			environmentDefault: newDefaultedEnvironment("",
 				environmentBase{
-					key:         clipCategory + "COPY_COMMAND",
+					key:         clipCategory + "COPY",
 					description: "Override the detected platform copy command.",
-				}),
-			flags: []stringsFlags{isCommandFlag},
-		},
-	})
-	// EnvClipPaste allows overriding the clipboard paste command
-	EnvClipPaste = environmentRegister(EnvironmentArray{
-		environmentStrings: environmentStrings{
-			environmentDefault: newDefaultedEnvironment("",
-				environmentBase{
-					key:         clipCategory + "PASTE_COMMAND",
-					description: "Override the detected platform paste command.",
 				}),
 			flags: []stringsFlags{isCommandFlag},
 		},
