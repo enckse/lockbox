@@ -1,11 +1,11 @@
-package clip_test
+package platform_test
 
 import (
 	"fmt"
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/config/store"
-	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 type mockLoader struct {
@@ -30,7 +30,7 @@ func (m mockLoader) Complete() bool {
 func TestDisabled(t *testing.T) {
 	defer store.Clear()
 	store.SetBool("LOCKBOX_FEATURE_CLIP", false)
-	if _, err := clip.New(mockLoader{}); err == nil || err.Error() != "clip feature is disabled" {
+	if _, err := platform.NewClipboard(mockLoader{}); err == nil || err.Error() != "clip feature is disabled" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -40,7 +40,7 @@ func TestMaxTime(t *testing.T) {
 	defer store.Clear()
 	t.Setenv("WAYLAND_DISPLAY", "1")
 	loader := mockLoader{name: "linux", runtime: "linux"}
-	c, err := clip.New(loader)
+	c, err := platform.NewClipboard(loader)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -48,7 +48,7 @@ func TestMaxTime(t *testing.T) {
 		t.Error("invalid default")
 	}
 	store.SetInt64("LOCKBOX_CLIP_TIMEOUT", 1)
-	c, err = clip.New(loader)
+	c, err = platform.NewClipboard(loader)
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestMaxTime(t *testing.T) {
 		t.Error("invalid default")
 	}
 	store.SetInt64("LOCKBOX_CLIP_TIMEOUT", -1)
-	c, err = clip.New(loader)
+	c, err = platform.NewClipboard(loader)
 	if err == nil || err.Error() != "clipboard entry max time must be > 0" {
 		t.Errorf("invalid max time error: %v", err)
 	}
@@ -67,7 +67,7 @@ func TestInstance(t *testing.T) {
 	defer store.Clear()
 	fxn := func(runtime, name, c, p, e string) {
 		l := mockLoader{runtime: runtime, name: name}
-		b, err := clip.New(l)
+		b, err := platform.NewClipboard(l)
 		if err != nil {
 			if err.Error() != e {
 				t.Errorf("invalid error: %v", err)
@@ -99,14 +99,14 @@ func TestFullPartial(t *testing.T) {
 	store.Clear()
 	defer store.Clear()
 	store.SetArray("LOCKBOX_CLIP_COPY_COMMAND", []string{"abc", "xyz", "111"})
-	if _, err := clip.New(mockLoader{}); err != nil {
+	if _, err := platform.NewClipboard(mockLoader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	if _, err := clip.New(mockLoader{full: true}); err == nil || err.Error() != "clipboard is unavailable" {
+	if _, err := platform.NewClipboard(mockLoader{full: true}); err == nil || err.Error() != "clipboard is unavailable" {
 		t.Errorf("invalid error: %v", err)
 	}
 	store.SetArray("LOCKBOX_CLIP_PASTE_COMMAND", []string{"abc", "xyz", "111"})
-	if _, err := clip.New(mockLoader{full: true}); err != nil {
+	if _, err := platform.NewClipboard(mockLoader{full: true}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -115,7 +115,7 @@ func TestArgsOverride(t *testing.T) {
 	store.Clear()
 	defer store.Clear()
 	store.SetArray("LOCKBOX_CLIP_PASTE_COMMAND", []string{"abc", "xyz", "111"})
-	c, err := clip.New(mockLoader{name: "microsoft", runtime: "linux"})
+	c, err := platform.NewClipboard(mockLoader{name: "microsoft", runtime: "linux"})
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -128,7 +128,7 @@ func TestArgsOverride(t *testing.T) {
 		t.Error("invalid parse")
 	}
 	store.SetArray("LOCKBOX_CLIP_COPY_COMMAND", []string{"zzz", "lll", "123"})
-	c, err = clip.New(mockLoader{})
+	c, err = platform.NewClipboard(mockLoader{})
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -141,7 +141,7 @@ func TestArgsOverride(t *testing.T) {
 		t.Error("invalid parse")
 	}
 	store.Clear()
-	c, err = clip.New(mockLoader{name: "microsoft", runtime: "linux"})
+	c, err = platform.NewClipboard(mockLoader{name: "microsoft", runtime: "linux"})
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
@@ -153,7 +153,7 @@ func TestArgsOverride(t *testing.T) {
 	if cmd != "powershell.exe" || len(args) != 2 || args[0] != "-command" || args[1] != "Get-Clipboard" || err != nil {
 		t.Errorf("invalid parse %s %v", cmd, args)
 	}
-	c = clip.Board{}
+	c = platform.Clipboard{}
 	if _, _, err := c.Args(true); err == nil || err.Error() != "command is not set (copying? true)" {
 		t.Errorf("invalid error: %v", err)
 	}

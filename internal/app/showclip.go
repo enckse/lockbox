@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
-	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 // ShowClip will handle showing/clipping an entry
@@ -16,10 +16,10 @@ func ShowClip(cmd CommandOptions, isShow bool) error {
 		return errors.New("only one argument supported")
 	}
 	entry := args[0]
-	clipboard := clip.Board{}
+	clipboard := platform.Clipboard{}
 	if !isShow {
 		var err error
-		clipboard, err = clip.New(clip.DefaultLoader{Full: false})
+		clipboard, err = platform.NewClipboard(platform.DefaultClipboardLoader{Full: false})
 		if err != nil {
 			return fmt.Errorf("unable to get clipboard: %w", err)
 		}

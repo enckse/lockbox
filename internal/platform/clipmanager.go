@@ -1,4 +1,4 @@
-package clip
+package platform
 
 import (
 	"crypto/sha256"
@@ -13,67 +13,67 @@ import (
 )
 
 type (
-	// Daemon is the manager interface
-	Daemon interface {
+	// ClipboardDaemon is the manager interface
+	ClipboardDaemon interface {
 		WriteFile(string, string)
 		ReadFile(string) ([]byte, error)
 		Output(string, ...string) ([]byte, error)
 		Start(string, ...string) error
 		Getpid() int
-		Copy(Board, string)
+		Copy(Clipboard, string)
 		Sleep()
-		Loader() Loader
+		Loader() ClipboardLoader
 	}
-	// DefaultDaemon is the default functioning daemon
-	DefaultDaemon struct{}
+	// DefaultClipboardDaemon is the default functioning daemon
+	DefaultClipboardDaemon struct{}
 )
 
 // WriteFile will write the necessary file to backing filesystem
-func (d DefaultDaemon) WriteFile(file, data string) {
+func (d DefaultClipboardDaemon) WriteFile(file, data string) {
 	os.WriteFile(file, []byte(data), 0o644)
 }
 
 // ReadFile will read a file from the filesystem
-func (d DefaultDaemon) ReadFile(file string) ([]byte, error) {
+func (d DefaultClipboardDaemon) ReadFile(file string) ([]byte, error) {
 	return os.ReadFile(file)
 }
 
 // Output will run a command and get output
-func (d DefaultDaemon) Output(cmd string, args ...string) ([]byte, error) {
+func (d DefaultClipboardDaemon) Output(cmd string, args ...string) ([]byte, error) {
 	return exec.Command(cmd, args...).Output()
 }
 
 // Start will start an disconnected execution
-func (d DefaultDaemon) Start(cmd string, args ...string) error {
+func (d DefaultClipboardDaemon) Start(cmd string, args ...string) error {
 	return exec.Command(cmd, args...).Start()
 }
 
 // Getpid will return the pid
-func (d DefaultDaemon) Getpid() int {
+func (d DefaultClipboardDaemon) Getpid() int {
 	return os.Getpid()
 }
 
 // Copy will copy data to the clipboard
-func (d DefaultDaemon) Copy(c Board, val string) {
+func (d DefaultClipboardDaemon) Copy(c Clipboard, val string) {
 	c.CopyTo(val)
 }
 
 // Sleep will cause a pause/delay/wait
-func (d DefaultDaemon) Sleep() {
+func (d DefaultClipboardDaemon) Sleep() {
 	time.Sleep(1 * time.Second)
 }
 
 // Loader will get the backing loader to use
-func (d DefaultDaemon) Loader() Loader {
-	return DefaultLoader{Full: true}
+func (d DefaultClipboardDaemon) Loader() ClipboardLoader {
+	return DefaultClipboardLoader{Full: true}
 }
 
-// Manager handles the daemon runner
-func Manager(daemon bool, manager Daemon) error {
+// ClipboardManager handles the daemon runner
+func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
 	if manager == nil {
 		return errors.New("manager is nil")
 	}
-	clipboard, err := New(manager.Loader())
+	clipboard, err := NewClipboard(manager.Loader())
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func Manager(daemon bool, manager Daemon) error {
 	}
 }
 
-func wait(val string, clip Board, mgr Daemon, isCurrent func() (bool, error), pasteFxn func() (string, error)) (bool, error) {
+func wait(val string, clip Clipboard, mgr ClipboardDaemon, isCurrent func() (bool, error), pasteFxn func() (string, error)) (bool, error) {
 	var count int64
 	for count < clip.MaxTime {
 		ok, err := isCurrent()

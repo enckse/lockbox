@@ -15,7 +15,7 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
-	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
+	"git.sr.ht/~enckse/lockbox/internal/platform"
 )
 
 var (
@@ -119,9 +119,9 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 			opts.Clear()
 		}
 	}
-	clipboard := clip.Board{}
+	clipboard := platform.Clipboard{}
 	if clipMode {
-		clipboard, err = clip.New(clip.DefaultLoader{Full: false})
+		clipboard, err = platform.NewClipboard(platform.DefaultClipboardLoader{Full: false})
 		if err != nil {
 			return err
 		}

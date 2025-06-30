@@ -11,7 +11,6 @@ import (
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
-	"git.sr.ht/~enckse/lockbox/internal/platform/clip"
 )
 
 var version string
@@ -45,7 +44,7 @@ func handleEarly(command string, args []string) (bool, error) {
 		fmt.Printf("version: %s\n", vers)
 		return true, nil
 	case commands.ClipManager, commands.ClipManagerDaemon:
-		return true, clip.Manager(command == commands.ClipManagerDaemon, clip.DefaultDaemon{})
+		return true, platform.ClipboardManager(command == commands.ClipManagerDaemon, platform.DefaultClipboardDaemon{})
 	}
 	return false, nil
 }

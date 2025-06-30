@@ -1,5 +1,5 @@
-// Package clip handles platform-specific operations around clipboards.
-package clip
+// Package platform handles platform-specific operations around clipboards.
+package platform
 
 import (
 	"errors"
@@ -13,27 +13,27 @@ import (
 )
 
 type (
-	// Board represent system clipboard operations.
-	Board struct {
+	// Clipboard represent system clipboard operations.
+	Clipboard struct {
 		PIDFile string
 		copying []string
 		pasting []string
 		MaxTime int64
 	}
-	// Loader handles how the system is detected
-	Loader interface {
+	// ClipboardLoader handles how the system is detected
+	ClipboardLoader interface {
 		Name() (string, error)
 		Runtime() string
 		Complete() bool
 	}
-	// DefaultLoader is the default system detector
-	DefaultLoader struct {
+	// DefaultClipboardLoader is the default system detector
+	DefaultClipboardLoader struct {
 		Full bool
 	}
 )
 
 // Name will get the uname results
-func (l DefaultLoader) Name() (string, error) {
+func (l DefaultClipboardLoader) Name() (string, error) {
 	b, err := exec.Command("uname", "-a").Output()
 	if err != nil {
 		return "", err
@@ -42,28 +42,28 @@ func (l DefaultLoader) Name() (string, error) {
 }
 
 // Runtime will return the GOOS runtime
-func (l DefaultLoader) Runtime() string {
+func (l DefaultClipboardLoader) Runtime() string {
 	return runtime.GOOS
 }
 
 // Complete indicates if the loader needs a full complete
-func (l DefaultLoader) Complete() bool {
+func (l DefaultClipboardLoader) Complete() bool {
 	return l.Full
 }
 
-func newBoard(copying, pasting []string) (Board, error) {
+func newBoard(copying, pasting []string) (Clipboard, error) {
 	maximum, err := config.EnvClipTimeout.Get()
 	if err != nil {
-		return Board{}, err
+		return Clipboard{}, err
 	}
 	pid := config.EnvClipProcessFile.Get()
-	return Board{copying: copying, pasting: pasting, MaxTime: maximum, PIDFile: pid}, nil
+	return Clipboard{copying: copying, pasting: pasting, MaxTime: maximum, PIDFile: pid}, nil
 }
 
-// New creates a new clipboard
-func New(loader Loader) (Board, error) {
+// NewClipboard creates a new clipboard
+func NewClipboard(loader ClipboardLoader) (Clipboard, error) {
 	if !config.EnvFeatureClip.Get() {
-		return Board{}, config.NewFeatureError("clip")
+		return Clipboard{}, config.NewFeatureError("clip")
 	}
 	overridePaste := config.EnvClipPaste.Get()
 	overrideCopy := config.EnvClipCopy.Get()
@@ -85,7 +85,7 @@ func New(loader Loader) (Board, error) {
 	case "linux":
 		name, err := loader.Name()
 		if err != nil {
-			return Board{}, err
+			return Clipboard{}, err
 		}
 		if strings.Contains(strings.ToLower(name), "microsoft") {
 			copying = []string{"clip.exe"}
@@ -99,12 +99,12 @@ func New(loader Loader) (Board, error) {
 					copying = []string{"xclip"}
 					pasting = []string{"xclip", "-o"}
 				} else {
-					return Board{}, errors.New("unable to detect linux clipboard")
+					return Clipboard{}, errors.New("unable to detect linux clipboard")
 				}
 			}
 		}
 	default:
-		return Board{}, errors.New("clipboard is unavailable")
+		return Clipboard{}, errors.New("clipboard is unavailable")
 	}
 	if setPaste {
 		pasting = overridePaste
@@ -116,7 +116,7 @@ func New(loader Loader) (Board, error) {
 }
 
 // CopyTo will copy to clipboard, if non-empty will clear later.
-func (c Board) CopyTo(value string) error {
+func (c Clipboard) CopyTo(value string) error {
 	cmd, args, err := c.Args(true)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (c Board) CopyTo(value string) error {
 }
 
 // Args returns clipboard args for execution.
-func (c Board) Args(copying bool) (string, []string, error) {
+func (c Clipboard) Args(copying bool) (string, []string, error) {
 	var using []string
 	if copying {
 		using = c.copying
