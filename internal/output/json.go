@@ -3,9 +3,9 @@ package output
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
 	"strings"
-
-	"git.sr.ht/~enckse/lockbox/internal/reflect"
 )
 
 // JSONModes are the JSON data output types for exporting/output of values
@@ -29,7 +29,13 @@ type (
 
 // List will list the output modes on the struct
 func (p JSONTypes) List() []string {
-	return reflect.ListFields(p)
+	v := reflect.ValueOf(p)
+	var vals []string
+	for i := range v.NumField() {
+		vals = append(vals, fmt.Sprintf("%v", v.Field(i).Interface()))
+	}
+	sort.Strings(vals)
+	return vals
 }
 
 // ParseJSONMode handles detecting the JSON output mode
