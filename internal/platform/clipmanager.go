@@ -81,7 +81,7 @@ func (d DefaultClipboardDaemon) Checkpid(pid int) error {
 }
 
 // ClipboardManager handles the daemon runner
-func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
+func ClipboardManager(args []string, daemon bool, manager ClipboardDaemon) error {
 	if manager == nil {
 		return errors.New("manager is nil")
 	}
@@ -101,6 +101,24 @@ func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
 		return val, nil
 	}
 	if !daemon {
+		invalid := false
+		switch len(args) {
+		case 0:
+			break
+		case 1:
+			invalid = args[0] != commands.ClipManagerStop
+			if !invalid {
+				if PathExists(clipboard.PIDFile) {
+					return os.WriteFile(clipboard.PIDFile, []byte("0"), 0o644)
+				}
+				return nil
+			}
+		default:
+			invalid = true
+		}
+		if invalid {
+			return fmt.Errorf("invalid manager arguments: %v", args)
+		}
 		if PathExists(clipboard.PIDFile) {
 			p, err := getProcess()
 			if err != nil {
@@ -115,6 +133,9 @@ func ClipboardManager(daemon bool, manager ClipboardDaemon) error {
 			}
 		}
 		return manager.Start(commands.Executable, commands.ClipManagerDaemon)
+	}
+	if len(args) > 0 {
+		return fmt.Errorf("invalid daemon arguments: %v", args)
 	}
 	paste, pasteArgs, err := clipboard.Args(false)
 	if err != nil {

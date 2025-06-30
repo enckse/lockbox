@@ -68,6 +68,8 @@ const (
 	TOTPURL = "url"
 	// TOTPSeed will display the seed for the TOTP tokens
 	TOTPSeed = "seed"
+	// ClipManagerStop will stop the clipboard manager
+	ClipManagerStop = "-kill"
 )
 
 var (

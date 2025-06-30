@@ -38,6 +38,8 @@ type (
 		HelpConfigCommand  string
 		NoColor            string
 		ReadOnlyCommands   string
+		ClipManager        string
+		ClipManagerStop    string
 		Config             struct {
 			Env  string
 			Home string
@@ -105,6 +107,9 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, subCommand(commands.TOTP, commands.TOTPSeed, isEntry, "show the TOTP seed (only)"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPShow, isEntry, "show the totp entry"))
 	results = append(results, command(commands.Version, "", "display version information"))
+	results = append(results, command(commands.ClipManager, "", "run the clipboard manager daemon"))
+	results = append(results, command(commands.ClipManagerDaemon, "", "clipboard manager daemonized function"))
+	results = append(results, subCommand(commands.ClipManager, commands.ClipManagerStop, "", "stop a running clipboard manager daemon"))
 	sort.Strings(results)
 	usage := []string{fmt.Sprintf("%s usage:", exe)}
 	if verbose {
@@ -117,6 +122,8 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			CompletionsCommand: commands.Completions,
 			HelpCommand:        commands.Help,
 			HelpConfigCommand:  commands.HelpConfig,
+			ClipManager:        commands.ClipManager,
+			ClipManagerStop:    commands.ClipManagerStop,
 			NoColor:            config.NoColorFlag,
 			ReadOnlyCommands:   strings.Join(commands.ReadOnly, ", "),
 		}
