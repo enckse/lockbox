@@ -63,16 +63,6 @@ func GetUserInput(interactive bool, prompt string) ([]byte, error) {
 	return []byte(value), nil
 }
 
-// ReadInteractivePassword will prompt for a single password for unlocking
-func ReadInteractivePassword() (string, error) {
-	termEcho(false)
-	defer func() {
-		termEcho(true)
-	}()
-	fmt.Print("password: ")
-	return Stdin(true)
-}
-
 func confirmInputsMatch(prompt string) (string, error) {
 	termEcho(false)
 	defer func() {
