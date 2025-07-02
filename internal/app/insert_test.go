@@ -17,6 +17,7 @@ type (
 		input       func() ([]byte, error)
 		pipe        func() bool
 		token       func() string
+		prompt      string
 		interactive bool
 	}
 )
@@ -35,8 +36,9 @@ func (m *mockInsert) IsPipe() bool {
 	return m.pipe()
 }
 
-func (m *mockInsert) Input(interactive bool) ([]byte, error) {
+func (m *mockInsert) Input(interactive bool, prompt string) ([]byte, error) {
 	m.interactive = interactive
+	m.prompt = prompt
 	return m.input()
 }
 
@@ -119,6 +121,9 @@ func TestInsertDo(t *testing.T) {
 	if m.command.buf.String() == "" {
 		t.Error("invalid insert")
 	}
+	if m.prompt != "password" {
+		t.Error("invalid field prompt")
+	}
 	m.command.confirm = false
 	m.command.buf = bytes.Buffer{}
 	m.command.args = []string{"test/test2/test1/password"}
@@ -146,5 +151,8 @@ func TestInsertDo(t *testing.T) {
 	}
 	if m.command.buf.String() == "" || m.interactive {
 		t.Errorf("invalid insert %s %v", m.command.buf.String(), m.interactive)
+	}
+	if m.prompt != "notes" {
+		t.Error("invalid field prompt")
 	}
 }

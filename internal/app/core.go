@@ -23,7 +23,7 @@ type (
 	UserInputOptions interface {
 		CommandOptions
 		IsPipe() bool
-		Input(bool) ([]byte, error)
+		Input(bool, string) ([]byte, error)
 	}
 
 	// DefaultCommand is the default CLI app type for actual execution
@@ -72,27 +72,12 @@ func Die(msg string) {
 	os.Exit(1)
 }
 
-// SetArgs allow updating the command args
-func (a *DefaultCommand) SetArgs(args ...string) {
-	a.args = args
-}
-
 // IsPipe will indicate if we're receiving pipe input
 func (a *DefaultCommand) IsPipe() bool {
 	return platform.IsInputFromPipe()
 }
 
-// ReadLine handles a single stdin read
-func (a DefaultCommand) ReadLine() (string, error) {
-	return platform.Stdin(true)
-}
-
-// Password is how a keyer gets the user's password for rekey
-func (a DefaultCommand) Password() (string, error) {
-	return platform.ReadInteractivePassword()
-}
-
 // Input will read user input
-func (a *DefaultCommand) Input(interactive bool) ([]byte, error) {
-	return platform.GetUserInputPassword(interactive)
+func (a *DefaultCommand) Input(interactive bool, prompt string) ([]byte, error) {
+	return platform.GetUserInput(interactive, prompt)
 }

@@ -41,26 +41,26 @@ func termEcho(on bool) {
 	}
 }
 
-// GetUserInputPassword will read the user's input from stdin via multiple means.
-func GetUserInputPassword(interactive bool) ([]byte, error) {
-	var password string
+// GetUserInput will read the user's input from stdin via multiple means.
+func GetUserInput(interactive bool, prompt string) ([]byte, error) {
+	var value string
 	if interactive {
-		input, err := confirmInputsMatch()
+		input, err := confirmInputsMatch(prompt)
 		if err != nil {
 			return nil, err
 		}
-		password = input
+		value = input
 	} else {
 		input, err := Stdin(false)
 		if err != nil {
 			return nil, err
 		}
-		password = input
+		value = input
 	}
-	if password == "" {
-		return nil, errors.New("password can NOT be empty")
+	if value == "" {
+		return nil, fmt.Errorf("%s can NOT be empty", prompt)
 	}
-	return []byte(password), nil
+	return []byte(value), nil
 }
 
 // ReadInteractivePassword will prompt for a single password for unlocking
@@ -73,23 +73,23 @@ func ReadInteractivePassword() (string, error) {
 	return Stdin(true)
 }
 
-func confirmInputsMatch() (string, error) {
+func confirmInputsMatch(prompt string) (string, error) {
 	termEcho(false)
 	defer func() {
 		termEcho(true)
 	}()
-	fmt.Print("please enter password: ")
+	fmt.Printf("please enter %s: ", prompt)
 	first, err := Stdin(true)
 	if err != nil {
 		return "", err
 	}
-	fmt.Print("\nplease re-enter password: ")
+	fmt.Printf("\nplease re-enter %s: ", prompt)
 	second, err := Stdin(true)
 	if err != nil {
 		return "", err
 	}
 	if first != second {
-		return "", errors.New("passwords do NOT match")
+		return "", fmt.Errorf("%s does NOT match", prompt)
 	}
 	return first, nil
 }

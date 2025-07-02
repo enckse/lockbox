@@ -24,7 +24,7 @@ func ReKey(cmd UserInputOptions) error {
 	}
 	var pass string
 	if !vars.NoKey {
-		p, err := cmd.Input(!piping)
+		p, err := cmd.Input(!piping, "password")
 		if err != nil {
 			return err
 		}
