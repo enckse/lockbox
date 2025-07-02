@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"git.sr.ht/~enckse/lockbox/internal/app"
+	"git.sr.ht/~enckse/lockbox/internal/config/store"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
@@ -168,5 +169,27 @@ func TestInsertDo(t *testing.T) {
 	}
 	if m.prompt != "url" || m.isPass {
 		t.Error("invalid field prompt")
+	}
+}
+
+func TestInsertTOTP(t *testing.T) {
+	defer store.Clear()
+	m := newMockInsert(t)
+	m.pipe = func() bool {
+		return false
+	}
+	m.input = func() ([]byte, error) {
+		return []byte("t"), nil
+	}
+	m.command.buf = bytes.Buffer{}
+	m.command.args = []string{"test/test2/test1/otp"}
+	if err := app.Insert(m); err == nil || err.Error() != "Decoding of secret as base32 failed." {
+		t.Errorf("invalid error: %v", err)
+	}
+	store.SetBool("LOCKBOX_TOTP_CHECK_ON_INSERT", false)
+	m.command.buf = bytes.Buffer{}
+	m.command.args = []string{"test/test2/test1/otp"}
+	if err := app.Insert(m); err != nil {
+		t.Errorf("invalid error: %v", err)
 	}
 }

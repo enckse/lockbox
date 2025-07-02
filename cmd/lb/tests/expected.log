@@ -4,7 +4,7 @@ setting up tests
 'test3' is not an allowed field name
 '' is not an allowed field name
 'still' is not an allowed field name
-otp can NOT be multi-line
+Decoding of secret as base32 failed.
 password can NOT be multi-line
 testing5
 testing5

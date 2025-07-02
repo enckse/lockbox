@@ -9,10 +9,8 @@ import (
 	"strings"
 	"time"
 
-	coreotp "github.com/pquerna/otp"
-	otp "github.com/pquerna/otp/totp"
-
 	"git.sr.ht/~enckse/lockbox/internal/app/commands"
+	"git.sr.ht/~enckse/lockbox/internal/app/totp"
 	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 	"git.sr.ht/~enckse/lockbox/internal/platform"
@@ -30,10 +28,6 @@ type (
 	TOTPArguments struct {
 		Entry string
 		Mode  string
-	}
-	totpWrapper struct {
-		code string
-		opts otp.ValidateOpts
 	}
 	// TOTPOptions are TOTP call options
 	TOTPOptions struct {
@@ -62,10 +56,6 @@ func colorWhenRules() ([]config.TimeWindow, error) {
 	return ParseTimeWindow(envTime...)
 }
 
-func (w totpWrapper) generateCode() (string, error) {
-	return otp.GenerateCodeCustom(w.code, time.Now(), w.opts)
-}
-
 func (args *TOTPArguments) display(opts TOTPOptions) error {
 	interactive := !slices.Contains([]string{commands.TOTPMinimal, commands.TOTPSeed, commands.TOTPURL}, args.Mode)
 	once := args.Mode == commands.TOTPOnce
@@ -80,31 +70,18 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 	if err != nil {
 		return err
 	}
-	k, err := coreotp.NewKeyFromURL(config.EnvTOTPFormat.Get(entity))
+	generator, err := totp.New(entity)
 	if err != nil {
 		return err
 	}
-	wrapper := totpWrapper{}
-	wrapper.code = k.Secret()
-	wrapper.opts = otp.ValidateOpts{}
-	wrapper.opts.Digits = k.Digits()
-	wrapper.opts.Algorithm = k.Algorithm()
-	wrapper.opts.Period = uint(k.Period())
 	writer := opts.app.Writer()
 	switch args.Mode {
-	case commands.TOTPSeed:
-		fmt.Fprintln(writer, wrapper.code)
-		return nil
-	case commands.TOTPURL:
-		fmt.Fprintf(writer, "url:       %s\n", k.URL())
-		fmt.Fprintf(writer, "seed:      %s\n", wrapper.code)
-		fmt.Fprintf(writer, "digits:    %s\n", wrapper.opts.Digits)
-		fmt.Fprintf(writer, "algorithm: %s\n", wrapper.opts.Algorithm)
-		fmt.Fprintf(writer, "period:    %d\n", wrapper.opts.Period)
+	case commands.TOTPSeed, commands.TOTPURL:
+		generator.Print(writer, args.Mode == commands.TOTPURL)
 		return nil
 	}
 	if !interactive {
-		code, err := wrapper.generateCode()
+		code, err := generator.Code()
 		if err != nil {
 			return err
 		}
@@ -152,7 +129,7 @@ func (args *TOTPArguments) display(opts TOTPOptions) error {
 		}
 		lastSecond = last
 		left := 60 - last
-		code, err := wrapper.generateCode()
+		code, err := generator.Code()
 		if err != nil {
 			return err
 		}

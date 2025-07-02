@@ -60,6 +60,14 @@ var (
 			}),
 		short: "max totp time",
 	})
+	// EnvTOTPCheckOnInsert will indicate if TOTP tokens should be check for validity during the insert process
+	EnvTOTPCheckOnInsert = environmentRegister(EnvironmentBool{
+		environmentDefault: newDefaultedEnvironment(true,
+			environmentBase{
+				key:         totpCategory + "CHECK_ON_INSERT",
+				description: "Test TOTP code generation on insert.",
+			}),
+	})
 	// EnvStore is the location of the keepass file/store
 	EnvStore = environmentRegister(EnvironmentString{
 		environmentStrings: environmentStrings{

@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 
+	"git.sr.ht/~enckse/lockbox/internal/app/totp"
+	"git.sr.ht/~enckse/lockbox/internal/config"
 	"git.sr.ht/~enckse/lockbox/internal/kdbx"
 )
 
@@ -45,18 +47,28 @@ func Insert(cmd UserInputOptions) error {
 	if err != nil {
 		return fmt.Errorf("invalid input: %w", err)
 	}
-	vals := make(kdbx.EntityValues)
-	if existing != nil {
-		vals = existing.Values
-	}
-	vals[base] = strings.TrimSpace(string(password))
-	if err := t.Insert(dir, vals); err != nil {
-		return err
-	}
 	if !isPipe {
 		if isPass {
 			fmt.Fprintln(cmd.Writer())
 		}
+	}
+	vals := make(kdbx.EntityValues)
+	if existing != nil {
+		vals = existing.Values
+	}
+	cleaned := strings.TrimSpace(string(password))
+	if config.EnvTOTPCheckOnInsert.Get() && strings.EqualFold(base, kdbx.OTPField) {
+		generator, err := totp.New(cleaned)
+		if err != nil {
+			return err
+		}
+		if _, err := generator.Code(); err != nil {
+			return err
+		}
+	}
+	vals[base] = cleaned
+	if err := t.Insert(dir, vals); err != nil {
+		return err
 	}
 	return nil
 }
