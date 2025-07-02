@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"testing"
 
@@ -32,7 +33,10 @@ func (m *mockKeyer) Args() []string {
 	return m.args
 }
 
-func (m *mockKeyer) Input(bool, string) ([]byte, error) {
+func (m *mockKeyer) Input(_, pass bool, _ string) ([]byte, error) {
+	if !pass {
+		return nil, errors.New("invalid request, always password")
+	}
 	return []byte(m.pass), nil
 }
 

@@ -42,10 +42,10 @@ func termEcho(on bool) {
 }
 
 // GetUserInput will read the user's input from stdin via multiple means.
-func GetUserInput(interactive bool, prompt string) ([]byte, error) {
+func GetUserInput(interactive, isPassword bool, prompt string) ([]byte, error) {
 	var value string
 	if interactive {
-		input, err := confirmInputsMatch(prompt)
+		input, err := confirmInputsMatch(isPassword, prompt)
 		if err != nil {
 			return nil, err
 		}
@@ -63,15 +63,20 @@ func GetUserInput(interactive bool, prompt string) ([]byte, error) {
 	return []byte(value), nil
 }
 
-func confirmInputsMatch(prompt string) (string, error) {
-	termEcho(false)
-	defer func() {
-		termEcho(true)
-	}()
+func confirmInputsMatch(isPassword bool, prompt string) (string, error) {
+	if isPassword {
+		termEcho(false)
+		defer func() {
+			termEcho(true)
+		}()
+	}
 	fmt.Printf("please enter %s: ", prompt)
 	first, err := Stdin(true)
 	if err != nil {
 		return "", err
+	}
+	if !isPassword {
+		return first, nil
 	}
 	fmt.Printf("\nplease re-enter %s: ", prompt)
 	second, err := Stdin(true)

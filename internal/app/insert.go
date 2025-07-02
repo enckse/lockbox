@@ -40,7 +40,8 @@ func Insert(cmd UserInputOptions) error {
 			}
 		}
 	}
-	password, err := cmd.Input(!isPipe && !strings.EqualFold(base, kdbx.NotesField), base)
+	isPass := !strings.EqualFold(base, kdbx.URLField)
+	password, err := cmd.Input(!isPipe && !strings.EqualFold(base, kdbx.NotesField), isPass, base)
 	if err != nil {
 		return fmt.Errorf("invalid input: %w", err)
 	}
@@ -53,7 +54,9 @@ func Insert(cmd UserInputOptions) error {
 		return err
 	}
 	if !isPipe {
-		fmt.Fprintln(cmd.Writer())
+		if isPass {
+			fmt.Fprintln(cmd.Writer())
+		}
 	}
 	return nil
 }

@@ -18,6 +18,7 @@ type (
 		pipe        func() bool
 		token       func() string
 		prompt      string
+		isPass      bool
 		interactive bool
 	}
 )
@@ -36,9 +37,10 @@ func (m *mockInsert) IsPipe() bool {
 	return m.pipe()
 }
 
-func (m *mockInsert) Input(interactive bool, prompt string) ([]byte, error) {
+func (m *mockInsert) Input(interactive, isPass bool, prompt string) ([]byte, error) {
 	m.interactive = interactive
 	m.prompt = prompt
+	m.isPass = isPass
 	return m.input()
 }
 
@@ -121,7 +123,7 @@ func TestInsertDo(t *testing.T) {
 	if m.command.buf.String() == "" {
 		t.Error("invalid insert")
 	}
-	if m.prompt != "password" {
+	if m.prompt != "password" || !m.isPass {
 		t.Error("invalid field prompt")
 	}
 	m.command.confirm = false
@@ -152,7 +154,19 @@ func TestInsertDo(t *testing.T) {
 	if m.command.buf.String() == "" || m.interactive {
 		t.Errorf("invalid insert %s %v", m.command.buf.String(), m.interactive)
 	}
-	if m.prompt != "notes" {
+	if m.prompt != "notes" || !m.isPass {
+		t.Error("invalid field prompt")
+	}
+	m.interactive = false
+	m.command.buf = bytes.Buffer{}
+	m.command.args = []string{"test/test2/test1/url"}
+	if err := app.Insert(m); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.command.buf.String() != "" || !m.interactive {
+		t.Errorf("invalid insert %s %v", m.command.buf.String(), m.interactive)
+	}
+	if m.prompt != "url" || m.isPass {
 		t.Error("invalid field prompt")
 	}
 }

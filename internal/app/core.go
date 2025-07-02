@@ -23,7 +23,7 @@ type (
 	UserInputOptions interface {
 		CommandOptions
 		IsPipe() bool
-		Input(bool, string) ([]byte, error)
+		Input(bool, bool, string) ([]byte, error)
 	}
 
 	// DefaultCommand is the default CLI app type for actual execution
@@ -78,6 +78,6 @@ func (a *DefaultCommand) IsPipe() bool {
 }
 
 // Input will read user input
-func (a *DefaultCommand) Input(interactive bool, prompt string) ([]byte, error) {
-	return platform.GetUserInput(interactive, prompt)
+func (a *DefaultCommand) Input(interactive, isPassword bool, prompt string) ([]byte, error) {
+	return platform.GetUserInput(interactive, isPassword, prompt)
 }
