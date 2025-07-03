@@ -17,7 +17,7 @@ func TestUsage(t *testing.T) {
 		t.Errorf("invalid verbose usage, out of date? %d", len(u))
 	}
 	for _, usage := range u {
-		for _, l := range strings.Split(usage, "\n") {
+		for l := range strings.SplitSeq(usage, "\n") {
 			if len(l) > 80 {
 				t.Errorf("usage line > 80 (%d), line: %s", len(l), l)
 			}

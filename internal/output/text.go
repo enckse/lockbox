@@ -10,7 +10,7 @@ import (
 func TextWrap(indent uint, in string) string {
 	var sections []string
 	var cur []string
-	for _, line := range strings.Split(strings.TrimSpace(in), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSpace(in), "\n") {
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" {
 			if len(cur) > 0 {
@@ -33,7 +33,7 @@ func TextWrap(indent uint, in string) string {
 	}
 	indenture := int(80 - indent)
 	for _, s := range sections {
-		for _, line := range strings.Split(wrap(s, indenture), "\n") {
+		for line := range strings.SplitSeq(wrap(s, indenture), "\n") {
 			fmt.Fprintf(&out, "%s%s\n", indenting, line)
 		}
 		fmt.Fprint(&out, "\n")
@@ -44,7 +44,7 @@ func TextWrap(indent uint, in string) string {
 func wrap(in string, maxLength int) string {
 	var lines []string
 	var cur []string
-	for _, p := range strings.Split(in, " ") {
+	for p := range strings.SplitSeq(in, " ") {
 		state := strings.Join(cur, " ")
 		l := len(p)
 		if len(state)+l >= maxLength {

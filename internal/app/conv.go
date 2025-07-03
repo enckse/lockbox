@@ -71,7 +71,7 @@ func serialize(w io.Writer, tx *kdbx.Transaction, isJSON bool, filter string) er
 		if isJSON {
 			fmt.Fprintf(w, "  %s", strings.TrimSpace(trimmed))
 		} else {
-			for _, line := range strings.Split(trimmed, "\n") {
+			for line := range strings.SplitSeq(trimmed, "\n") {
 				if strings.TrimSpace(line) == "" {
 					continue
 				}

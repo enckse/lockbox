@@ -126,7 +126,7 @@ func generateDetailText(data printer) (string, error) {
 		"",
 		"NOTE: the following value is NOT a default, it is an empty TOML placeholder",
 	} {
-		for _, comment := range strings.Split(line, "\n") {
+		for comment := range strings.SplitSeq(line, "\n") {
 			text = append(text, fmt.Sprintf("# %s", comment))
 		}
 	}

@@ -19,7 +19,7 @@ func TestPrint(t *testing.T) {
 	generator.Print(&buf, true)
 	count := 0
 	hasBlank := false
-	for _, line := range strings.Split(buf.String(), "\n") {
+	for line := range strings.SplitSeq(buf.String(), "\n") {
 		if line == "" {
 			if hasBlank {
 				t.Errorf("already have blank line")
