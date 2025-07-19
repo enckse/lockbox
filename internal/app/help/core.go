@@ -97,7 +97,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.List, isFilter, "list entries"))
 	results = append(results, command(commands.Groups, isFilter, "list groups"))
 	results = append(results, command(commands.Show, isEntry, "show the entry's value"))
-	results = append(results, command(commands.TOTP, isEntry, "display an updating totp generated code"))
+	results = append(results, command(commands.TOTP, "<command>", "display an updating totp generated code"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPClip, isEntry, "copy totp code to clipboard"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPList, isFilter, "list entries with totp settings"))
 	results = append(results, subCommand(commands.TOTP, commands.TOTPOnce, isEntry, "display the first generated code"))
