@@ -15,14 +15,20 @@ func report(w io.Writer, cat string, err error) {
 	if err != nil {
 		msg = fmt.Sprintf("error: %v", err)
 	}
-	text := fmt.Sprintf("%s\n  -> %s\n", cat, msg)
+	rawReport(w, cat, msg)
+}
+
+func rawReport(w io.Writer, cat, msg string) {
+	text := fmt.Sprintf("%-15s %s\n", cat, msg)
 	w.Write([]byte(text))
 }
 
 // Health will display configuration/system health
 func Health(cmd CommandOptions) error {
-	key, err := config.NewKey(config.DefaultKeyMode)
 	w := cmd.Writer()
+	rawReport(w, "item", "status")
+	rawReport(w, "---", "---")
+	key, err := config.NewKey(config.DefaultKeyMode)
 	if err == nil {
 		_, err = key.Read()
 	}
