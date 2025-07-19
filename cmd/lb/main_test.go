@@ -344,6 +344,9 @@ func test(profile string) error {
 	setConfig(r.config)
 	r.run("", "ls")
 
+	r.section("health")
+	r.run("", "health")
+
 	r.section("env")
 	r.run("", fmt.Sprintf("vars | sed 's#/%s#/datadir#g' | grep -v CREDENTIALS | sort", profile))
 

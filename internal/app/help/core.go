@@ -92,6 +92,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 	results = append(results, command(commands.Move, fmt.Sprintf("%s %s", isGroup, isGroup), "move a group from source to destination"))
 	results = append(results, command(commands.ReKey, "", "rekey/reinitialize the database credentials"))
 	results = append(results, command(commands.Remove, isGroup, "remove an entry from the store"))
+	results = append(results, command(commands.Health, "", "display configuration health"))
 	results = append(results, command(commands.JSON, isFilter, "display detailed information"))
 	results = append(results, command(commands.List, isFilter, "list entries"))
 	results = append(results, command(commands.Groups, isFilter, "list groups"))

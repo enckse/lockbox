@@ -78,6 +78,8 @@ func run() error {
 		return fmt.Errorf("%s is not allowed in read-only", command)
 	}
 	switch command {
+	case commands.Health:
+		return app.Health(p)
 	case commands.ReKey:
 		return app.ReKey(p)
 	case commands.List, commands.Groups:

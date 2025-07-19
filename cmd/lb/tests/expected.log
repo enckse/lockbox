@@ -321,6 +321,15 @@ test5/multiline/notes
 test6/multiline/notes
 test6/multiline/otp
 test6/multiline/password
+health
+key
+  -> ok
+keyfile
+  -> ok
+clipboard
+  -> ok
+store
+  -> ok
 env
 LOCKBOX_CLIP_COPY=[touch testdata/datadir/clip.copy]
 LOCKBOX_JSON_HASH_LENGTH=3
