@@ -18,12 +18,15 @@ jobs:
           - name: ubuntu-latest
             image: null
             display: ubuntu
+            deps: "echo no deps"
           - name: ubuntu-latest
             image: alpine:latest
             display: alpine
+            deps: apk add make
           - name: macos-latest
             image: null
             display: macos
+            deps: "echo no deps"
     runs-on: ${{ matrix.os.name }}
     name: ${{ matrix.os.display }}
     container:
@@ -34,7 +37,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: 1.24
+      - name: "deps"
+        run: ${{ matrix.os.deps }}
       - name: "build"
-        run: make
-      - name: "check"
-        run: make check
+        run: make VERSION=${GITHUB_SHA} check
