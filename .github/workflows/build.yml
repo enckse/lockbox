@@ -1,0 +1,40 @@
+name: "build"
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  builds:
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu-latest
+            image: null
+            display: ubuntu
+          - name: ubuntu-latest
+            image: alpine:latest
+            display: alpine
+          - name: macos-latest
+            image: null
+            display: macos
+    runs-on: ${{ matrix.os.name }}
+    name: ${{ matrix.os.display }}
+    container:
+      image: ${{ matrix.os.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v2
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 1.24
+      - name: "build"
+        run: make
+      - name: "check"
+        run: make check

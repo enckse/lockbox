@@ -1,9 +1,0 @@
-image: alpine/edge
-packages:
-  - make
-  - go
-tasks:
-  - build: |
-      cd lockbox && make
-  - check: |
-      cd lockbox && make check
