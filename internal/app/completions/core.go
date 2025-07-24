@@ -10,8 +10,8 @@ import (
 	"sort"
 	"text/template"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/app/commands"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 type (

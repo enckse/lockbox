@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/config/store"
 )
 
 func TestDefaultKey(t *testing.T) {

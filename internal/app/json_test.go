@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app"
+	"github.com/enckse/lockbox/internal/app"
 )
 
 func TestJSON(t *testing.T) {

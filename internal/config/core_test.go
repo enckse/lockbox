@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/config/store"
 )
 
 func TestNewEnvFiles(t *testing.T) {

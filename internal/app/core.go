@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
 type (

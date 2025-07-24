@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/kdbx"
 )
 
 // List will list/find entries

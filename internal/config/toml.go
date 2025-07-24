@@ -10,9 +10,9 @@ import (
 	"sort"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
-	"git.sr.ht/~enckse/lockbox/internal/output"
 	"github.com/BurntSushi/toml"
+	"github.com/enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/output"
 )
 
 const (

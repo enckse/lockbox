@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
 func report(w io.Writer, cat string, err error) {

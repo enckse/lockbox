@@ -4,7 +4,7 @@ package commands
 import (
 	"slices"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 const (

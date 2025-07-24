@@ -5,8 +5,8 @@ import (
 	"sort"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/app/commands"
+	"github.com/enckse/lockbox/internal/config/store"
 )
 
 func TestIsReadOnly(t *testing.T) {

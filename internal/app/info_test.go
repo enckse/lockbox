@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/app"
+	"github.com/enckse/lockbox/internal/config/store"
 )
 
 func TestNoInfo(t *testing.T) {

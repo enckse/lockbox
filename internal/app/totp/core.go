@@ -9,7 +9,7 @@ import (
 	coreotp "github.com/pquerna/otp"
 	otp "github.com/pquerna/otp/totp"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/config"
 )
 
 type (

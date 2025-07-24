@@ -7,9 +7,9 @@ import (
 	"slices"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/totp"
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/app/totp"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/kdbx"
 )
 
 // Insert will execute an insert

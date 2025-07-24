@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
 type mockLoader struct {

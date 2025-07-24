@@ -6,9 +6,9 @@ import (
 	"io"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/app"
+	"github.com/enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/kdbx"
 )
 
 type (

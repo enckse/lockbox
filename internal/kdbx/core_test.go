@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/kdbx"
 )
 
 func TestAllowedSort(t *testing.T) {

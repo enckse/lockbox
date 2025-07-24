@@ -11,10 +11,10 @@ import (
 	"strings"
 	"text/template"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
-	"git.sr.ht/~enckse/lockbox/internal/output"
+	"github.com/enckse/lockbox/internal/app/commands"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/output"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/output"
+	"github.com/enckse/lockbox/internal/output"
 )
 
 var (

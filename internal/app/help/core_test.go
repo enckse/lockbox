@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/help"
+	"github.com/enckse/lockbox/internal/app/help"
 )
 
 func TestUsage(t *testing.T) {

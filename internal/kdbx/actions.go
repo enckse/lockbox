@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/config"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 

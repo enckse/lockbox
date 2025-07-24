@@ -7,10 +7,10 @@ import (
 	"os"
 	"runtime/debug"
 
-	"git.sr.ht/~enckse/lockbox/internal/app"
-	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/app"
+	"github.com/enckse/lockbox/internal/app/commands"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
 var version string

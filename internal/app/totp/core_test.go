@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/totp"
+	"github.com/enckse/lockbox/internal/app/totp"
 )
 
 func TestPrint(t *testing.T) {

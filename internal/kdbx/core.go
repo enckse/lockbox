@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/platform"
 	"github.com/tobischo/gokeepasslib/v3"
 	"github.com/tobischo/gokeepasslib/v3/wrappers"
 )

@@ -3,7 +3,7 @@ package output_test
 import (
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/output"
+	"github.com/enckse/lockbox/internal/output"
 )
 
 func TestWrap(t *testing.T) {

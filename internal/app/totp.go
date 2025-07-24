@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/commands"
-	"git.sr.ht/~enckse/lockbox/internal/app/totp"
-	"git.sr.ht/~enckse/lockbox/internal/config"
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
-	"git.sr.ht/~enckse/lockbox/internal/platform"
+	"github.com/enckse/lockbox/internal/app/commands"
+	"github.com/enckse/lockbox/internal/app/totp"
+	"github.com/enckse/lockbox/internal/config"
+	"github.com/enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/platform"
 )
 
 var (

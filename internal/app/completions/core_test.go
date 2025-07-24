@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"git.sr.ht/~enckse/lockbox/internal/app/completions"
-	"git.sr.ht/~enckse/lockbox/internal/config/store"
+	"github.com/enckse/lockbox/internal/app/completions"
+	"github.com/enckse/lockbox/internal/config/store"
 )
 
 var tests = map[string]string{

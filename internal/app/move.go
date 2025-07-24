@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/kdbx"
 )
 
 type (

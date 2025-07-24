@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"git.sr.ht/~enckse/lockbox/internal/kdbx"
+	"github.com/enckse/lockbox/internal/kdbx"
 )
 
 // Conv will convert 1-N files
