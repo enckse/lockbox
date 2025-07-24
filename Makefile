@@ -1,6 +1,6 @@
 GOFLAGS := -trimpath -buildmode=pie -mod=readonly -modcacherw -buildvcs=false
 TARGET  := target
-VERSION := "$(shell git describe --abbrev=0 --tags)-$(shell git log -n 1 --format=%h)"
+VERSION ?= "$(shell git describe --abbrev=0 --tags)-$(shell git log -n 1 --format=%h)"
 OBJECT  := $(TARGET)/lb
 GOTEST  := go test
 CMD     := cmd/lb
