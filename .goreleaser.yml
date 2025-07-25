@@ -1,3 +1,4 @@
+version: 2
 project_name: lockbox
 builds:
   - main: cmd/lb/main.go
@@ -12,10 +13,12 @@ builds:
       - arm64
     flags:
       - -trimpath
+    ldflags:
+      - -s -w -X main.version={{.Version}}
 
 archives:
   - name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
-    format: tar.gz
+    formats: ['tar.gz']
     files:
       - none*
 checksum:
