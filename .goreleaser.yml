@@ -1,6 +1,6 @@
 project_name: lockbox
 builds:
-  - main: cmd/main.go
+  - main: cmd/lb/main.go
     env:
       - CGO_ENABLED=0
     binary: lb
