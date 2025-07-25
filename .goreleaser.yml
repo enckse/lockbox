@@ -1,0 +1,22 @@
+project_name: lockbox
+builds:
+  - main: cmd/main.go
+    env:
+      - CGO_ENABLED=0
+    binary: lb
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+
+archives:
+  - name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    format: tar.gz
+    files:
+      - none*
+checksum:
+  name_template: "{{ .ProjectName }}-{{ .Version }}-checksums.txt"
