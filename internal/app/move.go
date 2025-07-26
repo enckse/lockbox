@@ -48,7 +48,7 @@ func Move(cmd CommandOptions) error {
 				return fmt.Errorf("multiple moves can only be done at a leaf level")
 			}
 			r := moveRequest{cmd: cmd, src: e.Path, dst: kdbx.NewPath(dir, kdbx.Base(e.Path)), overwrite: false}
-			if err := r.do(true); err != nil {
+			if _, err := r.do(true); err != nil {
 				return err
 			}
 			requests = append(requests, r)
@@ -58,46 +58,51 @@ func Move(cmd CommandOptions) error {
 	if rCount == 0 {
 		return errors.New("no source entries matched")
 	}
+	var moving []kdbx.MoveRequest
 	for _, r := range requests {
-		if err := r.do(false); err != nil {
+		req, err := r.do(false)
+		if err != nil {
 			return err
 		}
+		if req != nil {
+			moving = append(moving, *req)
+		}
 	}
-	return nil
+	return t.Move(moving...)
 }
 
-func (r moveRequest) do(dryRun bool) error {
+func (r moveRequest) do(dryRun bool) (*kdbx.MoveRequest, error) {
 	tx := r.cmd.Transaction()
 	if !dryRun {
 		use, err := kdbx.NewTransaction()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		tx = use
 
 	}
 	srcExists, err := tx.Get(r.src, kdbx.SecretValue)
 	if err != nil {
-		return errors.New("unable to get source entry")
+		return nil, errors.New("unable to get source entry")
 	}
 	if srcExists == nil {
-		return errors.New("no source object found")
+		return nil, errors.New("no source object found")
 	}
 	dstExists, err := tx.Get(r.dst, kdbx.BlankValue)
 	if err != nil {
-		return errors.New("unable to get destination object")
+		return nil, errors.New("unable to get destination object")
 	}
 	if dstExists != nil {
 		if r.overwrite {
 			if !r.cmd.Confirm("overwrite destination") {
-				return nil
+				return nil, nil
 			}
 		} else {
-			return errors.New("unable to overwrite entries when moving multiple items")
+			return nil, errors.New("unable to overwrite entries when moving multiple items")
 		}
 	}
 	if dryRun {
-		return nil
+		return nil, nil
 	}
-	return tx.Move(srcExists, r.dst)
+	return &kdbx.MoveRequest{Source: srcExists, Destination: r.dst}, nil
 }

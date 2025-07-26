@@ -83,10 +83,13 @@ func TestMove(t *testing.T) {
 	setup(t)
 	fullSetup(t, true).Insert(kdbx.NewPath("test", "test2", "test1"), map[string]string{"passworD": "pass"})
 	fullSetup(t, true).Insert(kdbx.NewPath("test", "test2", "test3"), map[string]string{"NoTES": "pass", "password": "xxx"})
-	if err := fullSetup(t, true).Move(nil, ""); err == nil || err.Error() != "source entity is not set" {
+	if err := fullSetup(t, true).Move(); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if err := fullSetup(t, true).Move(kdbx.MoveRequest{nil, ""}); err == nil || err.Error() != "source entity is not set" {
 		t.Errorf("no error: %v", err)
 	}
-	if err := fullSetup(t, true).Move(&kdbx.Entity{Path: kdbx.NewPath("test", "test2", "test3"), Values: map[string]string{"Notes": "abc"}}, kdbx.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(kdbx.MoveRequest{&kdbx.Entity{Path: kdbx.NewPath("test", "test2", "test3"), Values: map[string]string{"Notes": "abc"}}, kdbx.NewPath("test1", "test2", "test3")}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err := fullSetup(t, true).Get(kdbx.NewPath("test1", "test2", "test3"), kdbx.SecretValue)
@@ -96,7 +99,7 @@ func TestMove(t *testing.T) {
 	if val, ok := q.Value("notes"); !ok || val != "abc" {
 		t.Errorf("invalid retrieval")
 	}
-	if err := fullSetup(t, true).Move(&kdbx.Entity{Path: kdbx.NewPath("test", "test2", "test1"), Values: map[string]string{"password": "test"}}, kdbx.NewPath("test1", "test2", "test3")); err != nil {
+	if err := fullSetup(t, true).Move(kdbx.MoveRequest{&kdbx.Entity{Path: kdbx.NewPath("test", "test2", "test1"), Values: map[string]string{"password": "test"}}, kdbx.NewPath("test1", "test2", "test3")}); err != nil {
 		t.Errorf("no error: %v", err)
 	}
 	q, err = fullSetup(t, true).Get(kdbx.NewPath("test1", "test2", "test3"), kdbx.SecretValue)

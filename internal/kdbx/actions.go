@@ -14,6 +14,25 @@ import (
 
 type (
 	action func(t Context) error
+
+	// MoveRequest allow for moving (or inserting) entities as actions
+	MoveRequest struct {
+		Source      *Entity
+		Destination string
+	}
+
+	moveData struct {
+		src     moveEntity
+		dst     moveEntity
+		move    bool
+		modTime time.Time
+		values  map[string]string
+	}
+
+	moveEntity struct {
+		title  string
+		offset []string
+	}
 )
 
 func (t *Transaction) act(cb action) error {
@@ -170,74 +189,88 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 	return g, e, done
 }
 
-// Move will move a src object to a dst location
-func (t *Transaction) Move(src *Entity, dst string) error {
-	if src == nil {
-		return errors.New("source entity is not set")
+// Move will move (one or more) source objects to destination location
+func (t *Transaction) Move(moves ...MoveRequest) error {
+	if len(moves) == 0 {
+		return nil
 	}
-	if strings.TrimSpace(src.Path) == "" {
-		return errors.New("empty path not allowed")
-	}
-	if len(src.Values) == 0 {
-		return errors.New("empty secrets not allowed")
-	}
-	values := make(map[string]string)
-	for k, v := range src.Values {
-		found := false
-		for _, mapping := range AllowedFields {
-			if strings.EqualFold(k, mapping) {
-				values[mapping] = v
-				found = true
-				break
+	var requests []moveData
+	for _, move := range moves {
+		if move.Source == nil {
+			return errors.New("source entity is not set")
+		}
+		if strings.TrimSpace(move.Source.Path) == "" {
+			return errors.New("empty path not allowed")
+		}
+		if len(move.Source.Values) == 0 {
+			return errors.New("empty secrets not allowed")
+		}
+		values := make(map[string]string)
+		for k, v := range move.Source.Values {
+			found := false
+			for _, mapping := range AllowedFields {
+				if strings.EqualFold(k, mapping) {
+					values[mapping] = v
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("unknown entity field: %s", k)
 			}
 		}
-		if !found {
-			return fmt.Errorf("unknown entity field: %s", k)
+		mod := config.EnvDefaultModTime.Get()
+		modTime := time.Now()
+		if mod != "" {
+			p, err := time.Parse(config.ModTimeFormat, mod)
+			if err != nil {
+				return err
+			}
+			modTime = p
 		}
-	}
-	mod := config.EnvDefaultModTime.Get()
-	modTime := time.Now()
-	if mod != "" {
-		p, err := time.Parse(config.ModTimeFormat, mod)
+		dOffset, dTitle, err := splitComponents(move.Destination)
 		if err != nil {
 			return err
 		}
-		modTime = p
+		sOffset, sTitle, err := splitComponents(move.Source.Path)
+		if err != nil {
+			return err
+		}
+		sourceData := moveEntity{offset: sOffset, title: sTitle}
+		destData := moveEntity{offset: dOffset, title: dTitle}
+		requests = append(requests, moveData{src: sourceData, dst: destData, move: move.Destination != move.Source.Path, modTime: modTime, values: values})
 	}
-	dOffset, dTitle, err := splitComponents(dst)
-	if err != nil {
-		return err
-	}
-	sOffset, sTitle, err := splitComponents(src.Path)
-	if err != nil {
-		return err
-	}
-	isMove := dst != src.Path
+	return t.doMoves(requests)
+}
+
+func (t *Transaction) doMoves(requests []moveData) error {
 	return t.change(func(c Context) error {
-		c.removeEntity(sOffset, sTitle)
-		if isMove {
-			c.removeEntity(dOffset, dTitle)
-		}
-		e := gokeepasslib.NewEntry()
-		e.Values = append(e.Values, value(titleKey, dTitle))
-		e.Values = append(e.Values, value(modTimeKey, modTime.Format(time.RFC3339)))
-		for k, v := range values {
-			if k != NotesField && strings.Contains(v, "\n") {
-				return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
+		for _, req := range requests {
+			c.removeEntity(req.src.offset, req.src.title)
+			if req.move {
+				c.removeEntity(req.dst.offset, req.dst.title)
 			}
-			if k == OTPField {
-				v = config.EnvTOTPFormat.Get(v)
+			e := gokeepasslib.NewEntry()
+			e.Values = append(e.Values, value(titleKey, req.dst.title))
+			e.Values = append(e.Values, value(modTimeKey, req.modTime.Format(time.RFC3339)))
+			for k, v := range req.values {
+				if k != NotesField && strings.Contains(v, "\n") {
+					return fmt.Errorf("%s can NOT be multi-line", strings.ToLower(k))
+				}
+				if k == OTPField {
+					v = config.EnvTOTPFormat.Get(v)
+				}
+				e.Values = append(e.Values, protectedValue(k, v))
 			}
-			e.Values = append(e.Values, protectedValue(k, v))
+			c.alterEntities(true, req.dst.offset, req.dst.title, &e)
 		}
-		c.alterEntities(true, dOffset, dTitle, &e)
 		return nil
 	})
 }
 
 // Insert is a move to the same location
 func (t *Transaction) Insert(path string, val EntityValues) error {
-	return t.Move(&Entity{Path: path, Values: val}, path)
+	return t.Move(MoveRequest{Source: &Entity{Path: path, Values: val}, Destination: path})
 }
 
 // Remove will remove a single entity
