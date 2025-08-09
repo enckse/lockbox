@@ -48,6 +48,8 @@ func TestInstance(t *testing.T) {
 	}
 	fxn("darwin", "", "[pbcopy]", "")
 	fxn("linux", "microsoft", "[clip.exe]", "")
+	t.Setenv("DISPLAY", "")
+	t.Setenv("WAYLAND_DISPLAY", "")
 	fxn("linux", "linux", "", "unable to detect linux clipboard")
 	t.Setenv("DISPLAY", "1")
 	t.Setenv("WAYLAND_DISPLAY", "1")
