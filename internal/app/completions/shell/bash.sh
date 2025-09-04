@@ -28,10 +28,10 @@ _{{ $.Executable }}() {
         "{{ $.HelpCommand }}")
           opts="{{ $.HelpAdvancedCommand }} {{ $.HelpConfigCommand }}"
           ;;
-        "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}" | "{{ $.InsertCommand }}")
+        "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
           opts="$opts $({{ $.DoGroups }})"
           ;;
-        "{{ $.UnsetCommand }}")
+        "{{ $.UnsetCommand }}" | "{{ $.InsertCommand }}")
           opts="$opts $({{ $.DoList }})"
           ;;
         "{{ $.TOTPCommand }}")

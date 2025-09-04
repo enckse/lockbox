@@ -40,12 +40,12 @@ _{{ $.Executable }}() {
             compadd "$@" "{{ $.HelpConfigCommand }}"
           fi
         ;;
-        "{{ $.RemoveCommand }}" | "{{ $.InsertCommand }}")
+        "{{ $.RemoveCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoGroups }})
           fi
         ;;
-        "{{ $.UnsetCommand }}")
+        "{{ $.UnsetCommand }}" | "{{ $.InsertCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
