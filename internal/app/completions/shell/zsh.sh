@@ -12,9 +12,7 @@ _{{ $.Executable }}() {
     main)
       args=""
 {{- range $idx, $value := $.Options }}
-      if [ -n "$args" ]; then
-        args="$args "
-      fi
+      [ -n "$args" ] && args="$args "
       args="${args}{{ $value }}"
 {{- end }}
       _arguments "1:main:($args)"
