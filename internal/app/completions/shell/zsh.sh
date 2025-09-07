@@ -68,7 +68,7 @@ _{{ $.Executable }}() {
               compadd "$@" {{ $.TOTPListCommand }}
 {{- range $key, $value := .TOTPSubCommands }}
               compadd "$@" {{ $value }}
-{{ end }}
+{{- end}}
             ;;
             4)
               case $words[3] in
