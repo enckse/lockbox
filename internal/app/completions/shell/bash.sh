@@ -16,9 +16,7 @@ _{{ $.Executable }}() {
     chosen=${COMP_WORDS[1]}
     found=0
 {{- range $idx, $value := $.Options }}
-    if [ "$chosen" == "{{ $value }}" ]; then
-      found=1
-    fi
+    [ "$chosen" == "{{ $value }}" ] && found=1
 {{- end}}
     if [ "$found" -eq 0 ]; then
       return
@@ -34,17 +32,14 @@ _{{ $.Executable }}() {
         "{{ $.InsertCommand }}")
           opts="$opts $({{ $.DoFields }})"
           ;;
-        "{{ $.UnsetCommand }}")
-          opts="$opts $({{ $.DoList }})"
+        "{{ $.UnsetCommand }}" | "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
+          opts=$({{ $.DoList }})
           ;;
         "{{ $.TOTPCommand }}")
           opts="{{ $.TOTPListCommand }} "
 {{- range $key, $value := .TOTPSubCommands }}
           opts="$opts {{ $value }}"
 {{- end}}
-          ;;
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
-          opts=$({{ $.DoList }})
           ;;
       esac
     else

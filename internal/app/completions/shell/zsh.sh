@@ -26,9 +26,7 @@ _{{ $.Executable }}() {
       chosen=$words[2]
       found=0
 {{- range $idx, $value := $.Options }}
-      if [[ "$chosen" == "{{ $value }}" ]]; then
-        found=1
-      fi
+      [[ "$chosen" == "{{ $value }}" ]] && found=1
 {{- end }}
       if [ "$found" -eq 0 ]; then
         return
@@ -50,7 +48,7 @@ _{{ $.Executable }}() {
             compadd "$@" $({{ $.DoFields }})
           fi
         ;;
-        "{{ $.UnsetCommand }}")
+        "{{ $.UnsetCommand }}" | "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
@@ -79,11 +77,6 @@ _{{ $.Executable }}() {
 {{- end}}
               esac
           esac
-        ;;
-        "{{ $.ShowCommand }}" | "{{ $.JSONCommand }}" | "{{ $.ClipCommand }}")
-          if [ "$len" -eq 3 ]; then
-            compadd "$@" $({{ $.DoList }})
-          fi
         ;;
       esac
   esac
