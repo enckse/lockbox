@@ -29,7 +29,6 @@ const (
 	// ModTimeFormat is the expected modtime format
 	ModTimeFormat      = time.RFC3339
 	exampleColorWindow = "start" + TimeWindowSpan + "end"
-	detectedValue      = "(detected)"
 	unset              = "(unset)"
 	arrayDelimiter     = " "
 	// TimeWindowSpan indicates the delineation between start -> end (start:end)

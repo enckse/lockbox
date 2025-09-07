@@ -10,11 +10,15 @@ import (
 	"github.com/enckse/lockbox/internal/kdbx"
 )
 
+// ListMode indicates how listing will be done/output
 type ListMode int
 
 const (
+	// ListEntriesMode will list the actual entries
 	ListEntriesMode ListMode = iota
+	// ListGroupsMode will list groups only (e.g. dirnames of all entries)
 	ListGroupsMode
+	// ListFieldsMode will list groups only, but with ALL possible/allowed field names
 	ListFieldsMode
 )
 

@@ -40,12 +40,14 @@ type (
 		Options             OptionList
 		TOTPSubCommands     OptionList
 	}
+	// OptionList represents completion list of available options
 	OptionList []string
 )
 
 //go:embed shell/*
 var shell embed.FS
 
+// Join will space-delimited join all options in a list
 func (o OptionList) Join() string {
 	return strings.Join(o, " ")
 }

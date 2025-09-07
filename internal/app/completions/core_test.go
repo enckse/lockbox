@@ -86,3 +86,14 @@ func testCompletion(t *testing.T, completionMode, need string) {
 		t.Errorf("invalid output, bad shell generation: %v", v)
 	}
 }
+
+func TestJoin(t *testing.T) {
+	l := completions.OptionList{}
+	if l.Join() != "" {
+		t.Error("invalid list, should be empty")
+	}
+	l = completions.OptionList{"x", "y ", " z a"}
+	if l.Join() != "x y   z a" {
+		t.Errorf("invalid join: %s", l.Join())
+	}
+}
