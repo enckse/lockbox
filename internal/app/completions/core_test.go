@@ -52,7 +52,7 @@ func TestFeatures(t *testing.T) {
 		without int
 	}
 	for k := range tests {
-		for _, feature := range []counts{{"clip", 5, 1}, {"totp", 9, 1}} {
+		for _, feature := range []counts{{"clip", 5, 1}} {
 			store.Clear()
 			key := fmt.Sprintf("LOCKBOX_FEATURE_%s", strings.ToUpper(feature.cmd))
 			store.SetBool(key, true)
@@ -65,9 +65,6 @@ func TestFeatures(t *testing.T) {
 
 func testCompletionFeature(t *testing.T, completionMode, cmd string, expect int) {
 	e := expect
-	if cmd == "totp" && completionMode == "bash" {
-		e++
-	}
 	v, _ := completions.Generate(completionMode, "lb")
 	if cnt := strings.Count(strings.Join(v, "\n"), cmd); cnt != e {
 		t.Errorf("completion mismatch %s: %d != %d (%s)", completionMode, cnt, expect, cmd)

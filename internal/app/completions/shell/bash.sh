@@ -50,11 +50,9 @@ _{{ $.Executable }}() {
             ;;
           "{{ $.TOTPCommand }}")
             case "${COMP_WORDS[2]}" in
-{{- range $key, $value := $.TOTPSubCommands }}
-              "{{ $value }}")
+              {{range $key, $value := $.TOTPSubCommands }}{{ if gt $key 0 }} | {{end}}"{{ $value }}"{{end}})
                 opts=$({{ $.DoTOTPList }})
                 ;;
-{{- end}}
             esac
             ;;
         esac
