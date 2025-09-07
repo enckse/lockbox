@@ -10,11 +10,7 @@ _{{ $.Executable }}() {
   len=${#words[@]}
   case $state in
     main)
-      args=""
-{{- range $idx, $value := $.Options }}
-      [ -n "$args" ] && args="$args "
-      args="${args}{{ $value }}"
-{{- end }}
+      args="{{ $.Options.Join }}"
       _arguments "1:main:($args)"
     ;;
     *)

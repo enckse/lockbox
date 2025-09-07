@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/enckse/lockbox/internal/app/commands"
@@ -36,13 +37,18 @@ type (
 		HelpAdvancedCommand string
 		HelpConfigCommand   string
 		ExportCommand       string
-		Options             []string
-		TOTPSubCommands     []string
+		Options             OptionList
+		TOTPSubCommands     OptionList
 	}
+	OptionList []string
 )
 
 //go:embed shell/*
 var shell embed.FS
+
+func (o OptionList) Join() string {
+	return strings.Join(o, " ")
+}
 
 // Generate handles creating shell completion outputs
 func Generate(completionType, exe string) ([]string, error) {

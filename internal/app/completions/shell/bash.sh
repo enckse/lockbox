@@ -4,9 +4,7 @@ _{{ $.Executable }}() {
   local cur opts chosen found
   cur=${COMP_WORDS[COMP_CWORD]}
   if [ "$COMP_CWORD" -eq 1 ]; then
-{{- range $idx, $value := $.Options }}
-    opts="${opts}{{ $value }} "
-{{- end}}
+    opts="{{ $.Options.Join }}"
     # shellcheck disable=SC2207
     COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
   else
@@ -37,9 +35,7 @@ _{{ $.Executable }}() {
           ;;
         "{{ $.TOTPCommand }}")
           opts="{{ $.TOTPListCommand }} "
-{{- range $key, $value := .TOTPSubCommands }}
-          opts="$opts {{ $value }}"
-{{- end}}
+          opts="$opts {{ $.TOTPSubCommands.Join }}"
           ;;
       esac
     else
