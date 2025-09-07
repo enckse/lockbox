@@ -42,14 +42,14 @@ func setup(t *testing.T) *kdbx.Transaction {
 
 func TestList(t *testing.T) {
 	m := newMockCommand(t)
-	if err := app.List(m, false); err != nil {
+	if err := app.List(m, app.ListEntriesMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
 		t.Error("nothing listed")
 	}
 	m.args = []string{"test", "test2"}
-	if err := app.List(m, false); err == nil || err.Error() != "too many arguments (none or filter)" {
+	if err := app.List(m, app.ListEntriesMode); err == nil || err.Error() != "too many arguments (none or filter)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -57,7 +57,7 @@ func TestList(t *testing.T) {
 func TestFind(t *testing.T) {
 	m := newMockCommand(t)
 	m.args = []string{"a/["}
-	if err := app.List(m, false); err == nil || !strings.Contains(err.Error(), "syntax error in pattern") {
+	if err := app.List(m, app.ListEntriesMode); err == nil || !strings.Contains(err.Error(), "syntax error in pattern") {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() != "" {
@@ -65,7 +65,7 @@ func TestFind(t *testing.T) {
 	}
 	m.buf.Reset()
 	m.args = []string{"[zzzzzz]"}
-	if err := app.List(m, false); err != nil {
+	if err := app.List(m, app.ListEntriesMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() != "" {
@@ -73,7 +73,7 @@ func TestFind(t *testing.T) {
 	}
 	m.buf.Reset()
 	m.args = []string{"test"}
-	if err := app.List(m, false); err != nil {
+	if err := app.List(m, app.ListEntriesMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
@@ -81,7 +81,7 @@ func TestFind(t *testing.T) {
 	}
 	m.buf.Reset()
 	m.args = []string{"test"}
-	if err := app.List(m, true); err != nil {
+	if err := app.List(m, app.ListGroupsMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
@@ -89,7 +89,7 @@ func TestFind(t *testing.T) {
 	}
 	m.buf.Reset()
 	m.args = []string{"test/**/**/*"}
-	if err := app.List(m, false); err != nil {
+	if err := app.List(m, app.ListEntriesMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
@@ -97,7 +97,7 @@ func TestFind(t *testing.T) {
 	}
 	m.buf.Reset()
 	m.args = []string{"test/**/*"}
-	if err := app.List(m, true); err != nil {
+	if err := app.List(m, app.ListGroupsMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
@@ -105,7 +105,23 @@ func TestFind(t *testing.T) {
 	}
 	m.buf.Reset()
 	m.args = []string{"[zzzz]"}
-	if err := app.List(m, true); err != nil {
+	if err := app.List(m, app.ListGroupsMode); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() != "" {
+		t.Error("something listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"test/**/*"}
+	if err := app.List(m, app.ListFieldsMode); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() == "" {
+		t.Error("nothing listed")
+	}
+	m.buf.Reset()
+	m.args = []string{"[zzzz]"}
+	if err := app.List(m, app.ListFieldsMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() != "" {
@@ -115,14 +131,28 @@ func TestFind(t *testing.T) {
 
 func TestGroups(t *testing.T) {
 	m := newMockCommand(t)
-	if err := app.List(m, true); err != nil {
+	if err := app.List(m, app.ListGroupsMode); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if m.buf.String() == "" {
 		t.Errorf("nothing listed: %s", m.buf.String())
 	}
 	m.args = []string{"test", "test2"}
-	if err := app.List(m, true); err == nil || err.Error() != "too many arguments (none or filter)" {
+	if err := app.List(m, app.ListGroupsMode); err == nil || err.Error() != "too many arguments (none or filter)" {
+		t.Errorf("invalid error: %v", err)
+	}
+}
+
+func TestFields(t *testing.T) {
+	m := newMockCommand(t)
+	if err := app.List(m, app.ListFieldsMode); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if m.buf.String() == "" {
+		t.Errorf("nothing listed: %s", m.buf.String())
+	}
+	m.args = []string{"test", "test2"}
+	if err := app.List(m, app.ListFieldsMode); err == nil || err.Error() != "too many arguments (none or filter)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

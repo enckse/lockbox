@@ -28,6 +28,7 @@ type (
 		TOTPCommand         string
 		DoTOTPList          string
 		DoList              string
+		DoFields            string
 		DoGroups            string
 		Executable          string
 		JSONCommand         string
@@ -66,6 +67,7 @@ func Generate(completionType, exe string) ([]string, error) {
 		DoGroups:            fmt.Sprintf("%s %s", exe, commands.Groups),
 		DoTOTPList:          fmt.Sprintf("%s %s %s", exe, commands.TOTP, commands.TOTPList),
 		ExportCommand:       fmt.Sprintf("%s %s %s", exe, commands.Env, commands.Completions),
+		DoFields:            fmt.Sprintf("%s %s", exe, commands.Fields),
 	}
 
 	c.Options = commands.AllowedInReadOnly(commands.Help, commands.List, commands.Show, commands.Version, commands.JSON, commands.Groups, commands.Move, commands.Remove, commands.Insert, commands.Unset)

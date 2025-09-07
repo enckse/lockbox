@@ -10,8 +10,16 @@ import (
 	"github.com/enckse/lockbox/internal/kdbx"
 )
 
+type ListMode int
+
+const (
+	ListEntriesMode ListMode = iota
+	ListGroupsMode
+	ListFieldsMode
+)
+
 // List will list/find entries
-func List(cmd CommandOptions, groups bool) error {
+func List(cmd CommandOptions, mode ListMode) error {
 	args := cmd.Args()
 	filter := ""
 	switch len(args) {
@@ -23,10 +31,10 @@ func List(cmd CommandOptions, groups bool) error {
 		return errors.New("too many arguments (none or filter)")
 	}
 
-	return doList("", filter, cmd, groups)
+	return doList("", filter, cmd, mode)
 }
 
-func doList(attr, filter string, cmd CommandOptions, groups bool) error {
+func doList(attr, filter string, cmd CommandOptions, mode ListMode) error {
 	hasFilter, selector := createFilter(filter)
 	opts := kdbx.QueryOptions{}
 	opts.Mode = kdbx.ListMode
@@ -42,17 +50,35 @@ func doList(attr, filter string, cmd CommandOptions, groups bool) error {
 	}
 	w := cmd.Writer()
 	attrFilter := attr != ""
+	isFields := mode == ListFieldsMode
+	allowedFields := []string{}
+	if isFields {
+		for _, allowed := range kdbx.AllowedFields {
+			allowedFields = append(allowedFields, strings.ToLower(allowed))
+		}
+		sort.Strings(allowedFields)
+	}
+	isGroups := mode == ListGroupsMode || isFields
 	for f, err := range e {
 		if err != nil {
 			return err
 		}
-		if groups {
+		if isGroups {
 			ok, err := allowed(f.Path)
 			if err != nil {
 				return err
 			}
 			if ok {
-				fmt.Fprintf(w, "%s\n", f.Path)
+				output := []string{f.Path}
+				if isFields {
+					output = []string{}
+					for _, allowed := range allowedFields {
+						output = append(output, kdbx.NewPath(f.Path, allowed))
+					}
+				}
+				for _, out := range output {
+					fmt.Fprintf(w, "%s\n", out)
+				}
 			}
 			continue
 		}

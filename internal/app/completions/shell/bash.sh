@@ -31,7 +31,10 @@ _{{ $.Executable }}() {
         "{{ $.MoveCommand }}" | "{{ $.RemoveCommand }}")
           opts="$opts $({{ $.DoGroups }})"
           ;;
-        "{{ $.UnsetCommand }}" | "{{ $.InsertCommand }}")
+        "{{ $.InsertCommand }}")
+          opts="$opts $({{ $.DoFields }})"
+          ;;
+        "{{ $.UnsetCommand }}")
           opts="$opts $({{ $.DoList }})"
           ;;
         "{{ $.TOTPCommand }}")

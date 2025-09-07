@@ -217,6 +217,7 @@ func test(profile string) error {
 	r.section("listing/outputs")
 	r.run("", "ls")
 	r.run("", "groups")
+	r.run("", "fields")
 	r.run("echo y |", "rm test2/key1")
 	r.logAppend("echo")
 	r.run("", "ls")
@@ -254,6 +255,7 @@ func test(profile string) error {
 	r.run("", "ls")
 	r.run("", "groups")
 	r.run("", "groups 'test9/**/*'")
+	r.run("", "fields 'test9/**/*'")
 	r.run("echo y |", "unset test8/unset/password")
 	r.logAppend("echo")
 	r.run("", "ls")
@@ -267,6 +269,7 @@ func test(profile string) error {
 	r.run("", "mv test9/key2/sub1 test9/sub3")
 	r.run("", "ls")
 	r.run("", "groups")
+	r.run("", "fields")
 	r.run("echo y |", "rm test9/*")
 	r.logAppend("echo")
 

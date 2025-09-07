@@ -82,8 +82,14 @@ func run() error {
 		return app.Health(p)
 	case commands.ReKey:
 		return app.ReKey(p)
-	case commands.List, commands.Groups:
-		return app.List(p, command == commands.Groups)
+	case commands.List, commands.Groups, commands.Fields:
+		mode := app.ListEntriesMode
+		if command == commands.Groups {
+			mode = app.ListGroupsMode
+		} else if command == commands.Fields {
+			mode = app.ListFieldsMode
+		}
+		return app.List(p, mode)
 	case commands.Unset:
 		return app.Unset(p)
 	case commands.Move:

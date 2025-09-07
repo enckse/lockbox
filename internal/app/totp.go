@@ -178,7 +178,7 @@ func (args *TOTPArguments) Do(opts TOTPOptions) error {
 		return errors.New("invalid option functions")
 	}
 	if args.Mode == commands.TOTPList {
-		return doList(kdbx.OTPField, args.Entry, opts.app, false)
+		return doList(kdbx.OTPField, args.Entry, opts.app, ListEntriesMode)
 	}
 	return args.display(opts)
 }

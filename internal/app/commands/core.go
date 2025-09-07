@@ -66,6 +66,7 @@ const (
 	TOTPSeed = "seed"
 	// Health will show health information (for debugging/troubleshooting)
 	Health = "health"
+	Fields = "fields"
 )
 
 var (

@@ -45,7 +45,12 @@ _{{ $.Executable }}() {
             compadd "$@" $({{ $.DoGroups }})
           fi
         ;;
-        "{{ $.UnsetCommand }}" | "{{ $.InsertCommand }}")
+        "{{ $.InsertCommand }}")
+          if [ "$len" -eq 3 ]; then
+            compadd "$@" $({{ $.DoFields }})
+          fi
+        ;;
+        "{{ $.UnsetCommand }}")
           if [ "$len" -eq 3 ]; then
             compadd "$@" $({{ $.DoList }})
           fi
