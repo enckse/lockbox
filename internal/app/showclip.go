@@ -50,7 +50,7 @@ func getEntity(entry string, cmd CommandOptions) (string, error) {
 	}
 	val, ok := existing.Value(base)
 	if !ok {
-		return "", fmt.Errorf("entity value invalid: %s (%s)", base, entry)
+		return "", fmt.Errorf("entity value invalid: %s", entry)
 	}
 	return val, nil
 }
