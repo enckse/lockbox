@@ -118,6 +118,18 @@ copy = ["'xyz/$TEST'", "s"]
 	if fmt.Sprintf("%v", a) != "['xyz/abc' s]" || !ok {
 		t.Errorf("invalid object: %v", a)
 	}
+	data = `include = [{file = 'xxx', required = false}]
+store="xyz"
+[clip]
+copy = [{file = "'cliptest/$TEST'"}, "s"]
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, emptyRead); err == nil || !strings.Contains(err.Error(), "value is not valid array value:") || !strings.Contains(err.Error(), "cliptest/") {
+		t.Errorf("invalid error: %v", err)
+	}
+	if len(store.List()) != 2 {
+		t.Errorf("invalid store")
+	}
 	data = `include = []
 store="xyz"
 [clip]
