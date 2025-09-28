@@ -41,7 +41,7 @@ func TestLoadConfigFile(t *testing.T) {
 	}
 }
 
-func TestLoadConfigFileNoFileStrict(t *testing.T) {
+func TestLoadConfigFileNoFile(t *testing.T) {
 	store.Clear()
 	os.Mkdir("testdata", 0o755)
 	defer os.RemoveAll("testdata")
@@ -57,7 +57,7 @@ func TestLoadConfigFileNoFileStrict(t *testing.T) {
 	}
 }
 
-func TestLoadConfigFileNoFileNoStrict(t *testing.T) {
+func TestLoadConfigFileNoFileNotRequired(t *testing.T) {
 	store.Clear()
 	os.Mkdir("testdata", 0o755)
 	defer os.RemoveAll("testdata")
@@ -66,10 +66,25 @@ func TestLoadConfigFileNoFileNoStrict(t *testing.T) {
 	if err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
-	loaded = strings.Replace(loaded, "include = []", "include = ['invalid.toml']", 1)
-	loaded = strings.Replace(loaded, "strict = true", "strict = false", 1)
+	loaded = strings.Replace(loaded, "include = []", "include = [{file = 'invalid.toml', required = false}]", 1)
 	os.WriteFile(file, []byte(loaded), 0o644)
 	if err := platform.LoadConfigFile(file); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+}
+
+func TestLoadConfigFileNoFileRequired(t *testing.T) {
+	store.Clear()
+	os.Mkdir("testdata", 0o755)
+	defer os.RemoveAll("testdata")
+	file := filepath.Join("testdata", "config.toml")
+	loaded, err := config.DefaultTOML()
+	if err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	loaded = strings.Replace(loaded, "include = []", "include = [{file = 'invalid.toml'}]", 1)
+	os.WriteFile(file, []byte(loaded), 0o644)
+	if err := platform.LoadConfigFile(file); err == nil || err.Error() != "failed to load the included file: invalid.toml" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

@@ -15,20 +15,24 @@ import (
 )
 
 const (
-	isStrict      = "strict"
-	isInclude     = "include"
-	maxDepth      = 10
-	tomlInt       = "integer"
-	tomlBool      = "boolean"
-	tomlString    = "string"
-	tomlArray     = "[]string"
-	strictDefault = true
+	isInclude   = "include"
+	maxDepth    = 10
+	tomlInt     = "integer"
+	tomlBool    = "boolean"
+	tomlString  = "string"
+	tomlArray   = "[]string"
+	fileKey     = "file"
+	requiredKey = "required"
 )
 
 type (
 	tomlType string
 	// Loader indicates how included files should be sourced
-	Loader func(string) (io.Reader, error)
+	Loader        func(string) (io.Reader, error)
+	stringWrapper struct {
+		value    string
+		required bool
+	}
 )
 
 // DefaultTOML will load the internal, default TOML with additional comment markups
@@ -77,15 +81,15 @@ func DefaultTOML() (string, error) {
 # depth allowed up to %d include levels
 #
 # it is ONLY used during TOML configuration loading
-%s = []
-
-# strict, when enabled, requires the configuration entries
-# to adhere to all loading rules.
 #
-# it is currently only used to ignore included files that
-# are not found
-%s = %t
-`, maxDepth, isInclude, isStrict, strictDefault), "\n"} {
+# can be an array of strings: ['file.toml']
+# or an array of objects: [{%s = 'file.toml', %s = false}]
+#
+# this is useful to control optional includes (includes
+# are required by default, set to false to allow ignoring
+# files)
+%s = []
+`, maxDepth, fileKey, requiredKey, isInclude), "\n"} {
 		if _, err := builder.WriteString(header); err != nil {
 			return "", err
 		}
@@ -160,11 +164,15 @@ func Load(r io.Reader, loader Loader) error {
 		md := env.display()
 		switch md.tomlType {
 		case tomlArray:
-			array, err := parseStringArray(v, md.canExpand)
+			array, err := parseArray(v, md.canExpand, false)
 			if err != nil {
 				return err
 			}
-			store.SetArray(export, array)
+			var s []string
+			for _, item := range array {
+				s = append(s, item.value)
+			}
+			store.SetArray(export, s)
 		case tomlInt:
 			i, ok := v.(int64)
 			if !ok {
@@ -220,27 +228,18 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 		return nil, err
 	}
 	maps := []map[string]any{m}
-	strict := strictDefault
-	if v, ok := m[isStrict]; ok {
-		delete(m, isStrict)
-		b, err := parseBool(v)
-		if err != nil {
-			return nil, err
-		}
-		strict = b
-	}
 	includes, ok := m[isInclude]
 	if ok {
 		delete(m, isInclude)
-		including, err := parseStringArray(includes, true)
+		including, err := parseArray(includes, true, true)
 		if err != nil {
 			return nil, err
 		}
 		if len(including) > 0 {
-			for _, s := range including {
-				files := []string{s}
-				if strings.Contains(s, "*") {
-					matched, err := filepath.Glob(s)
+			for _, item := range including {
+				files := []string{item.value}
+				if strings.Contains(item.value, "*") {
+					matched, err := filepath.Glob(item.value)
 					if err != nil {
 						return nil, err
 					}
@@ -252,7 +251,7 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 						return nil, err
 					}
 					if reader == nil {
-						if strict {
+						if item.required {
 							return nil, fmt.Errorf("failed to load the included file: %s", file)
 						}
 						continue
@@ -269,21 +268,56 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 	return maps, nil
 }
 
-func parseStringArray(value any, expand bool) ([]string, error) {
-	var res []string
+func parseArray(value any, expand, allowMap bool) ([]stringWrapper, error) {
+	expander := func(s string) string {
+		return s
+	}
+	if expand {
+		expander = func(s string) string {
+			return os.Expand(s, os.Getenv)
+		}
+	}
+	var res []stringWrapper
 	switch t := value.(type) {
 	case []any:
 		for _, item := range t {
+			err := fmt.Errorf("value is not valid array value: %v", item)
+			val := ""
+			required := true
 			switch s := item.(type) {
 			case string:
-				val := s
-				if expand {
-					val = os.Expand(s, os.Getenv)
+				val = s
+			case map[string]any:
+				if !allowMap {
+					return nil, err
 				}
-				res = append(res, val)
+				length := len(s)
+				if length > 2 {
+					return nil, fmt.Errorf("invalid map array, too many keys: %v", item)
+				}
+				file, ok := s[fileKey]
+				if !ok {
+					return nil, fmt.Errorf("'%s' is required, missing: %v", fileKey, item)
+				}
+				val, ok = file.(string)
+				if !ok {
+					return nil, newTypeError("string", file)
+				}
+				if length == 2 {
+					req, ok := s[requiredKey]
+					if !ok {
+						return nil, fmt.Errorf("only '%s' key is allowed here: %v", requiredKey, item)
+					}
+					b, err := parseBool(req)
+					if err != nil {
+						return nil, err
+					}
+					required = b
+				}
 			default:
-				return nil, fmt.Errorf("value is not string in array: %v", item)
+				return nil, err
 			}
+			res = append(res, stringWrapper{value: expander(val), required: required})
 		}
 	default:
 		return nil, fmt.Errorf("value is not of array type: %v", value)

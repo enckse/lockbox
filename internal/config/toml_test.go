@@ -61,7 +61,7 @@ func TestLoadIncludes(t *testing.T) {
 		} else {
 			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "value is not string in array: 1" {
+	}); err == nil || err.Error() != "value is not valid array value: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = ["$TEST/abc"]
@@ -95,7 +95,7 @@ func TestArrayLoad(t *testing.T) {
 copy = ["'xyz/$TEST'", "s", 1]
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "value is not string in array: 1" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "value is not valid array value: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -267,27 +267,25 @@ otp_format = "$TEST"
 	}
 }
 
-func TestLoadIncludesStrictControls(t *testing.T) {
+func TestLoadIncludesControls(t *testing.T) {
 	store.Clear()
 	defer os.Clearenv()
 	t.Setenv("TEST", "xyz")
 	data := `include = ["$TEST/abc"]
 store="xyz"
-strict = true
 `
 	r := strings.NewReader(data)
 	if err := config.Load(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
-			return strings.NewReader("include = ['123']\nstrict = 1\nstore = 'abc'"), nil
+			return strings.NewReader("include = [{file = '123', required = 1}]\nstore = 'abc'"), nil
 		} else {
 			return nil, errors.New("invalid path")
 		}
 	}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
-	data = `include = ["$TEST/abc"]
+	data = `include = [{file = "$TEST/abc", required = true}]
 store="xyz"
-strict = true
 `
 	r = strings.NewReader(data)
 	if err := config.Load(r, func(_ string) (io.Reader, error) {
@@ -295,14 +293,49 @@ strict = true
 	}); err == nil || err.Error() != "failed to load the included file: xyz/abc" {
 		t.Errorf("invalid error: %v", err)
 	}
-	data = `include = ["$TEST/abc"]
+	data = `include = [{file = "$TEST/abc", required = false}]
 store="xyz"
-strict = false
 `
 	r = strings.NewReader(data)
 	if err := config.Load(r, func(_ string) (io.Reader, error) {
 		return nil, nil
 	}); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	data = `include = [{file = "$TEST/abc", required = false, other = 1}]
+store="xyz"
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, func(_ string) (io.Reader, error) {
+		return nil, nil
+	}); err == nil || !strings.Contains(err.Error(), "invalid map array, too many keys:") {
+		t.Errorf("invalid error: %v", err)
+	}
+	data = `include = [{fsle = "$TEST/abc"}]
+store="xyz"
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, func(_ string) (io.Reader, error) {
+		return nil, nil
+	}); err == nil || !strings.Contains(err.Error(), "'file' is required, missing:") {
+		t.Errorf("invalid error: %v", err)
+	}
+	data = `include = [{file = "$TEST/abc", require = 1}]
+store="xyz"
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, func(_ string) (io.Reader, error) {
+		return nil, nil
+	}); err == nil || !strings.Contains(err.Error(), "only 'required' key is allowed here:") {
+		t.Errorf("invalid error: %v", err)
+	}
+	data = `include = [{file = "$TEST/abc", required = 1}]
+store="xyz"
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, func(_ string) (io.Reader, error) {
+		return nil, nil
+	}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
