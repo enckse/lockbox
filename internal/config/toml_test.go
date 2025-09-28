@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -23,7 +22,7 @@ func TestLoadIncludes(t *testing.T) {
 	t.Setenv("TEST", "xyz")
 	data := `include = ["$TEST/abc"]`
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
+	if err := config.Load(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"$TEST/abc\"]"), nil
 		} else {
@@ -34,7 +33,7 @@ func TestLoadIncludes(t *testing.T) {
 	}
 	data = `include = ["abc"]`
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
+	if err := config.Load(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"aaa\"]"), nil
 		} else {
@@ -45,7 +44,7 @@ func TestLoadIncludes(t *testing.T) {
 	}
 	data = `include = 1`
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
+	if err := config.Load(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"aaa\"]"), nil
 		} else {
@@ -56,7 +55,7 @@ func TestLoadIncludes(t *testing.T) {
 	}
 	data = `include = [1]`
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
+	if err := config.Load(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"aaa\"]"), nil
 		} else {
@@ -69,7 +68,7 @@ func TestLoadIncludes(t *testing.T) {
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, func(p string) (io.Reader, error) {
+	if err := config.Load(r, func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("store = 'abc'"), nil
 		} else {
@@ -96,7 +95,7 @@ func TestArrayLoad(t *testing.T) {
 copy = ["'xyz/$TEST'", "s", 1]
 `
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "value is not string in array: 1" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "value is not string in array: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -105,7 +104,7 @@ store="xyz"
 copy = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err != nil {
+	if err := config.Load(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -125,7 +124,7 @@ store="xyz"
 copy = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err != nil {
+	if err := config.Load(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -148,7 +147,7 @@ func TestReadInt(t *testing.T) {
 hash_length = true
 `
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-int64 found where expected: true" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "non-int64 found where int64 expected: true" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -156,7 +155,7 @@ hash_length = true
 hash_length = 1
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err != nil {
+	if err := config.Load(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -171,7 +170,7 @@ hash_length = 1
 hash_length = -1
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "-1 is negative (not allowed here)" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "-1 is negative (not allowed here)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -183,7 +182,7 @@ func TestReadBool(t *testing.T) {
 clip = 1
 `
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-bool found where expected: 1" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "non-bool found where bool expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -191,7 +190,7 @@ clip = 1
 clip = true
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err != nil {
+	if err := config.Load(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -206,7 +205,7 @@ clip = true
 clip = false
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err != nil {
+	if err := config.Load(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -225,7 +224,7 @@ func TestBadValues(t *testing.T) {
 enabled = "false"
 `
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "unknown key: totsp_enabled (LOCKBOX_TOTSP_ENABLED)" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "unknown key: totsp_enabled (LOCKBOX_TOTSP_ENABLED)" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -233,26 +232,8 @@ enabled = "false"
 otp_format = -1
 `
 	r = strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err == nil || err.Error() != "non-string found where expected: -1" {
+	if err := config.Load(r, emptyRead); err == nil || err.Error() != "non-string found where string expected: -1" {
 		t.Errorf("invalid error: %v", err)
-	}
-}
-
-func TestDefaultTOMLToLoadFile(t *testing.T) {
-	store.Clear()
-	os.Mkdir("testdata", 0o755)
-	defer os.RemoveAll("testdata")
-	file := filepath.Join("testdata", "config.toml")
-	loaded, err := config.DefaultTOML()
-	if err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	os.WriteFile(file, []byte(loaded), 0o644)
-	if err := config.LoadConfigFile(file); err != nil {
-		t.Errorf("invalid error: %v", err)
-	}
-	if len(store.List()) != 16 {
-		t.Errorf("invalid environment after load: %d", len(store.List()))
 	}
 }
 
@@ -266,7 +247,7 @@ clip.copy = ["$TEST", "$TEST"]
 otp_format = "$TEST"
 `
 	r := strings.NewReader(data)
-	if err := config.LoadConfig(r, emptyRead); err != nil {
+	if err := config.Load(r, emptyRead); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 3 {
@@ -283,5 +264,45 @@ otp_format = "$TEST"
 	a, ok := store.GetArray("LOCKBOX_CLIP_COPY")
 	if fmt.Sprintf("%v", a) != "[1 1]" || !ok {
 		t.Errorf("invalid object: %v", a)
+	}
+}
+
+func TestLoadIncludesStrictControls(t *testing.T) {
+	store.Clear()
+	defer os.Clearenv()
+	t.Setenv("TEST", "xyz")
+	data := `include = ["$TEST/abc"]
+store="xyz"
+strict = true
+`
+	r := strings.NewReader(data)
+	if err := config.Load(r, func(p string) (io.Reader, error) {
+		if p == "xyz/abc" {
+			return strings.NewReader("include = ['123']\nstrict = 1\nstore = 'abc'"), nil
+		} else {
+			return nil, errors.New("invalid path")
+		}
+	}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
+		t.Errorf("invalid error: %v", err)
+	}
+	data = `include = ["$TEST/abc"]
+store="xyz"
+strict = true
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, func(_ string) (io.Reader, error) {
+		return nil, nil
+	}); err == nil || err.Error() != "failed to load the included file: xyz/abc" {
+		t.Errorf("invalid error: %v", err)
+	}
+	data = `include = ["$TEST/abc"]
+store="xyz"
+strict = false
+`
+	r = strings.NewReader(data)
+	if err := config.Load(r, func(_ string) (io.Reader, error) {
+		return nil, nil
+	}); err != nil {
+		t.Errorf("invalid error: %v", err)
 	}
 }

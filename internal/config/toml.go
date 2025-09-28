@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"maps"
@@ -16,12 +15,14 @@ import (
 )
 
 const (
-	isInclude  = "include"
-	maxDepth   = 10
-	tomlInt    = "integer"
-	tomlBool   = "boolean"
-	tomlString = "string"
-	tomlArray  = "[]string"
+	isStrict      = "strict"
+	isInclude     = "include"
+	maxDepth      = 10
+	tomlInt       = "integer"
+	tomlBool      = "boolean"
+	tomlString    = "string"
+	tomlArray     = "[]string"
+	strictDefault = true
 )
 
 type (
@@ -77,7 +78,14 @@ func DefaultTOML() (string, error) {
 #
 # it is ONLY used during TOML configuration loading
 %s = []
-`, maxDepth, isInclude), "\n"} {
+
+# strict, when enabled, requires the configuration entries
+# to adhere to all loading rules.
+#
+# it is currently only used to ignore included files that
+# are not found
+%s = %t
+`, maxDepth, isInclude, isStrict, strictDefault), "\n"} {
 		if _, err := builder.WriteString(header); err != nil {
 			return "", err
 		}
@@ -133,8 +141,8 @@ func generateDetailText(data printer) (string, error) {
 	return strings.Join(text, "\n"), nil
 }
 
-// LoadConfig will read the input reader and use the loader to source configuration files
-func LoadConfig(r io.Reader, loader Loader) error {
+// Load will read the input reader and use the loader to source configuration files
+func Load(r io.Reader, loader Loader) error {
 	mapped, err := readConfigs(r, 1, loader)
 	if err != nil {
 		return err
@@ -160,23 +168,22 @@ func LoadConfig(r io.Reader, loader Loader) error {
 		case tomlInt:
 			i, ok := v.(int64)
 			if !ok {
-				return fmt.Errorf("non-int64 found where expected: %v", v)
+				return newTypeError("int64", v)
 			}
 			if i < 0 {
 				return fmt.Errorf("%d is negative (not allowed here)", i)
 			}
 			store.SetInt64(export, i)
 		case tomlBool:
-			switch t := v.(type) {
-			case bool:
-				store.SetBool(export, t)
-			default:
-				return fmt.Errorf("non-bool found where expected: %v", v)
+			b, err := parseBool(v)
+			if err != nil {
+				return err
 			}
+			store.SetBool(export, b)
 		case tomlString:
 			s, ok := v.(string)
 			if !ok {
-				return fmt.Errorf("non-string found where expected: %v", v)
+				return newTypeError("string", v)
 			}
 			if md.canExpand {
 				s = os.Expand(s, os.Getenv)
@@ -190,6 +197,19 @@ func LoadConfig(r io.Reader, loader Loader) error {
 	return nil
 }
 
+func newTypeError(t string, v any) error {
+	return fmt.Errorf("non-%s found where %s expected: %v", t, t, v)
+}
+
+func parseBool(v any) (bool, error) {
+	switch t := v.(type) {
+	case bool:
+		return t, nil
+	default:
+		return false, newTypeError("bool", v)
+	}
+}
+
 func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error) {
 	if depth > maxDepth {
 		return nil, fmt.Errorf("too many nested includes (%d > %d)", depth, maxDepth)
@@ -200,6 +220,15 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 		return nil, err
 	}
 	maps := []map[string]any{m}
+	strict := strictDefault
+	if v, ok := m[isStrict]; ok {
+		delete(m, isStrict)
+		b, err := parseBool(v)
+		if err != nil {
+			return nil, err
+		}
+		strict = b
+	}
 	includes, ok := m[isInclude]
 	if ok {
 		delete(m, isInclude)
@@ -221,6 +250,12 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 					reader, err := loader(file)
 					if err != nil {
 						return nil, err
+					}
+					if reader == nil {
+						if strict {
+							return nil, fmt.Errorf("failed to load the included file: %s", file)
+						}
+						continue
 					}
 					results, err := readConfigs(reader, depth+1, loader)
 					if err != nil {
@@ -258,7 +293,6 @@ func parseStringArray(value any, expand bool) ([]string, error) {
 
 func flatten(m map[string]any, prefix string) map[string]any {
 	flattened := make(map[string]any)
-
 	for k, v := range m {
 		key := k
 		if prefix != "" {
@@ -274,22 +308,4 @@ func flatten(m map[string]any, prefix string) map[string]any {
 	}
 
 	return flattened
-}
-
-func configLoader(path string) (io.Reader, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return bytes.NewReader(data), nil
-}
-
-// LoadConfigFile will load a path as the configuration
-// it will also set the environment
-func LoadConfigFile(path string) error {
-	reader, err := configLoader(path)
-	if err != nil {
-		return err
-	}
-	return LoadConfig(reader, configLoader)
 }
