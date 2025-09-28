@@ -89,7 +89,6 @@ func run() error {
 			mode = app.ListGroupsMode
 		case commands.Fields:
 			mode = app.ListFieldsMode
-
 		}
 		return app.List(p, mode)
 	case commands.Unset:
