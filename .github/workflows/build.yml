@@ -22,7 +22,7 @@ jobs:
           - name: ubuntu-latest
             image: alpine:latest
             display: alpine
-            deps: apk add make
+            deps: apk add make tar
           - name: macos-latest
             image: null
             display: macos
