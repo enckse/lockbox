@@ -47,18 +47,8 @@ func handleEarly(command string, args []string) (bool, error) {
 }
 
 func run() error {
-	cfg := app.ConfigLoader{}
-	for _, p := range config.NewConfigFiles() {
-		if cfg.Check(p) {
-			r, err := cfg.Read(p)
-			if err != nil {
-				return err
-			}
-			if err := config.Load(r, cfg); err != nil {
-				return err
-			}
-			break
-		}
+	if err := config.Parse(app.ConfigLoader{}); err != nil {
+		return err
 	}
 	args := os.Args
 	if len(args) < 2 {

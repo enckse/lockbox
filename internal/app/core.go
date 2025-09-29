@@ -99,3 +99,8 @@ func (c ConfigLoader) Read(file string) (io.Reader, error) {
 func (c ConfigLoader) Check(file string) bool {
 	return platform.PathExists(file)
 }
+
+// Home will read the user's home directory
+func (c ConfigLoader) Home() (string, error) {
+	return os.UserHomeDir()
+}

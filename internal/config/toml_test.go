@@ -15,6 +15,7 @@ import (
 type mockReader struct {
 	read  func(string) (io.Reader, error)
 	check func(string) bool
+	home  func() (string, error)
 }
 
 func (m mockReader) Read(path string) (io.Reader, error) {
@@ -29,6 +30,13 @@ func (m mockReader) Check(path string) bool {
 		return true
 	}
 	return m.check(path)
+}
+
+func (m mockReader) Home() (string, error) {
+	if m.home == nil {
+		return "", nil
+	}
+	return m.home()
 }
 
 func TestLoadIncludes(t *testing.T) {

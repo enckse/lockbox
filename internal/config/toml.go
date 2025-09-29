@@ -27,11 +27,6 @@ const (
 
 type (
 	tomlType string
-	// Loader indicates how included files should be sourced
-	Loader interface {
-		Read(string) (io.Reader, error)
-		Check(string) bool
-	}
 	included struct {
 		value    string
 		required bool

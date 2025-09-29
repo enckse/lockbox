@@ -1,37 +1,73 @@
 package config_test
 
 import (
+	"errors"
+	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/config"
 	"github.com/enckse/lockbox/internal/config/store"
 )
 
-func TestNewEnvFiles(t *testing.T) {
+func TestParse(t *testing.T) {
+	store.Clear()
+	defer store.Clear()
 	os.Clearenv()
+	defer os.Clearenv()
+	mock := mockReader{}
+	mock.home = func() (string, error) {
+		return "", errors.New("invalid home")
+	}
+	mock.check = func(string) bool {
+		return false
+	}
+	if err := config.Parse(mock); err == nil || err.Error() != "invalid home" {
+		t.Errorf("invalid error: %v", err)
+	}
+	mock.home = func() (string, error) {
+		return "hometest", nil
+	}
+	mock.read = func(p string) (io.Reader, error) {
+		if p == "hometest/.config/lockbox/config.toml" {
+			return strings.NewReader("[feature]\ncolor = true"), nil
+		}
+		return nil, nil
+	}
+	mock.check = func(string) bool {
+		return true
+	}
+	store.SetBool("LOCKBOX_FEATURE_COLOR", false)
+	if err := config.Parse(mock); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if ok, _ := store.GetBool("LOCKBOX_FEATURE_COLOR"); !ok {
+		t.Error("should have set")
+	}
+	t.Setenv("XDG_CONFIG_HOME", "xdghome")
+	mock.read = func(p string) (io.Reader, error) {
+		if p == "xdghome/lockbox/config.toml" {
+			return strings.NewReader("[feature]\ncolor = false"), nil
+		}
+		return nil, nil
+	}
+	if err := config.Parse(mock); err != nil {
+		t.Errorf("invalid error: %v", err)
+	}
+	if ok, _ := store.GetBool("LOCKBOX_FEATURE_COLOR"); ok {
+		t.Error("should have unset")
+	}
+	store.SetBool("LOCKBOX_FEATURE_COLOR", true)
 	t.Setenv("LOCKBOX_CONFIG_TOML", "test")
-	f := config.NewConfigFiles()
-	if len(f) != 1 || f[0] != "test" {
-		t.Errorf("invalid files: %v", f)
+	mock.check = func(p string) bool {
+		return p != "test"
 	}
-	t.Setenv("HOME", "test")
-	t.Setenv("LOCKBOX_CONFIG_TOML", "")
-	f = config.NewConfigFiles()
-	if len(f) != 1 {
-		t.Errorf("invalid files: %v", f)
+	if err := config.Parse(mock); err != nil {
+		t.Errorf("invalid error: %v", err)
 	}
-	t.Setenv("LOCKBOX_CONFIG_TOML", "")
-	t.Setenv("XDG_CONFIG_HOME", "test")
-	f = config.NewConfigFiles()
-	if len(f) != 2 {
-		t.Errorf("invalid files: %v", f)
-	}
-	t.Setenv("LOCKBOX_CONFIG_TOML", "")
-	os.Unsetenv("HOME")
-	f = config.NewConfigFiles()
-	if len(f) != 1 {
-		t.Errorf("invalid files: %v", f)
+	if ok, _ := store.GetBool("LOCKBOX_FEATURE_COLOR"); !ok {
+		t.Error("should have set")
 	}
 }
 

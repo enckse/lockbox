@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -91,24 +92,48 @@ type (
 		Text     string
 		Position Position
 	}
+	// Loader indicates how config files should be read
+	Loader interface {
+		Read(string) (io.Reader, error)
+		Check(string) bool
+		Home() (string, error)
+	}
 )
 
-// NewConfigFiles will get the list of candidate config files
-func NewConfigFiles() []string {
+// Parse will parse the config based on the loader
+func Parse(loader Loader) error {
+	process := func(path string) (bool, error) {
+		if loader.Check(path) {
+			r, err := loader.Read(path)
+			if err != nil {
+				return false, err
+			}
+			return true, Load(r, loader)
+		}
+		return false, nil
+	}
 	v := os.Expand(os.Getenv(ConfigEnv), os.Getenv)
 	if v != "" {
-		return []string{v}
+		// NOTE: when this environment variable is set - either load the config or exit, the user does NOT want the default config options regardless
+		_, err := process(v)
+		return err
 	}
-	var options []string
-	pathAdder := func(root, sub string, err error) {
-		if err == nil && root != "" {
-			options = append(options, filepath.Join(root, sub))
+	pathAdder := func(root, sub string) (bool, error) {
+		if root != "" {
+			return process(filepath.Join(root, sub))
 		}
+		return false, nil
 	}
-	pathAdder(os.Getenv("XDG_CONFIG_HOME"), ConfigXDG, nil)
-	h, err := os.UserHomeDir()
-	pathAdder(h, ConfigHome, err)
-	return options
+	ok, err := pathAdder(os.Getenv("XDG_CONFIG_HOME"), ConfigXDG)
+	if ok || err != nil {
+		return err
+	}
+	h, err := loader.Home()
+	if err != nil {
+		return err
+	}
+	_, err = pathAdder(h, ConfigHome)
+	return err
 }
 
 func environmentRegister[T printer](obj T) T {
