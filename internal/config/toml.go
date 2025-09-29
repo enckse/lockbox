@@ -28,7 +28,10 @@ const (
 type (
 	tomlType string
 	// Loader indicates how included files should be sourced
-	Loader   func(string) (io.Reader, error)
+	Loader interface {
+		Read(string) (io.Reader, error)
+		Check(string) bool
+	}
 	included struct {
 		value    string
 		required bool
@@ -246,15 +249,16 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 					files = matched
 				}
 				for _, file := range files {
-					reader, err := loader(file)
-					if err != nil {
-						return nil, err
-					}
-					if reader == nil {
+					ok := loader.Check(file)
+					if !ok {
 						if item.required {
 							return nil, fmt.Errorf("failed to load the included file: %s", file)
 						}
 						continue
+					}
+					reader, err := loader.Read(file)
+					if err != nil {
+						return nil, err
 					}
 					results, err := readConfigs(reader, depth+1, loader)
 					if err != nil {

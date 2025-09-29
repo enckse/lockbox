@@ -10,7 +10,6 @@ import (
 	"github.com/enckse/lockbox/internal/app"
 	"github.com/enckse/lockbox/internal/app/commands"
 	"github.com/enckse/lockbox/internal/config"
-	"github.com/enckse/lockbox/internal/platform"
 )
 
 var version string
@@ -48,9 +47,14 @@ func handleEarly(command string, args []string) (bool, error) {
 }
 
 func run() error {
+	cfg := app.ConfigLoader{}
 	for _, p := range config.NewConfigFiles() {
-		if platform.PathExists(p) {
-			if err := platform.LoadConfigFile(p); err != nil {
+		if cfg.Check(p) {
+			r, err := cfg.Read(p)
+			if err != nil {
+				return err
+			}
+			if err := config.Load(r, cfg); err != nil {
 				return err
 			}
 			break

@@ -2,6 +2,7 @@
 package app
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -31,6 +32,9 @@ type (
 		tx   *kdbx.Transaction
 		args []string
 	}
+
+	// ConfigLoader is the default application loader to assist with config handling
+	ConfigLoader struct{}
 )
 
 // NewDefaultCommand creates a new app command
@@ -80,4 +84,18 @@ func (a *DefaultCommand) IsPipe() bool {
 // Input will read user input
 func (a *DefaultCommand) Input(interactive, isPassword bool, prompt string) ([]byte, error) {
 	return platform.GetUserInput(interactive, isPassword, prompt)
+}
+
+// Read will read a configuration file
+func (c ConfigLoader) Read(file string) (io.Reader, error) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(data), nil
+}
+
+// Check will check if a configuration file is valid for reading
+func (c ConfigLoader) Check(file string) bool {
+	return platform.PathExists(file)
 }

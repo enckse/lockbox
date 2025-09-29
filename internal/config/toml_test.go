@@ -12,8 +12,23 @@ import (
 	"github.com/enckse/lockbox/internal/config/store"
 )
 
-var emptyRead = func(_ string) (io.Reader, error) {
-	return nil, nil
+type mockReader struct {
+	read  func(string) (io.Reader, error)
+	check func(string) bool
+}
+
+func (m mockReader) Read(path string) (io.Reader, error) {
+	if m.read == nil {
+		return nil, nil
+	}
+	return m.read(path)
+}
+
+func (m mockReader) Check(path string) bool {
+	if m.check == nil {
+		return true
+	}
+	return m.check(path)
 }
 
 func TestLoadIncludes(t *testing.T) {
@@ -22,59 +37,60 @@ func TestLoadIncludes(t *testing.T) {
 	t.Setenv("TEST", "xyz")
 	data := `include = ["$TEST/abc"]`
 	r := strings.NewReader(data)
-	if err := config.Load(r, func(p string) (io.Reader, error) {
+	mock := mockReader{}
+	mock.read = func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"$TEST/abc\"]"), nil
-		} else {
-			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "too many nested includes (11 > 10)" {
+		return nil, errors.New("invalid path")
+	}
+	if err := config.Load(r, mock); err == nil || err.Error() != "too many nested includes (11 > 10)" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = ["abc"]`
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(p string) (io.Reader, error) {
+	mock.read = func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"aaa\"]"), nil
-		} else {
-			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "invalid path" {
+		return nil, errors.New("invalid path")
+	}
+	if err := config.Load(r, mock); err == nil || err.Error() != "invalid path" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = 1`
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(p string) (io.Reader, error) {
+	mock.read = func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"aaa\"]"), nil
-		} else {
-			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "value is not of array type: 1" {
+		return nil, errors.New("invalid path")
+	}
+	if err := config.Load(r, mock); err == nil || err.Error() != "value is not of array type: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [1]`
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(p string) (io.Reader, error) {
+	mock.read = func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [\"aaa\"]"), nil
-		} else {
-			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "value is not valid array value: 1" {
+		return nil, errors.New("invalid path")
+	}
+	if err := config.Load(r, mock); err == nil || err.Error() != "value is not valid array value: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = ["$TEST/abc"]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(p string) (io.Reader, error) {
+	mock.read = func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("store = 'abc'"), nil
-		} else {
-			return nil, errors.New("invalid path")
 		}
-	}); err != nil {
+		return nil, errors.New("invalid path")
+	}
+	if err := config.Load(r, mock); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -95,7 +111,7 @@ func TestArrayLoad(t *testing.T) {
 copy = ["'xyz/$TEST'", "s", 1]
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "value is not valid array value: 1" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "value is not valid array value: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -104,7 +120,7 @@ store="xyz"
 copy = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err != nil {
+	if err := config.Load(r, mockReader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -124,7 +140,11 @@ store="xyz"
 copy = [{file = "'cliptest/$TEST'"}, "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || !strings.Contains(err.Error(), "value is not valid array value:") || !strings.Contains(err.Error(), "cliptest/") {
+	mock := mockReader{}
+	mock.check = func(string) bool {
+		return false
+	}
+	if err := config.Load(r, mock); err == nil || !strings.Contains(err.Error(), "value is not valid array value:") || !strings.Contains(err.Error(), "cliptest/") {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -136,7 +156,7 @@ store="xyz"
 copy = ["'xyz/$TEST'", "s"]
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err != nil {
+	if err := config.Load(r, mockReader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 2 {
@@ -159,7 +179,7 @@ func TestReadInt(t *testing.T) {
 hash_length = true
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "non-int64 found where int64 expected: true" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "non-int64 found where int64 expected: true" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -167,7 +187,7 @@ hash_length = true
 hash_length = 1
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err != nil {
+	if err := config.Load(r, mockReader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -182,7 +202,7 @@ hash_length = 1
 hash_length = -1
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "-1 is negative (not allowed here)" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "-1 is negative (not allowed here)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -194,7 +214,7 @@ func TestReadBool(t *testing.T) {
 clip = 1
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "non-bool found where bool expected: 1" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -202,7 +222,7 @@ clip = 1
 clip = true
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err != nil {
+	if err := config.Load(r, mockReader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -217,7 +237,7 @@ clip = true
 clip = false
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err != nil {
+	if err := config.Load(r, mockReader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 1 {
@@ -236,7 +256,7 @@ func TestBadValues(t *testing.T) {
 enabled = "false"
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "unknown key: totsp_enabled (LOCKBOX_TOTSP_ENABLED)" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "unknown key: totsp_enabled (LOCKBOX_TOTSP_ENABLED)" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = []
@@ -244,7 +264,7 @@ enabled = "false"
 otp_format = -1
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err == nil || err.Error() != "non-string found where string expected: -1" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "non-string found where string expected: -1" {
 		t.Errorf("invalid error: %v", err)
 	}
 }
@@ -259,7 +279,7 @@ clip.copy = ["$TEST", "$TEST"]
 otp_format = "$TEST"
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, emptyRead); err != nil {
+	if err := config.Load(r, mockReader{}); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	if len(store.List()) != 3 {
@@ -287,67 +307,59 @@ func TestLoadIncludesControls(t *testing.T) {
 store="xyz"
 `
 	r := strings.NewReader(data)
-	if err := config.Load(r, func(p string) (io.Reader, error) {
+	mock := mockReader{}
+	mock.read = func(p string) (io.Reader, error) {
 		if p == "xyz/abc" {
 			return strings.NewReader("include = [{file = '123', required = 1}]\nstore = 'abc'"), nil
-		} else {
-			return nil, errors.New("invalid path")
 		}
-	}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
+		return nil, errors.New("invalid path")
+	}
+	if err := config.Load(r, mock); err == nil || err.Error() != "non-bool found where bool expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [{file = "$TEST/abc", required = true}]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(_ string) (io.Reader, error) {
-		return nil, nil
-	}); err == nil || err.Error() != "failed to load the included file: xyz/abc" {
+	mock.check = func(string) bool {
+		return false
+	}
+	if err := config.Load(r, mock); err == nil || err.Error() != "failed to load the included file: xyz/abc" {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [{file = "$TEST/abc", required = false}]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(_ string) (io.Reader, error) {
-		return nil, nil
-	}); err != nil {
+	if err := config.Load(r, mock); err != nil {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [{file = "$TEST/abc", required = false, other = 1}]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(_ string) (io.Reader, error) {
-		return nil, nil
-	}); err == nil || !strings.Contains(err.Error(), "invalid map array, too many keys:") {
+	if err := config.Load(r, mockReader{}); err == nil || !strings.Contains(err.Error(), "invalid map array, too many keys:") {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [{fsle = "$TEST/abc"}]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(_ string) (io.Reader, error) {
-		return nil, nil
-	}); err == nil || !strings.Contains(err.Error(), "'file' is required, missing:") {
+	if err := config.Load(r, mockReader{}); err == nil || !strings.Contains(err.Error(), "'file' is required, missing:") {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [{file = "$TEST/abc", require = 1}]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(_ string) (io.Reader, error) {
-		return nil, nil
-	}); err == nil || !strings.Contains(err.Error(), "only 'required' key is allowed here:") {
+	if err := config.Load(r, mockReader{}); err == nil || !strings.Contains(err.Error(), "only 'required' key is allowed here:") {
 		t.Errorf("invalid error: %v", err)
 	}
 	data = `include = [{file = "$TEST/abc", required = 1}]
 store="xyz"
 `
 	r = strings.NewReader(data)
-	if err := config.Load(r, func(_ string) (io.Reader, error) {
-		return nil, nil
-	}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
+	if err := config.Load(r, mockReader{}); err == nil || err.Error() != "non-bool found where bool expected: 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

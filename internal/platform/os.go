@@ -6,12 +6,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"syscall"
-
-	"github.com/enckse/lockbox/internal/config"
 )
 
 func termEcho(on bool) {
@@ -135,25 +132,4 @@ func PathExists(file string) bool {
 		return false
 	}
 	return true
-}
-
-func configLoader(path string) (io.Reader, error) {
-	if !PathExists(path) {
-		return nil, nil
-	}
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	return bytes.NewReader(data), nil
-}
-
-// LoadConfigFile will load a path as the configuration
-// it will also set the environment
-func LoadConfigFile(path string) error {
-	reader, err := configLoader(path)
-	if err != nil {
-		return err
-	}
-	return config.Load(reader, configLoader)
 }
