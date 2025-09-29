@@ -28,8 +28,8 @@ const (
 type (
 	tomlType string
 	// Loader indicates how included files should be sourced
-	Loader        func(string) (io.Reader, error)
-	stringWrapper struct {
+	Loader   func(string) (io.Reader, error)
+	included struct {
 		value    string
 		required bool
 	}
@@ -164,15 +164,13 @@ func Load(r io.Reader, loader Loader) error {
 		md := env.display()
 		switch md.tomlType {
 		case tomlArray:
-			array, err := parseArray(v, md.canExpand, false)
+			array, err := parseArray(v, md.canExpand, false, func(s string, _ bool) string {
+				return s
+			})
 			if err != nil {
 				return err
 			}
-			var s []string
-			for _, item := range array {
-				s = append(s, item.value)
-			}
-			store.SetArray(export, s)
+			store.SetArray(export, array)
 		case tomlInt:
 			i, ok := v.(int64)
 			if !ok {
@@ -231,7 +229,9 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 	includes, ok := m[isInclude]
 	if ok {
 		delete(m, isInclude)
-		including, err := parseArray(includes, true, true)
+		including, err := parseArray(includes, true, true, func(s string, r bool) included {
+			return included{s, r}
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -268,7 +268,7 @@ func readConfigs(r io.Reader, depth int, loader Loader) ([]map[string]any, error
 	return maps, nil
 }
 
-func parseArray(value any, expand, allowMap bool) ([]stringWrapper, error) {
+func parseArray[T any](value any, expand, allowMap bool, creator func(string, bool) T) ([]T, error) {
 	expander := func(s string) string {
 		return s
 	}
@@ -277,7 +277,7 @@ func parseArray(value any, expand, allowMap bool) ([]stringWrapper, error) {
 			return os.Expand(s, os.Getenv)
 		}
 	}
-	var res []stringWrapper
+	var res []T
 	switch t := value.(type) {
 	case []any:
 		for _, item := range t {
@@ -317,7 +317,7 @@ func parseArray(value any, expand, allowMap bool) ([]stringWrapper, error) {
 			default:
 				return nil, err
 			}
-			res = append(res, stringWrapper{value: expander(val), required: required})
+			res = append(res, creator(expander(val), required))
 		}
 	default:
 		return nil, fmt.Errorf("value is not of array type: %v", value)
