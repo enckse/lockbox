@@ -1,8 +1,8 @@
-Lockbox
+lockbox
 ===
 
 A [pass](https://www.passwordstore.org/) inspired password manager that uses a system
-keyring or command for password input over using a GPG key and uses a keepass database as the backing data store.
+keyring, command, or plaintext solution for password input (over using a gpg key only) and uses a kdbx database as the backing data store.
 
 [![build](https://github.com/enckse/lockbox/actions/workflows/build.yml/badge.svg)](https://github.com/enckse/lockbox/actions/workflows/build.yml)
 
@@ -10,10 +10,10 @@ keyring or command for password input over using a GPG key and uses a keepass da
 
 ## upfront
 
-While `lb` uses a `.kdbx` formatted file that can be opened by a variety of tools, it is highly opinionated on how to store data in the database. Any
-`.kdbx` used with `lb` should be managed by `lb` with a fallback ability to use other tools to alter the/view the file otherwise. Mainly lockbox itself
-is using a common format so that it doesn't lock a user into a custom file format or dealing with gpg, age, etc. files and instead COULD be recovered
-via other tooling if needed. `lb` does try to play nice with standard fields used within kdbx files, but it may disagree how to manage/store/update them.
+While `lb` uses a `.kdbx` formatted file that can be opened by a variety of tools, it is highly opinionated on how it will store data in the database. Any
+`.kdbx` used with `lb` should be managed by `lb` with a fallback ability to use other tools to alter/view the file otherwise. Mainly, lockbox itself
+uses a common format so that it does not lock a user into a custom file format nor rely entirely on gpg.
+`lb` does try to play nice with standard fields used within kdbx files, but it may disagree with other tools on how to manage/store/update them.
 
 ## configuration
 
@@ -102,14 +102,6 @@ lb rekey -keyfile="my/new/keyfile"
 generate shell specific completions (via auto-detect using `SHELL`)
 ```
 lb completions
-```
-
-## clipboard manager
-
-`lb` can manage the system clipboard by creating a simplistic daemonized
-process to clear the clipboard over time
-```
-lb clipmgr
 ```
 
 ## git integration
