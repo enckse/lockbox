@@ -118,7 +118,7 @@ func TestInserts(t *testing.T) {
 	if err := setup(t).Insert("a", map[string]string{"randomfield": "1"}); err.Error() != "unknown entity field: randomfield" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("tests", map[string]string{"notes": "1"}); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Insert("tests", map[string]string{"notes": "1"}); err.Error() != "input paths must contain at LEAST 2 components (excluding field)" {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := setup(t).Insert("tests//l", map[string]string{"notes": "test"}); err.Error() != "unwilling to operate on path with empty segment" {
@@ -130,7 +130,7 @@ func TestInserts(t *testing.T) {
 	if err := setup(t).Insert("/tests", map[string]string{"password": "test"}); err.Error() != "path can NOT be rooted" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Insert("test", map[string]string{"otp": "test", "url": "xyz"}); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Insert("test", map[string]string{"otp": "test", "url": "xyz"}); err.Error() != "input paths must contain at LEAST 2 components (excluding field)" {
 		t.Errorf("wrong error: %v", err)
 	}
 	if err := setup(t).Insert("a", nil); err.Error() != "empty secrets not allowed" {
@@ -189,7 +189,7 @@ func TestRemoves(t *testing.T) {
 	if err := setup(t).Remove(nil); err.Error() != "entity is empty/invalid" {
 		t.Errorf("wrong error: %v", err)
 	}
-	if err := setup(t).Remove(&kdbx.Entity{}); err.Error() != "input paths must contain at LEAST 2 components" {
+	if err := setup(t).Remove(&kdbx.Entity{}); err.Error() != "input paths must contain at LEAST 2 components (excluding field)" {
 		t.Errorf("wrong error: %v", err)
 	}
 	tx := kdbx.Entity{Path: kdbx.NewPath("test1", "test2", "test3")}

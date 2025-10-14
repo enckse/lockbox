@@ -131,7 +131,7 @@ func TestGet(t *testing.T) {
 	if err != nil || q != nil {
 		t.Error("invalid result, should be empty")
 	}
-	if _, err := fullSetup(t, true).Get("aaaa", kdbx.BlankValue); err.Error() != "input paths must contain at LEAST 2 components" {
+	if _, err := fullSetup(t, true).Get("aaaa", kdbx.BlankValue); err.Error() != "input paths must contain at LEAST 2 components (excluding field)" {
 		t.Errorf("invalid error: %v", err)
 	}
 }

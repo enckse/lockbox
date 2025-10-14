@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	errPath = errors.New("input paths must contain at LEAST 2 components")
+	errPath = errors.New("input paths must contain at LEAST 2 components (excluding field)")
 	// AllowedFields are the same of allowed names for storing in a kdbx entry
 	AllowedFields = []string{NotesField, OTPField, "Password", URLField}
 )
