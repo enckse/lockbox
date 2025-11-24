@@ -183,7 +183,7 @@ func TestInsertTOTP(t *testing.T) {
 	}
 	m.command.buf = bytes.Buffer{}
 	m.command.args = []string{"test/test2/test1/otp"}
-	if err := app.Insert(m); err == nil || err.Error() != "Decoding of secret as base32 failed." {
+	if err := app.Insert(m); err == nil || err.Error() != "illegal base32 data at input byte 1" {
 		t.Errorf("invalid error: %v", err)
 	}
 	store.SetBool("LOCKBOX_TOTP_CHECK_ON_INSERT", false)

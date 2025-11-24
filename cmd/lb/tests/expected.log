@@ -4,7 +4,7 @@ setting up tests
 'test3' is not an allowed field name
 '' is not an allowed field name
 'still' is not an allowed field name
-Decoding of secret as base32 failed.
+illegal base32 data at input byte 16
 password can NOT be multi-line
 testing5
 testing5

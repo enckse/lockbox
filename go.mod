@@ -4,12 +4,11 @@ go 1.24.4
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/pquerna/otp v1.5.0
+	github.com/ja7ad/otp v1.3.3
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
 )
 
 require (
-	github.com/boombuler/barcode v1.1.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/tobischo/argon2 v0.1.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
