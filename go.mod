@@ -3,7 +3,7 @@ module github.com/enckse/lockbox
 go 1.24.4
 
 require (
-	github.com/BurntSushi/toml v1.5.0
+	github.com/BurntSushi/toml v1.6.0
 	github.com/ja7ad/otp v1.3.3
 	github.com/tobischo/gokeepasslib/v3 v3.6.1
 )
