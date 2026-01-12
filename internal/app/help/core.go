@@ -165,7 +165,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			}
 			buf.WriteString(s)
 			if adding != "" {
-				buf.WriteString(fmt.Sprintf("%s\n\n", adding))
+				fmt.Fprintf(&buf, "%s\n\n", adding)
 			}
 		}
 		results = append(results, strings.Split(strings.TrimSpace(buf.String()), "\n")...)

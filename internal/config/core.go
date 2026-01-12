@@ -201,7 +201,7 @@ func readNested(v reflect.Type, root string) []string {
 
 // TextPositionFields is the displayable set of templated fields
 func TextPositionFields() string {
-	return strings.Join(readNested(reflect.TypeOf(Word{}), ""), ", ")
+	return strings.Join(readNested(reflect.TypeFor[Word](), ""), ", ")
 }
 
 // NewFeatureError creates an error if a feature is not enabled
