@@ -177,4 +177,12 @@ Set to '%s' to ignore the set key value`, noKeyMode, IgnoreKeyMode),
 			flags:   []stringsFlags{canExpandFlag},
 		},
 	})
+	// EnvJSONHashPath will include path in hashing operations
+	EnvJSONHashPath = environmentRegister(EnvironmentBool{
+		environmentDefault: newDefaultedEnvironment(true,
+			environmentBase{
+				key:         jsonCategory + "HASH_PATH",
+				description: "Enable including the entity path in hashing of entries.",
+			}),
+	})
 )

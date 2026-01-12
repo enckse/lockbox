@@ -196,6 +196,7 @@ func test(profile string) error {
 		}
 	}
 
+	c["json.hash_path"] = "false"
 	c["readonly"] = "true"
 	r.writeConfig(c)
 	r.run("echo testing |", "insert test1/key1/password")
@@ -304,6 +305,10 @@ func test(profile string) error {
 	r.run("", "json test6/*")
 	c["json.mode"] = c.quoteString("hash")
 	c["json.hash_length"] = "3"
+	r.writeConfig(c)
+	r.run("", "json test6/*")
+	c["json.mode"] = c.quoteString("hash")
+	c["json.hash_path"] = "true"
 	r.writeConfig(c)
 	r.run("", "json test6/*")
 

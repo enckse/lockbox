@@ -148,6 +148,7 @@ func TestValueModes(t *testing.T) {
 			t.Errorf("invalid result value: %s", k)
 		}
 	}
+	store.SetBool("LOCKBOX_JSON_HASH_PATH", false)
 	q, err = fullSetup(t, true).Get("test/test/abc", kdbx.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -161,6 +162,20 @@ func TestValueModes(t *testing.T) {
 	}) {
 		t.Errorf("invalid entity: %v", q)
 	}
+	store.SetBool("LOCKBOX_JSON_HASH_PATH", true)
+	q, err = fullSetup(t, true).Get("test/test/abc", kdbx.JSONValue)
+	if err != nil {
+		t.Errorf("no error: %v", err)
+	}
+	if !compareEntity(q, kdbx.Entity{
+		Path: "test/test/abc",
+		Values: map[string]string{
+			"notes":    "aa9d44feade8efee5728a0a3ac61af09510649c2d2ef5ffa32187a48861c64c27ef5f204c7d4ee92bcbd1c18c53e76a4f2662987e1428ce4b51b7fe8f959074c",
+			"password": "9378107fdb4acbe3851bdd015017d35dcc921c18ce0c9ad24c730d3e1bf402ab1835ef547f8ccd191e21fd75d13fc86457dbbeae475e0ec817aae4c79ccf5884",
+		},
+	}) {
+		t.Errorf("invalid entity: %v", q)
+	}
 	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
 	q, err = fullSetup(t, true).Get("test/test/abc", kdbx.JSONValue)
 	if err != nil {
@@ -169,8 +184,8 @@ func TestValueModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/abc",
 		Values: map[string]string{
-			"notes":    "9057ff1aa9",
-			"password": "44276ba24d",
+			"notes":    "aa9d44fead",
+			"password": "9378107fdb",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -273,7 +288,7 @@ func TestSetModTime(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/xyz",
 		Values: map[string]string{
-			"password": "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff",
+			"password": "7117cd5faee8c269ced77e173fc88f3586bdb015099873deef6d97bcd41bb7494b17674ab98e3d78b7fffabbb331dd8c10be1d77bf5b9e485ec6f32f5dfca9e6",
 			"modtime":  testDateTime,
 		},
 	}) {
@@ -316,6 +331,7 @@ func TestAttributeModes(t *testing.T) {
 	}) {
 		t.Errorf("invalid entity: %v", q)
 	}
+	store.SetBool("LOCKBOX_JSON_HASH_PATH", false)
 	q, err = fullSetup(t, true).Get("test/test/totp", kdbx.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)

@@ -392,6 +392,14 @@ json
     "password": "cbf"
   }
 }
+{
+  "test6/multiline": {
+    "modtime": "XXXX-XX-XX",
+    "notes": "4df",
+    "otp": "630",
+    "password": "4df"
+  }
+}
 clipboard
 invalids
 Wrong password? HMAC-SHA256 of header mismatching
@@ -411,6 +419,7 @@ store           ok
 env
 LOCKBOX_CLIP_COPY=[touch testdata/datadir/clip.copy]
 LOCKBOX_JSON_HASH_LENGTH=3
+LOCKBOX_JSON_HASH_PATH=true
 LOCKBOX_JSON_MODE=hash
 LOCKBOX_STORE=testdata/datadir/pass.kdbx
 LOCKBOX_TOTP_TIMEOUT=1
