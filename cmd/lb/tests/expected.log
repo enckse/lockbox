@@ -108,72 +108,72 @@ test6/multiline/password
 test7/deeper/root/url
 {
   "test1/key1": {
-    "checksum": "00000000cd5p",
+    "checksum": "[00 00 00 00 cd 5p]",
     "modtime": "XXXX-XX-XX",
     "password": "57c8df271f1dfecb52f1e56d419bcf57b9cbf649a29bba042ccc8e1301acb0d930b22bedeb1373d8489b9f8eb1ccb310a877f382f62e597c9f5dbdd4a3ee2323"
   },
   "test4/multiline": {
-    "checksum": "00000000ddfn",
+    "checksum": "[00 00 00 00 dd fn]",
     "modtime": "XXXX-XX-XX",
     "notes": "08ecffb3ead6b577fbbacef5b1b87c240588208eee82904acc8e300fc10c504758878e9a2202a6e161d7d4925983117ee00293434bddb592656fcf01bca69ad3"
   },
   "test5/multiline": {
-    "checksum": "00000000cdfn",
+    "checksum": "[00 00 00 00 cd fn]",
     "modtime": "XXXX-XX-XX",
     "notes": "6be4f7e6c6761aa37ad0da252f7647e0d5401608dc193e0cf6c9cf16331600ca96df65cc5bdb2a085e79fb0818e98d1aabe8ae4e129ae369115f67f56ef9a859"
   },
   "test6/multiline": {
-    "checksum": "0000002dcncp",
+    "checksum": "[00 00 00 2d cn cp]",
     "modtime": "XXXX-XX-XX",
     "notes": "5b88331608e33b74c5fd5d22e9053a65f5cace6a3c046d7fbc9aaea1340bd1de90b6198a99af93d02df3c4715febb1daac5babb596867137b2a65ff91fd799ad",
     "password": "5b88331608e33b74c5fd5d22e9053a65f5cace6a3c046d7fbc9aaea1340bd1de90b6198a99af93d02df3c4715febb1daac5babb596867137b2a65ff91fd799ad"
   },
   "test7/deeper/root": {
-    "checksum": "000000007dcu",
+    "checksum": "[00 00 00 00 7d cu]",
     "modtime": "XXXX-XX-XX",
     "url": "ea959087841400b15d443e852860b70d4350c7264b4a8a446021416868d193c992c7a864881da3c4cbaaed4f6c970a6aeeeee0a2bc39f8a1f6845d2d95e14786"
   },
   "test7/deeper/rooted": {
-    "checksum": "0000003dcn3o",
+    "checksum": "[00 00 00 3d cn 3o]",
     "modtime": "XXXX-XX-XX",
     "notes": "1abfb8edd6c73ae6b1eb9842863b95a30e2308e7a0fe0070745ea3871a106813e9a3cf04fa43b0d322f79c03da6851b18e2139f827399fe019fc13eaaa993815",
     "otp": "d7d94959b640a2a11bac8cfde21cb8780943625403592b77a520585cdaf0469d2d0c7a834b70c053676f7298cb3d6f9b0d0a6dba4599dc2d53ec8508aedea801"
   },
   "test8/unset": {
-    "checksum": "0000002dcncp",
+    "checksum": "[00 00 00 2d cn cp]",
     "modtime": "XXXX-XX-XX",
     "notes": "0956b6450f907573260ad631985167421abbc38d2d69e690f87a370a0e4755a388b6e20e8ec15cfa8ce8d3c2a11117bbf345492ff9446f5781c10cfd54d68403",
     "password": "0956b6450f907573260ad631985167421abbc38d2d69e690f87a370a0e4755a388b6e20e8ec15cfa8ce8d3c2a11117bbf345492ff9446f5781c10cfd54d68403"
   },
   "test9/key1/sub1": {
-    "checksum": "000000004dcp",
+    "checksum": "[00 00 00 00 4d cp]",
     "modtime": "XXXX-XX-XX",
     "password": "e1fe8b29f0ed07e6af8a6a1100ed5268a58185eaf167726599be55ef09c363adf4df3257f45a84557977fd6b45f0713d6f791f6bc1e0ebce046568256859445b"
   },
   "test9/key1/sub2": {
-    "checksum": "000000007dcp",
+    "checksum": "[00 00 00 00 7d cp]",
     "modtime": "XXXX-XX-XX",
     "password": "ef69a69c35f720f0f252d4ed94c65fa5217222689a1ced1b3c409eb0a47736ba9df2d8e78563a6b1b78fb89c36c8cdc74c0bb195e025131b2ef615dc45444784"
   },
   "test9/key2/sub1": {
-    "checksum": "00000000fdcp",
+    "checksum": "[00 00 00 00 fd cp]",
     "modtime": "XXXX-XX-XX",
     "password": "27141582d19bb3d4e6ef34333895f2e193655ab069bb71331755caf310dac9610ca7027ec66faeceb3ac98b20bac5a77d580e95e6d8bd404b5d1ffb816192b9e"
   }
 }
 {
   "test4/multiline": {
-    "checksum": "00000000ddfn",
+    "checksum": "[00 00 00 00 dd fn]",
     "modtime": "XXXX-XX-XX",
     "notes": "08ecffb3ead6b577fbbacef5b1b87c240588208eee82904acc8e300fc10c504758878e9a2202a6e161d7d4925983117ee00293434bddb592656fcf01bca69ad3"
   },
   "test5/multiline": {
-    "checksum": "00000000cdfn",
+    "checksum": "[00 00 00 00 cd fn]",
     "modtime": "XXXX-XX-XX",
     "notes": "6be4f7e6c6761aa37ad0da252f7647e0d5401608dc193e0cf6c9cf16331600ca96df65cc5bdb2a085e79fb0818e98d1aabe8ae4e129ae369115f67f56ef9a859"
   },
   "test6/multiline": {
-    "checksum": "0000002dcncp",
+    "checksum": "[00 00 00 2d cn cp]",
     "modtime": "XXXX-XX-XX",
     "notes": "5b88331608e33b74c5fd5d22e9053a65f5cace6a3c046d7fbc9aaea1340bd1de90b6198a99af93d02df3c4715febb1daac5babb596867137b2a65ff91fd799ad",
     "password": "5b88331608e33b74c5fd5d22e9053a65f5cace6a3c046d7fbc9aaea1340bd1de90b6198a99af93d02df3c4715febb1daac5babb596867137b2a65ff91fd799ad"
@@ -202,61 +202,61 @@ algorithm: SHA1
 period:    30
 5ae472abqdekjqykoyxk7hvc2leklq5n
 "test1/key1": {
-  "checksum": "00000000cd5p",
+  "checksum": "[00 00 00 00 cd 5p]",
   "modtime": "XXXX-XX-XX",
   "password": "57c8df271f1dfecb52f1e56d419bcf57b9cbf649a29bba042ccc8e1301acb0d930b22bedeb1373d8489b9f8eb1ccb310a877f382f62e597c9f5dbdd4a3ee2323"
 }
 "test10/key1": {
-  "checksum": "00000000cdbo",
+  "checksum": "[00 00 00 00 cd bo]",
   "modtime": "XXXX-XX-XX",
   "otp": "f79f64504a1841638238141f19ec05f237d1b692c935dc605a1efc0f42e7fcfdb838ece01c644fe8ee9586faf6ff5cc5df2c7b300165df7af33e9e2e87322687"
 }
 "test4/multiline": {
-  "checksum": "00000000ddfn",
+  "checksum": "[00 00 00 00 dd fn]",
   "modtime": "XXXX-XX-XX",
   "notes": "08ecffb3ead6b577fbbacef5b1b87c240588208eee82904acc8e300fc10c504758878e9a2202a6e161d7d4925983117ee00293434bddb592656fcf01bca69ad3"
 }
 "test5/multiline": {
-  "checksum": "00000000cdfn",
+  "checksum": "[00 00 00 00 cd fn]",
   "modtime": "XXXX-XX-XX",
   "notes": "6be4f7e6c6761aa37ad0da252f7647e0d5401608dc193e0cf6c9cf16331600ca96df65cc5bdb2a085e79fb0818e98d1aabe8ae4e129ae369115f67f56ef9a859"
 }
 "test6/multiline": {
-  "checksum": "00002dcnbocp",
+  "checksum": "[00 00 2d cn bo cp]",
   "modtime": "XXXX-XX-XX",
   "notes": "5b88331608e33b74c5fd5d22e9053a65f5cace6a3c046d7fbc9aaea1340bd1de90b6198a99af93d02df3c4715febb1daac5babb596867137b2a65ff91fd799ad",
   "otp": "6d76012d8097b71107085ba0427460d1cec5bf5f18d93ab7001ec43a65b73def59078680999fc9b9476a923cfe34850b8dbe74292aa7b862e214f5f1070cf720",
   "password": "5b88331608e33b74c5fd5d22e9053a65f5cace6a3c046d7fbc9aaea1340bd1de90b6198a99af93d02df3c4715febb1daac5babb596867137b2a65ff91fd799ad"
 }
 "test7/deeper/root": {
-  "checksum": "000000007dcu",
+  "checksum": "[00 00 00 00 7d cu]",
   "modtime": "XXXX-XX-XX",
   "url": "ea959087841400b15d443e852860b70d4350c7264b4a8a446021416868d193c992c7a864881da3c4cbaaed4f6c970a6aeeeee0a2bc39f8a1f6845d2d95e14786"
 }
 "test7/deeper/rooted": {
-  "checksum": "0000003dcn3o",
+  "checksum": "[00 00 00 3d cn 3o]",
   "modtime": "XXXX-XX-XX",
   "notes": "1abfb8edd6c73ae6b1eb9842863b95a30e2308e7a0fe0070745ea3871a106813e9a3cf04fa43b0d322f79c03da6851b18e2139f827399fe019fc13eaaa993815",
   "otp": "d7d94959b640a2a11bac8cfde21cb8780943625403592b77a520585cdaf0469d2d0c7a834b70c053676f7298cb3d6f9b0d0a6dba4599dc2d53ec8508aedea801"
 }
 "test8/unset": {
-  "checksum": "0000002dcncp",
+  "checksum": "[00 00 00 2d cn cp]",
   "modtime": "XXXX-XX-XX",
   "notes": "0956b6450f907573260ad631985167421abbc38d2d69e690f87a370a0e4755a388b6e20e8ec15cfa8ce8d3c2a11117bbf345492ff9446f5781c10cfd54d68403",
   "password": "0956b6450f907573260ad631985167421abbc38d2d69e690f87a370a0e4755a388b6e20e8ec15cfa8ce8d3c2a11117bbf345492ff9446f5781c10cfd54d68403"
 }
 "test9/key1/sub1": {
-  "checksum": "000000004dcp",
+  "checksum": "[00 00 00 00 4d cp]",
   "modtime": "XXXX-XX-XX",
   "password": "e1fe8b29f0ed07e6af8a6a1100ed5268a58185eaf167726599be55ef09c363adf4df3257f45a84557977fd6b45f0713d6f791f6bc1e0ebce046568256859445b"
 }
 "test9/key1/sub2": {
-  "checksum": "000000007dcp",
+  "checksum": "[00 00 00 00 7d cp]",
   "modtime": "XXXX-XX-XX",
   "password": "ef69a69c35f720f0f252d4ed94c65fa5217222689a1ced1b3c409eb0a47736ba9df2d8e78563a6b1b78fb89c36c8cdc74c0bb195e025131b2ef615dc45444784"
 }
 "test9/key2/sub1": {
-  "checksum": "00000000fdcp",
+  "checksum": "[00 00 00 00 fd cp]",
   "modtime": "XXXX-XX-XX",
   "password": "27141582d19bb3d4e6ef34333895f2e193655ab069bb71331755caf310dac9610ca7027ec66faeceb3ac98b20bac5a77d580e95e6d8bd404b5d1ffb816192b9e"
 }
@@ -410,7 +410,7 @@ json
 }
 {
   "test6/multiline": {
-    "checksum": "00002dcnbocp",
+    "checksum": "[00 00 2d cn bo cp]",
     "modtime": "XXXX-XX-XX",
     "notes": "5b8",
     "otp": "6d7",

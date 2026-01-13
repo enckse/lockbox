@@ -177,7 +177,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		return ""
 	}
 	isChecksum := false
-	formatString := "%" + fmt.Sprintf("%d", (len(AllowedFields)+2)*2) + "s"
+	requiredChecksum := len(AllowedFields) + 2
 	switch jsonMode {
 	case output.JSONModes.Raw:
 		jsonHasher = func(val, _ string) string {
@@ -241,11 +241,14 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					slices.SortFunc(checksums, func(x, y checksummable) int {
 						return int(x.typeof) - int(y.typeof)
 					})
-					var vals string
+					var vals []string
 					for _, item := range checksums {
-						vals = fmt.Sprintf("%s%s%s", vals, string(item.value), string(item.typeof))
+						vals = append(vals, fmt.Sprintf("%s%s", string(item.value), string(item.typeof)))
 					}
-					check = strings.ReplaceAll(fmt.Sprintf(formatString, vals), " ", "0")
+					for len(vals) < requiredChecksum {
+						vals = append([]string{"00"}, vals...)
+					}
+					check = fmt.Sprintf("[%s]", strings.Join(vals, " "))
 				}
 				values[checksumKey] = check
 			}

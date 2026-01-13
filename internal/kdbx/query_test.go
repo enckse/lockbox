@@ -155,7 +155,7 @@ func TestValueModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/abc",
 		Values: map[string]string{
-			"checksum": "000000bd9n4p",
+			"checksum": "[00 00 00 bd 9n 4p]",
 			"notes":    "164f7d1c788400c54db852f5f1ef4629e4d0020a87e935dfd643dc4f765dfd201ce43b2b2ec23ff8f5b966ed15715f79d276d4ededf05691197096bb4247d665",
 			"password": "a3ea1c021135a8070c62a3a1080d9cd3385ebca45687636ba87c9abd1f5c2d68b17d68e72dc22461d0c8fc371573c568664e98fbfb832fcdda000318211b9538",
 		},
@@ -170,7 +170,7 @@ func TestValueModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/abc",
 		Values: map[string]string{
-			"checksum": "000000bd9n4p",
+			"checksum": "[00 00 00 bd 9n 4p]",
 			"notes":    "164f7d1c78",
 			"password": "a3ea1c0211",
 		},
@@ -277,7 +277,7 @@ func TestSetModTime(t *testing.T) {
 		Values: map[string]string{
 			"password": "f4d691c1399b47b1a17d64da4e91f27ee739d8e49eee11d3ca5185940353325cfd5892cd375dd6a82f0b9f6e52d0365b4ddc2510106d134a1c3e9283becf72c9",
 			"modtime":  testDateTime,
-			"checksum": "00000000fdep",
+			"checksum": "[00 00 00 00 fd ep]",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -326,7 +326,7 @@ func TestAttributeModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/totp",
 		Values: map[string]string{
-			"checksum": "00000000ed7o",
+			"checksum": "[00 00 00 00 ed 7o]",
 			"otp":      "cb9c99a3ba9f3370238a302adf9d3f4fa7cf4a2e01fe0225a7f69563b7c8160bd773471481d28d2f6654a6c88b41c54ca5c9930740554578b59832bd8ac2ee66",
 		},
 	}) {
@@ -340,7 +340,7 @@ func TestAttributeModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/totp",
 		Values: map[string]string{
-			"checksum": "00000000ed7o",
+			"checksum": "[00 00 00 00 ed 7o]",
 			"otp":      "cb9c99a3ba",
 		},
 	}) {
