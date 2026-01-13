@@ -185,47 +185,47 @@ algorithm: SHA1
 period:    30
 5ae472abqdekjqykoyxk7hvc2leklq5n
 "test1/key1": {
-  "checksum": "[00 00 00 00 cd 5p]",
+  "checksum": "[00 00 00 00 cd 5p]"
   "modtime": "XXXX-XX-XX",
 }
 "test10/key1": {
-  "checksum": "[00 00 00 00 cd bo]",
+  "checksum": "[00 00 00 00 cd bo]"
   "modtime": "XXXX-XX-XX",
 }
 "test4/multiline": {
-  "checksum": "[00 00 00 00 dd fn]",
+  "checksum": "[00 00 00 00 dd fn]"
   "modtime": "XXXX-XX-XX",
 }
 "test5/multiline": {
-  "checksum": "[00 00 00 00 cd fn]",
+  "checksum": "[00 00 00 00 cd fn]"
   "modtime": "XXXX-XX-XX",
 }
 "test6/multiline": {
-  "checksum": "[00 00 2d cn bo cp]",
+  "checksum": "[00 00 2d cn bo cp]"
   "modtime": "XXXX-XX-XX",
 }
 "test7/deeper/root": {
-  "checksum": "[00 00 00 00 7d cu]",
+  "checksum": "[00 00 00 00 7d cu]"
   "modtime": "XXXX-XX-XX",
 }
 "test7/deeper/rooted": {
-  "checksum": "[00 00 00 3d cn 3o]",
+  "checksum": "[00 00 00 3d cn 3o]"
   "modtime": "XXXX-XX-XX",
 }
 "test8/unset": {
-  "checksum": "[00 00 00 2d cn cp]",
+  "checksum": "[00 00 00 2d cn cp]"
   "modtime": "XXXX-XX-XX",
 }
 "test9/key1/sub1": {
-  "checksum": "[00 00 00 00 4d cp]",
+  "checksum": "[00 00 00 00 4d cp]"
   "modtime": "XXXX-XX-XX",
 }
 "test9/key1/sub2": {
-  "checksum": "[00 00 00 00 7d cp]",
+  "checksum": "[00 00 00 00 7d cp]"
   "modtime": "XXXX-XX-XX",
 }
 "test9/key2/sub1": {
-  "checksum": "[00 00 00 00 fd cp]",
+  "checksum": "[00 00 00 00 fd cp]"
   "modtime": "XXXX-XX-XX",
 }
 removing

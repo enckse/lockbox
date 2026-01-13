@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"testing"
 
 	"github.com/enckse/lockbox/internal/app"
@@ -54,6 +55,10 @@ func TestJSON(t *testing.T) {
 	}
 	if m.buf.String() == "" || m.buf.String() == "{}\n" {
 		t.Error("no data")
+	}
+	var check any
+	if err := json.Unmarshal(m.buf.Bytes(), &check); err != nil {
+		t.Errorf("invalid json: %v", err)
 	}
 	m.buf = bytes.Buffer{}
 	m.args = []string{"tsest/test2/test1"}
