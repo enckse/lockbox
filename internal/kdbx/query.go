@@ -177,7 +177,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		return ""
 	}
 	isChecksum := false
-	formatString := "%" + fmt.Sprintf("%d", len(AllowedFields)+1) + "s"
+	formatString := "%" + fmt.Sprintf("%d", (len(AllowedFields)+2)*2) + "s"
 	switch jsonMode {
 	case output.JSONModes.Raw:
 		jsonHasher = func(val, _ string) string {
@@ -198,12 +198,16 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 			return data
 		}
 	}
+	type checksummable struct {
+		value  byte
+		typeof byte
+	}
 	return func(yield func(Entity, error) bool) {
 		for _, item := range entities {
 			entity := Entity{Path: item.path}
 			var err error
 			values := make(EntityValues)
-			var checksums []byte
+			var checksums []checksummable
 			for _, v := range item.backing.Values {
 				val := ""
 				raw := ""
@@ -222,19 +226,26 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 				if key == modTimeKey || key == titleKey {
 					continue
 				}
+				field := strings.ToLower(key)
 				if isChecksum {
 					if r := jsonHasher(raw, ""); len(r) > 0 {
-						checksums = append(checksums, r[0])
+						checksums = append(checksums, checksummable{r[0], field[0]})
 					}
 				}
-				values[strings.ToLower(key)] = val
+				values[field] = val
 			}
 			if isChecksum {
 				var check string
 				if len(checksums) > 0 {
-					checksums = append(checksums, jsonHasher(entity.Path, "")[0])
-					slices.Sort(checksums)
-					check = strings.ReplaceAll(fmt.Sprintf(formatString, string(checksums)), " ", "0")
+					checksums = append(checksums, checksummable{jsonHasher(entity.Path, "")[0], byte('d')})
+					slices.SortFunc(checksums, func(x, y checksummable) int {
+						return int(x.typeof) - int(y.typeof)
+					})
+					var vals string
+					for _, item := range checksums {
+						vals = fmt.Sprintf("%s%s%s", vals, string(item.value), string(item.typeof))
+					}
+					check = strings.ReplaceAll(fmt.Sprintf(formatString, vals), " ", "0")
 				}
 				values[checksumKey] = check
 			}
