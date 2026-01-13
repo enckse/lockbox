@@ -156,13 +156,11 @@ func TestValueModes(t *testing.T) {
 		Path: "test/test/abc",
 		Values: map[string]string{
 			"checksum": "[00 00 00 bd 9n 4p]",
-			"notes":    "164f7d1c788400c54db852f5f1ef4629e4d0020a87e935dfd643dc4f765dfd201ce43b2b2ec23ff8f5b966ed15715f79d276d4ededf05691197096bb4247d665",
-			"password": "a3ea1c021135a8070c62a3a1080d9cd3385ebca45687636ba87c9abd1f5c2d68b17d68e72dc22461d0c8fc371573c568664e98fbfb832fcdda000318211b9538",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
 	}
-	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
+	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 5)
 	q, err = fullSetup(t, true).Get("test/test/abc", kdbx.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -170,9 +168,7 @@ func TestValueModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/abc",
 		Values: map[string]string{
-			"checksum": "[00 00 00 bd 9n 4p]",
-			"notes":    "164f7d1c78",
-			"password": "a3ea1c0211",
+			"checksum": "[000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 000000 b00d0d 9057fn 44276p]",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -332,7 +328,7 @@ func TestAttributeModes(t *testing.T) {
 	}) {
 		t.Errorf("invalid entity: %v", q)
 	}
-	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 10)
+	store.SetInt64("LOCKBOX_JSON_HASH_LENGTH", 4)
 	q, err = fullSetup(t, true).Get("test/test/totp", kdbx.JSONValue)
 	if err != nil {
 		t.Errorf("no error: %v", err)
@@ -340,7 +336,7 @@ func TestAttributeModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/totp",
 		Values: map[string]string{
-			"checksum": "[00 00 00 00 ed 7o]",
+			"checksum": "[00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 00000 ef10d 7f8fo]",
 			"otp":      "cb9c99a3ba",
 		},
 	}) {

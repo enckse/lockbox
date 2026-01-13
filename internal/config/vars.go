@@ -35,13 +35,13 @@ var (
 	})
 	// EnvJSONHashLength handles the hashing output length
 	EnvJSONHashLength = environmentRegister(EnvironmentInt{
-		environmentDefault: newDefaultedEnvironment(0,
+		environmentDefault: newDefaultedEnvironment(1,
 			environmentBase{
-				key:         jsonCategory + "HASH_LENGTH",
-				description: fmt.Sprintf("Maximum string length of the JSON value when '%s' mode is set for JSON output.", output.JSONModes.Hash),
+				key: jsonCategory + "HASH_LENGTH",
+				description: fmt.Sprintf(`Maximum string length of the JSON checksum value when JSON '%s' mode is set.
+This value is appended to the single character type field`, output.JSONModes.Hash),
 			}),
-		short:   "hash length",
-		canZero: true,
+		short: "checksum value length",
 	})
 	// EnvReadOnly indicates if in read-only mode
 	EnvReadOnly = environmentRegister(EnvironmentBool{

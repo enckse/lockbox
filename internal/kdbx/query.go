@@ -173,33 +173,30 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		}
 		jsonMode = m
 	}
-	jsonHasher := func(string, string) string {
+	jsonHasher := func(string) string {
 		return ""
 	}
 	isChecksum := false
-	requiredChecksum := len(AllowedFields) + 2
+	to := 1
 	switch jsonMode {
 	case output.JSONModes.Raw:
-		jsonHasher = func(val, _ string) string {
+		jsonHasher = func(val string) string {
 			return val
 		}
 	case output.JSONModes.Hash:
-		isChecksum = args.Values == JSONValue
-		hashLength, err := config.EnvJSONHashLength.Get()
+		length, err := config.EnvJSONHashLength.Get()
 		if err != nil {
 			return nil, err
 		}
-		l := int(hashLength)
-		jsonHasher = func(val, path string) string {
-			data := fmt.Sprintf("%x", sha512.Sum512([]byte(val+path)))
-			if hashLength > 0 && len(data) > l {
-				data = data[0:hashLength]
-			}
-			return data
+		to = max(int(length), to)
+		isChecksum = args.Values == JSONValue
+		jsonHasher = func(val string) string {
+			return fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 		}
 	}
+	requiredChecksum := (len(AllowedFields) + 2) * to
 	type checksummable struct {
-		value  byte
+		value  string
 		typeof byte
 	}
 	return func(yield func(Entity, error) bool) {
@@ -218,9 +215,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					}
 					val = v.Value.Content
 					raw = val
-					switch args.Values {
-					case JSONValue:
-						val = jsonHasher(val, entity.Path)
+					if !isChecksum {
+						switch args.Values {
+						case JSONValue:
+							val = jsonHasher(val)
+						}
 					}
 				}
 				if key == modTimeKey || key == titleKey {
@@ -228,25 +227,26 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 				}
 				field := strings.ToLower(key)
 				if isChecksum {
-					if r := jsonHasher(raw, ""); len(r) > 0 {
-						checksums = append(checksums, checksummable{r[0], field[0]})
+					if r := jsonHasher(raw); len(r) > 0 {
+						checksums = append(checksums, checksummable{r[0:to], field[0]})
 					}
+					continue
 				}
 				values[field] = val
 			}
 			if isChecksum {
 				var check string
 				if len(checksums) > 0 {
-					checksums = append(checksums, checksummable{jsonHasher(entity.Path, "")[0], byte('d')})
+					checksums = append(checksums, checksummable{jsonHasher(entity.Path)[0:to], byte('d')})
 					slices.SortFunc(checksums, func(x, y checksummable) int {
 						return int(x.typeof) - int(y.typeof)
 					})
 					var vals []string
 					for _, item := range checksums {
-						vals = append(vals, fmt.Sprintf("%s%s", string(item.value), string(item.typeof)))
+						vals = append(vals, fmt.Sprintf("%s%s", item.value, string(item.typeof)))
 					}
 					for len(vals) < requiredChecksum {
-						vals = append([]string{"00"}, vals...)
+						vals = append([]string{"0" + strings.Repeat("0", to)}, vals...)
 					}
 					check = fmt.Sprintf("[%s]", strings.Join(vals, " "))
 				}

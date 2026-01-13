@@ -66,7 +66,7 @@ func TestFormatTOTP(t *testing.T) {
 }
 
 func TestHashLength(t *testing.T) {
-	checkInt(config.EnvJSONHashLength, "LOCKBOX_JSON_HASH_LENGTH", "hash length", 0, true, t)
+	checkInt(config.EnvJSONHashLength, "LOCKBOX_JSON_HASH_LENGTH", "checksum value length", 1, false, t)
 }
 
 func TestMaxTOTP(t *testing.T) {
