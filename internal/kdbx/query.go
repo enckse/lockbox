@@ -173,13 +173,12 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		}
 		jsonMode = m
 	}
-	hashPath := config.EnvJSONHashPath.Get()
-	jsonHasher := func(string, string) string {
+	jsonHasher := func(string) string {
 		return ""
 	}
 	switch jsonMode {
 	case output.JSONModes.Raw:
-		jsonHasher = func(val, _ string) string {
+		jsonHasher = func(val string) string {
 			return val
 		}
 	case output.JSONModes.Hash:
@@ -188,12 +187,8 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 			return nil, err
 		}
 		l := int(hashLength)
-		jsonHasher = func(val, path string) string {
-			added := ""
-			if hashPath {
-				added = path
-			}
-			data := fmt.Sprintf("%x", sha512.Sum512([]byte(added+val)))
+		jsonHasher = func(val string) string {
+			data := fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
 			if hashLength > 0 && len(data) > l {
 				data = data[0:hashLength]
 			}
@@ -215,7 +210,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					val = v.Value.Content
 					switch args.Values {
 					case JSONValue:
-						val = jsonHasher(val, entity.Path)
+						val = jsonHasher(val)
 					}
 				}
 				if key == modTimeKey || key == titleKey {
