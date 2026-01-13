@@ -173,22 +173,25 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 		}
 		jsonMode = m
 	}
-	jsonHasher := func(string) string {
+	jsonHasher := func(string, string) string {
 		return ""
 	}
+	isChecksum := false
+	formatString := "%" + fmt.Sprintf("%d", len(AllowedFields)+1) + "s"
 	switch jsonMode {
 	case output.JSONModes.Raw:
-		jsonHasher = func(val string) string {
+		jsonHasher = func(val, _ string) string {
 			return val
 		}
 	case output.JSONModes.Hash:
+		isChecksum = args.Values == JSONValue
 		hashLength, err := config.EnvJSONHashLength.Get()
 		if err != nil {
 			return nil, err
 		}
 		l := int(hashLength)
-		jsonHasher = func(val string) string {
-			data := fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
+		jsonHasher = func(val, path string) string {
+			data := fmt.Sprintf("%x", sha512.Sum512([]byte(val+path)))
 			if hashLength > 0 && len(data) > l {
 				data = data[0:hashLength]
 			}
@@ -200,23 +203,40 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 			entity := Entity{Path: item.path}
 			var err error
 			values := make(EntityValues)
+			var checksums []byte
 			for _, v := range item.backing.Values {
 				val := ""
+				raw := ""
 				key := v.Key
 				if args.Values != BlankValue {
 					if args.Values == JSONValue {
 						values["modtime"] = getValue(item.backing, modTimeKey)
 					}
 					val = v.Value.Content
+					raw = val
 					switch args.Values {
 					case JSONValue:
-						val = jsonHasher(val)
+						val = jsonHasher(val, entity.Path)
 					}
 				}
 				if key == modTimeKey || key == titleKey {
 					continue
 				}
+				if isChecksum {
+					if r := jsonHasher(raw, ""); len(r) > 0 {
+						checksums = append(checksums, r[0])
+					}
+				}
 				values[strings.ToLower(key)] = val
+			}
+			if isChecksum {
+				var check string
+				if len(checksums) > 0 {
+					checksums = append(checksums, jsonHasher(entity.Path, "")[0])
+					slices.Sort(checksums)
+					check = strings.ReplaceAll(fmt.Sprintf(formatString, string(checksums)), " ", "0")
+				}
+				values[checksumKey] = check
 			}
 			entity.Values = values
 			if !yield(entity, err) {

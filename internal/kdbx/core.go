@@ -21,9 +21,10 @@ var (
 )
 
 const (
-	titleKey   = "Title"
-	pathSep    = "/"
-	modTimeKey = "ModTime"
+	checksumKey = "checksum"
+	titleKey    = "Title"
+	pathSep     = "/"
+	modTimeKey  = "ModTime"
 	// OTPField is the totp storage attribute
 	OTPField = "otp"
 	// NotesField is the multiline notes key

@@ -155,8 +155,9 @@ func TestValueModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/abc",
 		Values: map[string]string{
-			"notes":    "9057ff1aa9509b2a0af624d687461d2bbeb07e2f37d953b1ce4a9dc921a7f19c45dc35d7c5363b373792add57d0d7dc41596e1c585d6ef7844cdf8ae87af443f",
-			"password": "44276ba24db13df5568aa6db81e0190ab9d35d2168dce43dca61e628f5c666b1d8b091f1dda59c2359c86e7d393d59723a421d58496d279031e7f858c11d893e",
+			"checksum": "0049b",
+			"notes":    "164f7d1c788400c54db852f5f1ef4629e4d0020a87e935dfd643dc4f765dfd201ce43b2b2ec23ff8f5b966ed15715f79d276d4ededf05691197096bb4247d665",
+			"password": "a3ea1c021135a8070c62a3a1080d9cd3385ebca45687636ba87c9abd1f5c2d68b17d68e72dc22461d0c8fc371573c568664e98fbfb832fcdda000318211b9538",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -169,8 +170,9 @@ func TestValueModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/abc",
 		Values: map[string]string{
-			"notes":    "9057ff1aa9",
-			"password": "44276ba24d",
+			"checksum": "0049b",
+			"notes":    "164f7d1c78",
+			"password": "a3ea1c0211",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -273,8 +275,9 @@ func TestSetModTime(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/xyz",
 		Values: map[string]string{
-			"password": "ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff",
+			"password": "f4d691c1399b47b1a17d64da4e91f27ee739d8e49eee11d3ca5185940353325cfd5892cd375dd6a82f0b9f6e52d0365b4ddc2510106d134a1c3e9283becf72c9",
 			"modtime":  testDateTime,
+			"checksum": "000ef",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -323,7 +326,8 @@ func TestAttributeModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/totp",
 		Values: map[string]string{
-			"otp": "7f8fd0e1a714f63da75206748d0ea1dd601fc8f92498bc87c9579b403c3004a0eefdd7ead976f7dbd6e5143c9aa7a569e24322d870ec7745a4605a154557458e",
+			"checksum": "0007e",
+			"otp":      "cb9c99a3ba9f3370238a302adf9d3f4fa7cf4a2e01fe0225a7f69563b7c8160bd773471481d28d2f6654a6c88b41c54ca5c9930740554578b59832bd8ac2ee66",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
@@ -336,7 +340,8 @@ func TestAttributeModes(t *testing.T) {
 	if !compareEntity(q, kdbx.Entity{
 		Path: "test/test/totp",
 		Values: map[string]string{
-			"otp": "7f8fd0e1a7",
+			"checksum": "0007e",
+			"otp":      "cb9c99a3ba",
 		},
 	}) {
 		t.Errorf("invalid entity: %v", q)
