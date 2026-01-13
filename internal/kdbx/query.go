@@ -2,15 +2,11 @@
 package kdbx
 
 import (
-	"crypto/sha512"
 	"errors"
-	"fmt"
 	"path/filepath"
 	"slices"
 	"strings"
 
-	"github.com/enckse/lockbox/internal/config"
-	"github.com/enckse/lockbox/internal/output"
 	"github.com/tobischo/gokeepasslib/v3"
 )
 
@@ -165,46 +161,16 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsonMode := output.JSONModes.Blank
-	if args.Values == JSONValue {
-		m, err := output.ParseJSONMode(config.EnvJSONMode.Get())
-		if err != nil {
-			return nil, err
-		}
-		jsonMode = m
-	}
-	jsonHasher := func(string) string {
-		return ""
-	}
-	isChecksum := false
-	to := 1
-	switch jsonMode {
-	case output.JSONModes.Raw:
-		jsonHasher = func(val string) string {
-			return val
-		}
-	case output.JSONModes.Hash:
-		length, err := config.EnvJSONHashLength.Get()
-		if err != nil {
-			return nil, err
-		}
-		to = max(int(length), to)
-		isChecksum = args.Values == JSONValue
-		jsonHasher = func(val string) string {
-			return fmt.Sprintf("%x", sha512.Sum512([]byte(val)))
-		}
-	}
-	requiredChecksum := (len(AllowedFields) + 2) * to
-	type checksummable struct {
-		value  string
-		typeof byte
+	hasher, err := NewHasher(args.Values)
+	if err != nil {
+		return nil, err
 	}
 	return func(yield func(Entity, error) bool) {
 		for _, item := range entities {
+			hasher.Reset()
 			entity := Entity{Path: item.path}
 			var err error
 			values := make(EntityValues)
-			var checksums []checksummable
 			for _, v := range item.backing.Values {
 				val := ""
 				raw := ""
@@ -213,44 +179,20 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					if args.Values == JSONValue {
 						values["modtime"] = getValue(item.backing, modTimeKey)
 					}
-					val = v.Value.Content
-					raw = val
-					if !isChecksum {
-						switch args.Values {
-						case JSONValue:
-							val = jsonHasher(val)
-						}
-					}
+					raw = v.Value.Content
+					val = hasher.Transform(raw)
 				}
 				if key == modTimeKey || key == titleKey {
 					continue
 				}
 				field := strings.ToLower(key)
-				if isChecksum {
-					if r := jsonHasher(raw); len(r) > 0 {
-						checksums = append(checksums, checksummable{r[0:to], field[0]})
-					}
+				if hasher.Add(field, raw) {
 					continue
 				}
 				values[field] = val
 			}
-			if isChecksum {
-				var check string
-				if len(checksums) > 0 {
-					checksums = append(checksums, checksummable{jsonHasher(entity.Path)[0:to], byte('d')})
-					slices.SortFunc(checksums, func(x, y checksummable) int {
-						return int(x.typeof) - int(y.typeof)
-					})
-					var vals []string
-					for _, item := range checksums {
-						vals = append(vals, fmt.Sprintf("%s%s", item.value, string(item.typeof)))
-					}
-					for len(vals) < requiredChecksum {
-						vals = append([]string{"0" + strings.Repeat("0", to)}, vals...)
-					}
-					check = fmt.Sprintf("[%s]", strings.Join(vals, " "))
-				}
-				values[checksumKey] = check
+			if v, ok := hasher.Calculate(entity.Path); ok {
+				values[checksumKey] = v
 			}
 			entity.Values = values
 			if !yield(entity, err) {
