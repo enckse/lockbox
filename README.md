@@ -4,7 +4,12 @@ lockbox
 A [pass](https://www.passwordstore.org/) inspired password manager that uses a system
 keyring, command, or plaintext solution for password input (over using a gpg key only) and uses a kdbx database as the backing data store.
 
-[![build](https://github.com/enckse/lockbox/actions/workflows/build.yml/badge.svg)](https://github.com/enckse/lockbox/actions/workflows/build.yml)
+# install
+
+Build locally or install via go
+```
+go install github.com/enckse/lockbox/cmd/lb@latest
+```
 
 # usage
 
