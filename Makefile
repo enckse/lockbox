@@ -4,6 +4,7 @@ VERSION ?= "$(shell git describe --abbrev=0 --tags)-$(shell git log -n 1 --forma
 OBJECT  := $(TARGET)/lb
 GOTEST  := go test
 CMD     := cmd/lb
+RELMAKE := make --no-print-directory $(OBJECT) _release
 
 .PHONY: $(OBJECT)
 
@@ -13,7 +14,7 @@ setup:
 	@test -d $(TARGET) || mkdir -p $(TARGET)
 
 $(OBJECT):
-	go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
 
 unittest:
 	$(GOTEST) ./...
@@ -24,6 +25,14 @@ tests: $(OBJECT)
 	$(GOTEST) $(CMD)/main_test.go
 
 clean:
-	rm -f "$(OBJECT)"
+	rm -f "$(OBJECT)"*
 	find internal/ $(CMD) -type f -wholename "*testdata*" -delete
 	find internal/ $(CMD) -type d -empty -delete
+
+_release:
+	mv $(OBJECT) $(OBJECT)-$(GOOS)-$(GOARCH)
+
+releases: clean
+	@GOOS=darwin GOARCH=arm64 $(RELMAKE)
+	@GOOS=linux GOARCH=arm64 $(RELMAKE)
+	@GOOS=linux GOARCH=amd64 $(RELMAKE)
