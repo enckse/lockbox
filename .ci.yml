@@ -1,0 +1,14 @@
+# woodpecker ci yaml file
+when:
+  - event: manual
+
+steps:
+  - name: build
+    image: docker.io/library/golang:latest
+    commands:
+      - make
+      - make check
+  - name: release
+    image: docker.io/library/golang:latest
+    commands:
+      - make releases
