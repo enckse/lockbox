@@ -36,3 +36,5 @@ releases: clean
 	@GOOS=darwin GOARCH=arm64 $(RELMAKE)
 	@GOOS=linux GOARCH=arm64 $(RELMAKE)
 	@GOOS=linux GOARCH=amd64 $(RELMAKE)
+
+ci: $(OBJECT) check releases
