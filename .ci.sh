@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 ENGINE=podman
 [ -n "$CONTAINER_ENGINE" ] && ENGINE="$CONTAINER_ENGINE"
 
