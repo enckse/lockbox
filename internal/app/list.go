@@ -10,16 +10,14 @@ import (
 	"github.com/enckse/lockbox/internal/kdbx"
 )
 
-var (
-	allowedFieldsLower = func() []string {
-		fields := make([]string, len(kdbx.AllowedFields))
-		for i, field := range kdbx.AllowedFields {
-			fields[i] = strings.ToLower(field)
-		}
-		sort.Strings(fields)
-		return fields
-	}()
-)
+var allowedFieldsLower = func() []string {
+	fields := make([]string, len(kdbx.AllowedFields))
+	for i, field := range kdbx.AllowedFields {
+		fields[i] = strings.ToLower(field)
+	}
+	sort.Strings(fields)
+	return fields
+}()
 
 // ListMode indicates how listing will be done/output
 type ListMode int
