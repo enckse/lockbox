@@ -142,15 +142,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 					}
 				}
 			}
-			obj := entity{backing: entry, path: path}
-			if isSort && len(entities) > 0 {
-				i, _ := slices.BinarySearchFunc(entities, obj, func(i, j entity) int {
-					return strings.Compare(i.path, j.path)
-				})
-				entities = slices.Insert(entities, i, obj)
-			} else {
-				entities = append(entities, obj)
-			}
+			entities = append(entities, entity{backing: entry, path: path})
 			return nil
 		})
 		if decrypt {
@@ -160,6 +152,11 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 	})
 	if err != nil {
 		return nil, err
+	}
+	if isSort {
+		slices.SortFunc(entities, func(i, j entity) int {
+			return strings.Compare(i.path, j.path)
+		})
 	}
 	hasher, err := NewHasher(args.Values)
 	if err != nil {
