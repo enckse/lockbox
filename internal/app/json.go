@@ -11,7 +11,7 @@ func JSON(cmd CommandOptions) error {
 	if len(args) > 1 {
 		return errors.New("invalid arguments")
 	}
-	filter := ""
+	var filter string
 	if len(args) == 1 {
 		filter = args[0]
 	}
