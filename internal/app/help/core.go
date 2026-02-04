@@ -127,14 +127,10 @@ func Usage(verbose bool, exe string) ([]string, error) {
 		document.Config.XDG = config.ConfigXDG
 		document.ReKey.KeyFile = setDocFlag(commands.ReKeyFlags.KeyFile)
 		document.ReKey.NoKey = commands.ReKeyFlags.NoKey
-		var fields []string
-		for _, field := range kdbx.AllowedFields {
-			fields = append(fields, strings.ToLower(field))
-		}
-		document.Database.Fields = strings.Join(fields, ", ")
+		document.Database.Fields = strings.Join(kdbx.AllFieldsLower, ", ")
 		var examples []string
 		for _, example := range []string{commands.Insert, commands.Show} {
-			for _, field := range fields {
+			for _, field := range kdbx.AllFieldsLower {
 				examples = append(examples, fmt.Sprintf("%s %s my/path/%s", document.Executable, example, field))
 			}
 		}

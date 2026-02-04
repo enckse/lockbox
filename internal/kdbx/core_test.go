@@ -11,13 +11,16 @@ import (
 )
 
 func TestAllowedSort(t *testing.T) {
-	set := fmt.Sprintf("%v", kdbx.AllowedFields)
-	have := kdbx.AllowedFields
+	testSorted(kdbx.AllFields, fmt.Sprintf("%v", kdbx.AllFields), t)
+	testSorted(kdbx.AllFieldsLower, fmt.Sprintf("%v", kdbx.AllFieldsLower), t)
+}
+
+func testSorted(have []string, set string, t *testing.T) {
 	slices.SortFunc(have, func(x, y string) int {
 		return strings.Compare(strings.ToLower(x), strings.ToLower(y))
 	})
 	if fmt.Sprintf("%v", have) != set {
-		t.Error("allowed fields has incorrect sort")
+		t.Errorf("allowed fields has incorrect sort: %v", set)
 	}
 }
 

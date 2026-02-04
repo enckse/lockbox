@@ -57,10 +57,7 @@ func doList(attr, filter string, cmd CommandOptions, mode ListMode) error {
 	isFields := mode == ListFieldsMode
 	var allowedFields []string
 	if isFields {
-		allowedFields = make([]string, len(kdbx.AllowedFields))
-		for idx, item := range kdbx.AllowedFields {
-			allowedFields[idx] = strings.ToLower(item)
-		}
+		allowedFields = kdbx.AllFieldsLower
 	}
 	isGroups := mode == ListGroupsMode || isFields
 	for f, err := range e {

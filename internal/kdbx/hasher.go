@@ -58,7 +58,7 @@ func NewHasher(mode ValueMode) (*Hasher, error) {
 		}
 		obj.checksumTo = max(int(length), obj.checksumTo)
 	}
-	obj.requiredLength = (len(AllowedFields) + 2) * obj.checksumTo
+	obj.requiredLength = (len(AllFields) + 2) * obj.checksumTo
 	return obj, nil
 }
 

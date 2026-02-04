@@ -208,7 +208,7 @@ func (t *Transaction) Move(moves ...MoveRequest) error {
 		values := make(map[string]string)
 		for k, v := range move.Source.Values {
 			found := false
-			for _, mapping := range AllowedFields {
+			for _, mapping := range AllFields {
 				if strings.EqualFold(k, mapping) {
 					values[mapping] = v
 					found = true

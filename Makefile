@@ -14,6 +14,7 @@ setup:
 	@test -d $(TARGET) || mkdir -p $(TARGET)
 
 $(OBJECT):
+	go generate ./...
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
 
 unittest:

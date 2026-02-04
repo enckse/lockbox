@@ -21,7 +21,7 @@ func Insert(cmd UserInputOptions) error {
 	}
 	entry := args[0]
 	base := kdbx.Base(entry)
-	if !slices.ContainsFunc(kdbx.AllowedFields, func(v string) bool {
+	if !slices.ContainsFunc(kdbx.AllFields, func(v string) bool {
 		return base == strings.ToLower(v)
 	}) {
 		return fmt.Errorf("'%s' is not an allowed field name", base)
