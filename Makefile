@@ -39,7 +39,7 @@ clean:
 _release:
 	mv $(OBJECT) $(OBJECT)-$(GOOS)-$(GOARCH)
 
-releases: clean
-	@GOOS=darwin GOARCH=arm64 $(RELMAKE)
-	@GOOS=linux GOARCH=arm64 $(RELMAKE)
+releases:
 	@GOOS=linux GOARCH=amd64 $(RELMAKE)
+	@GOOS=linux GOARCH=arm64 $(RELMAKE)
+	@GOOS=darwin GOARCH=arm64 $(RELMAKE)
