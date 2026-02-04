@@ -71,7 +71,7 @@ func (t *Transaction) Get(path string, mode ValueMode) (*Entity, error) {
 
 func forEach(offset string, groups []gokeepasslib.Group, entries []gokeepasslib.Entry, cb func(string, gokeepasslib.Entry) error) error {
 	for _, g := range groups {
-		o := ""
+		var o string
 		if offset == "" {
 			o = g.Name
 		} else {
@@ -169,8 +169,7 @@ func (t *Transaction) QueryCallback(args QueryOptions) (QuerySeq2, error) {
 			var err error
 			values := make(EntityValues)
 			for _, v := range item.backing.Values {
-				val := ""
-				raw := ""
+				var val, raw string
 				key := v.Key
 				if args.Values != BlankValue {
 					if args.Values == JSONValue {

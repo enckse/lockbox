@@ -25,7 +25,7 @@ func TextWrap(indent uint, in string) string {
 		sections = append(sections, strings.Join(cur, " "))
 	}
 	var out bytes.Buffer
-	indenting := ""
+	var indenting string
 	var cnt uint
 	for cnt < indent {
 		indenting = fmt.Sprintf("%s ", indenting)

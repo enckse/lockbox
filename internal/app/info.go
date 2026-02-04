@@ -75,7 +75,7 @@ func info(command string, args []string) ([]string, error) {
 		}
 		return results, nil
 	case commands.Completions:
-		shell := ""
+		var shell string
 		switch len(args) {
 		case 0:
 			shell = filepath.Base(os.Getenv("SHELL"))

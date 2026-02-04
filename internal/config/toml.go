@@ -46,7 +46,7 @@ func DefaultTOML() (string, error) {
 			return "", fmt.Errorf("invalid internal TOML structure: %v", item)
 		}
 		key := parts[0]
-		sub := ""
+		var sub string
 		switch length {
 		case 1:
 			key = root
@@ -121,7 +121,7 @@ func generateDetailText(data printer) (string, error) {
 		requirement = r
 	}
 	var text []string
-	extra := ""
+	var extra string
 	if md.canExpand {
 		extra = " (shell expansions)"
 	}
@@ -279,7 +279,7 @@ func parseArray[T any](value any, expand, allowMap bool, creator func(string, bo
 	case []any:
 		for _, item := range t {
 			err := fmt.Errorf("value is not valid array value: %v", item)
-			val := ""
+			var val string
 			required := true
 			switch s := item.(type) {
 			case string:

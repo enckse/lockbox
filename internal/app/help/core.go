@@ -63,7 +63,7 @@ func command(name, args, desc string) string {
 }
 
 func commandText(args, name, desc string) string {
-	arguments := ""
+	var arguments string
 	if len(args) > 0 {
 		arguments = fmt.Sprintf("[%s]", args)
 	}
@@ -149,7 +149,7 @@ func Usage(verbose bool, exe string) ([]string, error) {
 			if !strings.HasSuffix(n, textFile) {
 				continue
 			}
-			adding := ""
+			var adding string
 			section := strings.TrimSuffix(filepath.Base(n), textFile)
 			if slices.Contains([]string{
 				"totp",

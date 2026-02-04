@@ -77,7 +77,7 @@ func (e EnvironmentInt) Get() (int64, error) {
 		i = int64(e.value)
 	}
 	invalid := false
-	check := ""
+	var check string
 	if e.canZero {
 		check = "="
 	}
