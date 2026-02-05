@@ -37,7 +37,7 @@ type (
 func DefaultTOML() (string, error) {
 	const root = "_root_"
 	unmapped := make(map[string][]string)
-	keys := []string{}
+	var keys []string
 	for envKey, item := range registry {
 		tomlKey := strings.ToLower(strings.TrimPrefix(envKey, environmentPrefix))
 		parts := strings.Split(tomlKey, "_")

@@ -145,7 +145,7 @@ func findAndDo(isAdd bool, entityName string, offset []string, opEntity *gokeepa
 		done = true
 	} else {
 		name := offset[0]
-		remaining := []string{}
+		var remaining []string
 		if len(offset) > 1 {
 			remaining = offset[1:]
 		}
@@ -290,7 +290,7 @@ func (t *Transaction) RemoveAll(entities []Entity) error {
 		title string
 		parts []string
 	}
-	removals := []removal{}
+	var removals []removal
 	for _, entity := range entities {
 		offset, title, err := splitComponents(entity.Path)
 		if err != nil {
