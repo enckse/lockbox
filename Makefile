@@ -5,7 +5,6 @@ OBJECT  := $(TARGET)/lb
 GOTEST  := go test
 CMD     := cmd/lb
 RELMAKE := make --no-print-directory $(OBJECT) _release
-FIELDS  := internal/kdbx/fields.go
 
 .PHONY: $(OBJECT)
 
@@ -14,9 +13,7 @@ all: setup $(OBJECT)
 setup:
 	@test -d $(TARGET) || mkdir -p $(TARGET)
 
-generate: $(FIELDS)
-
-$(FIELDS): tools/kdbx.go
+generate:
 	go generate ./...
 
 $(OBJECT): generate
@@ -34,12 +31,11 @@ clean:
 	rm -f "$(OBJECT)"*
 	find internal/ $(CMD) -type f -wholename "*testdata*" -delete
 	find internal/ $(CMD) -type d -empty -delete
-	rm -f $(FIELDS)
 
 _release:
 	mv $(OBJECT) $(OBJECT)-$(GOOS)-$(GOARCH)
 
-releases: clean generate
+releases: clean
 	@GOOS=linux GOARCH=amd64 $(RELMAKE)
 	@GOOS=linux GOARCH=arm64 $(RELMAKE)
 	@GOOS=darwin GOARCH=arm64 $(RELMAKE)
