@@ -16,13 +16,13 @@ setup:
 generate:
 	go generate ./...
 
-$(OBJECT): generate
+$(OBJECT):
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
 
 unittest:
 	$(GOTEST) ./...
 
-check: unittest tests
+check: generate unittest tests
 
 tests: $(OBJECT)
 	$(GOTEST) $(CMD)/main_test.go
