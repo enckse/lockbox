@@ -31,7 +31,7 @@ const (
 )
 
 var (
-	target = filepath.Join("..", "..", "target")
+	target = filepath.Join("..", "..", "dist")
 	binary = filepath.Join(target, "lb")
 	//go:embed tests/*
 	testingFiles embed.FS

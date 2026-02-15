@@ -1,10 +1,9 @@
 GOFLAGS := -trimpath -mod=readonly -modcacherw -buildvcs=false
-TARGET  := target
+TARGET  := dist
 VERSION ?= "$(shell git describe --abbrev=0 --tags)-$(shell git log -n 1 --format=%h)"
 OBJECT  := $(TARGET)/lb
 GOTEST  := go test
 CMD     := cmd/lb
-RELMAKE := make --no-print-directory $(OBJECT) _release
 
 .PHONY: $(OBJECT)
 
@@ -17,7 +16,7 @@ generate:
 	go generate ./...
 
 $(OBJECT):
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
+	go build $(GOFLAGS) -ldflags "$(LDFLAGS) -X main.version=$(VERSION)" -o "$(OBJECT)" $(CMD)/main.go
 
 unittest:
 	$(GOTEST) ./...
@@ -35,7 +34,4 @@ clean:
 _release:
 	mv $(OBJECT) $(OBJECT)-$(GOOS)-$(GOARCH)
 
-releases: clean
-	@GOOS=linux GOARCH=amd64 $(RELMAKE)
-	@GOOS=linux GOARCH=arm64 $(RELMAKE)
-	@GOOS=darwin GOARCH=arm64 $(RELMAKE)
+releases: clean $(OBJECT)
